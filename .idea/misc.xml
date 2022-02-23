@@ -6,10 +6,16 @@
         <entry key="../../../../../layout/compose-model-1645621545104.xml" value="0.20650337837837837" />
         <entry key="app/src/main/res/drawable/ic_account.xml" value="0.1005" />
         <entry key="app/src/main/res/drawable/ic_bookmark.xml" value="0.136" />
+        <entry key="app/src/main/res/drawable/ic_broken_image.xml" value="0.1005" />
         <entry key="app/src/main/res/drawable/ic_comment.xml" value="0.1005" />
         <entry key="app/src/main/res/drawable/ic_download.xml" value="0.1005" />
         <entry key="app/src/main/res/drawable/ic_fav.xml" value="0.1005" />
+        <entry key="app/src/main/res/drawable/ic_home.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable/ic_image.xml" value="0.1005" />
+        <entry key="app/src/main/res/drawable/ic_notify.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable/ic_options_horizontal.xml" value="0.1005" />
         <entry key="app/src/main/res/drawable/ic_options_vertical.xml" value="0.1005" />
+        <entry key="app/src/main/res/drawable/ic_search.xml" value="0.136" />
         <entry key="app/src/main/res/drawable/ic_share.xml" value="0.1005" />
       </map>
     </option>
