@@ -5,6 +5,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
+        android:name=".inject.Application"
         android:configChanges="orientation"
         android:screenOrientation="portrait"
         android:allowBackup="true"

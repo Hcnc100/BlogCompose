@@ -1,6 +1,9 @@
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
+    id 'com.google.gms.google-services'
+    id 'dagger.hilt.android.plugin'
+    id 'kotlin-kapt'
 }
 
 android {
@@ -59,6 +62,16 @@ dependencies {
     androidTestImplementation "androidx.compose.ui:ui-test-junit4:$compose_version"
     debugImplementation "androidx.compose.ui:ui-tooling:$compose_version"
 
+    // * hilt
+    def daggerHiltVersion = '2.38.1'
+    implementation "com.google.dagger:hilt-android:$daggerHiltVersion"
+    kapt "com.google.dagger:hilt-compiler:$daggerHiltVersion"
+    implementation 'androidx.hilt:hilt-navigation-compose:1.0.0'
+    // ? hilt test
+    testImplementation "com.google.dagger:hilt-android-testing:$daggerHiltVersion"
+    androidTestImplementation "com.google.dagger:hilt-android-testing:$daggerHiltVersion"
+    kaptAndroidTest "com.google.dagger:hilt-android-compiler:$daggerHiltVersion"
+
     // * Timber
     implementation 'com.jakewharton.timber:timber:4.7.1'
     implementation 'com.orhanobut:logger:2.2.0'
@@ -75,6 +88,7 @@ dependencies {
     implementation platform('com.google.firebase:firebase-bom:29.0.0')
     implementation 'com.google.firebase:firebase-firestore-ktx'
     implementation 'com.google.firebase:firebase-storage-ktx'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.4.1'
 
 
 }
