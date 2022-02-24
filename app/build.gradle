@@ -90,5 +90,8 @@ dependencies {
     implementation 'com.google.firebase:firebase-storage-ktx'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.4.1'
 
+    // * paddings
+    implementation "com.google.accompanist:accompanist-insets:0.24.1-alpha"
+    implementation "com.google.accompanist:accompanist-insets-ui:0.24.1-alpha"
 
 }

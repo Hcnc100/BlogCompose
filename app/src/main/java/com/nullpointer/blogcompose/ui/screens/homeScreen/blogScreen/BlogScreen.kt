@@ -1,5 +1,6 @@
 package com.nullpointer.blogcompose.ui.screens.homeScreen.blogScreen
 
+import androidx.compose.animation.*
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
@@ -22,11 +23,10 @@ import timber.log.Timber
 fun BlogScreen(
     postVM: PostViewModel = hiltViewModel(),
 ) {
+    val stateList= rememberLazyListState()
     Scaffold(
         floatingActionButton = {
-            FloatingActionButton(onClick = { postVM.uploadNewPost(Post.createRandom())}) {
-                Icon(painterResource(id = R.drawable.ic_add), "")
-            }
+           ButtonAdd(isScrollInProgress = stateList.isScrollInProgress)
         }
     ) {
         val listPostState = postVM.listPost.collectAsState()
@@ -41,12 +41,30 @@ fun BlogScreen(
             }
             is Resource.Success -> {
                 val listPost = state.data
-                LazyColumn(state = rememberLazyListState()) {
+                LazyColumn(state = stateList) {
                     items(listPost.size) { index ->
                         BlogItem(listPost[index])
                     }
                 }
             }
+        }
+    }
+}
+
+@OptIn(ExperimentalAnimationApi::class)
+@Composable
+fun ButtonAdd(
+    isScrollInProgress: Boolean,
+    action: () -> Unit = {},
+) {
+    AnimatedVisibility(
+        visible = !isScrollInProgress,
+        enter = scaleIn() + fadeIn(),
+        exit = scaleOut() + fadeOut()
+    ) {
+        FloatingActionButton(onClick = { /*TODO*/ }){
+            Icon(painterResource(id = R.drawable.ic_add),
+                contentDescription = "")
         }
     }
 }
