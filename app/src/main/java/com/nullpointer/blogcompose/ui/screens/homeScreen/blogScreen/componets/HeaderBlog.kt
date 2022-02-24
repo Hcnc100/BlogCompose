@@ -18,14 +18,17 @@ import coil.transform.CircleCropTransformation
 import com.nullpointer.blogcompose.R
 
 @Composable
-fun HeaderBlog() {
+fun HeaderBlog(
+    urlImgOwnerPost: String,
+    nameOwnerPost: String,
+) {
 
     Row(
         modifier = Modifier.padding(7.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         val painter = rememberImagePainter(
-            data = "https://picsum.photos/200", builder = {
+            data = urlImgOwnerPost, builder = {
                 transformations(CircleCropTransformation())
                 crossfade(true)
                 placeholder(R.drawable.ic_account)
@@ -38,7 +41,7 @@ fun HeaderBlog() {
                 .weight(1f)
         )
         Spacer(modifier = Modifier.width(10.dp))
-        Text(text = "Hola como estas este es un nombre de usuario muy largo y no va a caber",
+        Text(text = nameOwnerPost,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(5f),
@@ -46,7 +49,7 @@ fun HeaderBlog() {
             fontWeight = FontWeight.W600
         )
 
-        IconButton(onClick = { /*TODO*/ }, modifier = Modifier
+        IconButton(onClick = {  }, modifier = Modifier
             .weight(1f)
             .size(20.dp)) {
             Icon(painterResource(id = R.drawable.ic_options_vertical),

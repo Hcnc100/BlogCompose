@@ -21,8 +21,8 @@ import com.nullpointer.blogcompose.R
 
 @ExperimentalCoilApi
 @Composable
-fun ImageBlog() {
-    val painter = rememberImagePainter(data = "https://picsum.photos/500", builder = {
+fun ImageBlog(urlImage: String) {
+    val painter = rememberImagePainter(data = urlImage, builder = {
         crossfade(true)
     })
     val statePainter = painter.state
