@@ -10,13 +10,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.nullpointer.blogcompose.core.utils.TimeUtils
+import com.nullpointer.blogcompose.models.Post
+import java.util.*
 
 @Composable
-fun BlogItem() {
+fun BlogItem(post: Post) {
     Card(
         modifier = Modifier
             .padding(10.dp)
@@ -24,19 +28,20 @@ fun BlogItem() {
         shape = RoundedCornerShape(10.dp)
     ) {
         Column {
-            HeaderBlog()
-            ImageBlog()
+            HeaderBlog(post.profilePictureOwner, post.postOwnerName)
+            ImageBlog(post.urlImage)
             ButtonsInteractionBlog()
-            TextLikes()
-            DescriptionBlog(Modifier.padding(5.dp))
-            TextTime()
+            TextLikes(post.numberLikes, post.numberComments)
+            DescriptionBlog(Modifier.padding(5.dp), post.description)
+            TextTime(post.timeStamp)
         }
     }
 }
 
 @Composable
-fun TextTime() {
-    Text(text = "Hace 10 minutos",
+fun TextTime(timeStamp: Date?) {
+    val context= LocalContext.current
+    Text(text = TimeUtils.getTimeAgo(timeStamp?.time?:0,context),
         style = MaterialTheme.typography.caption,
         modifier = Modifier.padding(10.dp))
 }
@@ -45,9 +50,10 @@ fun TextTime() {
 @Composable
 fun DescriptionBlog(
     modifier: Modifier,
+    description: String,
 ) {
     val (isExpanded, changeExpanded) = rememberSaveable { mutableStateOf(false) }
-    Text(text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer auctor pellentesque fermentum. Etiam eu lorem nec eros fringilla pretium. Proin sit amet sagittis nulla, sed lacinia turpis. Fusce id magna nec urna sollicitudin malesuada. Aenean bibendum quam at ipsum aliquam porttitor. Mauris vel venenatis ligula. Aliquam enim erat, porta a massa in, luctus aliquam elit. Donec id quam vitae erat ultricies auctor eu ac arcu. In sed blandit nibh. In consectetur iaculis lacinia.",
+    Text(text = description,
         maxLines = if (isExpanded) Int.MAX_VALUE else 2,
         overflow = if (isExpanded) TextOverflow.Visible else TextOverflow.Ellipsis,
         modifier = modifier.clickable {
@@ -61,19 +67,19 @@ fun DescriptionBlog(
 
 
 @Composable
-fun TextLikes() {
+fun TextLikes(numberLikes: Long, numberComments: Long) {
     Row(modifier = Modifier
         .fillMaxWidth()
         .padding(horizontal = 5.dp)
         .clickable { },
         horizontalArrangement = Arrangement.SpaceBetween) {
-        Text(text = "541 Me gusta",
+        Text(text = "$numberLikes Me gusta",
             modifier = Modifier.padding(vertical = 5.dp),
             style = MaterialTheme.typography.caption,
             fontWeight = FontWeight.W400,
             fontSize = 14.sp
         )
-        Text(text = "10 Comentarios",
+        Text(text = "$numberComments Comentarios",
             modifier = Modifier.padding(vertical = 5.dp),
             style = MaterialTheme.typography.caption,
             fontWeight = FontWeight.W400,
