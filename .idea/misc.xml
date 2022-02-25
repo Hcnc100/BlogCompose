@@ -9,6 +9,7 @@
         <entry key="app/src/main/res/drawable/ic_arrow_back.xml" value="0.136" />
         <entry key="app/src/main/res/drawable/ic_bookmark.xml" value="0.136" />
         <entry key="app/src/main/res/drawable/ic_broken_image.xml" value="0.1005" />
+        <entry key="app/src/main/res/drawable/ic_camera.xml" value="0.136" />
         <entry key="app/src/main/res/drawable/ic_clear.xml" value="0.101" />
         <entry key="app/src/main/res/drawable/ic_comment.xml" value="0.1005" />
         <entry key="app/src/main/res/drawable/ic_download.xml" value="0.1005" />
@@ -24,6 +25,7 @@
         <entry key="app/src/main/res/drawable/ic_share.xml" value="0.1005" />
         <entry key="app/src/main/res/drawable/ic_stop.xml" value="0.136" />
         <entry key="app/src/main/res/drawable/ic_upload.xml" value="0.101" />
+        <entry key="app/src/main/res/xml/provider_paths.xml" value="0.10740740740740741" />
       </map>
     </option>
   </component>

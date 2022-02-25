@@ -75,7 +75,7 @@ class UploadPostServices : LifecycleService() {
         if (fileImage != null && post != null) {
             lifecycleScope.launch {
                 startUploadImg(Uri.fromFile(fileImage as File), post.id) {
-                    postRepoImpl.updatePost(post)
+                    postRepoImpl.updatePost(post.copy(urlImage = it))
                 }
             }
         }
@@ -87,7 +87,7 @@ class UploadPostServices : LifecycleService() {
         }
     }
 
-    private suspend fun startUploadImg(uriImage: Uri, idPost: String,  uploadPost:suspend () -> Unit) {
+    private suspend fun startUploadImg(uriImage: Uri, idPost: String,  uploadPost:suspend (uri:String) -> Unit) {
         // * change state to init upload
         _stateUpload.value = StorageUploadTaskResult.Init
         val servicesNotification =
@@ -103,7 +103,7 @@ class UploadPostServices : LifecycleService() {
                 is StorageUploadTaskResult.Complete.Success -> {
                     servicesNotification.setProgress(100, 100, true)
                     _stateUpload.value = task
-                    uploadPost()
+                    uploadPost(task.urlFile)
                 }
                 is StorageUploadTaskResult.InProgress -> {
                     servicesNotification.setProgress(100, task.percent, false)
