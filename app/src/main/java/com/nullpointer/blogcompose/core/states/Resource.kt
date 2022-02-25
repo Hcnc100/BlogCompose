@@ -1,5 +1,5 @@
 
-package com.nullpointer.blogcompose.core.utils
+package com.nullpointer.blogcompose.core.states
 
 sealed class Resource<out T> {
     class Loading<out T> : Resource<T>()

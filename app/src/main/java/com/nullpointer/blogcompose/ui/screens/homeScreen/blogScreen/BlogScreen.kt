@@ -13,8 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.nullpointer.blogcompose.R
-import com.nullpointer.blogcompose.core.utils.Resource
-import com.nullpointer.blogcompose.models.Post
+import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.presentation.PostViewModel
 import com.nullpointer.blogcompose.ui.screens.homeScreen.blogScreen.componets.BlogItem
 import timber.log.Timber

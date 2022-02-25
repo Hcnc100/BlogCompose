@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import coil.annotation.ExperimentalCoilApi
 import coil.compose.ImagePainter
 import coil.compose.rememberImagePainter
 import com.google.accompanist.insets.navigationBarsWithImePadding
@@ -71,6 +72,7 @@ fun DescriptionNewBlog() {
 
 }
 
+@OptIn(ExperimentalCoilApi::class)
 @Composable
 fun ImageNewBlog() {
     Card(shape = RoundedCornerShape(10.dp), modifier = Modifier.padding(10.dp)) {
