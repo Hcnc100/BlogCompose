@@ -1,6 +1,7 @@
 package com.nullpointer.blogcompose.data.remote
 
 import android.net.Uri
+import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
 import com.nullpointer.blogcompose.core.states.StorageUploadTaskResult
@@ -14,7 +15,7 @@ import kotlin.math.absoluteValue
 
 class ImagesDataSource {
     private val refStorage = Firebase.storage.reference.child("images")
-    private val idUser = "NoAuth"
+    private val idUser = Firebase.auth.currentUser?.uid ?: "NoAuth"
 
     @OptIn(ExperimentalCoroutinesApi::class)
     fun uploadImagePost(uriImg: Uri, name: String): Flow<StorageUploadTaskResult> =

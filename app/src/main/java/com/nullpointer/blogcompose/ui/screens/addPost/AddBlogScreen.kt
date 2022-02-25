@@ -1,9 +1,11 @@
 package com.nullpointer.blogcompose.ui.screens.addPost
 
 import android.widget.Space
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
@@ -12,25 +14,23 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Color.Companion.Gray
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import coil.annotation.ExperimentalCoilApi
 import coil.compose.ImagePainter
 import coil.compose.rememberImagePainter
 import com.google.accompanist.insets.navigationBarsWithImePadding
 import com.nullpointer.blogcompose.R
+import com.nullpointer.blogcompose.services.UploadPostServices
 
 @Composable
 fun AddBlogScreen() {
-
-    Scaffold(topBar = {
-        TopAppBar(title = { Text("Nuevo post") },
-            navigationIcon = { Icon(painterResource(id = R.drawable.ic_arrow_back), "") })
-    }, floatingActionButton = {
-        ExtendedFloatingActionButton(text = { Text("Publicar") },
-            onClick = { /*TODO*/ })
-
-    }) {
+    Scaffold(
+        topBar = { ToolbarBack() },
+        floatingActionButton = { ButtonPublish() }
+    ) {
         Column(modifier = Modifier
             .verticalScroll(rememberScrollState())) {
             ImageNewBlog()
@@ -39,6 +39,22 @@ fun AddBlogScreen() {
         }
     }
 
+}
+
+@Composable
+fun ToolbarBack() {
+    TopAppBar(title = { Text("Nuevo post") },
+        navigationIcon = { Icon(painterResource(id = R.drawable.ic_arrow_back), "") })
+}
+
+@Composable
+fun ButtonPublish() {
+    val context=LocalContext.current
+    ExtendedFloatingActionButton(icon = { Icon(painterResource(id = R.drawable.ic_publish), "") },
+        text = { Text("Publicar") },
+        onClick = {
+//            UploadPostServices.startServicesUploadPost()
+        })
 }
 
 @Composable
@@ -72,7 +88,6 @@ fun DescriptionNewBlog() {
 
 }
 
-@OptIn(ExperimentalCoilApi::class)
 @Composable
 fun ImageNewBlog() {
     Card(shape = RoundedCornerShape(10.dp), modifier = Modifier.padding(10.dp)) {

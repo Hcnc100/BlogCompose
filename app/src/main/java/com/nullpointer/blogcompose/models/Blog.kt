@@ -1,9 +1,12 @@
 package com.nullpointer.blogcompose.models
 
+import android.os.Parcelable
 import com.google.firebase.firestore.Exclude
 import com.google.firebase.firestore.ServerTimestamp
+import kotlinx.parcelize.Parcelize
 import java.util.*
 
+@Parcelize
 data class Post(
     val description:String="",
     val profilePictureOwner:String="",
@@ -16,7 +19,7 @@ data class Post(
     var timeStamp: Date?=null,
     @set:Exclude @get:Exclude
     var id:String=UUID.randomUUID().toString(),
-){
+) : Parcelable {
     companion object{
         fun createRandom():Post{
             return Post(
