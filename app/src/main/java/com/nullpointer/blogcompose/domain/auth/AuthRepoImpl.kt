@@ -24,4 +24,9 @@ class AuthRepoImpl(
 
     override suspend fun uploadDataUser(urlImg: String, name: String) =
         authDataSource.updateDataUser(urlImg, name)
+
+    override fun logOut() =
+        authDataSource.logOut()
+
+
 }

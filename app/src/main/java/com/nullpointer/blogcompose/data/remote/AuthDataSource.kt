@@ -48,5 +48,9 @@ class AuthDataSource {
         auth.currentUser?.delete()?.await()
     }
 
+     fun logOut(){
+        auth.signOut()
+    }
+
 
 }

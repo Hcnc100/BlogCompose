@@ -15,10 +15,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 
 @HiltViewModel
-class AuthViewModel(
+class AuthViewModel @Inject constructor(
     private val imagesRepoImpl: ImagesRepoImpl,
     private val authRepoImpl: AuthRepoImpl,
     savedStateHandle: SavedStateHandle,
@@ -26,17 +27,29 @@ class AuthViewModel(
     val nameUser = mutableStateOf(authRepoImpl.nameUser)
     val photoUser = mutableStateOf(authRepoImpl.urlImgProfile)
     val isDataComplete = mutableStateOf(authRepoImpl.isDataComplete)
+    private val _messageErrorAuth = Channel<String>()
+    val messageErrorAuth = _messageErrorAuth.receiveAsFlow()
 
-    private val _stateAuth = Channel<LoginStatus>()
-    val stateAuth = _stateAuth.receiveAsFlow()
+    private val _stateAuth = MutableStateFlow(
+        if (authRepoImpl.uuidUser.isNullOrBlank())
+            LoginStatus.Unauthenticated else LoginStatus.Authenticated
+    )
+     val stateAuth = _stateAuth.asStateFlow()
+
 
     fun authWithTokeGoogle(token: String) = viewModelScope.launch {
-        _stateAuth.send(LoginStatus.Authenticating)
+        _stateAuth.value = LoginStatus.Authenticating
         try {
             authRepoImpl.authWithTokeGoogle(token)
-            _stateAuth.send(LoginStatus.Authenticated)
+            _stateAuth.value = LoginStatus.Authenticated
         } catch (e: Exception) {
-            _stateAuth.send(LoginStatus.Error(e))
+            _messageErrorAuth.send("Error $e")
+            _stateAuth.value = LoginStatus.Unauthenticated
         }
+    }
+
+    fun logOut() {
+        _stateAuth.value=LoginStatus.Unauthenticated
+        authRepoImpl.logOut()
     }
 }
