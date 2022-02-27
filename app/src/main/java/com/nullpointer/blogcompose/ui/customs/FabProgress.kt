@@ -16,8 +16,12 @@ import com.nullpointer.blogcompose.R
 
 @Composable
 fun FabProgress(
+    modifier: Modifier=Modifier,
+    cancelAction:(()->Unit)?=null,
     isLoading: Boolean,
-    changeLoading:(Boolean)->Unit
+    changeLoading:(Boolean)->Unit,
+    colorNormal:Color,
+    contentNormal: @Composable ()->Unit,
 ) {
     FloatingActionButton(
         onClick = { changeLoading(!isLoading) },
@@ -27,18 +31,21 @@ fun FabProgress(
         if (isLoading) {
             Box(contentAlignment = Alignment.Center) {
                 CircularProgressIndicator(modifier = Modifier.size(54.dp))
-                Icon(painterResource(id = R.drawable.ic_clear),
-                    contentDescription = "",
-                    Modifier.padding(10.dp))
+                if(cancelAction!=null){
+                    Icon(painterResource(id = R.drawable.ic_clear),
+                        contentDescription = "",
+                        Modifier.padding(10.dp))
+                }
             }
         } else {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(painterResource(id = R.drawable.ic_publish),
-                    contentDescription = "",
-                    Modifier.padding(10.dp))
-                Text("Publicar Post",
-                    modifier = Modifier.padding(top = 10.dp, bottom = 10.dp, end = 15.dp))
-            }
+//            Row(verticalAlignment = Alignment.CenterVertically) {
+//                Icon(painterResource(id = R.drawable.ic_publish),
+//                    contentDescription = "",
+//                    Modifier.padding(10.dp))
+//                Text("Publicar Post",
+//                    modifier = Modifier.padding(top = 10.dp, bottom = 10.dp, end = 15.dp))
+//            }
+            contentNormal()
         }
     }
 }
