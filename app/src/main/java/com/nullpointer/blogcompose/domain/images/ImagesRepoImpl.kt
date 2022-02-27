@@ -8,9 +8,8 @@ import kotlinx.coroutines.flow.Flow
 class ImagesRepoImpl(
     private val imagesDataSource: ImagesDataSource
 ):ImagesRepository {
-    override fun uploadImgProfile(uri: Uri): Flow<StorageUploadTaskResult> {
-        TODO("Not yet implemented")
-    }
+    override fun uploadImgProfile(uri: Uri): Flow<StorageUploadTaskResult> =
+        imagesDataSource.uploadImagePost(uri,"imgProfile")
 
     override fun uploadImgBlog(uri: Uri,name:String): Flow<StorageUploadTaskResult> =
         imagesDataSource.uploadImagePost(uri, name)

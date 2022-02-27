@@ -10,6 +10,7 @@ import androidx.core.view.WindowCompat
 import com.google.accompanist.insets.ProvideWindowInsets
 import com.google.accompanist.insets.navigationBarsWithImePadding
 import com.nullpointer.blogcompose.ui.screens.authScreen.AuthScreen
+import com.nullpointer.blogcompose.ui.screens.dataUser.DataUserScreen
 import com.nullpointer.blogcompose.ui.theme.BlogComposeTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -21,11 +22,12 @@ class MainActivity : ComponentActivity() {
         setContent {
             BlogComposeTheme {
                 ProvideWindowInsets(windowInsetsAnimationsEnabled = true) {
-                    Scaffold (modifier = Modifier
+                    Scaffold(modifier = Modifier
                         .navigationBarsWithImePadding()
-                        .systemBarsPadding()){
+                        .systemBarsPadding()) {
 //                        AddBlogScreen()
-                        AuthScreen()
+//                        AuthScreen()
+                        DataUserScreen()
                     }
                 }
             }
