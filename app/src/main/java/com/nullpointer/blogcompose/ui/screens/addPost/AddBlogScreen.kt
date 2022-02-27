@@ -25,6 +25,7 @@ import coil.compose.rememberImagePainter
 import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.models.Post
 import com.nullpointer.blogcompose.services.UploadPostServices
+import com.nullpointer.blogcompose.ui.customs.ToolbarBack
 import com.nullpointer.blogcompose.ui.screens.addPost.components.ButtonSheetContent
 import com.nullpointer.blogcompose.ui.screens.addPost.viewModel.AddBlogViewModel
 import kotlinx.coroutines.launch
@@ -47,7 +48,7 @@ fun AddBlogScreen(
         })
     }) {
         Scaffold(
-            topBar = { ToolbarBack() },
+            topBar = { ToolbarBack("Nuevo Post") },
             floatingActionButton = {
                 ButtonPublish {
                     if (addBlogVM.validate()) {
@@ -80,11 +81,7 @@ fun AddBlogScreen(
 
 }
 
-@Composable
-fun ToolbarBack() {
-    TopAppBar(title = { Text("Nuevo post") },
-        navigationIcon = { Icon(painterResource(id = R.drawable.ic_arrow_back), "") })
-}
+
 
 @Composable
 fun ButtonPublish(

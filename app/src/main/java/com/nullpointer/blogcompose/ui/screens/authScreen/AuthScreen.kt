@@ -9,7 +9,6 @@ import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -24,7 +23,6 @@ import com.google.android.gms.common.api.ApiException
 import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.states.LoginStatus
 import com.nullpointer.blogcompose.presentation.AuthViewModel
-import kotlinx.coroutines.flow.StateFlow
 import timber.log.Timber
 
 @Composable
@@ -33,7 +31,7 @@ fun AuthScreen(
 ) {
     val scaffoldState = rememberScaffoldState()
     val stateAuth = authViewModel.stateAuth.collectAsState()
-    val messageError=authViewModel.messageErrorAuth.collectAsState(null)
+    val messageError=authViewModel.messageAuth.collectAsState(null)
 
     LaunchedEffect(messageError.value){
         messageError.value?.let{
