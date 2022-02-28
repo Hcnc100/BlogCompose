@@ -17,12 +17,13 @@ import timber.log.Timber
 fun MainNavHost(
     navController: NavHostController = rememberNavController(),
     authViewModel: AuthViewModel= hiltViewModel(),
+    actionGoToAddPost:()->Unit,
 ) {
     NavHost(
         navController = navController,
         startDestination = HomeDestinations.BlogScreen.route) {
         composable(HomeDestinations.BlogScreen.route) {
-            BlogScreen()
+            BlogScreen(actionGoToAddPost = actionGoToAddPost)
         }
         composable(HomeDestinations.SearchScreen.route) {
             SearchScreen()

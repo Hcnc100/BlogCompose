@@ -12,6 +12,7 @@ import com.nullpointer.blogcompose.domain.post.PostRepoImpl
 import com.nullpointer.blogcompose.models.Post
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -28,10 +29,10 @@ class UploadPostServices : LifecycleService() {
         private const val KEY_FILE_IMG_POST = "KEY_FILE_IMG_POST"
         private const val KEY_POST = "KEY_POST"
 
-        fun startServicesUploadPost(context: Context,post:Post, fileImage: File) {
+        fun startServicesUploadPost(context: Context, post: Post, fileImage: File) {
             Intent(context, UploadPostServices::class.java).also {
                 it.putExtra(KEY_FILE_IMG_POST, fileImage)
-                it.putExtra(KEY_POST,post)
+                it.putExtra(KEY_POST, post)
                 it.action = ACTION_START
                 context.startService(it)
             }
@@ -87,23 +88,29 @@ class UploadPostServices : LifecycleService() {
         }
     }
 
-    private suspend fun startUploadImg(uriImage: Uri, idPost: String,  uploadPost:suspend (uri:String) -> Unit) {
+    private suspend fun startUploadImg(
+        uriImage: Uri,
+        idPost: String,
+        uploadPost: suspend (uri: String) -> Unit,
+    ) {
         // * change state to init upload
         _stateUpload.value = StorageUploadTaskResult.Init
-        val servicesNotification =
-            notificationHelper.getNotificationUploadServices(ID_CHANNEL_UPLOAD_POST,
+        val servicesNotification = notificationHelper.getNotificationUploadServices(
+            ID_CHANNEL_UPLOAD_POST,
                 UPLOAD_POST_CHANNEL,
                 NotificationManagerCompat.IMPORTANCE_DEFAULT,
                 ACTION_STOP)
-        imagesRepoImpl.uploadImgBlog(uriImage, idPost).catch { exeption ->
+        startForeground(10, servicesNotification.build())
+        imagesRepoImpl.uploadImgBlog(uriImage, idPost).catch { exception ->
             // ! if has Error send error
-            _stateUpload.value = StorageUploadTaskResult.Complete.Failed(Exception(exeption))
+            _stateUpload.value = StorageUploadTaskResult.Complete.Failed(Exception(exception))
         }.collect { task ->
             when (task) {
                 is StorageUploadTaskResult.Complete.Success -> {
                     servicesNotification.setProgress(100, 100, true)
                     _stateUpload.value = task
                     uploadPost(task.urlFile)
+                    killServices()
                 }
                 is StorageUploadTaskResult.InProgress -> {
                     servicesNotification.setProgress(100, task.percent, false)
@@ -112,6 +119,11 @@ class UploadPostServices : LifecycleService() {
                 else -> Unit
             }
         }
+    }
+
+    private fun killServices() {
+        stopForeground(true)
+        stopSelf()
     }
 
 }

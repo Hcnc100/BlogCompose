@@ -1,6 +1,5 @@
 package com.nullpointer.blogcompose.services
 
-import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -8,7 +7,6 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.content.Intent
 import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.ui.activitys.MainActivity
@@ -30,7 +28,7 @@ class NotificationHelper(context: Context) : ContextWrapper(context) {
             )
             notificationManager.createNotificationChannel(channel)
         }
-        return getNotificationUpload(nameNotificationChanel, nameActionStop)
+        return getNotificationUpload(idNotificationChannel, nameActionStop)
     }
 
     private fun getPendingIntentToClick(
@@ -51,8 +49,8 @@ class NotificationHelper(context: Context) : ContextWrapper(context) {
         )
 
 
-    private fun getNotificationUpload(notificationChannel: String, nameActionStop: String) =
-        NotificationCompat.Builder(this, notificationChannel)
+    private fun getNotificationUpload(idNotificationChannel: String, nameActionStop: String) =
+        NotificationCompat.Builder(this, idNotificationChannel)
             .setAutoCancel(false)
             .setOngoing(true)
             .setSmallIcon(R.drawable.ic_upload)

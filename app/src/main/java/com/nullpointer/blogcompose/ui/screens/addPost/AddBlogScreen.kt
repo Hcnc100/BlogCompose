@@ -35,6 +35,7 @@ import java.io.File
 @Composable
 fun AddBlogScreen(
     addBlogVM: AddBlogViewModel = hiltViewModel(),
+    goBack: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
     val modalState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
@@ -48,7 +49,7 @@ fun AddBlogScreen(
         })
     }) {
         Scaffold(
-            topBar = { ToolbarBack("Nuevo Post") },
+            topBar = { ToolbarBack("Nuevo Post", goBack) },
             floatingActionButton = {
                 ButtonPublish {
                     if (addBlogVM.validate()) {
@@ -56,6 +57,7 @@ fun AddBlogScreen(
                             Post.createRandom().copy(
                                 description = addBlogVM.description,
                             ), addBlogVM.fileImg!!)
+                        goBack()
                     } else {
                         Toast.makeText(context, "Verifique sus datos", Toast.LENGTH_SHORT).show()
                     }
@@ -80,7 +82,6 @@ fun AddBlogScreen(
 
 
 }
-
 
 
 @Composable

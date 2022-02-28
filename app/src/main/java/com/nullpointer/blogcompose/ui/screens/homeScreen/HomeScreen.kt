@@ -22,7 +22,9 @@ import com.nullpointer.blogcompose.ui.navigation.MainNavHost
 import timber.log.Timber
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(
+    actionGoToAddPost:()->Unit,
+) {
     val scaffoldState = rememberScaffoldState()
     val navController = rememberNavController()
     val navigationItems = listOf(
@@ -47,7 +49,7 @@ fun HomeScreen() {
         }
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
-            MainNavHost(navController = navController)
+            MainNavHost(navController = navController, actionGoToAddPost = actionGoToAddPost)
         }
 
     }

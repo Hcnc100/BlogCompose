@@ -11,6 +11,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.nullpointer.blogcompose.core.states.LoginStatus
 import com.nullpointer.blogcompose.presentation.AuthViewModel
+import com.nullpointer.blogcompose.ui.screens.addPost.AddBlogScreen
 import com.nullpointer.blogcompose.ui.screens.authScreen.AuthScreen
 import com.nullpointer.blogcompose.ui.screens.dataUser.DataUserScreen
 import com.nullpointer.blogcompose.ui.screens.homeScreen.HomeScreen
@@ -47,11 +48,18 @@ fun HomeNavHost(
             composable(MainDestinations.RegistryScreen.route) {
                 DataUserScreen()
             }
+            composable(MainDestinations.AddNewPostScreen.route){
+                AddBlogScreen{
+                    navController.navigateUp()
+                }
+            }
             composable(MainDestinations.HomeScreen.route){
                 CompositionLocalProvider(
                     LocalViewModelStoreOwner provides viewModelStoreOwner
                 ) {
-                    HomeScreen()
+                    HomeScreen(actionGoToAddPost = {
+                        navController.navigate(MainDestinations.AddNewPostScreen.route)
+                    })
                 }
             }
         }

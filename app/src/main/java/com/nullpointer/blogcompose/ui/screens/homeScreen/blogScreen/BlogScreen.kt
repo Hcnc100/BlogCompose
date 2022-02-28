@@ -21,11 +21,15 @@ import timber.log.Timber
 @Composable
 fun BlogScreen(
     postVM: PostViewModel = hiltViewModel(),
+    actionGoToAddPost: () -> Unit,
 ) {
-    val stateList= rememberLazyListState()
+    val stateList = rememberLazyListState()
     Scaffold(
         floatingActionButton = {
-           ButtonAdd(isScrollInProgress = stateList.isScrollInProgress)
+            ButtonAdd(
+                isScrollInProgress = stateList.isScrollInProgress,
+                action = actionGoToAddPost
+            )
         }
     ) {
         val listPostState = postVM.listPost.collectAsState()
@@ -61,7 +65,7 @@ fun ButtonAdd(
         enter = scaleIn() + fadeIn(),
         exit = scaleOut() + fadeOut()
     ) {
-        FloatingActionButton(onClick = { /*TODO*/ }){
+        FloatingActionButton(onClick = { action() }) {
             Icon(painterResource(id = R.drawable.ic_add),
                 contentDescription = "")
         }

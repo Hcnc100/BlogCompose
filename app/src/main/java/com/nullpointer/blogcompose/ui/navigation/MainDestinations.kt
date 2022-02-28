@@ -12,4 +12,7 @@ sealed class MainDestinations(
     object HomeScreen : MainDestinations(
         "HomeScreen"
     )
+    object AddNewPostScreen : MainDestinations(
+        "AddNewPostScreen"
+    )
 }
