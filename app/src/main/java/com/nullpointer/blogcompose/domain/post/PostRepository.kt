@@ -5,6 +5,7 @@ import com.nullpointer.blogcompose.models.Post
 interface PostRepository {
     suspend fun getLastPost(nPost: Long): List<Post>
     suspend fun getLastPostByUser(idUser: String, nPost: Long): List<Post>
+    suspend fun getMyLastPost( nPost: Long): List<Post>
     suspend fun addNewPost(post: Post)
     suspend fun deleterPost(post: Post)
     suspend fun updatePost(post: Post)

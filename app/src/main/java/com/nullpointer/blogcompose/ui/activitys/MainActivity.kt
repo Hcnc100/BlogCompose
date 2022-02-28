@@ -17,9 +17,11 @@ import com.google.accompanist.insets.ProvideWindowInsets
 import com.google.accompanist.insets.navigationBarsWithImePadding
 import com.nullpointer.blogcompose.core.states.LoginStatus
 import com.nullpointer.blogcompose.presentation.AuthViewModel
+import com.nullpointer.blogcompose.ui.navigation.HomeNavHost
 import com.nullpointer.blogcompose.ui.screens.authScreen.AuthScreen
 import com.nullpointer.blogcompose.ui.screens.dataUser.DataUserScreen
 import com.nullpointer.blogcompose.ui.screens.homeScreen.HomeScreen
+import com.nullpointer.blogcompose.ui.screens.homeScreen.profileScreen.ProfileScreen
 import com.nullpointer.blogcompose.ui.theme.BlogComposeTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -37,27 +39,10 @@ class MainActivity : ComponentActivity() {
                     Scaffold(modifier = Modifier
                         .navigationBarsWithImePadding()
                         .systemBarsPadding()) {
-                        val authViewModel: AuthViewModel = hiltViewModel()
-                        val loginStatus = authViewModel.stateAuthUser.collectAsState()
-                        val isDataComplete = authViewModel.isDataComplete.value
 
-                        when (loginStatus.value) {
-                            LoginStatus.Authenticated -> {
-                                if (isDataComplete) {
-                                    HomeScreen()
-                                } else {
-                                    DataUserScreen()
-                                }
-                                loading = false
-                            }
-                            LoginStatus.Authenticating -> {
-                                loading = true
-                            }
-                            LoginStatus.Unauthenticated -> {
-                                AuthScreen()
-                                loading = false
-                            }
-                        }
+                        loading=false
+                        HomeNavHost { loading = false }
+
                     }
                 }
             }

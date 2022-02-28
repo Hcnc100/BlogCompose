@@ -1,5 +1,6 @@
 package com.nullpointer.blogcompose.data.remote
 
+import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.ktx.firestore
@@ -9,6 +10,7 @@ import kotlinx.coroutines.tasks.await
 
 class PostDataSource {
     private val refPosts = Firebase.firestore.collection("posts")
+    private val auth = Firebase.auth
 
     suspend fun getLatestPost(nPosts: Long): List<Post> {
         return refPosts.orderBy("timeStamp", Query.Direction.DESCENDING)
@@ -24,6 +26,9 @@ class PostDataSource {
                 }
             }
     }
+
+    suspend fun getMyLastPost(nPosts: Long) =
+        getLatestPostFrom(auth.currentUser?.uid!!, nPosts)
 
     suspend fun getLatestPostFrom(idUser: String, nPost: Long): List<Post> {
         return refPosts.orderBy("timeStamp", Query.Direction.DESCENDING)

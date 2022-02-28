@@ -16,17 +16,30 @@ import javax.inject.Inject
 class PostViewModel @Inject constructor(
     private val postRepo: PostRepoImpl,
 ) : ViewModel() {
+
     private val _listPost = MutableStateFlow<Resource<List<Post>>>(Resource.Loading())
     val listPost = _listPost.asStateFlow()
 
+    private val _listMyPost = MutableStateFlow<Resource<List<Post>>>(Resource.Loading())
+    val listMyPost = _listPost.asStateFlow()
+
     init {
-        initFetchPost()
+        fetchLastPost()
+        fetchMyLastPost()
     }
 
-    fun initFetchPost() = viewModelScope.launch(Dispatchers.IO) {
+    fun fetchLastPost() = viewModelScope.launch(Dispatchers.IO) {
         _listPost.value = Resource.Loading()
         _listPost.value = try {
             Resource.Success(postRepo.getLastPost(10))
+        } catch (e: Exception) {
+            Resource.Failure(e)
+        }
+    }
+    fun fetchMyLastPost()= viewModelScope.launch{
+        _listPost.value = Resource.Loading()
+        _listPost.value = try {
+            Resource.Success(postRepo.getMyLastPost(10))
         } catch (e: Exception) {
             Resource.Failure(e)
         }

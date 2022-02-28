@@ -9,7 +9,7 @@ sealed class HomeDestinations(
     val icon: Int,
 ) {
     object BlogScreen : HomeDestinations(
-        route = "HomeScreen",
+        route = "BlogScreen",
         title = "Blogs",
         icon = R.drawable.ic_home
     )
@@ -28,4 +28,5 @@ sealed class HomeDestinations(
         title = "Perfil",
         icon = R.drawable.ic_account
     )
+
 }

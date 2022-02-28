@@ -10,13 +10,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.nullpointer.blogcompose.R
+import com.nullpointer.blogcompose.presentation.AuthViewModel
 import com.nullpointer.blogcompose.ui.navigation.HomeDestinations
 import com.nullpointer.blogcompose.ui.navigation.MainNavHost
+import timber.log.Timber
 
 @Composable
 fun HomeScreen() {
@@ -28,6 +31,7 @@ fun HomeScreen() {
         HomeDestinations.NotifyScreen,
         HomeDestinations.ProfileScreen
     )
+
     Scaffold(
         scaffoldState = scaffoldState,
         topBar = {
