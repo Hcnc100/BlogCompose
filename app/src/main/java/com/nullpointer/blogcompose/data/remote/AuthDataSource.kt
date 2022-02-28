@@ -8,6 +8,7 @@ import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.auth.ktx.userProfileChangeRequest
 import com.google.firebase.ktx.Firebase
+import com.nullpointer.blogcompose.models.CurrentUser
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
@@ -20,6 +21,24 @@ class AuthDataSource {
     val uuidUser = auth.currentUser?.uid
 
 
+    fun getCurrentUser() = callbackFlow {
+        val listener = FirebaseAuth.AuthStateListener {
+            val user = it.currentUser
+            if (user != null) {
+                trySend(CurrentUser(
+                    nameUser = user.displayName,
+                    urlImg = user.photoUrl?.toString(),
+                    uuid = user.uid
+                ))
+            }else{
+                trySend(null)
+            }
+        }
+        auth.addAuthStateListener(listener)
+        awaitClose { auth.removeAuthStateListener(listener) }
+    }
+
+
     suspend fun authWithTokenGoogle(token: String) = callbackFlow {
         val credential = GoogleAuthProvider.getCredential(token, null)
         auth.signInWithCredential(credential).await()
@@ -29,7 +48,7 @@ class AuthDataSource {
             if (user != null) {
                 val name = user.displayName
                 val urlImg = user.photoUrl?.toString()
-                trySend(Pair( name, urlImg))
+                trySend(Pair(name, urlImg))
                 close()
             }
         }
@@ -46,18 +65,20 @@ class AuthDataSource {
         auth.currentUser?.updateProfile(profileUpdate)?.await()
     }
 
-    suspend fun updateImgUser(urlImg: String) {
+    suspend fun updateImgUser(urlImg: String): String {
         val profileUpdate = userProfileChangeRequest {
             photoUri = Uri.parse(urlImg)
         }
         auth.currentUser?.updateProfile(profileUpdate)?.await()
+        return auth.currentUser?.photoUrl.toString()
     }
 
-    suspend fun updateNameUser(name: String) {
+    suspend fun updateNameUser(name: String): String {
         val profileUpdate = userProfileChangeRequest {
             displayName = name
         }
         auth.currentUser?.updateProfile(profileUpdate)?.await()
+        return auth.currentUser?.displayName!!
     }
 
     suspend fun deleterUser() {

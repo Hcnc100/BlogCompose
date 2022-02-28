@@ -2,6 +2,7 @@ package com.nullpointer.blogcompose.presentation
 
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.net.toUri
 import androidx.lifecycle.SavedStateHandle
@@ -15,6 +16,7 @@ import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.core.states.StorageUploadTaskResult
 import com.nullpointer.blogcompose.domain.auth.AuthRepoImpl
 import com.nullpointer.blogcompose.domain.images.ImagesRepoImpl
+import com.nullpointer.blogcompose.models.CurrentUser
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
@@ -48,6 +50,7 @@ class AuthViewModel @Inject constructor(
         private set
     var photoUser by SaveableComposeState(savedStateHandle, KEY_PHOTO_USER, "")
         private set
+
     var errorName by SaveableComposeState(savedStateHandle, KEY_ERROR_NAME, 0)
         private set
     var fileImg: File? by SaveableComposeState(savedStateHandle, KEY_IMAGE_USER, null)
@@ -58,20 +61,35 @@ class AuthViewModel @Inject constructor(
     private val _stateUpdateUser = MutableStateFlow<Resource<Unit>?>(null)
     val stateUpdateUser = _stateUpdateUser.asStateFlow()
 
-    val isDataComplete = mutableStateOf(authRepoImpl.isDataComplete)
+    val isDataComplete = mutableStateOf<Boolean>(false)
 
     private val _messageAuth = Channel<String>()
     val messageAuth = _messageAuth.receiveAsFlow()
 
     init {
-        reLoadInfoUser()
+
     }
 
-    private val _stateAuth = MutableStateFlow(
-        if (authRepoImpl.uuidUser.isNullOrBlank())
-            LoginStatus.Unauthenticated else LoginStatus.Authenticated
+     val stateAuthUser = flow<LoginStatus> {
+        authRepoImpl.getCurrentUser().collect {
+            if (it == null) {
+                isDataComplete.value = false
+                emit(LoginStatus.Unauthenticated)
+            } else {
+                isDataComplete.value = it.nameUser != null && it.urlImg != null
+                nameUser = it.nameUser ?: ""
+                photoUser = it.urlImg ?: ""
+                emit(LoginStatus.Authenticated)
+            }
+        }
+    }.stateIn(viewModelScope,
+        SharingStarted.WhileSubscribed(5000),
+        LoginStatus.Authenticating
     )
-    val stateAuth = _stateAuth.asStateFlow()
+
+    private val _stateAuth = MutableStateFlow<Resource<Unit>?>(null)
+    val stateAuth=_stateAuth.asStateFlow()
+
 
     fun changeNameUserTemp(newName: String) {
         nameUser = newName
@@ -115,7 +133,7 @@ class AuthViewModel @Inject constructor(
                         when (status) {
                             is StorageUploadTaskResult.Complete.Failed -> throw Exception(status.error)
                             is StorageUploadTaskResult.Complete.Success -> {
-                                authRepoImpl.updatePhotoUser(status.urlFile)
+                                photoUser=authRepoImpl.updatePhotoUser(status.urlFile)
                                 // ! this very important for reload img user, with same url
                                 // * without this, only update img user becouse load img from cache
                                 context.imageLoader.memoryCache.clear()
@@ -124,8 +142,10 @@ class AuthViewModel @Inject constructor(
                         }
                     }
                 }
-                if (nameUser != authRepoImpl.nameUser) authRepoImpl.uploadNameUser(nameUser)
-                reLoadInfoUser()
+                if (nameUser != authRepoImpl.nameUser) {
+                    nameUser=authRepoImpl.uploadNameUser(nameUser)
+                }
+
                 _stateUpdateUser.value = Resource.Success(Unit)
                 _messageAuth.send("Cambios guardados")
 
@@ -146,16 +166,11 @@ class AuthViewModel @Inject constructor(
     }
 
 
-    fun reLoadInfoUser() {
-        nameUser = authRepoImpl.nameUser ?: ""
-        photoUser = authRepoImpl.urlImgProfile.toString()
-        fileImg = null
-        isDataComplete.value = authRepoImpl.isDataComplete
-    }
+
 
 
     fun authWithTokeGoogle(token: String) = viewModelScope.launch {
-        _stateAuth.value = LoginStatus.Authenticating
+        _stateAuth.value = Resource.Loading()
         try {
             authRepoImpl.authWithTokeGoogle(token).collect { result: Pair<String?, String?> ->
                 val (name, url) = result
@@ -164,7 +179,7 @@ class AuthViewModel @Inject constructor(
                     photoUser = url
                     isDataComplete.value = true
                 }
-                _stateAuth.value = LoginStatus.Authenticated
+                _stateAuth.value = Resource.Success(Unit)
             }
 
         } catch (exception: Exception) {
@@ -172,14 +187,13 @@ class AuthViewModel @Inject constructor(
                 is CancellationException -> throw exception
                 else -> {
                     _messageAuth.send("Error $exception")
-                    _stateAuth.value = LoginStatus.Unauthenticated
+                    _stateAuth.value = Resource.Failure(exception)
                 }
             }
         }
     }
 
     fun logOut() {
-        _stateAuth.value = LoginStatus.Unauthenticated
         authRepoImpl.logOut()
     }
 }

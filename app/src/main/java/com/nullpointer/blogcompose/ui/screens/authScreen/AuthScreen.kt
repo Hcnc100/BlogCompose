@@ -22,6 +22,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.states.LoginStatus
+import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.presentation.AuthViewModel
 import timber.log.Timber
 
@@ -30,7 +31,8 @@ fun AuthScreen(
     authViewModel: AuthViewModel = hiltViewModel(),
 ) {
     val scaffoldState = rememberScaffoldState()
-    val stateAuth = authViewModel.stateAuth.collectAsState()
+    val loginStatus = authViewModel.stateAuth.collectAsState()
+    val authStatus=authViewModel.stateAuthUser.collectAsState()
     val messageError=authViewModel.messageAuth.collectAsState(null)
 
     LaunchedEffect(messageError.value){
@@ -45,10 +47,11 @@ fun AuthScreen(
         Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.SpaceBetween) {
             ContainerLogo()
 
-            when (stateAuth.value) {
-                LoginStatus.Authenticated -> Text("Usuario autenticado")
-                LoginStatus.Authenticating -> Text("Autenticando...")
-                LoginStatus.Unauthenticated -> Text("Usuario no autenticado")
+            when (loginStatus.value) {
+                is Resource.Failure -> {}
+                is Resource.Loading -> Text("Autenticando...")
+                is Resource.Success -> Text("Usuario autenticado")
+                null -> Text("Usuario no autenticado")
             }
 
 
@@ -63,7 +66,7 @@ fun AuthScreen(
                 ButtonLoginGoogle(
                     authWithTokeGoogle = authViewModel::authWithTokeGoogle,
                     logoOut = authViewModel::logOut,
-                    loginStatus = stateAuth.value,
+                    loginStatus = authStatus.value,
                 )
                 ExtendedFloatingActionButton(onClick = { /*TODO*/ },
                     text = { Text("Ingresa con Facebook") },

@@ -38,7 +38,6 @@ fun DataUserScreen(
     authViewModel: AuthViewModel = hiltViewModel(),
 ) {
     // * reload info user
-    authViewModel.reLoadInfoUser()
     val statusChange = authViewModel.stateUpdateUser.collectAsState()
     val scaffoldState = rememberScaffoldState()
     val sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)

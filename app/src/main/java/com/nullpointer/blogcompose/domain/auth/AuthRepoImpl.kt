@@ -1,6 +1,7 @@
 package com.nullpointer.blogcompose.domain.auth
 
 import com.nullpointer.blogcompose.data.remote.AuthDataSource
+import com.nullpointer.blogcompose.models.CurrentUser
 import kotlinx.coroutines.flow.Flow
 
 class AuthRepoImpl(
@@ -29,5 +30,6 @@ class AuthRepoImpl(
     override fun logOut() =
         authDataSource.logOut()
 
-
+    override fun getCurrentUser(): Flow<CurrentUser?> =
+        authDataSource.getCurrentUser()
 }

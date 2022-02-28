@@ -1,6 +1,7 @@
 package com.nullpointer.blogcompose.ui.activitys
 
 import android.os.Bundle
+import android.window.SplashScreen
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -8,7 +9,9 @@ import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.accompanist.insets.ProvideWindowInsets
 import com.google.accompanist.insets.navigationBarsWithImePadding
@@ -22,9 +25,11 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    private val authViewModel: AuthViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        var loading = true
+        val splash = installSplashScreen()
+        splash.setKeepOnScreenCondition { loading }
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setContent {
             BlogComposeTheme {
@@ -32,16 +37,26 @@ class MainActivity : ComponentActivity() {
                     Scaffold(modifier = Modifier
                         .navigationBarsWithImePadding()
                         .systemBarsPadding()) {
-                        val loginStatus = authViewModel.stateAuth.collectAsState()
+                        val authViewModel: AuthViewModel = hiltViewModel()
+                        val loginStatus = authViewModel.stateAuthUser.collectAsState()
                         val isDataComplete = authViewModel.isDataComplete.value
-                        if (loginStatus.value is LoginStatus.Authenticated) {
-                            if (isDataComplete) {
-                                HomeScreen()
-                            } else {
-                                DataUserScreen()
+
+                        when (loginStatus.value) {
+                            LoginStatus.Authenticated -> {
+                                if (isDataComplete) {
+                                    HomeScreen()
+                                } else {
+                                    DataUserScreen()
+                                }
+                                loading = false
                             }
-                        } else {
-                            AuthScreen()
+                            LoginStatus.Authenticating -> {
+                                loading = true
+                            }
+                            LoginStatus.Unauthenticated -> {
+                                AuthScreen()
+                                loading = false
+                            }
                         }
                     }
                 }
