@@ -18,10 +18,7 @@ import com.nullpointer.blogcompose.domain.images.ImagesRepoImpl
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.*
 
 import me.shouheng.compress.Compress
 import me.shouheng.compress.concrete
@@ -133,9 +130,9 @@ class AuthViewModel @Inject constructor(
                 _messageAuth.send("Cambios guardados")
 
             } catch (exception: Exception) {
-                when(exception){
-                    is CancellationException->throw exception
-                    else->{
+                when (exception) {
+                    is CancellationException -> throw exception
+                    else -> {
                         _messageAuth.send("Error desconocido")
                         _stateUpdateUser.value = Resource.Failure(exception)
                     }
@@ -160,12 +157,20 @@ class AuthViewModel @Inject constructor(
     fun authWithTokeGoogle(token: String) = viewModelScope.launch {
         _stateAuth.value = LoginStatus.Authenticating
         try {
-            authRepoImpl.authWithTokeGoogle(token)
-            _stateAuth.value = LoginStatus.Authenticated
+            authRepoImpl.authWithTokeGoogle(token).collect { result: Pair<String?, String?> ->
+                val (name, url) = result
+                if (name != null && url != null) {
+                    nameUser = name
+                    photoUser = url
+                    isDataComplete.value = true
+                }
+                _stateAuth.value = LoginStatus.Authenticated
+            }
+
         } catch (exception: Exception) {
-            when(exception){
-                is CancellationException->throw exception
-                else->{
+            when (exception) {
+                is CancellationException -> throw exception
+                else -> {
                     _messageAuth.send("Error $exception")
                     _stateAuth.value = LoginStatus.Unauthenticated
                 }

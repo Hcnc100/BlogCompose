@@ -1,6 +1,7 @@
 package com.nullpointer.blogcompose.domain.auth
 
 import com.nullpointer.blogcompose.data.remote.AuthDataSource
+import kotlinx.coroutines.flow.Flow
 
 class AuthRepoImpl(
     private val authDataSource: AuthDataSource,
@@ -11,7 +12,7 @@ class AuthRepoImpl(
     override val uuidUser: String? = authDataSource.uuidUser
 
     override suspend fun authWithTokeGoogle(token: String) =
-        authDataSource.authWithTokeGoogle(token)
+        authDataSource.authWithTokenGoogle(token)
 
     override suspend fun deleterUser() =
         authDataSource.deleterUser()

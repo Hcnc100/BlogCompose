@@ -10,21 +10,27 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberImagePainter
 import coil.transform.CircleCropTransformation
+import com.nullpointer.blogcompose.presentation.AuthViewModel
 
 @Composable
-fun ProfileScreen() {
+fun ProfileScreen(
+    authViewModel: AuthViewModel = hiltViewModel(),
+) {
     Scaffold {
-        InfoProfile()
+        InfoProfile(authViewModel.photoUser)
     }
 }
 
 @Composable
-fun InfoProfile() {
+fun InfoProfile(
+    urlImgProfile:String
+) {
     Column(modifier = Modifier.padding(horizontal = 10.dp)) {
         Row {
-            val painter = rememberImagePainter(data = "https://picsum.photos/500") {
+            val painter = rememberImagePainter(data = urlImgProfile) {
                 transformations(CircleCropTransformation())
             }
 
