@@ -3,6 +3,7 @@ package com.nullpointer.blogcompose.services
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.runtime.mutableStateOf
 import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
@@ -45,7 +46,7 @@ class UploadPostServices : LifecycleService() {
             }
         }
 
-        val updatePostComplete = MutableStateFlow(false)
+        val updatePostComplete = mutableStateOf(false)
     }
 
     private val notificationHelper = NotificationHelper(this)
@@ -110,10 +111,10 @@ class UploadPostServices : LifecycleService() {
         }.collect { task ->
             when (task) {
                 is StorageUploadTaskResult.Complete.Success -> {
+                    updatePostComplete.value=true
                     servicesNotification.setProgress(100, 100, true)
                     _stateUpload.value = task
                     uploadPost(task.urlFile)
-                    updatePostComplete.value=true
                     killServices()
                 }
                 is StorageUploadTaskResult.InProgress -> {

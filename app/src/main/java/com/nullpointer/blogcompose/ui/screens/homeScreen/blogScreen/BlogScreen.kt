@@ -15,6 +15,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.presentation.PostViewModel
+import com.nullpointer.blogcompose.services.UploadPostServices
 import com.nullpointer.blogcompose.ui.screens.homeScreen.blogScreen.componets.BlogItem
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.flow.collect
@@ -35,6 +36,9 @@ fun BlogScreen(
             )
         }
     ) {
+
+        if(UploadPostServices.updatePostComplete.value) postVM.fetchLastPost()
+
         val listPostState = postVM.listPost.collectAsState()
 
         when (val state = listPostState.value) {
@@ -54,7 +58,7 @@ fun BlogScreen(
                     }
                 }
                 listState.OnBottomReached(3) {
-                    postVM.concatenatePost()
+                    postVM.concatenateLastPost()
                 }
             }
         }

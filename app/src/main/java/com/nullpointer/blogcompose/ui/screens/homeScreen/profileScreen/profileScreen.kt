@@ -23,6 +23,7 @@ import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.presentation.AuthViewModel
 import com.nullpointer.blogcompose.presentation.PostViewModel
+import com.nullpointer.blogcompose.services.UploadPostServices
 import com.nullpointer.blogcompose.ui.screens.homeScreen.blogScreen.componets.BlogItem
 
 @Composable
@@ -31,6 +32,7 @@ fun ProfileScreen(
     postViewModel: PostViewModel = hiltViewModel(),
 ) {
     val listMyPost = postViewModel.listMyPost.collectAsState()
+    if(UploadPostServices.updatePostComplete.value) postViewModel.fetchMyLastPost()
 
     Scaffold {
         LazyColumn {
