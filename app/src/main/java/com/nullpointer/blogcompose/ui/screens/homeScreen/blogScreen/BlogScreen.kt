@@ -3,6 +3,7 @@ package com.nullpointer.blogcompose.ui.screens.homeScreen.blogScreen
 import androidx.compose.animation.*
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -11,9 +12,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.SwipeRefreshState
 import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.states.Resource
+import com.nullpointer.blogcompose.models.Post
 import com.nullpointer.blogcompose.presentation.PostViewModel
 import com.nullpointer.blogcompose.services.UploadPostServices
 import com.nullpointer.blogcompose.ui.screens.homeScreen.blogScreen.componets.BlogItem
@@ -27,49 +32,51 @@ fun BlogScreen(
     actionGoToAddPost: () -> Unit,
 ) {
 
-    val listState= rememberLazyListState()
-    Scaffold(
-        floatingActionButton = {
+    val listState = rememberLazyListState()
+    val listPostState = postVM.listPost.collectAsState()
+    if (UploadPostServices.updatePostComplete.value) postVM.fetchLastPost()
+
+    SwipeRefresh(
+        state = SwipeRefreshState(listPostState.value is Resource.Loading),
+        onRefresh = { postVM.fetchLastPost() }
+    ) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            val result = listPostState.value
+            if (result is Resource.Success) {
+                ListInfinitePost(listPost = result.data, listState = listState) {
+                    postVM.concatenateLastPost()
+                }
+            }
             ButtonAdd(
+                modifier = Modifier.padding(15.dp).align(Alignment.BottomEnd),
                 isScrollInProgress = listState.isScrollInProgress,
                 action = actionGoToAddPost
             )
         }
-    ) {
+    }
+}
 
-        if(UploadPostServices.updatePostComplete.value) postVM.fetchLastPost()
-
-        val listPostState = postVM.listPost.collectAsState()
-
-        when (val state = listPostState.value) {
-            is Resource.Failure -> {
-                Timber.d(state.exception)
-            }
-            is Resource.Loading -> Box(modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
-            }
-            is Resource.Success -> {
-                val listPost = state.data
-
-                LazyColumn(state = listState) {
-                    items(listPost.size) { index ->
-                        BlogItem(listPost[index])
-                    }
-                }
-                listState.OnBottomReached(3) {
-                    postVM.concatenateLastPost()
-                }
-            }
+@Composable
+fun ListInfinitePost(
+    listPost: List<Post>,
+    listState: LazyListState,
+    actionBottomReached: () -> Unit,
+) {
+    LazyColumn(state = listState) {
+        items(listPost.size) { index ->
+            BlogItem(listPost[index])
         }
+    }
+    listState.OnBottomReached(3) {
+        actionBottomReached()
     }
 }
 
 @OptIn(InternalCoroutinesApi::class)
 @Composable
 fun LazyListState.OnBottomReached(
-    buffer : Int = 0,
-    onLoadMore : () -> Unit
+    buffer: Int = 0,
+    onLoadMore: () -> Unit,
 ) {
     require(buffer >= 0) { "buffer cannot be negative, but was $buffer" }
     val shouldLoadMore = remember {
@@ -77,11 +84,11 @@ fun LazyListState.OnBottomReached(
             // * get the las item index and determinate if is the last minus the buffer
             val lastVisibleItem =
                 layoutInfo.visibleItemsInfo.lastOrNull() ?: return@derivedStateOf true
-            lastVisibleItem.index >=  layoutInfo.totalItemsCount - 1 - buffer
+            lastVisibleItem.index >= layoutInfo.totalItemsCount - 1 - buffer
         }
     }
     // * listener changes and require more if is needed
-    LaunchedEffect(shouldLoadMore){
+    LaunchedEffect(shouldLoadMore) {
         snapshotFlow { shouldLoadMore.value }
             .collect { if (it) onLoadMore() }
     }
@@ -90,10 +97,12 @@ fun LazyListState.OnBottomReached(
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun ButtonAdd(
+    modifier: Modifier = Modifier,
     isScrollInProgress: Boolean,
-    action: () -> Unit = {},
+    action: () -> Unit,
 ) {
     AnimatedVisibility(
+        modifier = modifier,
         visible = !isScrollInProgress,
         enter = scaleIn() + fadeIn(),
         exit = scaleOut() + fadeOut()
