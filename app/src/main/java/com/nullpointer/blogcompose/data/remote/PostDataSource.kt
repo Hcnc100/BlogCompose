@@ -13,9 +13,9 @@ class PostDataSource {
     private val refPosts = Firebase.firestore.collection("posts")
     private val auth=Firebase.auth
 
-    suspend fun getLatestPost(nPosts: Long): List<Post> {
+    suspend fun getLatestPost(nPosts: Int): List<Post> {
         return refPosts.orderBy("timeStamp", Query.Direction.DESCENDING)
-            .limit(nPosts).get().await().documents.mapNotNull { document ->
+            .limit(nPosts.toLong()).get().await().documents.mapNotNull { document ->
                 document.toObject(Post::class.java)?.let { post ->
                     post.apply {
                         timeStamp = document.getTimestamp(
@@ -28,12 +28,12 @@ class PostDataSource {
             }
     }
 
-    suspend fun getMyLastPost(nPosts: Long) =
+    suspend fun getMyLastPost(nPosts: Int) =
         getLatestPostFrom(auth.currentUser?.uid!!,nPosts)
 
-    suspend fun getLatestPostFrom(idUser: String, nPost: Long): List<Post> {
+    suspend fun getLatestPostFrom(idUser: String, nPost: Int): List<Post> {
         return refPosts.orderBy("timeStamp", Query.Direction.DESCENDING)
-            .whereEqualTo("postOwnerId", idUser).limit(nPost).get()
+            .whereEqualTo("postOwnerId", idUser).limit(nPost.toLong()).get()
             .await().documents.mapNotNull { document ->
                 document.toObject(Post::class.java)?.let { post ->
                     post.apply {

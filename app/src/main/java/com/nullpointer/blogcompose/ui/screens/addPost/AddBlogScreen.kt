@@ -24,6 +24,8 @@ import coil.compose.ImagePainter
 import coil.compose.rememberImagePainter
 import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.models.Post
+import com.nullpointer.blogcompose.presentation.AuthViewModel
+import com.nullpointer.blogcompose.presentation.PostViewModel
 import com.nullpointer.blogcompose.services.UploadPostServices
 import com.nullpointer.blogcompose.ui.customs.ToolbarBack
 import com.nullpointer.blogcompose.ui.screens.addPost.components.ButtonSheetContent
@@ -35,6 +37,7 @@ import java.io.File
 @Composable
 fun AddBlogScreen(
     addBlogVM: AddBlogViewModel = hiltViewModel(),
+    authViewModel: AuthViewModel = hiltViewModel(),
     goBack: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
@@ -54,8 +57,11 @@ fun AddBlogScreen(
                 ButtonPublish {
                     if (addBlogVM.validate()) {
                         UploadPostServices.startServicesUploadPost(context,
-                            Post.createRandom().copy(
+                            Post(
                                 description = addBlogVM.description,
+                                profilePictureOwner = authViewModel.photoUser,
+                                postOwnerName = authViewModel.nameUser,
+                                postOwnerId = authViewModel.uuidUser,
                             ), addBlogVM.fileImg!!)
                         goBack()
                     } else {
@@ -88,7 +94,6 @@ fun AddBlogScreen(
 fun ButtonPublish(
     actionValidate: () -> Unit,
 ) {
-    val context = LocalContext.current
     ExtendedFloatingActionButton(icon = { Icon(painterResource(id = R.drawable.ic_publish), "") },
         text = { Text("Publicar") },
         onClick = { actionValidate() })

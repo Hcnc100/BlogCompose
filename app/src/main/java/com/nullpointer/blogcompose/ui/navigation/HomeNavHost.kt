@@ -1,10 +1,13 @@
 package com.nullpointer.blogcompose.ui.navigation
 
+import android.os.Bundle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
+import androidx.navigation.NavController
+import androidx.navigation.NavDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -15,6 +18,7 @@ import com.nullpointer.blogcompose.ui.screens.addPost.AddBlogScreen
 import com.nullpointer.blogcompose.ui.screens.authScreen.AuthScreen
 import com.nullpointer.blogcompose.ui.screens.dataUser.DataUserScreen
 import com.nullpointer.blogcompose.ui.screens.homeScreen.HomeScreen
+import timber.log.Timber
 
 @Composable
 fun HomeNavHost(
@@ -40,7 +44,6 @@ fun HomeNavHost(
         }
     }
     if (initialRoute != null) {
-        finishLoading()
         NavHost(navController = navController, startDestination = initialRoute) {
             composable(MainDestinations.LoginScreen.route) {
                 AuthScreen()
@@ -48,12 +51,14 @@ fun HomeNavHost(
             composable(MainDestinations.RegistryScreen.route) {
                 DataUserScreen()
             }
-            composable(MainDestinations.AddNewPostScreen.route){
-                AddBlogScreen{
+            composable(MainDestinations.AddNewPostScreen.route) {
+
+                AddBlogScreen(authViewModel = authViewModel) {
                     navController.navigateUp()
                 }
+
             }
-            composable(MainDestinations.HomeScreen.route){
+            composable(MainDestinations.HomeScreen.route) {
                 CompositionLocalProvider(
                     LocalViewModelStoreOwner provides viewModelStoreOwner
                 ) {
@@ -62,6 +67,7 @@ fun HomeNavHost(
                     })
                 }
             }
+            finishLoading()
         }
     }
 

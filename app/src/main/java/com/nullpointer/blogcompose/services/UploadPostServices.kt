@@ -44,6 +44,8 @@ class UploadPostServices : LifecycleService() {
                 context.startService(it)
             }
         }
+
+        val updatePostComplete = MutableStateFlow(false)
     }
 
     private val notificationHelper = NotificationHelper(this)
@@ -97,19 +99,21 @@ class UploadPostServices : LifecycleService() {
         _stateUpload.value = StorageUploadTaskResult.Init
         val servicesNotification = notificationHelper.getNotificationUploadServices(
             ID_CHANNEL_UPLOAD_POST,
-                UPLOAD_POST_CHANNEL,
-                NotificationManagerCompat.IMPORTANCE_DEFAULT,
-                ACTION_STOP)
+            UPLOAD_POST_CHANNEL,
+            NotificationManagerCompat.IMPORTANCE_DEFAULT,
+            ACTION_STOP)
         startForeground(10, servicesNotification.build())
         imagesRepoImpl.uploadImgBlog(uriImage, idPost).catch { exception ->
             // ! if has Error send error
             _stateUpload.value = StorageUploadTaskResult.Complete.Failed(Exception(exception))
+            killServices()
         }.collect { task ->
             when (task) {
                 is StorageUploadTaskResult.Complete.Success -> {
                     servicesNotification.setProgress(100, 100, true)
                     _stateUpload.value = task
                     uploadPost(task.urlFile)
+                    updatePostComplete.value=true
                     killServices()
                 }
                 is StorageUploadTaskResult.InProgress -> {
@@ -122,6 +126,7 @@ class UploadPostServices : LifecycleService() {
     }
 
     private fun killServices() {
+        updatePostComplete.value=false
         stopForeground(true)
         stopSelf()
     }

@@ -6,13 +6,13 @@ import com.nullpointer.blogcompose.models.Post
 class PostRepoImpl(
     private val postDataSource: PostDataSource,
 ) : PostRepository {
-    override suspend fun getLastPost(nPost: Long): List<Post> =
+    override suspend fun getLastPost(nPost: Int): List<Post> =
         postDataSource.getLatestPost(nPost)
 
-    override suspend fun getLastPostByUser(idUser: String, nPost: Long): List<Post> =
+    override suspend fun getLastPostByUser(idUser: String, nPost: Int): List<Post> =
         postDataSource.getLatestPostFrom(idUser, nPost)
 
-    override suspend fun getMyLastPost(nPost: Long): List<Post> =
+    override suspend fun getMyLastPost(nPost: Int): List<Post> =
         postDataSource.getMyLastPost(nPost)
 
     override suspend fun addNewPost(post: Post) =
