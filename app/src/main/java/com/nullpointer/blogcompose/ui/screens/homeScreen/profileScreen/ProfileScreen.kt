@@ -16,6 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.annotation.ExperimentalCoilApi
 import coil.compose.ImagePainter
 import coil.compose.rememberImagePainter
 import coil.transform.CircleCropTransformation
@@ -25,6 +26,7 @@ import com.nullpointer.blogcompose.presentation.AuthViewModel
 import com.nullpointer.blogcompose.presentation.PostViewModel
 import com.nullpointer.blogcompose.services.UploadPostServices
 import com.nullpointer.blogcompose.ui.screens.homeScreen.blogScreen.componets.BlogItem
+import com.nullpointer.blogcompose.ui.screens.swipePosts.ScreenSwiperPost
 
 @Composable
 fun ProfileScreen(
@@ -32,35 +34,30 @@ fun ProfileScreen(
     postViewModel: PostViewModel = hiltViewModel(),
 ) {
     val listMyPost = postViewModel.listMyPost.collectAsState()
-    if(UploadPostServices.updatePostComplete.value) postViewModel.fetchMyLastPost()
+    if (UploadPostServices.updatePostComplete.value) postViewModel.fetchMyLastPost()
+    ScreenSwiperPost(resultListPost = listMyPost.value,
+        updateListPost = { postViewModel.fetchMyLastPost() },
+        actionBottomReached = { postViewModel.concatenateMyPost() }) {
+        HeaderProfile(urlImgProfile = authViewModel.photoUser)
+    }
+}
 
-    Scaffold {
-        LazyColumn {
-            item {
-                Box {
-                    InfoProfile(authViewModel.photoUser)
-                    IconButton(onClick = { /*TODO*/ }, modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(10.dp)) {
-                        Icon(painterResource(id = R.drawable.ic_settings), "")
-                    }
-                }
-            }
-            when (val list = listMyPost.value) {
-                is Resource.Failure -> Unit
-                is Resource.Loading -> item {
-                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator()
-                    }
-                }
-                is Resource.Success -> items(list.data.size) { index ->
-                    BlogItem(post = list.data[index])
-                }
-            }
+@Composable
+fun HeaderProfile(
+    urlImgProfile: String,
+) {
+    Box {
+        InfoProfile(urlImgProfile)
+        IconButton(onClick = { /*TODO*/ }, modifier = Modifier
+            .align(Alignment.TopEnd)
+            .padding(10.dp)) {
+            Icon(painterResource(id = R.drawable.ic_settings), "")
         }
     }
 }
 
+
+@OptIn(ExperimentalCoilApi::class)
 @Composable
 fun InfoProfile(
     urlImgProfile: String,
