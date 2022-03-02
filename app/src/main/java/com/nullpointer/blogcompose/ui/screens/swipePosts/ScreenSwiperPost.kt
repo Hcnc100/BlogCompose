@@ -28,6 +28,7 @@ fun ScreenSwiperPost(
     resultListPost: Resource<List<Post>>,
     updateListPost: () -> Unit,
     actionBottomReached: () -> Unit,
+    actionChangePost:(Post,isLiked:Boolean)->Unit,
     actionButtonAdd: (() -> Unit)? = null,
     header: @Composable (() -> Unit)? = null,
 ) {
@@ -44,6 +45,7 @@ fun ScreenSwiperPost(
                     listState = listState,
                     actionBottomReached = actionBottomReached,
                     header = header,
+                    actionChangePost = actionChangePost
                 )
             }
             actionButtonAdd?.let {
@@ -64,6 +66,7 @@ fun ScreenSwiperPost(
 fun ListInfinitePost(
     listPost: List<Post>,
     listState: LazyListState,
+    actionChangePost:(Post,isLiked:Boolean)->Unit,
     header: (@Composable () -> Unit)? = null,
     actionBottomReached: () -> Unit,
 ) {
@@ -72,7 +75,7 @@ fun ListInfinitePost(
             item { it() }
         }
         items(listPost.size) { index ->
-            BlogItem(listPost[index])
+            BlogItem(listPost[index],actionChangePost)
         }
     }
     listState.OnBottomReached(3) {

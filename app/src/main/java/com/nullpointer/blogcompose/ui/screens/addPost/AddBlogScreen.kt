@@ -24,6 +24,7 @@ import coil.compose.ImagePainter
 import coil.compose.rememberImagePainter
 import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.models.Post
+import com.nullpointer.blogcompose.models.Poster
 import com.nullpointer.blogcompose.presentation.AuthViewModel
 import com.nullpointer.blogcompose.presentation.PostViewModel
 import com.nullpointer.blogcompose.services.UploadPostServices
@@ -59,9 +60,11 @@ fun AddBlogScreen(
                         UploadPostServices.startServicesUploadPost(context,
                             Post(
                                 description = addBlogVM.description,
-                                profilePictureOwner = authViewModel.photoUser,
-                                postOwnerName = authViewModel.nameUser,
-                                postOwnerId = authViewModel.uuidUser,
+                                poster = Poster(
+                                    uuid = authViewModel.uuidUser,
+                                    name = authViewModel.nameUser,
+                                    urlImg = authViewModel.photoUser
+                                )
                             ), addBlogVM.fileImg!!)
                         goBack()
                     } else {

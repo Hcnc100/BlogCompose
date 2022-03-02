@@ -23,4 +23,10 @@ class PostRepoImpl(
 
     override suspend fun updatePost(post: Post) =
         postDataSource.update(post)
+
+    override suspend fun getPost(idPost: String) =
+        postDataSource.getPost(idPost)
+
+    override suspend fun updateLikePost(idPost: String,isLiked:Boolean): Post? =
+        postDataSource.updateLikes(idPost,isLiked)
 }

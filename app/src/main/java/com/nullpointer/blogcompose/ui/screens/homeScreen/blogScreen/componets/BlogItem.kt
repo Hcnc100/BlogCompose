@@ -15,12 +15,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.annotation.ExperimentalCoilApi
 import com.nullpointer.blogcompose.core.utils.TimeUtils
 import com.nullpointer.blogcompose.models.Post
 import java.util.*
 
+@OptIn(ExperimentalCoilApi::class)
 @Composable
-fun BlogItem(post: Post) {
+fun BlogItem(
+    post: Post,
+    actionChangePost:(Post,isLiked:Boolean)->Unit,
+) {
+    val (ownerLike, changeOwnerLike) = rememberSaveable { mutableStateOf(post.ownerLike) }
+    val (numberLikes, changeNumberLikes) = rememberSaveable { mutableStateOf(post.numberLikes) }
+    val (numberComments, changeNumberComments) = rememberSaveable { mutableStateOf(post.numberComments) }
     Card(
         modifier = Modifier
             .padding(10.dp)
@@ -28,10 +36,14 @@ fun BlogItem(post: Post) {
         shape = RoundedCornerShape(10.dp)
     ) {
         Column {
-            HeaderBlog(post.profilePictureOwner, post.postOwnerName)
+            HeaderBlog(post.poster!!.urlImg, post.poster.name)
             ImageBlog(post.urlImage)
-            ButtonsInteractionBlog()
-            TextLikes(post.numberLikes, post.numberComments)
+            ButtonsInteractionBlog(ownerLike) {
+                actionChangePost(post,it)
+                changeOwnerLike(it)
+                post.numberLikes=if (it) post.numberLikes+1 else post.numberLikes-1
+            }
+            TextLikes(post.numberLikes, numberComments)
             DescriptionBlog(Modifier.padding(5.dp), post.description)
             TextTime(post.timeStamp)
         }
@@ -40,8 +52,8 @@ fun BlogItem(post: Post) {
 
 @Composable
 fun TextTime(timeStamp: Date?) {
-    val context= LocalContext.current
-    Text(text = TimeUtils.getTimeAgo(timeStamp?.time?:0,context),
+    val context = LocalContext.current
+    Text(text = TimeUtils.getTimeAgo(timeStamp?.time ?: 0, context),
         style = MaterialTheme.typography.caption,
         modifier = Modifier.padding(10.dp))
 }
@@ -67,7 +79,7 @@ fun DescriptionBlog(
 
 
 @Composable
-fun TextLikes(numberLikes: Long, numberComments: Long) {
+fun TextLikes(numberLikes: Int, numberComments: Int) {
     Row(modifier = Modifier
         .fillMaxWidth()
         .padding(horizontal = 5.dp)

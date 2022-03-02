@@ -37,7 +37,9 @@ fun ProfileScreen(
     if (UploadPostServices.updatePostComplete.value) postViewModel.fetchMyLastPost()
     ScreenSwiperPost(resultListPost = listMyPost.value,
         updateListPost = { postViewModel.fetchMyLastPost() },
-        actionBottomReached = { postViewModel.concatenateMyPost() }) {
+        actionBottomReached = { postViewModel.concatenateMyPost() },
+        actionChangePost = postViewModel::likePost
+        ) {
         HeaderProfile(urlImgProfile = authViewModel.photoUser)
     }
 }

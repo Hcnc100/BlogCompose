@@ -18,7 +18,8 @@ fun BlogScreen(
     ScreenSwiperPost(resultListPost = resultGetPost.value,
         updateListPost = { postVM.fetchLastPost() },
         actionBottomReached = { postVM.concatenateLastPost() },
-        actionButtonAdd = actionGoToAddPost
+        actionButtonAdd = actionGoToAddPost,
+        actionChangePost = postVM::likePost
     )
 }
 

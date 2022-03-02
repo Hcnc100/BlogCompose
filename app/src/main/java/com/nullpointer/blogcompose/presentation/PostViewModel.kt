@@ -1,16 +1,15 @@
 package com.nullpointer.blogcompose.presentation
 
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nullpointer.blogcompose.core.delegates.SavableProperty
-import com.nullpointer.blogcompose.core.delegates.SaveableComposeState
 import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.domain.post.PostRepoImpl
 import com.nullpointer.blogcompose.models.Post
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import timber.log.Timber
 import javax.inject.Inject
@@ -45,6 +44,9 @@ class PostViewModel @Inject constructor(
     private var currentSizeMyPost by SavableProperty(savedStateHandle,
         KEY_SIZE_MYSELF,
         INIT_POST_LOAD)
+
+    private val _messagePost = Channel<String>()
+    val messagePost=_messagePost.receiveAsFlow()
 
     init {
         fetchLastPost()
@@ -111,5 +113,39 @@ class PostViewModel @Inject constructor(
             Timber.d("Excepcion con la carga concatedana ${e.message}")
             if (e is CancellationException) throw e
         }
+    }
+
+    fun likePost(post: Post, isLiked: Boolean) = viewModelScope.launch(Dispatchers.IO) {
+        try {
+            val postUpdated = postRepo.updateLikePost(post.id, isLiked)!!
+            val currentMyPost=_listMyPost.value
+            if(currentMyPost is Resource.Success) {
+                updateInfoIfNeeded(post,postUpdated,currentMyPost.data)?.let {
+                    _listMyPost.value=Resource.Success(it)
+                }
+            }
+            val currentLastPost=_listPost.value
+            if(currentLastPost is Resource.Success){
+                updateInfoIfNeeded(post,postUpdated,currentLastPost.data)?.let {
+                    _listPost.value=Resource.Success(it)
+                }
+            }
+        } catch (e: Exception) {
+            Timber.d("Excepcion al dar like ${e.message}")
+            if (e is CancellationException) throw e
+        }
+
+    }
+
+    private fun updateInfoIfNeeded(post: Post, newPost: Post, list: List<Post>): List<Post>?{
+        val index = list.indexOf(post)
+        val mutableList=list.toMutableList()
+        return if (index != -1) {
+            mutableList[index] = newPost
+            mutableList
+        }else{
+            null
+        }
+
     }
 }
