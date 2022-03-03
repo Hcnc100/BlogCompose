@@ -1,4 +1,4 @@
-package com.nullpointer.blogcompose.services
+package com.nullpointer.blogcompose.services.uploadImg
 
 import android.app.NotificationChannel
 import android.app.NotificationManager

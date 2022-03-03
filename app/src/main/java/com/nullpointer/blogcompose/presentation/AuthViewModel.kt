@@ -9,6 +9,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import coil.imageLoader
+import com.google.firebase.messaging.FirebaseMessaging
 import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.delegates.SaveableComposeState
 import com.nullpointer.blogcompose.core.states.LoginStatus
@@ -16,11 +17,13 @@ import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.core.states.StorageUploadTaskResult
 import com.nullpointer.blogcompose.domain.auth.AuthRepoImpl
 import com.nullpointer.blogcompose.domain.images.ImagesRepoImpl
+import com.nullpointer.blogcompose.domain.toke.TokenRepoImpl
 import com.nullpointer.blogcompose.models.CurrentUser
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.tasks.await
 
 import me.shouheng.compress.Compress
 import me.shouheng.compress.concrete
@@ -34,6 +37,7 @@ import javax.inject.Inject
 class AuthViewModel @Inject constructor(
     private val imagesRepoImpl: ImagesRepoImpl,
     private val authRepoImpl: AuthRepoImpl,
+    private val tokenRepoImpl: TokenRepoImpl,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
@@ -174,6 +178,7 @@ class AuthViewModel @Inject constructor(
                     nameUser = name
                     photoUser = url
                 }
+                tokenRepoImpl.updateCurrentToken(FirebaseMessaging.getInstance().token.await())
                 _stateAuth.value = Resource.Success(Unit)
             }
 

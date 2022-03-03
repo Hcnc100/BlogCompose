@@ -1,10 +1,7 @@
 package com.nullpointer.blogcompose.ui.screens.homeScreen.profileScreen
 
-import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
@@ -21,11 +18,9 @@ import coil.compose.ImagePainter
 import coil.compose.rememberImagePainter
 import coil.transform.CircleCropTransformation
 import com.nullpointer.blogcompose.R
-import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.presentation.AuthViewModel
 import com.nullpointer.blogcompose.presentation.PostViewModel
-import com.nullpointer.blogcompose.services.UploadPostServices
-import com.nullpointer.blogcompose.ui.screens.homeScreen.blogScreen.componets.BlogItem
+import com.nullpointer.blogcompose.services.uploadImg.UploadPostServices
 import com.nullpointer.blogcompose.ui.screens.swipePosts.ScreenSwiperPost
 
 @Composable

@@ -1,6 +1,5 @@
 package com.nullpointer.blogcompose.ui.screens.addPost
 
-import android.net.Uri
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -18,7 +17,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.ImagePainter
 import coil.compose.rememberImagePainter
@@ -26,8 +24,7 @@ import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.models.Post
 import com.nullpointer.blogcompose.models.Poster
 import com.nullpointer.blogcompose.presentation.AuthViewModel
-import com.nullpointer.blogcompose.presentation.PostViewModel
-import com.nullpointer.blogcompose.services.UploadPostServices
+import com.nullpointer.blogcompose.services.uploadImg.UploadPostServices
 import com.nullpointer.blogcompose.ui.customs.ToolbarBack
 import com.nullpointer.blogcompose.ui.screens.addPost.components.ButtonSheetContent
 import com.nullpointer.blogcompose.ui.screens.addPost.viewModel.AddBlogViewModel

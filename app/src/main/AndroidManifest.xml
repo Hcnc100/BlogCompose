@@ -36,9 +36,15 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/provider_paths" />
         </provider>
+        <service android:name=".services.notfication.MyFirebaseMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
 
         <service
-            android:name=".services.UploadPostServices"
+            android:name=".services.uploadImg.UploadPostServices"
             android:foregroundServiceType="dataSync" />
     </application>
 
