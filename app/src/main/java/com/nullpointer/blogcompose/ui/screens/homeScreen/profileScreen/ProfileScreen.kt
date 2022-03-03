@@ -34,12 +34,14 @@ fun ProfileScreen(
     postViewModel: PostViewModel = hiltViewModel(),
 ) {
     val listMyPost = postViewModel.listMyPost.collectAsState()
+    val scaffoldState = rememberScaffoldState()
     if (UploadPostServices.updatePostComplete.value) postViewModel.fetchMyLastPost()
     ScreenSwiperPost(resultListPost = listMyPost.value,
+        scaffoldState = scaffoldState,
         updateListPost = { postViewModel.fetchMyLastPost() },
         actionBottomReached = { postViewModel.concatenateMyPost() },
         actionChangePost = postViewModel::likePost
-        ) {
+    ) {
         HeaderProfile(urlImgProfile = authViewModel.photoUser)
     }
 }

@@ -9,6 +9,8 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
+import androidx.compose.material.Scaffold
+import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,9 +28,10 @@ import kotlinx.coroutines.flow.collect
 @Composable
 fun ScreenSwiperPost(
     resultListPost: Resource<List<Post>>,
+    scaffoldState: ScaffoldState,
     updateListPost: () -> Unit,
     actionBottomReached: () -> Unit,
-    actionChangePost:(Post,isLiked:Boolean)->Unit,
+    actionChangePost: (Post, isLiked: Boolean) -> Unit,
     actionButtonAdd: (() -> Unit)? = null,
     header: @Composable (() -> Unit)? = null,
 ) {
@@ -38,7 +41,17 @@ fun ScreenSwiperPost(
         state = SwipeRefreshState(resultListPost is Resource.Loading),
         onRefresh = { updateListPost() }
     ) {
-        Box(modifier = Modifier.fillMaxSize()) {
+        Scaffold(
+            scaffoldState = scaffoldState,
+            floatingActionButton = {
+                actionButtonAdd?.let {
+                    ButtonAdd(
+                        isScrollInProgress = listState.isScrollInProgress,
+                        action = it
+                    )
+                }
+            }
+        ) {
             if (resultListPost is Resource.Success) {
                 ListInfinitePost(
                     listPost = resultListPost.data,
@@ -48,16 +61,6 @@ fun ScreenSwiperPost(
                     actionChangePost = actionChangePost
                 )
             }
-            actionButtonAdd?.let {
-                ButtonAdd(
-                    modifier = Modifier
-                        .padding(15.dp)
-                        .align(Alignment.BottomEnd),
-                    isScrollInProgress = listState.isScrollInProgress,
-                    action = it
-                )
-            }
-
         }
     }
 }
@@ -66,7 +69,7 @@ fun ScreenSwiperPost(
 fun ListInfinitePost(
     listPost: List<Post>,
     listState: LazyListState,
-    actionChangePost:(Post,isLiked:Boolean)->Unit,
+    actionChangePost: (Post, isLiked: Boolean) -> Unit,
     header: (@Composable () -> Unit)? = null,
     actionBottomReached: () -> Unit,
 ) {
@@ -75,7 +78,7 @@ fun ListInfinitePost(
             item { it() }
         }
         items(listPost.size) { index ->
-            BlogItem(listPost[index],actionChangePost)
+            BlogItem(listPost[index], actionChangePost)
         }
     }
     listState.OnBottomReached(3) {

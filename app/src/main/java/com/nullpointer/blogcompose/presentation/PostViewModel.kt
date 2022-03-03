@@ -46,7 +46,7 @@ class PostViewModel @Inject constructor(
         INIT_POST_LOAD)
 
     private val _messagePost = Channel<String>()
-    val messagePost=_messagePost.receiveAsFlow()
+    val messagePost = _messagePost.receiveAsFlow()
 
     init {
         fetchLastPost()
@@ -115,35 +115,45 @@ class PostViewModel @Inject constructor(
         }
     }
 
-    fun likePost(post: Post, isLiked: Boolean) = viewModelScope.launch(Dispatchers.IO) {
+    fun likePost(oldPost: Post, isLiked: Boolean) = viewModelScope.launch(Dispatchers.IO) {
         try {
-            val postUpdated = postRepo.updateLikePost(post.id, isLiked)!!
-            val currentMyPost=_listMyPost.value
-            if(currentMyPost is Resource.Success) {
-                updateInfoIfNeeded(post,postUpdated,currentMyPost.data)?.let {
-                    _listMyPost.value=Resource.Success(it)
-                }
-            }
-            val currentLastPost=_listPost.value
-            if(currentLastPost is Resource.Success){
-                updateInfoIfNeeded(post,postUpdated,currentLastPost.data)?.let {
-                    _listPost.value=Resource.Success(it)
-                }
+            val postUpdated = postRepo.updateLikePost(oldPost.id, isLiked)
+            if (postUpdated != null) {
+                updateListPost(oldPost, postUpdated)
+            } else {
+                updateListPost(oldPost, oldPost)
+                throw Exception("Error")
             }
         } catch (e: Exception) {
             Timber.d("Excepcion al dar like ${e.message}")
+            _messagePost.send("Erro al dar like")
             if (e is CancellationException) throw e
         }
-
     }
 
-    private fun updateInfoIfNeeded(post: Post, newPost: Post, list: List<Post>): List<Post>?{
-        val index = list.indexOf(post)
-        val mutableList=list.toMutableList()
+    private fun updateListPost(oldPost: Post, newPost: Post) {
+        val currentMyPost = _listMyPost.value
+        if (currentMyPost is Resource.Success) {
+            updateInfoIfNeeded(oldPost, newPost, currentMyPost.data)?.let {
+                _listMyPost.value = Resource.Success(it)
+            }
+        }
+        val currentLastPost = _listPost.value
+        if (currentLastPost is Resource.Success) {
+            updateInfoIfNeeded(oldPost, newPost, currentLastPost.data)?.let {
+                _listPost.value = Resource.Success(it)
+            }
+        }
+    }
+
+    private fun updateInfoIfNeeded(oldPost: Post, newPost: Post, list: List<Post>): List<Post>? {
+        // ! use this and no use index of
+        val index = list.indexOfFirst { oldPost.id == newPost.id }
+        val mutableList = list.toMutableList()
         return if (index != -1) {
             mutableList[index] = newPost
             mutableList
-        }else{
+        } else {
             null
         }
 

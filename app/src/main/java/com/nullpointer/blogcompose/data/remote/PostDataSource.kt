@@ -61,7 +61,7 @@ class PostDataSource {
         val currentPost = refPosts.document(idPost)
         val likePost = refLikePost.document(idPost)
         val uuid = auth.currentUser?.uid ?: ""
-        var isSuccess = false
+        var isSuccess = true
 
         database.runTransaction { transition ->
             val postSnapshot = transition.get(currentPost)
@@ -80,9 +80,11 @@ class PostDataSource {
                     transition.update(currentPost, "numberLikes", decrement)
                     transition.update(likePost, "likes", FieldValue.arrayRemove(uuid))
                 }
+            }else{
+                isSuccess=false
             }
-        }.addOnSuccessListener {
-            isSuccess = true
+        }.addOnFailureListener {
+            isSuccess = false
         }.await()
 
         return if (isSuccess) transformDocumentPost(currentPost.get().await()) else null

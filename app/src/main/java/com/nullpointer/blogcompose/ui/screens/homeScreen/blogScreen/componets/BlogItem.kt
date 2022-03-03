@@ -6,8 +6,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -26,9 +25,12 @@ fun BlogItem(
     post: Post,
     actionChangePost:(Post,isLiked:Boolean)->Unit,
 ) {
-    val (ownerLike, changeOwnerLike) = rememberSaveable { mutableStateOf(post.ownerLike) }
-    val (numberLikes, changeNumberLikes) = rememberSaveable { mutableStateOf(post.numberLikes) }
-    val (numberComments, changeNumberComments) = rememberSaveable { mutableStateOf(post.numberComments) }
+    val (ownerLike, changeOwnerLike) = remember { mutableStateOf(post.ownerLike) }
+    SideEffect {
+        if(ownerLike!=post.ownerLike){
+            changeOwnerLike(post.ownerLike)
+        }
+    }
     Card(
         modifier = Modifier
             .padding(10.dp)
@@ -39,11 +41,12 @@ fun BlogItem(
             HeaderBlog(post.poster!!.urlImg, post.poster.name)
             ImageBlog(post.urlImage)
             ButtonsInteractionBlog(ownerLike) {
-                actionChangePost(post,it)
+                actionChangePost(post.copy(),it)
                 changeOwnerLike(it)
+                post.ownerLike=!post.ownerLike
                 post.numberLikes=if (it) post.numberLikes+1 else post.numberLikes-1
             }
-            TextLikes(post.numberLikes, numberComments)
+            TextLikes(post.numberLikes, post.numberComments)
             DescriptionBlog(Modifier.padding(5.dp), post.description)
             TextTime(post.timeStamp)
         }

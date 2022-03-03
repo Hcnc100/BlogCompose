@@ -20,7 +20,27 @@ data class Post(
     var timeStamp: Date?=null,
     @set:Exclude @get:Exclude
     var id:String=UUID.randomUUID().toString(),
-) : Parcelable
+) : Parcelable{
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Post
+
+        if (numberComments != other.numberComments) return false
+        if (numberLikes != other.numberLikes) return false
+        if (id != other.id) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = numberComments
+        result = 31 * result + numberLikes
+        result = 31 * result + id.hashCode()
+        return result
+    }
+}
 
 @Parcelize
 data class Poster(
