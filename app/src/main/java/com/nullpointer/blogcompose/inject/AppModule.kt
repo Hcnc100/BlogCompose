@@ -1,5 +1,7 @@
 package com.nullpointer.blogcompose.inject
 
+import android.content.Context
+import com.nullpointer.blogcompose.data.local.PreferencesDataSource
 import com.nullpointer.blogcompose.data.remote.AuthDataSource
 import com.nullpointer.blogcompose.data.remote.ImagesDataSource
 import com.nullpointer.blogcompose.data.remote.PostDataSource
@@ -9,10 +11,12 @@ import com.nullpointer.blogcompose.domain.auth.AuthRepository
 import com.nullpointer.blogcompose.domain.images.ImagesRepoImpl
 import com.nullpointer.blogcompose.domain.post.PostRepoImpl
 import com.nullpointer.blogcompose.domain.post.PostRepository
+import com.nullpointer.blogcompose.domain.preferences.PreferencesRepoImpl
 import com.nullpointer.blogcompose.domain.toke.TokenRepoImpl
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
@@ -62,4 +66,17 @@ object AppModule {
     @Singleton
     fun tokenRepository(tokenDataSource: TokenDataSource): TokenRepoImpl =
         TokenRepoImpl(tokenDataSource)
+
+    @Provides
+    @Singleton
+    fun providePreferencesDataSource(
+        @ApplicationContext context: Context
+    ): PreferencesDataSource =
+        PreferencesDataSource(context)
+
+    @Provides
+    @Singleton
+    fun providePreferencesRepo(
+        preferencesDataSource: PreferencesDataSource,
+    ): PreferencesRepoImpl = PreferencesRepoImpl(preferencesDataSource)
 }
