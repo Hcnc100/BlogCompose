@@ -25,9 +25,7 @@ fun MainNavHost(
         composable(HomeDestinations.BlogScreen.route) {
             BlogScreen(actionGoToAddPost = actionGoToAddPost)
         }
-        composable(HomeDestinations.SearchScreen.route) {
-            SearchScreen()
-        }
+
         composable(HomeDestinations.NotifyScreen.route) {
             NotifyScreen()
         }

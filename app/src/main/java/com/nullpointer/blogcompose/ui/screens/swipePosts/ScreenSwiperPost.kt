@@ -26,7 +26,6 @@ import kotlinx.coroutines.flow.collect
 fun ScreenSwiperPost(
     resultListPost: Resource<List<Post>>,
     scaffoldState: ScaffoldState = rememberScaffoldState(),
-    snackbarHostState: SnackbarHostState,
     updateListPost: () -> Unit,
     actionBottomReached: () -> Unit,
     actionChangePost: (Post, isLiked: Boolean) -> Unit,
@@ -44,7 +43,7 @@ fun ScreenSwiperPost(
             floatingActionButton = {
                 actionButtonAdd?.let {
                     ButtonAdd(
-                        isScrollInProgress = listState.isScrollInProgress || snackbarHostState.currentSnackbarData!=null,
+                        isScrollInProgress = listState.isScrollInProgress,
                         action = it
                     )
                 }

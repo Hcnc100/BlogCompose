@@ -76,7 +76,7 @@ class PostViewModel @Inject constructor(
 
     fun likePost(oldPost: Post, isLiked: Boolean) = viewModelScope.launch(Dispatchers.IO) {
         try {
-            val postUpdated = postRepo.updateLikePost(oldPost.id, isLiked)
+            val postUpdated = postRepo.updateLikePost(oldPost, isLiked)
             if (postUpdated != null) {
                 updateListPost(oldPost, postUpdated)
             } else {

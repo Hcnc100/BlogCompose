@@ -5,6 +5,7 @@ import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.nullpointer.blogcompose.domain.preferences.PreferencesRepoImpl
 import com.nullpointer.blogcompose.domain.toke.TokenRepoImpl
+import com.nullpointer.blogcompose.models.NotifyBasic
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -15,6 +16,13 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class MyFirebaseMessagingService : FirebaseMessagingService() {
+    companion object {
+        private const val ID_USER = "ID_USER"
+        private const val USER_URL_IMG = "USER_URL_IMG"
+        private const val NAME_USER_LIKE = "NAME_USER_LIKE"
+        private const val POST_URL_IMG = "POST_URL_IMG"
+    }
+
     @Inject
     lateinit var tokenRepoImpl: TokenRepoImpl
 
@@ -43,11 +51,11 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
     override fun onMessageReceived(message: RemoteMessage) {
         super.onMessageReceived(message)
-        val idUserChange: String? = message.data.getValue("KEY_CHANGE")
-        idUserChange?.let {
-            CoroutineScope(job).launch {
-                preferencesRepoImpl.changeData(true)
-            }
+        try {
+            val notify=NotifyBasic(message.data)
+            Timber.d("notificacion recibida $notify")
+        }catch (e:Exception){
+            Timber.e("Message $e")
         }
     }
 

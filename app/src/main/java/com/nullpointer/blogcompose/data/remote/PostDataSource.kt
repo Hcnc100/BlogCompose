@@ -1,5 +1,6 @@
 package com.nullpointer.blogcompose.data.remote
 
+import com.google.android.gms.tasks.Tasks.await
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.*
 import com.google.firebase.firestore.ktx.firestore
@@ -68,43 +69,39 @@ class PostDataSource {
     }
 
     private suspend fun isPostLiked(idPost: String): Boolean {
-        return if(InternetCheck.isNetworkAvailable()){
-            val uuid = auth.currentUser?.uid
-            val refLikePost = refLikePost.document(idPost).get().await()
-            if (!refLikePost.exists()) return false
-            val listIdLikes = refLikePost.get("likes") as List<String>
-            listIdLikes.contains(uuid)
-        }else{
+        return if (InternetCheck.isNetworkAvailable()) {
+            val uuid = auth.currentUser?.uid!!
+            val refLikePost = refLikePost.document(idPost).collection("usersLike").document(uuid)
+            refLikePost.get().await().exists()
+        } else {
             false
         }
     }
 
-    suspend fun updateLikes(idPost: String, isLiked: Boolean): Post? {
-        if(!InternetCheck.isNetworkAvailable()) return null
+    suspend fun updateLikes(post: Post, isLiked: Boolean): Post? {
+        if (!InternetCheck.isNetworkAvailable()) return null
         val increment = FieldValue.increment(1)
         val decrement = FieldValue.increment(-1)
 
-        val currentPost = refPosts.document(idPost)
-        val likePost = refLikePost.document(idPost)
+        val currentPost = refPosts.document(post.id)
+        val likePost = refLikePost.document(post.id)
         val uuid = auth.currentUser?.uid ?: ""
         var isSuccess = true
+        val refLikePost = refLikePost.document(post.id).collection("usersLike").document(uuid)
 
         database.runTransaction { transition ->
             val postSnapshot = transition.get(currentPost)
             val likesCount = postSnapshot.getLong("numberLikes")
             if (likesCount != null) {
+                if(!transition.get(likePost).exists()) {
+                    transition.set(likePost, mapOf("ownerPost" to post.poster!!.uuid))
+                }
                 if (isLiked) {
-                    if (transition.get(likePost).exists()) {
-                        transition.update(likePost, "likes", FieldValue.arrayUnion(uuid))
-                    } else {
-                        transition.set(likePost,
-                            hashMapOf("likes" to arrayListOf(uuid)),
-                            SetOptions.merge())
-                    }
+                    transition.set(refLikePost, mapOf("timestamp" to FieldValue.serverTimestamp()))
                     transition.update(currentPost, "numberLikes", increment)
                 } else {
                     transition.update(currentPost, "numberLikes", decrement)
-                    transition.update(likePost, "likes", FieldValue.arrayRemove(uuid))
+                    transition.delete(refLikePost)
                 }
             } else {
                 isSuccess = false

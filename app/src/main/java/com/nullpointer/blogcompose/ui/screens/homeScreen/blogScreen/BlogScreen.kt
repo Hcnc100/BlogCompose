@@ -19,10 +19,9 @@ fun BlogScreen(
     val resultGetPost = postVM.listPost.collectAsState()
     val postMessage = postVM.messagePost
     val scaffoldState = rememberScaffoldState()
-    val snackbarHostState=scaffoldState.snackbarHostState
     LaunchedEffect(postMessage) {
         postMessage.collect {
-            snackbarHostState.showSnackbar(it)
+            scaffoldState.snackbarHostState.showSnackbar(it)
         }
     }
 
@@ -31,8 +30,7 @@ fun BlogScreen(
         updateListPost = { postVM.fetchLastPost() },
         actionBottomReached = { },
         actionButtonAdd = actionGoToAddPost,
-        actionChangePost = postVM::likePost,
-        snackbarHostState = snackbarHostState
+        actionChangePost = postVM::likePost
     )
 }
 

@@ -29,7 +29,6 @@ fun HomeScreen(
     val navController = rememberNavController()
     val navigationItems = listOf(
         HomeDestinations.BlogScreen,
-        HomeDestinations.SearchScreen,
         HomeDestinations.NotifyScreen,
         HomeDestinations.ProfileScreen
     )

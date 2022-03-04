@@ -13,11 +13,6 @@ sealed class HomeDestinations(
         title = "Blogs",
         icon = R.drawable.ic_home
     )
-    object SearchScreen : HomeDestinations(
-        route = "SearchScreen",
-        title = "Buscar",
-        icon = R.drawable.ic_search
-    )
     object NotifyScreen : HomeDestinations(
         route = "NotifyScreen",
         title = "Notificaciones",
