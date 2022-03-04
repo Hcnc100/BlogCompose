@@ -3,35 +3,56 @@ package com.nullpointer.blogcompose.data.remote
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.*
 import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.firestore.ktx.firestoreSettings
 import com.google.firebase.ktx.Firebase
+import com.nullpointer.blogcompose.core.utils.InternetCheck
 import com.nullpointer.blogcompose.models.Post
 import kotlinx.coroutines.tasks.await
 import timber.log.Timber
 
 class PostDataSource {
-    private val refPosts = Firebase.firestore.collection("posts")
-    private val refLikePost = Firebase.firestore.collection("likePost")
     private val database = Firebase.firestore
+    private val refPosts = database.collection("posts")
+    private val refLikePost = database.collection("likePost")
     private val auth = Firebase.auth
 
-    suspend fun getLatestPost(nPosts: Int): List<Post> {
-        return refPosts.orderBy(
-            "timeStamp", Query.Direction.DESCENDING)
-            .limit(nPosts.toLong()).get().await().documents.mapNotNull {
-                transformDocumentPost(it)
-            }
+    private suspend fun getLastPost(
+        reference: CollectionReference,
+        nPosts: Int = Int.MAX_VALUE,
+        fromUserId: String? = null,
+        source: Source? = null,
+    ): List<Post> {
+        // * base query
+        var query = reference.orderBy("timeStamp", Query.Direction.DESCENDING)
+        // * filter to user or for default get all
+        if (fromUserId != null) query = query.whereEqualTo("postOwnerId", fromUserId)
+        // * limit result or for default all
+        if (nPosts != Integer.MAX_VALUE) query = query.limit(nPosts.toLong())
+
+        return query.get().await().documents.mapNotNull { transformDocumentPost(it) }
     }
 
-    suspend fun getMyLastPost(nPosts: Int) =
-        getLatestPostFrom(auth.currentUser?.uid!!, nPosts)
-
-    suspend fun getLatestPostFrom(idUser: String, nPost: Int): List<Post> {
-        return refPosts.orderBy("timeStamp", Query.Direction.DESCENDING)
-            .whereEqualTo("postOwnerId", idUser).limit(nPost.toLong()).get()
-            .await().documents.mapNotNull {
-                transformDocumentPost(it)
-            }
+    suspend fun getLatestPost(
+        nPosts: Int = Integer.MAX_VALUE,
+    ): List<Post> {
+        return getLastPost(refPosts, nPosts)
     }
+
+    suspend fun getMyLastPost(
+        nPosts: Int = Integer.MAX_VALUE,
+    ): List<Post> {
+        return getLastPost(refPosts, nPosts, auth.currentUser?.uid!!)
+    }
+
+    suspend fun getLastPostByUser(idUser: String, nPost: Int): List<Post> {
+        return getLastPost(refPosts, nPost, idUser)
+    }
+
+    suspend fun getPost(idPost: String): Post? {
+        val document = refPosts.document(idPost).get().await()
+        return transformDocumentPost(document)
+    }
+
 
     private suspend fun transformDocumentPost(documentSnapshot: DocumentSnapshot): Post? {
         return documentSnapshot.toObject(Post::class.java)?.let { post ->
@@ -47,14 +68,19 @@ class PostDataSource {
     }
 
     private suspend fun isPostLiked(idPost: String): Boolean {
-        val uuid = auth.currentUser?.uid
-        val refLikePost = refLikePost.document(idPost).get().await()
-        if (!refLikePost.exists()) return false
-        val listIdLikes = refLikePost.get("likes") as List<String>
-        return listIdLikes.contains(uuid)
+        return if(InternetCheck.isNetworkAvailable()){
+            val uuid = auth.currentUser?.uid
+            val refLikePost = refLikePost.document(idPost).get().await()
+            if (!refLikePost.exists()) return false
+            val listIdLikes = refLikePost.get("likes") as List<String>
+            listIdLikes.contains(uuid)
+        }else{
+            false
+        }
     }
 
     suspend fun updateLikes(idPost: String, isLiked: Boolean): Post? {
+        if(!InternetCheck.isNetworkAvailable()) return null
         val increment = FieldValue.increment(1)
         val decrement = FieldValue.increment(-1)
 
@@ -80,26 +106,14 @@ class PostDataSource {
                     transition.update(currentPost, "numberLikes", decrement)
                     transition.update(likePost, "likes", FieldValue.arrayRemove(uuid))
                 }
-            }else{
-                isSuccess=false
+            } else {
+                isSuccess = false
             }
         }.addOnFailureListener {
             isSuccess = false
         }.await()
 
         return if (isSuccess) transformDocumentPost(currentPost.get().await()) else null
-    }
-
-    suspend fun getPost(idPost: String): Post? {
-        val document = refPosts.document(idPost).get().await()
-        return document.toObject(Post::class.java)?.apply {
-            timeStamp = document.getTimestamp(
-                "timeStamp",
-                DocumentSnapshot.ServerTimestampBehavior.ESTIMATE
-            )?.toDate()
-//            ownerLike = listLikes.contains(auth.currentUser?.uid!!)
-            id = document.id
-        }
     }
 
     suspend fun addNewPost(post: Post) {

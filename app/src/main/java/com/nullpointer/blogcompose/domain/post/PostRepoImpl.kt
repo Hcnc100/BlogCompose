@@ -10,7 +10,7 @@ class PostRepoImpl(
         postDataSource.getLatestPost(nPost)
 
     override suspend fun getLastPostByUser(idUser: String, nPost: Int): List<Post> =
-        postDataSource.getLatestPostFrom(idUser, nPost)
+        postDataSource.getLastPostByUser(idUser, nPost)
 
     override suspend fun getMyLastPost(nPost: Int): List<Post> =
         postDataSource.getMyLastPost(nPost)

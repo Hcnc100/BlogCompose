@@ -7,10 +7,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.FloatingActionButton
-import androidx.compose.material.Icon
-import androidx.compose.material.Scaffold
-import androidx.compose.material.ScaffoldState
+import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,7 +25,8 @@ import kotlinx.coroutines.flow.collect
 @Composable
 fun ScreenSwiperPost(
     resultListPost: Resource<List<Post>>,
-    scaffoldState: ScaffoldState,
+    scaffoldState: ScaffoldState = rememberScaffoldState(),
+    snackbarHostState: SnackbarHostState,
     updateListPost: () -> Unit,
     actionBottomReached: () -> Unit,
     actionChangePost: (Post, isLiked: Boolean) -> Unit,
@@ -46,7 +44,7 @@ fun ScreenSwiperPost(
             floatingActionButton = {
                 actionButtonAdd?.let {
                     ButtonAdd(
-                        isScrollInProgress = listState.isScrollInProgress,
+                        isScrollInProgress = listState.isScrollInProgress || snackbarHostState.currentSnackbarData!=null,
                         action = it
                     )
                 }

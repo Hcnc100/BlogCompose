@@ -3,6 +3,7 @@ package com.nullpointer.blogcompose.services.uploadImg
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.widget.Toast
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.LifecycleService
@@ -10,9 +11,11 @@ import androidx.lifecycle.lifecycleScope
 import com.nullpointer.blogcompose.core.states.StorageUploadTaskResult
 import com.nullpointer.blogcompose.domain.images.ImagesRepoImpl
 import com.nullpointer.blogcompose.domain.post.PostRepoImpl
+import com.nullpointer.blogcompose.domain.preferences.PreferencesRepoImpl
 import com.nullpointer.blogcompose.models.Post
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -56,6 +59,7 @@ class UploadPostServices : LifecycleService() {
 
     @Inject
     lateinit var postRepoImpl: PostRepoImpl
+
 
     private val _stateUpload = MutableStateFlow<StorageUploadTaskResult?>(null)
     val stateUpload = _stateUpload.asStateFlow()
@@ -110,10 +114,10 @@ class UploadPostServices : LifecycleService() {
         }.collect { task ->
             when (task) {
                 is StorageUploadTaskResult.Complete.Success -> {
-                    updatePostComplete.value=true
                     servicesNotification.setProgress(100, 100, true)
                     _stateUpload.value = task
                     uploadPost(task.urlFile)
+                    updatePostComplete.value=true
                     killServices()
                 }
                 is StorageUploadTaskResult.InProgress -> {
