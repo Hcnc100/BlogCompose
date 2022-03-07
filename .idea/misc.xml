@@ -30,6 +30,7 @@
         <entry key="app/src/main/res/drawable/ic_stop.xml" value="0.136" />
         <entry key="app/src/main/res/drawable/ic_unfav.xml" value="0.136" />
         <entry key="app/src/main/res/drawable/ic_upload.xml" value="0.101" />
+        <entry key="app/src/main/res/layout/notify_liked.xml" value="0.33" />
         <entry key="app/src/main/res/xml/provider_paths.xml" value="0.10740740740740741" />
       </map>
     </option>

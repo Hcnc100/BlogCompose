@@ -93,9 +93,9 @@ class PostDataSource {
             val postSnapshot = transition.get(currentPost)
             val likesCount = postSnapshot.getLong("numberLikes")
             if (likesCount != null) {
-                if(!transition.get(likePost).exists()) {
-                    transition.set(likePost, mapOf("ownerPost" to post.poster!!.uuid))
-                }
+//                if(!transition.get(likePost).exists()) {
+//                    transition.set(likePost, mapOf("ownerPost" to post.poster!!.uuid))
+//                }
                 if (isLiked) {
                     transition.set(refLikePost, mapOf("timestamp" to FieldValue.serverTimestamp()))
                     transition.update(currentPost, "numberLikes", increment)

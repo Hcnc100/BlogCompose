@@ -3,19 +3,15 @@ package com.nullpointer.blogcompose.services.uploadImg
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.widget.Toast
 import androidx.compose.runtime.mutableStateOf
-import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
 import com.nullpointer.blogcompose.core.states.StorageUploadTaskResult
 import com.nullpointer.blogcompose.domain.images.ImagesRepoImpl
 import com.nullpointer.blogcompose.domain.post.PostRepoImpl
-import com.nullpointer.blogcompose.domain.preferences.PreferencesRepoImpl
 import com.nullpointer.blogcompose.models.Post
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -51,7 +47,7 @@ class UploadPostServices : LifecycleService() {
         val updatePostComplete = mutableStateOf(false)
     }
 
-    private val notificationHelper = NotificationHelper(this)
+    private val notifyHelper = NotificationHelper(this)
     private var jobUploadTask: Job? = null
 
     @Inject
@@ -101,11 +97,7 @@ class UploadPostServices : LifecycleService() {
     ) {
         // * change state to init upload
         _stateUpload.value = StorageUploadTaskResult.Init
-        val servicesNotification = notificationHelper.getNotificationUploadServices(
-            ID_CHANNEL_UPLOAD_POST,
-            UPLOAD_POST_CHANNEL,
-            NotificationManagerCompat.IMPORTANCE_DEFAULT,
-            ACTION_STOP)
+        val servicesNotification = notifyHelper.getNotifyUploadServices(ACTION_STOP)
         startForeground(10, servicesNotification.build())
         imagesRepoImpl.uploadImgBlog(uriImage, idPost).catch { exception ->
             // ! if has Error send error
@@ -117,7 +109,7 @@ class UploadPostServices : LifecycleService() {
                     servicesNotification.setProgress(100, 100, true)
                     _stateUpload.value = task
                     uploadPost(task.urlFile)
-                    updatePostComplete.value=true
+                    updatePostComplete.value = true
                     killServices()
                 }
                 is StorageUploadTaskResult.InProgress -> {
@@ -130,7 +122,7 @@ class UploadPostServices : LifecycleService() {
     }
 
     private fun killServices() {
-        updatePostComplete.value=false
+        updatePostComplete.value = false
         stopForeground(true)
         stopSelf()
     }
