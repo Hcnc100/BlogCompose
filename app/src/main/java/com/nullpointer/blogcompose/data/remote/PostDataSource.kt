@@ -45,7 +45,7 @@ class PostDataSource {
         return getLastPost(refPosts, nPosts, auth.currentUser?.uid!!)
     }
 
-    suspend fun getLastPostByUser(idUser: String, nPost: Int): List<Post> {
+    suspend fun getLastPostByUser(idUser: String, nPost: Int=Integer.MAX_VALUE): List<Post> {
         return getLastPost(refPosts, nPost, idUser)
     }
 

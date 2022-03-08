@@ -9,14 +9,11 @@ import com.nullpointer.blogcompose.data.local.cache.NotifyDAO
 import com.nullpointer.blogcompose.data.local.cache.PostDAO
 import com.nullpointer.blogcompose.data.remote.*
 import com.nullpointer.blogcompose.domain.auth.AuthRepoImpl
-import com.nullpointer.blogcompose.domain.auth.AuthRepository
 import com.nullpointer.blogcompose.domain.images.ImagesRepoImpl
 import com.nullpointer.blogcompose.domain.notify.NotifyRepoImpl
 import com.nullpointer.blogcompose.domain.post.PostRepoImpl
-import com.nullpointer.blogcompose.domain.post.PostRepository
 import com.nullpointer.blogcompose.domain.preferences.PreferencesRepoImpl
 import com.nullpointer.blogcompose.domain.toke.TokenRepoImpl
-import com.nullpointer.blogcompose.models.Post
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -36,7 +33,8 @@ object AppModule {
     @Singleton
     fun getPostRepository(
         postDataSource: PostDataSource,
-    ): PostRepoImpl = PostRepoImpl(postDataSource)
+        postDAO: PostDAO
+    ): PostRepoImpl = PostRepoImpl(postDataSource,postDAO)
 
 
     @Provides
@@ -107,8 +105,8 @@ object AppModule {
     @Provides
     @Singleton
     fun getNotifyDao(
-        databse: BlogDataBase,
-    ): NotifyDAO = databse.getNotifyDAO()
+        database: BlogDataBase,
+    ): NotifyDAO = database.getNotifyDAO()
 
     @Provides
     @Singleton
