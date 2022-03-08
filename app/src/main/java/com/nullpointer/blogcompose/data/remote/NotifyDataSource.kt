@@ -15,13 +15,17 @@ class NotifyDataSource {
     private val database = Firebase.firestore.collection("notifications")
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    suspend fun getListNotify() = callbackFlow<List<Notify>> {
+    suspend fun getListNotify() = callbackFlow {
         var subscribe: ListenerRegistration? = null
         try {
             val refNotify = database.document(auth.currentUser?.uid!!).collection("listNotify").orderBy("timestamp")
             subscribe = refNotify.addSnapshotListener { value, error ->
                 if (error != null) throw error
-                val list = value?.toObjects(Notify::class.java) ?: emptyList()
+                val list=value?.documents?.mapNotNull {document->
+                    document.toObject(Notify::class.java)?.apply {
+                        id=document.id
+                    }
+                } ?: emptyList()
                 trySend(list)
             }
         } catch (e: Exception) {

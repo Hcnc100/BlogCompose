@@ -1,26 +1,31 @@
 package com.nullpointer.blogcompose.models
 
 import android.os.Parcelable
+import androidx.room.Embedded
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import com.google.firebase.firestore.Exclude
 import com.google.firebase.firestore.ServerTimestamp
 import kotlinx.parcelize.Parcelize
 import java.util.*
 
-
 @Parcelize
+@Entity(tableName = "table_post")
 data class Post(
-    val description:String="",
-    val urlImage:String="",
-    val numberComments:Int=0,
-    var numberLikes:Int=0,
-    val poster: Poster?=null,
+    val description: String = "",
+    val urlImage: String = "",
+    val numberComments: Int = 0,
+    var numberLikes: Int = 0,
+    @Embedded
+    val poster: Poster? = null,
     @set:Exclude @get:Exclude
-    var ownerLike:Boolean=false,
+    var ownerLike: Boolean = false,
     @ServerTimestamp
-    var timeStamp: Date?=null,
+    var timeStamp: Date? = null,
     @set:Exclude @get:Exclude
-    var id:String=UUID.randomUUID().toString(),
-) : Parcelable{
+    @PrimaryKey
+    var id: String = UUID.randomUUID().toString(),
+) : Parcelable {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -44,7 +49,7 @@ data class Post(
 
 @Parcelize
 data class Poster(
-    val uuid:String="",
-    val name:String="",
-    val urlImg:String=""
+    val uuid: String = "",
+    val name: String = "",
+    val urlImg: String = "",
 ) : Parcelable

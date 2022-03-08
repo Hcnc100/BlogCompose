@@ -83,6 +83,13 @@ dependencies {
     androidTestImplementation "com.google.dagger:hilt-android-testing:$daggerHiltVersion"
     kaptAndroidTest "com.google.dagger:hilt-android-compiler:$daggerHiltVersion"
 
+    // * room
+    def roomVersion="2.4.1"
+    implementation "androidx.room:room-runtime:$roomVersion"
+    kapt "androidx.room:room-compiler:$roomVersion"
+    implementation "androidx.room:room-ktx:$roomVersion"
+    testImplementation "androidx.room:room-testing:$roomVersion"
+
     // * Timber
     implementation 'com.jakewharton.timber:timber:4.7.1'
     implementation 'com.orhanobut:logger:2.2.0'

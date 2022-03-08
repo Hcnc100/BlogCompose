@@ -1,8 +1,11 @@
 package com.nullpointer.blogcompose.models
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import com.google.firebase.firestore.ServerTimestamp
 import java.util.*
 
+@Entity(tableName = "table_notify")
 data class Notify(
     val idUserLiked: String="",
     val nameUserLiked: String="",
@@ -10,6 +13,8 @@ data class Notify(
     val urlImgPost: String="",
     val timestamp: Date? = null,
     val isOpen: Boolean=false,
+    @PrimaryKey
+    var id:String=""
 ) {
     constructor(map: Map<String, String>) : this(
         idUserLiked = map["idUserLiked"]!!,
