@@ -2,13 +2,11 @@ package com.nullpointer.blogcompose.inject
 
 import android.content.Context
 import com.nullpointer.blogcompose.data.local.PreferencesDataSource
-import com.nullpointer.blogcompose.data.remote.AuthDataSource
-import com.nullpointer.blogcompose.data.remote.ImagesDataSource
-import com.nullpointer.blogcompose.data.remote.PostDataSource
-import com.nullpointer.blogcompose.data.remote.TokenDataSource
+import com.nullpointer.blogcompose.data.remote.*
 import com.nullpointer.blogcompose.domain.auth.AuthRepoImpl
 import com.nullpointer.blogcompose.domain.auth.AuthRepository
 import com.nullpointer.blogcompose.domain.images.ImagesRepoImpl
+import com.nullpointer.blogcompose.domain.notify.NotifyRepoImpl
 import com.nullpointer.blogcompose.domain.post.PostRepoImpl
 import com.nullpointer.blogcompose.domain.post.PostRepository
 import com.nullpointer.blogcompose.domain.preferences.PreferencesRepoImpl
@@ -70,7 +68,7 @@ object AppModule {
     @Provides
     @Singleton
     fun providePreferencesDataSource(
-        @ApplicationContext context: Context
+        @ApplicationContext context: Context,
     ): PreferencesDataSource =
         PreferencesDataSource(context)
 
@@ -79,4 +77,15 @@ object AppModule {
     fun providePreferencesRepo(
         preferencesDataSource: PreferencesDataSource,
     ): PreferencesRepoImpl = PreferencesRepoImpl(preferencesDataSource)
+
+    @Provides
+    @Singleton
+    fun provideNotifyDatSource(): NotifyDataSource =
+        NotifyDataSource()
+
+    @Provides
+    @Singleton
+    fun provideNotifyRepo(notifyDataSource: NotifyDataSource):
+            NotifyRepoImpl = NotifyRepoImpl(notifyDataSource)
+
 }

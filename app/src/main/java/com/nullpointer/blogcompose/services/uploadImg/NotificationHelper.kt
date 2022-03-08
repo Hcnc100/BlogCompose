@@ -75,7 +75,7 @@ class NotificationHelper(context: Context) : ContextWrapper(context) {
     private fun getBaseNotificationLiked() =
         NotificationCompat.Builder(this, ID_CHANNEL_LIKE)
             .setAutoCancel(true)
-            .setOngoing(true)
+            .setOngoing(false)
             .setSmallIcon(R.drawable.ic_fav)
             .setContentTitle("pan")
 
