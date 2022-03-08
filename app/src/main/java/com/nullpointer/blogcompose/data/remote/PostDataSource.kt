@@ -84,7 +84,6 @@ class PostDataSource {
         val decrement = FieldValue.increment(-1)
 
         val currentPost = refPosts.document(post.id)
-        val likePost = refLikePost.document(post.id)
         val uuid = auth.currentUser?.uid ?: ""
         var isSuccess = true
         val refLikePost = refLikePost.document(post.id).collection("usersLike").document(uuid)

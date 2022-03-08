@@ -1,6 +1,5 @@
 package com.nullpointer.blogcompose.domain.post
 
-import android.icu.number.IntegerWidth
 import com.nullpointer.blogcompose.models.Post
 
 interface PostRepository {
