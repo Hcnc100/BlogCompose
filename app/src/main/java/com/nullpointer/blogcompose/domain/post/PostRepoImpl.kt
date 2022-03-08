@@ -17,8 +17,8 @@ class PostRepoImpl(
     override suspend fun getLastPost(inCaching:Boolean): List<Post> {
         return if (!inCaching && InternetCheck.isNetworkAvailable()) {
             postDataSource.getLatestPost().also {
-                postDAO.deleterAll()
                 val listSaved = if (it.size < SIZE_CACHE) it else it.subList(0, SIZE_CACHE)
+                postDAO.deleterAll()
                 postDAO.insertListPost(listSaved)
             }
         } else {

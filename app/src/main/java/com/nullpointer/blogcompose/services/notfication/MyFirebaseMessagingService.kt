@@ -65,23 +65,24 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             Timber.d("notificacion recibida $notify")
             CoroutineScope(job).launch {
                 notifyHelper.launchNotifyLike(
-                    bitmapPost = getBitMapUser(notify.urlImgPost,false)!!,
-                    bitmapUser = getBitMapUser("https://picsum.photos/200",true)!!,
+                    bitmapPost = getBitMapUser(notify.urlImgPost, false)!!,
+                    bitmapUser = getBitMapUser("https://picsum.photos/200", true)!!,
                     notify.nameUserLiked,
                     ""
                 )
+                preferencesRepoImpl.changeHasNotify(true)
             }
         } catch (e: Exception) {
             Timber.e("Message $e")
         }
     }
 
-    private suspend fun getBitMapUser(urlImgUser: String,circleTransform:Boolean): Bitmap? {
+    private suspend fun getBitMapUser(urlImgUser: String, circleTransform: Boolean): Bitmap? {
         val loader = ImageLoader(this)
         val request = ImageRequest.Builder(this)
             .data(urlImgUser)
             .allowHardware(false).apply {
-                if(circleTransform) this.transformations(CircleCropTransformation())
+                if (circleTransform) this.transformations(CircleCropTransformation())
             }.build()
         val result = (loader.execute(request) as SuccessResult).drawable
         return (result as BitmapDrawable).bitmap

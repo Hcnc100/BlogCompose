@@ -4,12 +4,17 @@ import com.nullpointer.blogcompose.data.local.PreferencesDataSource
 import kotlinx.coroutines.flow.Flow
 
 class PreferencesRepoImpl(
-    private val preferencesDataSource: PreferencesDataSource
+    private val preferencesDataSource: PreferencesDataSource,
 ) : PreferencesRepository {
     override val isDataChange: Flow<Boolean> =
         preferencesDataSource.isDataExternChange
+    override val hasNewNotify: Flow<Boolean> =
+        preferencesDataSource.hasReciveNotify
 
-    override suspend fun changeData(isDataChange: Boolean)=
+    override suspend fun changeData(isDataChange: Boolean) =
         preferencesDataSource.changeIsDataExternChange(isDataChange)
+
+    override suspend fun changeHasNotify(isHasNotify: Boolean) =
+        preferencesDataSource.changeReciveNotify(isHasNotify)
 
 }

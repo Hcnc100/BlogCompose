@@ -11,6 +11,12 @@ interface NotifyDAO {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertNotify(notify: Notify)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertListNotify(list: List<Notify>)
+
     @Query("DELETE FROM table_notify")
     suspend fun deleterAll()
+
+    @Query("SELECT * FROM table_notify")
+    suspend fun getAllNotify(): List<Notify>
 }

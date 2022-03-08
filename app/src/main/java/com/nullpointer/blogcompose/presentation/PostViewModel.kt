@@ -38,7 +38,7 @@ class PostViewModel @Inject constructor(
     fun fetchLastPost() = viewModelScope.launch(Dispatchers.IO) {
         _listPost.value = Resource.Loading()
         _listPost.value = try {
-            Resource.Success(postRepo.getLastPost())
+            Resource.Success(postRepo.getLastPost(false))
         } catch (e: Exception) {
             Timber.e(e)
             Resource.Failure(e)
@@ -48,7 +48,7 @@ class PostViewModel @Inject constructor(
     fun fetchMyLastPost() = viewModelScope.launch {
         _listMyPost.value = Resource.Loading()
         _listMyPost.value = try {
-            Resource.Success(postRepo.getMyLastPost())
+            Resource.Success(postRepo.getMyLastPost("",false))
         } catch (e: Exception) {
             Resource.Failure(e)
         }

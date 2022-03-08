@@ -33,8 +33,8 @@ object AppModule {
     @Singleton
     fun getPostRepository(
         postDataSource: PostDataSource,
-        postDAO: PostDAO
-    ): PostRepoImpl = PostRepoImpl(postDataSource,postDAO)
+        postDAO: PostDAO,
+    ): PostRepoImpl = PostRepoImpl(postDataSource, postDAO)
 
 
     @Provides
@@ -89,8 +89,10 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideNotifyRepo(notifyDataSource: NotifyDataSource):
-            NotifyRepoImpl = NotifyRepoImpl(notifyDataSource)
+    fun provideNotifyRepo(
+        notifyDataSource: NotifyDataSource,
+        notifyDAO: NotifyDAO,
+    ): NotifyRepoImpl = NotifyRepoImpl(notifyDataSource, notifyDAO)
 
     @Provides
     @Singleton
