@@ -5,6 +5,7 @@ import com.google.firebase.firestore.*
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.nullpointer.blogcompose.core.utils.InternetCheck
+import com.nullpointer.blogcompose.core.utils.NetworkException
 import com.nullpointer.blogcompose.models.Post
 import kotlinx.coroutines.tasks.await
 
@@ -87,7 +88,7 @@ class PostDataSource {
     }
 
     suspend fun updateLikes(post: Post, isLiked: Boolean): Post? {
-        if (!InternetCheck.isNetworkAvailable()) return null
+        if (!InternetCheck.isNetworkAvailable()) throw NetworkException()
         val increment = FieldValue.increment(1)
         val decrement = FieldValue.increment(-1)
 
@@ -100,9 +101,6 @@ class PostDataSource {
             val postSnapshot = transition.get(currentPost)
             val likesCount = postSnapshot.getLong("numberLikes")
             if (likesCount != null) {
-//                if(!transition.get(likePost).exists()) {
-//                    transition.set(likePost, mapOf("ownerPost" to post.poster!!.uuid))
-//                }
                 if (isLiked) {
                     transition.set(refLikePost, mapOf("timestamp" to FieldValue.serverTimestamp()))
                     transition.update(currentPost, "numberLikes", increment)

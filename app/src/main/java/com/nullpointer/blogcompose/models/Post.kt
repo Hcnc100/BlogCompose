@@ -47,9 +47,3 @@ data class Post(
     }
 }
 
-@Parcelize
-data class Poster(
-    val uuid: String = "",
-    val name: String = "",
-    val urlImg: String = "",
-) : Parcelable

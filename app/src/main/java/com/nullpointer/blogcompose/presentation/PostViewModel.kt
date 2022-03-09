@@ -105,6 +105,21 @@ class PostViewModel @Inject constructor(
         }
     }
 
+    fun likePost(oldPost: Post, isLiked: Boolean) = viewModelScope.launch(Dispatchers.IO) {
+        try {
+            postRepo.updateLikePost(oldPost, isLiked)
+        } catch (e: Exception) {
+            when (e) {
+                is CancellationException -> throw e
+                is NetworkException -> _messagePost.send("Necesita conexion para esto")
+                else -> {
+                    Timber.d("Erro al dar like $e")
+                    _messagePost.send("Error desconocido")
+                }
+            }
+        }
+    }
+
 //    fun fetchLastPost() = viewModelScope.launch(Dispatchers.IO) {
 //        _listPost.value = Resource.Loading()
 //        _listPost.value = try {

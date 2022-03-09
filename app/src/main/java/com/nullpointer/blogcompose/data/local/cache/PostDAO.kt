@@ -28,6 +28,9 @@ interface PostDAO {
     @Query("SELECT * FROM table_post ORDER BY timeStamp DESC LIMIT 1")
     suspend fun getFirstPost():Post?
 
+    @Query("SELECT * FROM table_post ORDER BY timeStamp LIMIT 1")
+    suspend fun getLastPost():Post?
+
     @Query("SELECT * FROM table_post WHERE uuid = :idUser")
     suspend fun getPostByUser(idUser: String): List<Post>
 

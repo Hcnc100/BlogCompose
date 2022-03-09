@@ -6,7 +6,7 @@ import com.nullpointer.blogcompose.data.local.cache.PostDAO
 import com.nullpointer.blogcompose.data.remote.PostDataSource
 import com.nullpointer.blogcompose.models.Post
 import kotlinx.coroutines.flow.Flow
-import timber.log.Timber
+import java.lang.Exception
 
 class PostRepoImpl(
     private val postDataSource: PostDataSource,
@@ -18,31 +18,28 @@ class PostRepoImpl(
         private const val SIZE_POST_REQUEST = 5
     }
 
-    private var lastIdPost: String? = null
-
     suspend fun requestNewPost(): Int {
-        if(!InternetCheck.isNetworkAvailable()) throw NetworkException()
-        postDataSource.getLatestPost(SIZE_POST_REQUEST, beforeId = postDAO.getFirstPost()?.id).also {
-            if(it.isNotEmpty()){
-                postDAO.deleterAll()
-                postDAO.insertListPost(it)
-                if (it.isNotEmpty()) lastIdPost = it.last().id
+        if (!InternetCheck.isNetworkAvailable()) throw NetworkException()
+        postDataSource.getLatestPost(SIZE_POST_REQUEST, beforeId = postDAO.getFirstPost()?.id)
+            .also {
+                if (it.isNotEmpty()) {
+                    postDAO.deleterAll()
+                    postDAO.insertListPost(it)
+                }
+                return it.size
             }
-            return it.size
-        }
     }
 
     suspend fun concatenatePost(): Int {
-        if(!InternetCheck.isNetworkAvailable()) throw NetworkException()
-        postDataSource.getLatestPost(SIZE_POST_REQUEST, afterId = lastIdPost).also {
+        if (!InternetCheck.isNetworkAvailable()) throw NetworkException()
+        postDataSource.getLatestPost(SIZE_POST_REQUEST, afterId = postDAO.getLastPost()?.id).also {
             postDAO.insertListPost(it)
-            if (it.isNotEmpty()) lastIdPost = it.last().id
             return it.size
         }
     }
 
 
-    override  fun getLastPost(inCaching: Boolean): Flow<List<Post>> {
+    override fun getLastPost(inCaching: Boolean): Flow<List<Post>> {
         return postDAO.getAllPost()
     }
 
@@ -62,9 +59,13 @@ class PostRepoImpl(
         }
     }
 
-    override suspend fun updateLikePost(post: Post, isLiked: Boolean): Post? {
-        return postDataSource.updateLikes(post, isLiked)?.also {
-            postDAO.updatePost(it)
+    override suspend fun updateLikePost(oldPost: Post, isLiked: Boolean) {
+        try {
+            val postUpdate = postDataSource.updateLikes(oldPost, isLiked)!!
+            postDAO.updatePost(postUpdate)
+        } catch (e: Exception) {
+            postDAO.updatePost(oldPost)
+            throw e
         }
     }
 
