@@ -2,6 +2,7 @@ package com.nullpointer.blogcompose.data.local.cache
 
 import androidx.room.*
 import com.nullpointer.blogcompose.models.Post
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface PostDAO {
@@ -18,11 +19,14 @@ interface PostDAO {
     @Query("DELETE FROM table_post")
     suspend fun deleterAll()
 
-    @Query("SELECT * FROM table_post")
-    suspend fun getAllPost(): List<Post>
+    @Query("SELECT * FROM table_post ORDER BY timeStamp DESC")
+     fun getAllPost(): Flow<List<Post>>
 
     @Query("SELECT * FROM table_post WHERE id = :idPost")
     suspend fun getPostById(idPost: String): Post?
+
+    @Query("SELECT * FROM table_post ORDER BY timeStamp DESC LIMIT 1")
+    suspend fun getFirstPost():Post?
 
     @Query("SELECT * FROM table_post WHERE uuid = :idUser")
     suspend fun getPostByUser(idUser: String): List<Post>

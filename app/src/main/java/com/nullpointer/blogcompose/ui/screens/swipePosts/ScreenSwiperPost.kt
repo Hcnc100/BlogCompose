@@ -2,7 +2,7 @@ package com.nullpointer.blogcompose.ui.screens.swipePosts
 
 import androidx.compose.animation.*
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -25,6 +25,8 @@ import kotlinx.coroutines.flow.collect
 @Composable
 fun ScreenSwiperPost(
     resultListPost: Resource<List<Post>>,
+    isLoadNewData: Boolean,
+    isConcatenateData: Boolean = false,
     scaffoldState: ScaffoldState = rememberScaffoldState(),
     updateListPost: () -> Unit,
     actionBottomReached: () -> Unit,
@@ -35,7 +37,7 @@ fun ScreenSwiperPost(
     val listState = rememberLazyListState()
 
     SwipeRefresh(
-        state = SwipeRefreshState(resultListPost is Resource.Loading),
+        state = SwipeRefreshState(isLoadNewData),
         onRefresh = { updateListPost() }
     ) {
         Scaffold(
@@ -55,7 +57,8 @@ fun ScreenSwiperPost(
                     listState = listState,
                     actionBottomReached = actionBottomReached,
                     header = header,
-                    actionChangePost = actionChangePost
+                    actionChangePost = actionChangePost,
+                    isConcatenateData = isConcatenateData
                 )
             }
         }
@@ -69,6 +72,8 @@ fun ListInfinitePost(
     actionChangePost: (Post, isLiked: Boolean) -> Unit,
     header: (@Composable () -> Unit)? = null,
     actionBottomReached: () -> Unit,
+    isConcatenateData: Boolean,
+    buffer:Int=0
 ) {
     LazyColumn(state = listState) {
         header?.let {
@@ -77,8 +82,26 @@ fun ListInfinitePost(
         items(listPost.size) { index ->
             BlogItem(listPost[index], actionChangePost)
         }
+
+            item {
+                AnimatedVisibility(
+                    visible = isConcatenateData && listPost.isNotEmpty(),
+                    enter = expandVertically(),
+                    exit = shrinkVertically()
+                ){
+                    Box(modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 20.dp),
+                        contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator()
+                    }
+                }
+
+            }
+
+
     }
-    listState.OnBottomReached(3) {
+    listState.OnBottomReached(buffer) {
         actionBottomReached()
     }
 }

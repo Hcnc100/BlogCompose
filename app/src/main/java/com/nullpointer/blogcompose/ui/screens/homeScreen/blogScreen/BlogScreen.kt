@@ -5,8 +5,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.presentation.PostViewModel
-import com.nullpointer.blogcompose.services.uploadImg.UploadPostServices
 import com.nullpointer.blogcompose.ui.screens.swipePosts.ScreenSwiperPost
 import kotlinx.coroutines.flow.collect
 
@@ -15,8 +15,10 @@ fun BlogScreen(
     postVM: PostViewModel = hiltViewModel(),
     actionGoToAddPost: () -> Unit,
 ) {
-    if (UploadPostServices.updatePostComplete.value) postVM.fetchLastPost()
+//    if (UploadPostServices.updatePostComplete.value) postVM.fetchLastPost()
     val resultGetPost = postVM.listPost.collectAsState()
+    val stateLoading = postVM.stateLoad.collectAsState()
+    val stateConcatenate = postVM.stateConcatenate.collectAsState()
     val postMessage = postVM.messagePost
     val scaffoldState = rememberScaffoldState()
     LaunchedEffect(postMessage) {
@@ -27,10 +29,12 @@ fun BlogScreen(
 
     ScreenSwiperPost(resultListPost = resultGetPost.value,
         scaffoldState = scaffoldState,
-        updateListPost = { postVM.fetchLastPost() },
-        actionBottomReached = { },
+        updateListPost = { postVM.requestNewPost() },
+        actionBottomReached = {postVM.concatenatePost() },
         actionButtonAdd = actionGoToAddPost,
-        actionChangePost = postVM::likePost
+        actionChangePost = { _, _ ->  },
+        isLoadNewData = stateLoading.value is Resource.Loading,
+        isConcatenateData = stateConcatenate.value is Resource.Loading
     )
 }
 

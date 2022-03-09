@@ -1,15 +1,12 @@
 package com.nullpointer.blogcompose.data.remote
 
-import com.google.android.gms.tasks.Tasks.await
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.*
 import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.firestore.ktx.firestoreSettings
 import com.google.firebase.ktx.Firebase
 import com.nullpointer.blogcompose.core.utils.InternetCheck
 import com.nullpointer.blogcompose.models.Post
 import kotlinx.coroutines.tasks.await
-import timber.log.Timber
 
 class PostDataSource {
     private val database = Firebase.firestore
@@ -20,23 +17,34 @@ class PostDataSource {
     private suspend fun getLastPost(
         reference: CollectionReference,
         nPosts: Int = Int.MAX_VALUE,
+        afterId: String? = null,
+        beforeId: String? = null,
         fromUserId: String? = null,
-        source: Source? = null,
     ): List<Post> {
         // * base query
         var query = reference.orderBy("timeStamp", Query.Direction.DESCENDING)
         // * filter to user or for default get all
         if (fromUserId != null) query = query.whereEqualTo("postOwnerId", fromUserId)
+        // * get documents after that
+        if (afterId != null) {
+            val lastDocument = refPosts.document(afterId).get(Source.CACHE).await()
+            query=query.startAfter(lastDocument)
+        }
+        if (beforeId != null) {
+            val lastDocument = refPosts.document(beforeId).get(Source.CACHE).await()
+            query=query.endBefore(lastDocument)
+        }
         // * limit result or for default all
         if (nPosts != Integer.MAX_VALUE) query = query.limit(nPosts.toLong())
-
-        return query.get().await().documents.mapNotNull { transformDocumentPost(it) }
+        return query.get(Source.SERVER).await().documents.mapNotNull { transformDocumentPost(it) }
     }
 
     suspend fun getLatestPost(
         nPosts: Int = Integer.MAX_VALUE,
+        afterId: String? = null,
+        beforeId: String? = null,
     ): List<Post> {
-        return getLastPost(refPosts, nPosts)
+        return getLastPost(refPosts, nPosts, afterId = afterId, beforeId = beforeId)
     }
 
     suspend fun getMyLastPost(
@@ -45,7 +53,7 @@ class PostDataSource {
         return getLastPost(refPosts, nPosts, auth.currentUser?.uid!!)
     }
 
-    suspend fun getLastPostByUser(idUser: String, nPost: Int=Integer.MAX_VALUE): List<Post> {
+    suspend fun getLastPostByUser(idUser: String, nPost: Int = Integer.MAX_VALUE): List<Post> {
         return getLastPost(refPosts, nPost, idUser)
     }
 

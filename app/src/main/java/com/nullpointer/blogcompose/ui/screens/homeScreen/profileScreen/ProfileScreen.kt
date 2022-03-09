@@ -28,17 +28,17 @@ fun ProfileScreen(
     authViewModel: AuthViewModel = hiltViewModel(),
     postViewModel: PostViewModel = hiltViewModel(),
 ) {
-    val listMyPost = postViewModel.listMyPost.collectAsState()
-    val scaffoldState = rememberScaffoldState()
-
-    ScreenSwiperPost(resultListPost = listMyPost.value,
-        scaffoldState = scaffoldState,
-        updateListPost = { postViewModel.fetchMyLastPost() },
-        actionBottomReached = {  },
-        actionChangePost = postViewModel::likePost,
-    ) {
-        HeaderProfile(urlImgProfile = authViewModel.photoUser)
-    }
+//    val listMyPost = postViewModel.listMyPost.collectAsState()
+//    val scaffoldState = rememberScaffoldState()
+//
+//    ScreenSwiperPost(resultListPost = listMyPost.value,
+//        scaffoldState = scaffoldState,
+//        updateListPost = { postViewModel.fetchMyLastPost() },
+//        actionBottomReached = {  },
+//        actionChangePost = postViewModel::likePost,
+//    ) {
+//        HeaderProfile(urlImgProfile = authViewModel.photoUser)
+//    }
 }
 
 @Composable

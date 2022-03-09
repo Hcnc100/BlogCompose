@@ -1,9 +1,12 @@
 package com.nullpointer.blogcompose.domain.post
 
 import com.nullpointer.blogcompose.core.utils.InternetCheck
+import com.nullpointer.blogcompose.core.utils.NetworkException
 import com.nullpointer.blogcompose.data.local.cache.PostDAO
 import com.nullpointer.blogcompose.data.remote.PostDataSource
 import com.nullpointer.blogcompose.models.Post
+import kotlinx.coroutines.flow.Flow
+import timber.log.Timber
 
 class PostRepoImpl(
     private val postDataSource: PostDataSource,
@@ -11,33 +14,50 @@ class PostRepoImpl(
 ) : PostRepository {
 
     companion object {
-        private const val SIZE_CACHE = 20
+        private const val SIZE_CACHE = 5
+        private const val SIZE_POST_REQUEST = 5
     }
 
-    override suspend fun getLastPost(inCaching:Boolean): List<Post> {
-        return if (!inCaching && InternetCheck.isNetworkAvailable()) {
-            postDataSource.getLatestPost().also {
-                val listSaved = if (it.size < SIZE_CACHE) it else it.subList(0, SIZE_CACHE)
+    private var lastIdPost: String? = null
+
+    suspend fun requestNewPost(): Int {
+        if(!InternetCheck.isNetworkAvailable()) throw NetworkException()
+        postDataSource.getLatestPost(SIZE_POST_REQUEST, beforeId = postDAO.getFirstPost()?.id).also {
+            if(it.isNotEmpty()){
                 postDAO.deleterAll()
-                postDAO.insertListPost(listSaved)
+                postDAO.insertListPost(it)
+                if (it.isNotEmpty()) lastIdPost = it.last().id
             }
-        } else {
-            postDAO.getAllPost()
+            return it.size
         }
     }
 
-    override suspend fun getLastPostByUser(idUser: String, inCaching:Boolean): List<Post> {
-        return if(!inCaching && InternetCheck.isNetworkAvailable()){
+    suspend fun concatenatePost(): Int {
+        if(!InternetCheck.isNetworkAvailable()) throw NetworkException()
+        postDataSource.getLatestPost(SIZE_POST_REQUEST, afterId = lastIdPost).also {
+            postDAO.insertListPost(it)
+            if (it.isNotEmpty()) lastIdPost = it.last().id
+            return it.size
+        }
+    }
+
+
+    override  fun getLastPost(inCaching: Boolean): Flow<List<Post>> {
+        return postDAO.getAllPost()
+    }
+
+    override suspend fun getLastPostByUser(idUser: String, inCaching: Boolean): List<Post> {
+        return if (!inCaching && InternetCheck.isNetworkAvailable()) {
             postDataSource.getLastPostByUser(idUser)
-        }else{
+        } else {
             postDAO.getPostByUser(idUser)
         }
     }
 
-    override suspend fun getMyLastPost(idUser: String, inCaching:Boolean): List<Post> {
-        return if(!inCaching && InternetCheck.isNetworkAvailable()){
+    override suspend fun getMyLastPost(idUser: String, inCaching: Boolean): List<Post> {
+        return if (!inCaching && InternetCheck.isNetworkAvailable()) {
             postDataSource.getMyLastPost()
-        }else{
+        } else {
             postDAO.getPostByUser(idUser)
         }
     }
