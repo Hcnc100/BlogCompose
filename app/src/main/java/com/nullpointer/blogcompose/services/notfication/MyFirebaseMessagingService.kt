@@ -8,6 +8,7 @@ import coil.request.SuccessResult
 import coil.transform.CircleCropTransformation
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
+import com.nullpointer.blogcompose.domain.notify.NotifyRepoImpl
 import com.nullpointer.blogcompose.domain.preferences.PreferencesRepoImpl
 import com.nullpointer.blogcompose.domain.toke.TokenRepoImpl
 import com.nullpointer.blogcompose.models.Notify
@@ -22,18 +23,11 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class MyFirebaseMessagingService : FirebaseMessagingService() {
-    companion object {
-        private const val ID_USER = "ID_USER"
-        private const val USER_URL_IMG = "USER_URL_IMG"
-        private const val NAME_USER_LIKE = "NAME_USER_LIKE"
-        private const val POST_URL_IMG = "POST_URL_IMG"
-    }
-
     @Inject
     lateinit var tokenRepoImpl: TokenRepoImpl
 
     @Inject
-    lateinit var preferencesRepoImpl: PreferencesRepoImpl
+    lateinit var notifyRepoImpl: NotifyRepoImpl
 
     private val job = SupervisorJob()
 
@@ -70,7 +64,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
                     notify.nameUserLiked,
                     ""
                 )
-                preferencesRepoImpl.changeHasNotify(true)
+                notifyRepoImpl.requestLastNotify()
             }
         } catch (e: Exception) {
             Timber.e("Message $e")

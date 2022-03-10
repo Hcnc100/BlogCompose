@@ -31,7 +31,7 @@ class NotifyViewModel @Inject constructor(
     val stateRequest= _stateRequestData.asStateFlow()
 
     private val _messageNotify = Channel<String>()
-    val messagePost = _messageNotify.receiveAsFlow()
+    val messageNotify = _messageNotify.receiveAsFlow()
 
     val listNotify = flow<Resource<List<Notify>>> {
         notifyRepoImpl.getAllNotifications().collect {
