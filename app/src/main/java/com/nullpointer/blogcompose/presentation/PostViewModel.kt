@@ -1,9 +1,7 @@
 package com.nullpointer.blogcompose.presentation
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.nullpointer.blogcompose.core.delegates.SavableProperty
 import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.core.utils.NetworkException
 import com.nullpointer.blogcompose.domain.post.PostRepoImpl
@@ -62,7 +60,7 @@ class PostViewModel @Inject constructor(
         jobRequestNew = viewModelScope.launch {
             _stateLoadData.value = Resource.Loading()
             try {
-                val sizeNewPost = postRepo.requestNewPost()
+                val sizeNewPost = postRepo.requestLastPost()
                 if (sizeNewPost == 0) {
                     _messagePost.trySend("Es todo, no hay post nuevos")
                 } else {
@@ -107,7 +105,7 @@ class PostViewModel @Inject constructor(
 
     fun likePost(oldPost: Post, isLiked: Boolean) = viewModelScope.launch(Dispatchers.IO) {
         try {
-            postRepo.updateLikePost(oldPost, isLiked)
+            postRepo.updateLikePost(oldPost.id, isLiked)
         } catch (e: Exception) {
             when (e) {
                 is CancellationException -> throw e

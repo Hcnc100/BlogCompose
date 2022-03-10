@@ -2,27 +2,27 @@ package com.nullpointer.blogcompose.data.local.cache
 
 import androidx.room.*
 import com.nullpointer.blogcompose.models.Post
+import com.nullpointer.blogcompose.models.MyPost
 import kotlinx.coroutines.flow.Flow
 
 @Dao
-interface PostDAO {
+interface MyPostDAO {
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertPost(post: MyPost)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertPost(post: Post)
+    suspend fun insertListPost(list: List<MyPost>)
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertListPost(list: List<Post>)
-
-    @Update
-    suspend fun updatePost(post: Post)
-
-    @Query("SELECT * FROM table_post WHERE id = :idPost")
+    @Query("SELECT * FROM table_my_post WHERE id = :idPost")
     suspend fun getPostById(idPost: String): Post?
 
-    @Query("DELETE FROM table_post")
+    @Update
+    suspend fun updatePost(post: MyPost)
+
+    @Query("DELETE FROM table_my_post")
     suspend fun deleterAll()
 
-    @Query("SELECT * FROM table_post ORDER BY timeStamp DESC")
+    @Query("SELECT * FROM table_my_post ORDER BY timeStamp DESC")
     fun getAllPost(): Flow<List<Post>>
 
     @Query("SELECT * FROM table_post ORDER BY timeStamp DESC LIMIT 1")
@@ -31,6 +31,6 @@ interface PostDAO {
     @Query("SELECT * FROM table_post ORDER BY timeStamp LIMIT 1")
     suspend fun getLastPost(): Post?
 
-    @Query("SELECT EXISTS(SELECT * FROM table_post WHERE id = :idPost)")
-    fun isPostExist(idPost: String): Boolean
+    @Query("SELECT EXISTS(SELECT * FROM table_my_post WHERE id = :idPost)")
+    fun isPostExist(idPost : String) : Boolean
 }

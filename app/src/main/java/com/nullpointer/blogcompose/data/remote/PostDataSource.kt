@@ -87,15 +87,14 @@ class PostDataSource {
         }
     }
 
-    suspend fun updateLikes(post: Post, isLiked: Boolean): Post? {
-        if (!InternetCheck.isNetworkAvailable()) throw NetworkException()
+    suspend fun updateLikes(idPost: String, isLiked: Boolean): Post? {
         val increment = FieldValue.increment(1)
         val decrement = FieldValue.increment(-1)
 
-        val currentPost = refPosts.document(post.id)
+        val currentPost = refPosts.document(idPost)
         val uuid = auth.currentUser?.uid ?: ""
         var isSuccess = true
-        val refLikePost = refLikePost.document(post.id).collection("usersLike").document(uuid)
+        val refLikePost = refLikePost.document(idPost).collection("usersLike").document(uuid)
 
         database.runTransaction { transition ->
             val postSnapshot = transition.get(currentPost)

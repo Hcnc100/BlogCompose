@@ -5,6 +5,7 @@ import androidx.room.Room
 import com.nullpointer.blogcompose.data.local.PreferencesDataSource
 import com.nullpointer.blogcompose.data.local.cache.BlogDataBase
 import com.nullpointer.blogcompose.data.local.cache.BlogDataBase.Companion.BLOG_DATABASE
+import com.nullpointer.blogcompose.data.local.cache.MyPostDAO
 import com.nullpointer.blogcompose.data.local.cache.NotifyDAO
 import com.nullpointer.blogcompose.data.local.cache.PostDAO
 import com.nullpointer.blogcompose.data.remote.*
@@ -34,7 +35,8 @@ object AppModule {
     fun getPostRepository(
         postDataSource: PostDataSource,
         postDAO: PostDAO,
-    ): PostRepoImpl = PostRepoImpl(postDataSource, postDAO)
+        myPostDAO: MyPostDAO
+    ): PostRepoImpl = PostRepoImpl(postDataSource, postDAO,myPostDAO)
 
 
     @Provides
@@ -115,5 +117,11 @@ object AppModule {
     fun getPostDao(
         database: BlogDataBase,
     ): PostDAO = database.getPostDAO()
+
+    @Provides
+    @Singleton
+    fun getMyPost(
+        database: BlogDataBase
+    ):MyPostDAO = database.getMyPostDAO()
 
 }
