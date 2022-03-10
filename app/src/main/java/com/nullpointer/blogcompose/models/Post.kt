@@ -12,18 +12,18 @@ import java.util.*
 @Parcelize
 @Entity(tableName = "table_post")
 data class Post(
-    val description: String = "",
-    val urlImage: String = "",
-    val numberComments: Int = 0,
-    var numberLikes: Int = 0,
+    override var description: String = "",
+    override var urlImage: String = "",
+    override var numberComments: Int = 0,
+    override var numberLikes: Int = 0,
     @Embedded
-    val poster: Poster? = null,
+    override var poster: Poster? = null,
     @set:Exclude @get:Exclude
-    var ownerLike: Boolean = false,
+    override var ownerLike: Boolean = false,
     @ServerTimestamp
-    var timeStamp: Date? = null,
+    override var timeStamp: Date? = null,
     @set:Exclude @get:Exclude
     @PrimaryKey
-    var id: String = UUID.randomUUID().toString(),
-) : Parcelable
+    override var id: String = UUID.randomUUID().toString(),
+) : Parcelable,SimplePost
 

@@ -18,19 +18,21 @@ import com.google.accompanist.swiperefresh.SwipeRefreshState
 import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.models.Post
+import com.nullpointer.blogcompose.models.SimplePost
 import com.nullpointer.blogcompose.ui.screens.homeScreen.blogScreen.componets.BlogItem
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.flow.collect
 
 @Composable
 fun ScreenSwiperPost(
-    resultListPost: Resource<List<Post>>,
+    resultListPost: Resource<List<SimplePost>>,
     isLoadNewData: Boolean,
     isConcatenateData: Boolean = false,
     scaffoldState: ScaffoldState = rememberScaffoldState(),
     updateListPost: () -> Unit,
     actionBottomReached: () -> Unit,
-    actionChangePost: (Post, isLiked: Boolean) -> Unit,
+    actionChangePost: (String,Boolean) -> Unit,
+    staticInfo:Pair<String,String>? = null,
     actionButtonAdd: (() -> Unit)? = null,
     header: @Composable (() -> Unit)? = null,
 ) {
@@ -58,7 +60,8 @@ fun ScreenSwiperPost(
                     actionBottomReached = actionBottomReached,
                     header = header,
                     actionChangePost = actionChangePost,
-                    isConcatenateData = isConcatenateData
+                    isConcatenateData = isConcatenateData,
+                    staticInfo = staticInfo
                 )
             }
         }
@@ -67,20 +70,21 @@ fun ScreenSwiperPost(
 
 @Composable
 fun ListInfinitePost(
-    listPost: List<Post>,
+    listPost: List<SimplePost>,
     listState: LazyListState,
-    actionChangePost: (Post, isLiked: Boolean) -> Unit,
+    actionChangePost: (String,Boolean) -> Unit,
     header: (@Composable () -> Unit)? = null,
     actionBottomReached: () -> Unit,
     isConcatenateData: Boolean,
-    buffer:Int=0
+    buffer:Int=0,
+    staticInfo:Pair<String,String>? = null
 ) {
     LazyColumn(state = listState) {
         header?.let {
             item { it() }
         }
         items(listPost.size) { index ->
-            BlogItem(listPost[index], actionChangePost)
+            BlogItem(listPost[index], actionChangePost,staticInfo)
         }
 
             item {

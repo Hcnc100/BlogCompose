@@ -4,5 +4,7 @@ import com.nullpointer.blogcompose.models.Notify
 import kotlinx.coroutines.flow.Flow
 
 interface NotifyRepository {
-    suspend fun getNotify(inCaching:Boolean): List<Notify>
+    suspend fun requestLastNotify(): Int
+    suspend fun concatenateNotify(): Int
+    fun getAllNotifications(): Flow<List<Notify>>
 }

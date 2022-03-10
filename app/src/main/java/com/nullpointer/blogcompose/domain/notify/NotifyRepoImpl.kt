@@ -1,9 +1,9 @@
 package com.nullpointer.blogcompose.domain.notify
 
 import com.nullpointer.blogcompose.core.utils.InternetCheck
+import com.nullpointer.blogcompose.core.utils.NetworkException
 import com.nullpointer.blogcompose.data.local.cache.NotifyDAO
 import com.nullpointer.blogcompose.data.remote.NotifyDataSource
-import com.nullpointer.blogcompose.domain.preferences.PreferencesRepoImpl
 import com.nullpointer.blogcompose.models.Notify
 import kotlinx.coroutines.flow.Flow
 import timber.log.Timber
@@ -13,22 +13,36 @@ class NotifyRepoImpl(
     private val notifyDAO: NotifyDAO,
 ) : NotifyRepository {
     companion object {
-        private const val SIZE_CACHING = 20
+        private const val SIZE_NOTIFY_REQUEST = 10
     }
 
-    override suspend fun getNotify(inCaching: Boolean): List<Notify> {
-        return if (!inCaching && InternetCheck.isNetworkAvailable()) {
-            notifyDataSource.getListNotify().also {
-                Timber.d("Notificaciones obtenidas del server ${it.size}")
-                val listSave = if (it.size < SIZE_CACHING) it else it.subList(0, SIZE_CACHING)
+    override suspend fun requestLastNotify(): Int {
+        if (!InternetCheck.isNetworkAvailable()) throw NetworkException()
+        notifyDataSource.getLastNotifications(
+            nNotify= SIZE_NOTIFY_REQUEST,
+            afterId = notifyDAO.getFirstNotify()?.id).let {
+            if (it.isNotEmpty()) {
                 notifyDAO.deleterAll()
-                notifyDAO.insertListNotify(listSave)
+                notifyDAO.insertListNotify(it)
             }
-        } else {
-            Timber.d("Notificaciones obtenidas del cache")
-            notifyDAO.getAllNotify()
+            return it.size
         }
-
     }
+
+    override suspend fun concatenateNotify(): Int {
+        if (!InternetCheck.isNetworkAvailable()) throw NetworkException()
+        notifyDataSource.getLastNotifications(
+            nNotify = SIZE_NOTIFY_REQUEST,
+            afterId = notifyDAO.getLastNotify()?.id
+        ).let {
+            if (it.isNotEmpty()) {
+                notifyDAO.insertListNotify(it)
+            }
+            return it.size
+        }
+    }
+
+    override fun getAllNotifications(): Flow<List<Notify>> =
+        notifyDAO.getAllNotify()
 
 }

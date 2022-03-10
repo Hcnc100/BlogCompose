@@ -16,28 +16,29 @@ class PostDataSource {
     private val auth = Firebase.auth
 
     private suspend fun getLastPost(
-        reference: CollectionReference,
         nPosts: Int = Int.MAX_VALUE,
         afterId: String? = null,
         beforeId: String? = null,
         fromUserId: String? = null,
     ): List<Post> {
         // * base query
-        var query = reference.orderBy("timeStamp", Query.Direction.DESCENDING)
+        var query = refPosts.orderBy("timeStamp", Query.Direction.DESCENDING)
         // * filter to user or for default get all
-        if (fromUserId != null) query = query.whereEqualTo("postOwnerId", fromUserId)
+        if (fromUserId != null) query = query.whereEqualTo("poster.uuid", fromUserId)
         // * get documents after that
         if (afterId != null) {
             val lastDocument = refPosts.document(afterId).get(Source.CACHE).await()
-            query=query.startAfter(lastDocument)
+            query = query.startAfter(lastDocument)
         }
         if (beforeId != null) {
             val lastDocument = refPosts.document(beforeId).get(Source.CACHE).await()
-            query=query.endBefore(lastDocument)
+            query = query.endBefore(lastDocument)
         }
         // * limit result or for default all
         if (nPosts != Integer.MAX_VALUE) query = query.limit(nPosts.toLong())
-        return query.get(Source.SERVER).await().documents.mapNotNull { transformDocumentPost(it) }
+        return query.get(Source.SERVER).await().documents.mapNotNull {
+            transformDocumentPost(it)
+        }
     }
 
     suspend fun getLatestPost(
@@ -45,17 +46,26 @@ class PostDataSource {
         afterId: String? = null,
         beforeId: String? = null,
     ): List<Post> {
-        return getLastPost(refPosts, nPosts, afterId = afterId, beforeId = beforeId)
+        return getLastPost(
+            nPosts = nPosts,
+            afterId = afterId,
+            beforeId = beforeId)
     }
 
     suspend fun getMyLastPost(
         nPosts: Int = Integer.MAX_VALUE,
+        afterId: String? = null,
+        beforeId: String? = null,
     ): List<Post> {
-        return getLastPost(refPosts, nPosts, auth.currentUser?.uid!!)
+        return getLastPost(
+            nPosts = nPosts,
+            afterId = afterId,
+            beforeId = beforeId,
+            fromUserId = auth.currentUser?.uid!!)
     }
 
     suspend fun getLastPostByUser(idUser: String, nPost: Int = Integer.MAX_VALUE): List<Post> {
-        return getLastPost(refPosts, nPost, idUser)
+        return getLastPost( nPost, idUser)
     }
 
     suspend fun getPost(idPost: String): Post? {

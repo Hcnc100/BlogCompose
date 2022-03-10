@@ -14,7 +14,7 @@ interface MyPostDAO {
     suspend fun insertListPost(list: List<MyPost>)
 
     @Query("SELECT * FROM table_my_post WHERE id = :idPost")
-    suspend fun getPostById(idPost: String): Post?
+    suspend fun getPostById(idPost: String): MyPost?
 
     @Update
     suspend fun updatePost(post: MyPost)
@@ -23,13 +23,13 @@ interface MyPostDAO {
     suspend fun deleterAll()
 
     @Query("SELECT * FROM table_my_post ORDER BY timeStamp DESC")
-    fun getAllPost(): Flow<List<Post>>
+    fun getAllPost(): Flow<List<MyPost>>
 
-    @Query("SELECT * FROM table_post ORDER BY timeStamp DESC LIMIT 1")
-    suspend fun getFirstPost(): Post?
+    @Query("SELECT * FROM table_my_post ORDER BY timeStamp DESC LIMIT 1")
+    suspend fun getFirstPost(): MyPost?
 
-    @Query("SELECT * FROM table_post ORDER BY timeStamp LIMIT 1")
-    suspend fun getLastPost(): Post?
+    @Query("SELECT * FROM table_my_post ORDER BY timeStamp LIMIT 1")
+    suspend fun getLastPost(): MyPost?
 
     @Query("SELECT EXISTS(SELECT * FROM table_my_post WHERE id = :idPost)")
     fun isPostExist(idPost : String) : Boolean

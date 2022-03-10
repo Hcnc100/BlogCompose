@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.nullpointer.blogcompose.models.Notify
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface NotifyDAO {
@@ -18,5 +19,11 @@ interface NotifyDAO {
     suspend fun deleterAll()
 
     @Query("SELECT * FROM table_notify")
-    suspend fun getAllNotify(): List<Notify>
+    fun getAllNotify(): Flow<List<Notify>>
+
+    @Query("SELECT * FROM table_notify ORDER BY timestamp DESC LIMIT 1")
+    suspend fun getFirstNotify():Notify?
+
+    @Query("SELECT * FROM table_notify ORDER BY timestamp LIMIT 1")
+    suspend fun getLastNotify():Notify?
 }

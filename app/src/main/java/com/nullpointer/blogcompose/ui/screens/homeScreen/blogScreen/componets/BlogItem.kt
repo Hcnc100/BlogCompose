@@ -17,13 +17,15 @@ import androidx.compose.ui.unit.sp
 import coil.annotation.ExperimentalCoilApi
 import com.nullpointer.blogcompose.core.utils.TimeUtils
 import com.nullpointer.blogcompose.models.Post
+import com.nullpointer.blogcompose.models.SimplePost
 import java.util.*
 
 @OptIn(ExperimentalCoilApi::class)
 @Composable
 fun BlogItem(
-    post: Post,
-    actionChangePost:(Post,isLiked:Boolean)->Unit,
+    post: SimplePost,
+    actionChangePost:(String,Boolean)->Unit,
+    staticInfo:Pair<String,String>? = null
 ) {
     val (ownerLike, changeOwnerLike) = remember { mutableStateOf(post.ownerLike) }
     SideEffect {
@@ -38,10 +40,14 @@ fun BlogItem(
         shape = RoundedCornerShape(10.dp)
     ) {
         Column {
-            HeaderBlog(post.poster!!.urlImg, post.poster.name)
+            if(staticInfo!=null){
+                HeaderBlog(staticInfo.first,staticInfo.second)
+            }else{
+                HeaderBlog(post.poster!!.urlImg, post.poster!!.name)
+            }
             ImageBlog(post.urlImage)
             ButtonsInteractionBlog(ownerLike) {
-                actionChangePost(post.copy(),it)
+                actionChangePost(post.id,it)
                 changeOwnerLike(it)
                 post.ownerLike=!post.ownerLike
                 post.numberLikes=if (it) post.numberLikes+1 else post.numberLikes-1

@@ -11,7 +11,7 @@ data class Notify(
     val nameUserLiked: String="",
     val imgUserLiked: String="",
     val urlImgPost: String="",
-    val timestamp: Date? = null,
+    var timestamp: Date? = null,
     val isOpen: Boolean=false,
     @PrimaryKey
     var id:String=""
