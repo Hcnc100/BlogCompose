@@ -33,7 +33,7 @@ class PostRepoImpl(
 
     suspend fun requestMyLastPost(): Int {
         if (!InternetCheck.isNetworkAvailable()) throw NetworkException()
-        postDataSource.getLatestPost(SIZE_POST_REQUEST, beforeId = myPostDAO.getFirstPost()?.id)
+        postDataSource.getMyLastPost(SIZE_POST_REQUEST, beforeId = myPostDAO.getFirstPost()?.id)
             .also { list ->
                 if (list.isNotEmpty()) {
                     myPostDAO.deleterAll()
@@ -71,7 +71,7 @@ class PostRepoImpl(
         TODO("Not yet implemented")
     }
 
-    override suspend fun getMyLastPost(inCaching: Boolean): Flow<List<Post>> =
+    override suspend fun getMyLastPost(inCaching: Boolean): Flow<List<MyPost>> =
         myPostDAO.getAllPost()
 
 
@@ -89,7 +89,7 @@ class PostRepoImpl(
                 postDAO.updatePost(it)
             }
             myPostDAO.getPostById(idPost)?.let {
-                myPostDAO.updatePost(MyPost.fromPost(it))
+                myPostDAO.updatePost(it)
             }
             throw e
         }

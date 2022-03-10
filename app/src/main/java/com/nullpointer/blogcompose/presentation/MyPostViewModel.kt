@@ -5,22 +5,21 @@ import androidx.lifecycle.viewModelScope
 import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.core.utils.NetworkException
 import com.nullpointer.blogcompose.domain.post.PostRepoImpl
-import com.nullpointer.blogcompose.domain.preferences.PreferencesRepoImpl
 import com.nullpointer.blogcompose.models.MyPost
-import com.nullpointer.blogcompose.models.Post
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import timber.log.Timber
-import java.lang.Exception
 import javax.inject.Inject
+import kotlin.coroutines.cancellation.CancellationException
 
 @HiltViewModel
-class PostViewModel @Inject constructor(
-    private val postRepo: PostRepoImpl,
-    private val prefRepo: PreferencesRepoImpl,
-) : ViewModel() {
+class MyPostViewModel @Inject constructor(
+    private val postRepo: PostRepoImpl
+):ViewModel() {
 
     private val _messagePost = Channel<String>()
     val messagePost = _messagePost.receiveAsFlow()
@@ -33,20 +32,18 @@ class PostViewModel @Inject constructor(
     private val _stateConcatenateData = MutableStateFlow<Resource<Unit>>(Resource.Loading())
     val stateConcatenate = _stateConcatenateData.asStateFlow()
 
-    val listPost = flow<Resource<List<Post>>> {
-        postRepo.getLastPost(false).collect {
+    val listMyPost = flow<Resource<List<MyPost>>> {
+        postRepo.getMyLastPost(false).collect {
             emit(Resource.Success(it))
         }
     }.catch {
-        Timber.d("Error al obtener los post de la base de datos $it")
-        Resource.Failure<Resource<List<Post>>>(Exception(it))
+        Timber.d("Error al obtener my post de la base de datos $it")
+        Resource.Failure<Resource<List<MyPost>>>(Exception(it))
     }.stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(5_000),
         Resource.Loading()
     )
-
-
 
     init {
         requestNewPost()
@@ -58,7 +55,7 @@ class PostViewModel @Inject constructor(
         jobRequestNew = viewModelScope.launch {
             _stateLoadData.value = Resource.Loading()
             try {
-                val sizeNewPost = postRepo.requestLastPost()
+                val sizeNewPost = postRepo.requestMyLastPost()
                 if (sizeNewPost == 0) {
                     _messagePost.trySend("Es todo, no hay post nuevos")
                 } else {
@@ -84,7 +81,7 @@ class PostViewModel @Inject constructor(
         jobConcatenatePost = viewModelScope.launch {
             _stateConcatenateData.value = Resource.Loading()
             try {
-                val sizeRequest = postRepo.concatenatePost()
+                val sizeRequest = postRepo.concatenateMyPost()
                 Timber.d("Datos concatenados $sizeRequest")
                 _stateConcatenateData.value = Resource.Success(Unit)
             } catch (e: Exception) {
@@ -101,7 +98,7 @@ class PostViewModel @Inject constructor(
         }
     }
 
-    fun likePost(idPost:String, isLiked: Boolean) = viewModelScope.launch(Dispatchers.IO) {
+    fun likePost(idPost: String, isLiked: Boolean) = viewModelScope.launch(Dispatchers.IO) {
         try {
             postRepo.updateLikePost(idPost, isLiked)
         } catch (e: Exception) {
@@ -115,5 +112,4 @@ class PostViewModel @Inject constructor(
             }
         }
     }
-
 }
