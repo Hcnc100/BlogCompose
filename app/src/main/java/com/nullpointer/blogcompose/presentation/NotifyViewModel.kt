@@ -33,6 +33,8 @@ class NotifyViewModel @Inject constructor(
     private val _messageNotify = Channel<String>()
     val messageNotify = _messageNotify.receiveAsFlow()
 
+
+
     val listNotify = flow<Resource<List<Notify>>> {
         notifyRepoImpl.getAllNotifications().collect {
             emit(Resource.Success(it))
@@ -45,12 +47,16 @@ class NotifyViewModel @Inject constructor(
         Resource.Loading()
     )
 
+    init {
+        requestLastNotify()
+    }
+
     fun concatenateNotify(){
         jobConcatenateNotify?.cancel()
         jobConcatenateNotify=viewModelScope.launch(Dispatchers.IO) {
             _stateConcatenateData.value = Resource.Loading()
             try{
-                notifyRepoImpl.requestLastNotify()
+                notifyRepoImpl.concatenateNotify()
                 _stateConcatenateData.value=Resource.Success(Unit)
             }catch (e:Exception){
                 _stateConcatenateData.value = Resource.Failure(e)

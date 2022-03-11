@@ -19,12 +19,9 @@ class NotifyRepoImpl(
     override suspend fun requestLastNotify(): Int {
         if (!InternetCheck.isNetworkAvailable()) throw NetworkException()
         notifyDataSource.getLastNotifications(
-            nNotify= SIZE_NOTIFY_REQUEST,
-            afterId = notifyDAO.getFirstNotify()?.id).let {
-            if (it.isNotEmpty()) {
-                notifyDAO.deleterAll()
-                notifyDAO.insertListNotify(it)
-            }
+            nNotify = SIZE_NOTIFY_REQUEST,
+            beforeId = notifyDAO.getFirstNotify()?.id).let {
+            if (it.isNotEmpty()) notifyDAO.updateAllNotify(it)
             return it.size
         }
     }
@@ -35,9 +32,8 @@ class NotifyRepoImpl(
             nNotify = SIZE_NOTIFY_REQUEST,
             afterId = notifyDAO.getLastNotify()?.id
         ).let {
-            if (it.isNotEmpty()) {
-                notifyDAO.insertListNotify(it)
-            }
+            if (it.isNotEmpty()) notifyDAO.insertListNotify(it)
+
             return it.size
         }
     }

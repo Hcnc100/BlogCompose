@@ -22,6 +22,12 @@ interface PostDAO {
     @Query("DELETE FROM table_post")
     suspend fun deleterAll()
 
+    @Transaction
+    suspend fun updateAllPost(list:List<Post>){
+        deleterAll()
+        insertListPost(list)
+    }
+
     @Query("SELECT * FROM table_post ORDER BY timeStamp DESC")
     fun getAllPost(): Flow<List<Post>>
 

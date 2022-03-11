@@ -36,7 +36,7 @@ class NotifyDataSource {
         nNotify: Int = Integer.MAX_VALUE,
     ): List<Notify> {
         var baseQuery = database.document(auth.currentUser?.uid!!)
-            .collection("listNotify").orderBy("timestamp")
+            .collection("listNotify").orderBy("timestamp", Query.Direction.DESCENDING)
         // * get documents after that
         if (afterId != null) {
             val lastDocument = database.document(auth.currentUser?.uid!!)
@@ -50,7 +50,7 @@ class NotifyDataSource {
         }
         // * limit result or for default all
         if (nNotify != Integer.MAX_VALUE) baseQuery = baseQuery.limit(nNotify.toLong())
-        return baseQuery.get(Source.SERVER).await().documents.mapNotNull {document->
+        return baseQuery.get(Source.SERVER).await().documents.mapNotNull { document ->
             document.toObject(Notify::class.java)?.apply {
                 id = document.id
                 timestamp = document.getTimestamp(

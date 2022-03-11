@@ -23,10 +23,7 @@ class PostRepoImpl(
         if (!InternetCheck.isNetworkAvailable()) throw NetworkException()
         postDataSource.getLatestPost(SIZE_POST_REQUEST, beforeId = postDAO.getFirstPost()?.id)
             .also {
-                if (it.isNotEmpty()) {
-                    postDAO.deleterAll()
-                    postDAO.insertListPost(it)
-                }
+                if (it.isNotEmpty()) postDAO.updateAllPost(it)
                 return it.size
             }
     }
@@ -35,11 +32,7 @@ class PostRepoImpl(
         if (!InternetCheck.isNetworkAvailable()) throw NetworkException()
         postDataSource.getMyLastPost(SIZE_POST_REQUEST, beforeId = myPostDAO.getFirstPost()?.id)
             .also { list ->
-                if (list.isNotEmpty()) {
-                    myPostDAO.deleterAll()
-                    val listSimplePost = list.map { MyPost.fromPost(it) }
-                    myPostDAO.insertListPost(listSimplePost)
-                }
+                if (list.isNotEmpty()) myPostDAO.updateAllPost(list.map { MyPost.fromPost(it) })
                 return list.size
             }
     }
