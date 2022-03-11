@@ -32,7 +32,7 @@ import kotlinx.coroutines.flow.collect
 fun NotifyScreen(
     notifyVM: NotifyViewModel = hiltViewModel(),
 ) {
-    val resultGetPost = notifyVM.listNotify.collectAsState()
+    val stateListNotify = notifyVM.listNotify.collectAsState(emptyList())
     val stateLoading = notifyVM.stateRequest.collectAsState()
     val stateConcatenate = notifyVM.stateConcatenate.collectAsState()
     val notifyMessage = notifyVM.messageNotify
@@ -46,40 +46,38 @@ fun NotifyScreen(
 
     SwipeRefresh(
         state = SwipeRefreshState(stateLoading.value is Resource.Loading),
-        onRefresh = notifyVM::requestLastNotify,
+        onRefresh = { notifyVM.requestLastNotify(true) },
     ) {
         Scaffold(scaffoldState = scaffoldState) {
-            val notifyState = resultGetPost.value
-            if (notifyState is Resource.Success) {
-                val listNotify = notifyState.data
-                LazyColumn(state = listState) {
-                    items(listNotify.size) { index ->
-                        val post = listNotify[index]
-                        ItemNotify(
-                            imgPost = post.urlImgPost,
-                            imgProfile = post.imgUserLiked,
-                            nameLiked = post.nameUserLiked,
-                            timeStamp = post.timestamp?.time ?: System.currentTimeMillis(),
-                            isOpen = post.isOpen,
-                        )
-                    }
-                    item {
-                        AnimatedVisibility(
-                            visible = stateConcatenate.value is Resource.Loading && listNotify.isNotEmpty(),
-                            enter = expandVertically(),
-                            exit = shrinkVertically()
-                        ) {
-                            Box(modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 20.dp),
-                                contentAlignment = Alignment.Center) {
-                                CircularProgressIndicator()
-                            }
+            val listNotify = stateListNotify.value
+            LazyColumn(state = listState) {
+                items(listNotify.size) { index ->
+                    val post = listNotify[index]
+                    ItemNotify(
+                        imgPost = post.urlImgPost,
+                        imgProfile = post.imgUserLiked,
+                        nameLiked = post.nameUserLiked,
+                        timeStamp = post.timestamp?.time ?: System.currentTimeMillis(),
+                        isOpen = post.isOpen,
+                    )
+                }
+                item {
+                    AnimatedVisibility(
+                        visible = stateConcatenate.value is Resource.Loading && listNotify.isNotEmpty(),
+                        enter = expandVertically(),
+                        exit = shrinkVertically()
+                    ) {
+                        Box(modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 20.dp),
+                            contentAlignment = Alignment.Center) {
+                            CircularProgressIndicator()
                         }
-
                     }
+
                 }
             }
+
         }
     }
     listState.OnBottomReached(0) {

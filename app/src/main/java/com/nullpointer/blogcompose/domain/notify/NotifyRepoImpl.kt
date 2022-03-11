@@ -6,39 +6,44 @@ import com.nullpointer.blogcompose.data.local.cache.NotifyDAO
 import com.nullpointer.blogcompose.data.remote.NotifyDataSource
 import com.nullpointer.blogcompose.models.Notify
 import kotlinx.coroutines.flow.Flow
-import timber.log.Timber
 
 class NotifyRepoImpl(
     private val notifyDataSource: NotifyDataSource,
     private val notifyDAO: NotifyDAO,
 ) : NotifyRepository {
+
     companion object {
+        // * size of request notify data source
         private const val SIZE_NOTIFY_REQUEST = 10
     }
 
-    override suspend fun requestLastNotify(): Int {
+    // * return flow to notification in database, is for get modifications in realtime
+    override val listNotify: Flow<List<Notify>> = notifyDAO.getAllNotify()
+
+    override suspend fun requestLastNotify(forceRefresh: Boolean): Int {
         if (!InternetCheck.isNetworkAvailable()) throw NetworkException()
-        notifyDataSource.getLastNotifications(
-            nNotify = SIZE_NOTIFY_REQUEST,
-            beforeId = notifyDAO.getFirstNotify()?.id).let {
-            if (it.isNotEmpty()) notifyDAO.updateAllNotify(it)
-            return it.size
-        }
+        // * get the first id from notify order for date
+        // ? if the database is empty o the parameter "force refresh" is true
+        // ? request new data and replace data in database
+        val firstIdNotify = if (forceRefresh) null else notifyDAO.getFirstNotify()?.id
+        val listNewNotify = notifyDataSource.getLastNotifications(
+            numberRequest = SIZE_NOTIFY_REQUEST,
+            beforeId = firstIdNotify)
+        if (listNewNotify.isNotEmpty()) notifyDAO.updateAllNotify(listNewNotify)
+        return listNewNotify.size
     }
 
     override suspend fun concatenateNotify(): Int {
         if (!InternetCheck.isNetworkAvailable()) throw NetworkException()
-        notifyDataSource.getLastNotifications(
-            nNotify = SIZE_NOTIFY_REQUEST,
+        // * get last notify consideration the last notify order for date
+        // * this for no request all notify
+        // ? this notifications no override the notification from database
+        val listConcatNotify = notifyDataSource.getLastNotifications(
+            numberRequest = SIZE_NOTIFY_REQUEST,
             afterId = notifyDAO.getLastNotify()?.id
-        ).let {
-            if (it.isNotEmpty()) notifyDAO.insertListNotify(it)
-
-            return it.size
-        }
+        )
+        if (listConcatNotify.isNotEmpty()) notifyDAO.insertListNotify(listConcatNotify)
+        return listConcatNotify.size
     }
-
-    override fun getAllNotifications(): Flow<List<Notify>> =
-        notifyDAO.getAllNotify()
 
 }
