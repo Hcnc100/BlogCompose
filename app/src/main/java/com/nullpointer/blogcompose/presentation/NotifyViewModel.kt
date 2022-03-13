@@ -39,10 +39,10 @@ class NotifyViewModel @Inject constructor(
     val messageNotify = _messageNotify.receiveAsFlow()
 
     // * show notification from database
-    val listNotify: Flow<List<Notify>> = notifyRepoImpl.listNotify.catch { e ->
+    val listNotify = notifyRepoImpl.listNotify.catch { e ->
         Timber.e("Error al obtener las notificaciones de la base de datos $e")
         _messageNotify.trySend("Error desconocido")
-    }.stateIn(
+    }.flowOn(Dispatchers.IO).stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(5_000),
         emptyList()
@@ -83,7 +83,7 @@ class NotifyViewModel @Inject constructor(
         // * request las notification, consideration the first notification
         // * order by time in the database, or also force refresh data
         jobRequestNotify?.cancel()
-        jobRequestNotify = viewModelScope.launch {
+        jobRequestNotify = viewModelScope.launch(Dispatchers.IO) {
             _stateRequestData.value = Resource.Loading()
             try {
                 notifyRepoImpl.requestLastNotify(forceRefresh).let {

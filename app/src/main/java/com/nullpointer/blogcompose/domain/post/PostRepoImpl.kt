@@ -19,71 +19,86 @@ class PostRepoImpl(
         private const val SIZE_POST_REQUEST = 5
     }
 
-    suspend fun requestLastPost(): Int {
+    override val listLastPost: Flow<List<Post>> = postDAO.getAllPost()
+    override val listMyLastPost: Flow<List<MyPost>> = myPostDAO.getAllPost()
+
+    override suspend fun requestLastPost(forceRefresh: Boolean): Int {
         if (!InternetCheck.isNetworkAvailable()) throw NetworkException()
-        postDataSource.getLatestPost(SIZE_POST_REQUEST, beforeId = postDAO.getFirstPost()?.id)
-            .also {
-                if (it.isNotEmpty()) postDAO.updateAllPost(it)
-                return it.size
-            }
+        // * get last post consideration first post saved in database
+        val idFirstPost = if (forceRefresh) null else postDAO.getFirstPost()?.id
+        val listLastPost = postDataSource.getLatestPost(
+            nPosts = SIZE_POST_REQUEST,
+            beforeId = idFirstPost
+        )
+        if (listLastPost.isNotEmpty()) postDAO.updateAllPost(listLastPost)
+        return listLastPost.size
     }
 
-    suspend fun requestMyLastPost(): Int {
+    override suspend fun requestMyLastPost(forceRefresh: Boolean): Int {
         if (!InternetCheck.isNetworkAvailable()) throw NetworkException()
-        postDataSource.getMyLastPost(SIZE_POST_REQUEST, beforeId = myPostDAO.getFirstPost()?.id)
-            .also { list ->
-                if (list.isNotEmpty()) myPostDAO.updateAllPost(list.map { MyPost.fromPost(it) })
-                return list.size
-            }
+        // * get last post consideration "my" first post saved in database
+        // ? and remove repeater info because owner is me
+        val idMyFirstPost = if (forceRefresh) null else myPostDAO.getFirstPost()?.id
+        val listMyLastPost = postDataSource.getMyLastPost(
+            nPosts = SIZE_POST_REQUEST,
+            beforeId = idMyFirstPost
+        ).map { MyPost.fromPost(it) }
+        if (listMyLastPost.isNotEmpty()) myPostDAO.updateAllPost(listMyLastPost)
+        return listMyLastPost.size
     }
 
-    suspend fun concatenatePost(): Int {
+    override suspend fun concatenatePost(): Int {
+        // * get post and concatenate to all post
+        // * this nos remove old post
+        // * consideration first post saved
         if (!InternetCheck.isNetworkAvailable()) throw NetworkException()
-        postDataSource.getLatestPost(SIZE_POST_REQUEST, afterId = postDAO.getLastPost()?.id).also {
-            postDAO.insertListPost(it)
-            return it.size
-        }
+        val listNewPost = postDataSource.getLatestPost(
+            nPosts = SIZE_POST_REQUEST,
+            afterId = postDAO.getLastPost()?.id
+        )
+        postDAO.insertListPost(listNewPost)
+        return listNewPost.size
     }
 
-    suspend fun concatenateMyPost(): Int {
+    override suspend fun concatenateMyPost(): Int {
+        // * get "my post" and concatenate
+        // * this nos remove old post
+        // * consideration first post saved
         if (!InternetCheck.isNetworkAvailable()) throw NetworkException()
-        postDataSource.getLatestPost(SIZE_POST_REQUEST, afterId = myPostDAO.getLastPost()?.id)
-            .also { list ->
-                val listSimplePost = list.map { MyPost.fromPost((it)) }
-                myPostDAO.insertListPost(listSimplePost)
-                return listSimplePost.size
-            }
+        val listMyNewPost = postDataSource.getMyLastPost(
+            nPosts = SIZE_POST_REQUEST,
+            afterId = myPostDAO.getLastPost()?.id
+        )
+        val listSimplePost = listMyNewPost.map { MyPost.fromPost(it) }
+        myPostDAO.insertListPost(listSimplePost)
+        return listSimplePost.size
     }
-
-
-    override fun getLastPost(inCaching: Boolean): Flow<List<Post>> =
-        postDAO.getAllPost()
-
 
     override suspend fun getLastPostByUser(idUser: String, inCaching: Boolean): List<Post> {
         TODO("Not yet implemented")
     }
 
-    override suspend fun getMyLastPost(inCaching: Boolean): Flow<List<MyPost>> =
-        myPostDAO.getAllPost()
-
 
     override suspend fun updateLikePost(idPost: String, isLiked: Boolean) {
+        val oldPost = postDAO.getPostById(idPost)
+        val oldMyPost = myPostDAO.getPostById(idPost)
         try {
+            // * update fake post
+            if (oldPost != null) postDAO.updatePost(oldPost.copyInnerLike(isLiked))
+            if (oldMyPost != null) myPostDAO.updatePost(oldMyPost.copyInnerLike(isLiked))
+
             // * if has null update post or dont have internet, launch exception
             if (!InternetCheck.isNetworkAvailable()) throw NetworkException()
             val postUpdate = postDataSource.updateLikes(idPost, isLiked)!!
+
             // * update the info from post
-            if (postDAO.isPostExist(idPost)) postDAO.updatePost(postUpdate)
-            if (myPostDAO.isPostExist(idPost)) myPostDAO.updatePost(MyPost.fromPost(postUpdate))
+            if (oldPost != null) postDAO.updatePost(postUpdate)
+            if (oldMyPost != null) myPostDAO.updatePost(MyPost.fromPost(postUpdate))
         } catch (e: Exception) {
             // ? if has problem restore data post
-            postDAO.getPostById(idPost)?.let {
-                postDAO.updatePost(it)
-            }
-            myPostDAO.getPostById(idPost)?.let {
-                myPostDAO.updatePost(it)
-            }
+            oldPost?.let { postDAO.updatePost(oldPost) }
+            oldMyPost?.let { myPostDAO.updatePost(it) }
+
             throw e
         }
     }

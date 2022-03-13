@@ -29,7 +29,7 @@ fun BlogScreen(
 
     ScreenSwiperPost(resultListPost = resultGetPost.value,
         scaffoldState = scaffoldState,
-        updateListPost = postVM::requestNewPost,
+        updateListPost = { postVM.requestNewPost(true) },
         actionBottomReached = postVM::concatenatePost,
         actionButtonAdd = actionGoToAddPost,
         actionChangePost = postVM::likePost,

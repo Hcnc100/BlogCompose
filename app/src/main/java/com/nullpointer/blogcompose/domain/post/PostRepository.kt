@@ -5,9 +5,13 @@ import com.nullpointer.blogcompose.models.Post
 import kotlinx.coroutines.flow.Flow
 
 interface PostRepository {
-     fun getLastPost(inCaching:Boolean): Flow<List<Post>>
-    suspend fun getLastPostByUser(idUser: String, inCaching:Boolean): List<Post>
-    suspend fun getMyLastPost(inCaching:Boolean): Flow<List<MyPost>>
+    val listLastPost: Flow<List<Post>>
+    val listMyLastPost: Flow<List<MyPost>>
+    suspend fun getLastPostByUser(idUser: String, inCaching: Boolean): List<Post>
+    suspend fun requestLastPost(forceRefresh: Boolean = false): Int
+    suspend fun requestMyLastPost(forceRefresh: Boolean = false): Int
+    suspend fun concatenatePost(): Int
+    suspend fun concatenateMyPost(): Int
     suspend fun addNewPost(post: Post)
     suspend fun deleterPost(post: Post)
     suspend fun updatePost(post: Post)

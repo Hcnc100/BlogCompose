@@ -35,4 +35,11 @@ data class MyPost(
             id = post.id
         )
     }
+    fun copyInnerLike(isLiked:Boolean):MyPost{
+        val newCount=if(isLiked) numberLikes+1 else numberLikes-1
+        return this.copy(
+            numberLikes = newCount,
+            ownerLike = isLiked
+        )
+    }
 }

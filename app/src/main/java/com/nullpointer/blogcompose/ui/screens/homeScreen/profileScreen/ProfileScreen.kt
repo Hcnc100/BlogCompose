@@ -22,6 +22,7 @@ import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.presentation.AuthViewModel
 import com.nullpointer.blogcompose.presentation.MyPostViewModel
+import com.nullpointer.blogcompose.presentation.PostViewModel
 import com.nullpointer.blogcompose.ui.screens.swipePosts.ScreenSwiperPost
 import kotlinx.coroutines.flow.collect
 
@@ -29,12 +30,13 @@ import kotlinx.coroutines.flow.collect
 fun ProfileScreen(
     authViewModel: AuthViewModel = hiltViewModel(),
     myPostViewModel: MyPostViewModel = hiltViewModel(),
+    postViewModel: PostViewModel = hiltViewModel(),
 ) {
 
-    val resultGetPost = myPostViewModel.listMyPost.collectAsState()
+    val stateListPost = myPostViewModel.listMyPost.collectAsState()
     val stateLoading = myPostViewModel.stateLoad.collectAsState()
     val stateConcatenate = myPostViewModel.stateConcatenate.collectAsState()
-    val postMessage = myPostViewModel.messagePost
+    val postMessage = myPostViewModel.messageMyPosts
     val scaffoldState = rememberScaffoldState()
     LaunchedEffect(postMessage) {
         postMessage.collect {
@@ -42,11 +44,11 @@ fun ProfileScreen(
         }
     }
 
-    ScreenSwiperPost(resultListPost = resultGetPost.value,
+    ScreenSwiperPost(resultListPost = stateListPost.value,
         scaffoldState = scaffoldState,
-        updateListPost = myPostViewModel::requestNewPost,
+        updateListPost = { myPostViewModel.requestNewPost(true) },
         actionBottomReached = myPostViewModel::concatenatePost,
-        actionChangePost = myPostViewModel::likePost,
+        actionChangePost = postViewModel::likePost,
         staticInfo = Pair(authViewModel.photoUser, authViewModel.nameUser),
         isLoadNewData = stateLoading.value is Resource.Loading,
         isConcatenateData = stateConcatenate.value is Resource.Loading

@@ -32,7 +32,7 @@ import kotlinx.coroutines.flow.collect
 fun NotifyScreen(
     notifyVM: NotifyViewModel = hiltViewModel(),
 ) {
-    val stateListNotify = notifyVM.listNotify.collectAsState(emptyList())
+    val stateListNotify = notifyVM.listNotify.collectAsState()
     val stateLoading = notifyVM.stateRequest.collectAsState()
     val stateConcatenate = notifyVM.stateConcatenate.collectAsState()
     val notifyMessage = notifyVM.messageNotify
@@ -80,10 +80,11 @@ fun NotifyScreen(
 
         }
     }
-    listState.OnBottomReached(0) {
-        notifyVM.concatenateNotify()
+    if(stateListNotify.value.isNotEmpty()){
+        listState.OnBottomReached(0) {
+            notifyVM.concatenateNotify()
+        }
     }
-
 }
 
 @Composable

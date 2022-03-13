@@ -25,14 +25,14 @@ import kotlinx.coroutines.flow.collect
 
 @Composable
 fun ScreenSwiperPost(
-    resultListPost: Resource<List<SimplePost>>,
+    resultListPost: List<SimplePost>,
     isLoadNewData: Boolean,
     isConcatenateData: Boolean = false,
     scaffoldState: ScaffoldState = rememberScaffoldState(),
     updateListPost: () -> Unit,
     actionBottomReached: () -> Unit,
-    actionChangePost: (String,Boolean) -> Unit,
-    staticInfo:Pair<String,String>? = null,
+    actionChangePost: (String, Boolean) -> Unit,
+    staticInfo: Pair<String, String>? = null,
     actionButtonAdd: (() -> Unit)? = null,
     header: @Composable (() -> Unit)? = null,
 ) {
@@ -53,17 +53,16 @@ fun ScreenSwiperPost(
                 }
             }
         ) {
-            if (resultListPost is Resource.Success) {
-                ListInfinitePost(
-                    listPost = resultListPost.data,
-                    listState = listState,
-                    actionBottomReached = actionBottomReached,
-                    header = header,
-                    actionChangePost = actionChangePost,
-                    isConcatenateData = isConcatenateData,
-                    staticInfo = staticInfo
-                )
-            }
+            ListInfinitePost(
+                listPost = resultListPost,
+                listState = listState,
+                actionBottomReached = actionBottomReached,
+                header = header,
+                actionChangePost = actionChangePost,
+                isConcatenateData = isConcatenateData,
+                staticInfo = staticInfo
+            )
+
         }
     }
 }
@@ -72,42 +71,46 @@ fun ScreenSwiperPost(
 fun ListInfinitePost(
     listPost: List<SimplePost>,
     listState: LazyListState,
-    actionChangePost: (String,Boolean) -> Unit,
+    actionChangePost: (String, Boolean) -> Unit,
     header: (@Composable () -> Unit)? = null,
     actionBottomReached: () -> Unit,
     isConcatenateData: Boolean,
-    buffer:Int=0,
-    staticInfo:Pair<String,String>? = null
+    buffer: Int = 0,
+    staticInfo: Pair<String, String>? = null,
 ) {
     LazyColumn(state = listState) {
         header?.let {
             item { it() }
         }
         items(listPost.size) { index ->
-            BlogItem(listPost[index], actionChangePost,staticInfo)
+            BlogItem(listPost[index], actionChangePost, staticInfo)
         }
 
-            item {
-                AnimatedVisibility(
-                    visible = isConcatenateData && listPost.isNotEmpty(),
-                    enter = expandVertically(),
-                    exit = shrinkVertically()
-                ){
-                    Box(modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 20.dp),
-                        contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator()
-                    }
+        item {
+            AnimatedVisibility(
+                visible = isConcatenateData && listPost.isNotEmpty(),
+                enter = expandVertically(),
+                exit = shrinkVertically()
+            ) {
+                Box(modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 20.dp),
+                    contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
                 }
-
             }
 
+        }
+
 
     }
-    listState.OnBottomReached(buffer) {
-        actionBottomReached()
+    // ! this is import for no call with this list is empty
+    if(listPost.isNotEmpty()){
+        listState.OnBottomReached(buffer) {
+            actionBottomReached()
+        }
     }
+
 }
 
 @OptIn(InternalCoroutinesApi::class)

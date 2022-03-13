@@ -18,11 +18,11 @@ import kotlin.coroutines.cancellation.CancellationException
 
 @HiltViewModel
 class MyPostViewModel @Inject constructor(
-    private val postRepo: PostRepoImpl
-):ViewModel() {
+    private val postRepo: PostRepoImpl,
+) : ViewModel() {
 
-    private val _messagePost = Channel<String>()
-    val messagePost = _messagePost.receiveAsFlow()
+    private val _messageMyPosts = Channel<String>()
+    val messageMyPosts = _messageMyPosts.receiveAsFlow()
 
     private var jobRequestNew: Job? = null
     private val _stateLoadData = MutableStateFlow<Resource<Unit>>(Resource.Loading())
@@ -32,17 +32,13 @@ class MyPostViewModel @Inject constructor(
     private val _stateConcatenateData = MutableStateFlow<Resource<Unit>>(Resource.Loading())
     val stateConcatenate = _stateConcatenateData.asStateFlow()
 
-    val listMyPost = flow<Resource<List<MyPost>>> {
-        postRepo.getMyLastPost(false).collect {
-            emit(Resource.Success(it))
-        }
-    }.catch {
-        Timber.d("Error al obtener my post de la base de datos $it")
-        Resource.Failure<Resource<List<MyPost>>>(Exception(it))
-    }.stateIn(
+    val listMyPost = postRepo.listMyLastPost.catch {
+        Timber.e("Error al obtener my post de la base de datos $it")
+        _messageMyPosts.trySend("Error deconocido")
+    }.flowOn(Dispatchers.IO).stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(5_000),
-        Resource.Loading()
+        emptyList()
     )
 
     init {
@@ -50,26 +46,24 @@ class MyPostViewModel @Inject constructor(
     }
 
 
-    fun requestNewPost() {
+    fun requestNewPost(forceRefresh: Boolean = false) {
+        // * request last post in cache or if there new post
+        // * or force refresh with the argument
         jobRequestNew?.cancel()
-        jobRequestNew = viewModelScope.launch {
+        jobRequestNew = viewModelScope.launch(Dispatchers.IO) {
             _stateLoadData.value = Resource.Loading()
             try {
-                val sizeNewPost = postRepo.requestMyLastPost()
-                if (sizeNewPost == 0) {
-                    _messagePost.trySend("Es todo, no hay post nuevos")
-                } else {
-                    _messagePost.trySend("Se obtuvieron $sizeNewPost post nuevos")
-                }
+                val sizeNewPost = postRepo.requestMyLastPost(forceRefresh)
+                Timber.d("Se obtuvieron $sizeNewPost post nuevos 'mios'")
                 _stateLoadData.value = Resource.Success(Unit)
             } catch (e: Exception) {
                 _stateLoadData.value = Resource.Failure(e)
                 when (e) {
                     is CancellationException -> throw e
-                    is NetworkException -> _messagePost.trySend("Verifique su conexion a internet")
+                    is NetworkException -> _messageMyPosts.trySend("Verifique su conexion a internet")
                     else -> {
-                        _messagePost.trySend("Error desconocido")
-                        Timber.d("Error en el request $e")
+                        _messageMyPosts.trySend("Error desconocido")
+                        Timber.e("Error en el request 'myPost' $e")
                     }
                 }
             }
@@ -77,37 +71,23 @@ class MyPostViewModel @Inject constructor(
     }
 
     fun concatenatePost() {
+        // * request post and concatenate and the last post
         jobConcatenatePost?.cancel()
-        jobConcatenatePost = viewModelScope.launch {
+        jobConcatenatePost = viewModelScope.launch(Dispatchers.IO) {
             _stateConcatenateData.value = Resource.Loading()
             try {
                 val sizeRequest = postRepo.concatenateMyPost()
-                Timber.d("Datos concatenados $sizeRequest")
+                Timber.d("Post concatenados $sizeRequest")
                 _stateConcatenateData.value = Resource.Success(Unit)
             } catch (e: Exception) {
                 _stateConcatenateData.value = Resource.Failure(e)
                 when (e) {
                     is CancellationException -> throw e
-                    is NetworkException -> _messagePost.trySend("Verifique su conexion a internet")
+                    is NetworkException -> _messageMyPosts.trySend("Verifique su conexion a internet")
                     else -> {
-                        _messagePost.trySend("Error desconocido")
-                        Timber.d("Error en el request $e")
+                        _messageMyPosts.trySend("Error desconocido")
+                        Timber.e("Error en el request  de mis post $e")
                     }
-                }
-            }
-        }
-    }
-
-    fun likePost(idPost: String, isLiked: Boolean) = viewModelScope.launch(Dispatchers.IO) {
-        try {
-            postRepo.updateLikePost(idPost, isLiked)
-        } catch (e: Exception) {
-            when (e) {
-                is CancellationException -> throw e
-                is NetworkException -> _messagePost.send("Necesita conexion para esto")
-                else -> {
-                    Timber.d("Erro al dar like $e")
-                    _messagePost.send("Error desconocido")
                 }
             }
         }

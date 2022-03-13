@@ -36,7 +36,4 @@ interface PostDAO {
 
     @Query("SELECT * FROM table_post ORDER BY timeStamp LIMIT 1")
     suspend fun getLastPost(): Post?
-
-    @Query("SELECT EXISTS(SELECT * FROM table_post WHERE id = :idPost)")
-    fun isPostExist(idPost: String): Boolean
 }
