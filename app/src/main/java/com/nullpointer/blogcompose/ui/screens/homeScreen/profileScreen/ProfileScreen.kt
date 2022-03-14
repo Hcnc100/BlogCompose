@@ -29,7 +29,6 @@ import kotlinx.coroutines.flow.collect
 
 @Composable
 fun ProfileScreen(
-    registryViewModel: RegistryViewModel = hiltViewModel(),
     authViewModel: AuthViewModel = hiltViewModel(),
     myPostViewModel: MyPostViewModel = hiltViewModel(),
     postViewModel: PostViewModel = hiltViewModel(),
@@ -40,6 +39,11 @@ fun ProfileScreen(
     val stateConcatenate = myPostViewModel.stateConcatenate.collectAsState()
     val postMessage = myPostViewModel.messageMyPosts
     val scaffoldState = rememberScaffoldState()
+    val currentUser = authViewModel.currentUser.collectAsState()
+
+    val photoUser = currentUser.value?.urlImg ?: ""
+    val name = currentUser.value?.nameUser ?: ""
+
     LaunchedEffect(postMessage) {
         postMessage.collect {
             scaffoldState.snackbarHostState.showSnackbar(it)
@@ -51,13 +55,13 @@ fun ProfileScreen(
         updateListPost = { myPostViewModel.requestNewPost(true) },
         actionBottomReached = myPostViewModel::concatenatePost,
         actionChangePost = postViewModel::likePost,
-        staticInfo = Pair(registryViewModel.photoUser, registryViewModel.nameUser),
+        staticInfo = Pair(photoUser, name),
         isLoadNewData = stateLoading.value is Resource.Loading,
         isConcatenateData = stateConcatenate.value is Resource.Loading
     ) {
         HeaderProfile(
-            urlImgProfile = registryViewModel.photoUser,
-            nameProfile = registryViewModel.nameUser,
+            urlImgProfile = photoUser,
+            nameProfile = name,
             authViewModel::logOut
         )
     }
@@ -67,11 +71,11 @@ fun ProfileScreen(
 fun HeaderProfile(
     urlImgProfile: String,
     nameProfile: String,
-    actionLogOut:()->Unit
+    actionLogOut: () -> Unit,
 ) {
     Box {
         InfoProfile(urlImgProfile, nameProfile)
-        IconButton(onClick = { actionLogOut()}, modifier = Modifier
+        IconButton(onClick = { actionLogOut() }, modifier = Modifier
             .align(Alignment.TopEnd)
             .padding(10.dp)) {
             Icon(painterResource(id = R.drawable.ic_settings), "")

@@ -17,15 +17,13 @@ import com.nullpointer.blogcompose.domain.auth.AuthRepoImpl
 import com.nullpointer.blogcompose.domain.images.ImagesRepoImpl
 import com.nullpointer.blogcompose.domain.preferences.PreferencesRepoImpl
 import com.nullpointer.blogcompose.domain.toke.TokenRepoImpl
+import com.nullpointer.blogcompose.models.User
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import me.shouheng.compress.Compress
 import me.shouheng.compress.concrete
@@ -39,11 +37,10 @@ import kotlin.coroutines.cancellation.CancellationException
 class RegistryViewModel @Inject constructor(
     private val imagesRepoImpl: ImagesRepoImpl,
     private val authRepoImpl: AuthRepoImpl,
-    private val tokenRepoImpl: TokenRepoImpl,
-    savedStateHandle: SavedStateHandle
+    savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
     companion object {
-         const val MAX_LENGTH_NAME_USER = 100
+        const val MAX_LENGTH_NAME_USER = 100
         private const val KEY_NAME_USER = "KEY_NAME_USER"
         private const val KEY_PHOTO_USER = "KEY_PHOTO_USER"
         private const val KEY_ERROR_NAME = "KEY_ERROR_NAME"
@@ -73,6 +70,21 @@ class RegistryViewModel @Inject constructor(
     private val _registryMessage = Channel<String>()
     val registryMessage = _registryMessage.receiveAsFlow()
 
+
+    private var jobCompress: Job? = null
+    var isCompress = mutableStateOf(false)
+        private set
+
+
+    fun updateDataUser(context: Context) = viewModelScope.launch {
+        when {
+            nameUser.isEmpty() || (photoUser.isEmpty() && fileImg == null) -> _registryMessage.send(
+                "Varifique sus datos")
+            fileImg == null && nameUser == nameUser -> _registryMessage.send("Sin cambios")
+            else -> updateUser(context)
+        }
+    }
+
     fun changeNameUserTemp(newName: String) {
         nameUser = newName
         errorName = when {
@@ -82,51 +94,36 @@ class RegistryViewModel @Inject constructor(
         }
     }
 
-    private var jobCompress: Job? = null
-    var isCompress = mutableStateOf(false)
-        private set
-
-
-    fun updateDataUser(context: Context) = viewModelScope.launch {
-        if (fileImg == null && nameUser == nameUser) {
-            _registryMessage.send("Sin cambios")
-        } else {
-            _stateUpdateUser.value = Resource.Loading()
-            try {
-                if (fileImg != null) {
-                    imagesRepoImpl.uploadImgProfile(fileImg!!.toUri()).collect { status ->
-                        when (status) {
-                            is StorageUploadTaskResult.Complete.Failed -> throw Exception(status.error)
-                            is StorageUploadTaskResult.Complete.Success -> {
-                                photoUser = authRepoImpl.updatePhotoUser(status.urlFile)
-                                // ! this very important for reload img user, with same url
-                                // * without this, only update img user becouse load img from cache
-                                context.imageLoader.memoryCache.clear()
-                            }
-                            else -> Unit
-                        }
-                    }
-                }
-                if (nameUser != nameUser) {
-                    nameUser = authRepoImpl.uploadNameUser(nameUser)
-                }
-
-                _stateUpdateUser.value = Resource.Success(Unit)
-                _registryMessage.send("Cambios guardados")
-
-            } catch (exception: Exception) {
-                when (exception) {
-                    is CancellationException -> throw exception
-                    else -> {
-                        _registryMessage.send("Error desconocido")
-                        _stateUpdateUser.value = Resource.Failure(exception)
-                    }
+    private suspend fun updateUser(context: Context) {
+        _stateUpdateUser.value = Resource.Loading()
+        try {
+            val urlImg = updateImageUser(context, fileImg!!.toUri())
+            authRepoImpl.uploadDataUser(urlImg, nameUser)
+            _stateUpdateUser.value = Resource.Success(Unit)
+            _registryMessage.send("Cambios guardados")
+        } catch (exception: Exception) {
+            when (exception) {
+                is CancellationException -> throw exception
+                else -> {
+                    _registryMessage.send("Error desconocido")
+                    _stateUpdateUser.value = Resource.Failure(exception)
                 }
             }
+        }
+        delay(2000)
+        _stateUpdateUser.value = null
+    }
 
-
-            delay(2000)
-            _stateUpdateUser.value = null
+    suspend fun updateImageUser(context: Context, uri: Uri): String {
+        return when (val result = imagesRepoImpl.uploadImgProfile(uri).last()) {
+            is StorageUploadTaskResult.Complete.Failed -> throw Exception(result.error)
+            is StorageUploadTaskResult.Complete.Success -> {
+                // ! this very important for reload img user, with same url
+                // * without this, only update img user becouse load img from cache
+                context.imageLoader.memoryCache.clear()
+                authRepoImpl.updatePhotoUser(result.urlFile)
+            }
+            else -> ""
         }
     }
 

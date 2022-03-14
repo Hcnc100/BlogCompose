@@ -7,4 +7,5 @@ interface NotifyRepository {
     val listNotify: Flow<List<Notify>>
     suspend fun requestLastNotify(forceRefresh: Boolean = false): Int
     suspend fun concatenateNotify(): Int
+    suspend fun deleterAllNotify()
 }

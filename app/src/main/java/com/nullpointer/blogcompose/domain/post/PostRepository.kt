@@ -17,4 +17,5 @@ interface PostRepository {
     suspend fun updatePost(post: Post)
     suspend fun getPost(idPost: String): Post?
     suspend fun updateLikePost(idPost: String, isLiked: Boolean)
+    suspend fun deleterAllPost()
 }

@@ -11,5 +11,5 @@ data class User(
     val nameUser: String = "",
     val urlImg: String = "",
     @ServerTimestamp
-    val timeCreate: Date? = null,
+    var timeCreate: Date? = null,
 )

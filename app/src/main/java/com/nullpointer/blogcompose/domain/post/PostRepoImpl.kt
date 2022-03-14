@@ -103,6 +103,11 @@ class PostRepoImpl(
         }
     }
 
+    override suspend fun deleterAllPost() {
+        postDAO.deleterAll()
+        myPostDAO.deleterAll()
+    }
+
     override suspend fun addNewPost(post: Post) =
         postDataSource.addNewPost(post)
 

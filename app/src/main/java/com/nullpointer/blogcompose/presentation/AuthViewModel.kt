@@ -5,6 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.nullpointer.blogcompose.core.states.LoginStatus
 import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.domain.auth.AuthRepoImpl
+import com.nullpointer.blogcompose.domain.notify.NotifyRepoImpl
+import com.nullpointer.blogcompose.domain.post.PostRepoImpl
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -18,8 +20,15 @@ import javax.inject.Inject
 @HiltViewModel
 class AuthViewModel @Inject constructor(
     private val authRepoImpl: AuthRepoImpl,
+    private val notifyRepoImpl: NotifyRepoImpl,
+    private val postRepoImpl: PostRepoImpl,
 ) : ViewModel() {
 
+    val currentUser = authRepoImpl.user.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5000),
+        null
+    )
 
     private val _messageAuth = Channel<String>()
     val messageAuth = _messageAuth.receiveAsFlow()
@@ -72,5 +81,7 @@ class AuthViewModel @Inject constructor(
 
     fun logOut() = viewModelScope.launch {
         authRepoImpl.logOut()
+        notifyRepoImpl.deleterAllNotify()
+        postRepoImpl.deleterAllPost()
     }
 }

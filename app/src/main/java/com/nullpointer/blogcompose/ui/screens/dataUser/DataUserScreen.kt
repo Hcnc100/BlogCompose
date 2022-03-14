@@ -24,6 +24,7 @@ import coil.compose.ImagePainter
 import coil.compose.rememberImagePainter
 import coil.request.CachePolicy
 import com.nullpointer.blogcompose.R
+import com.nullpointer.blogcompose.core.states.LoginStatus
 import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.presentation.AuthViewModel
 import com.nullpointer.blogcompose.presentation.RegistryViewModel
@@ -37,13 +38,15 @@ import java.io.File
 @Composable
 fun DataUserScreen(
     registryViewModel: RegistryViewModel = hiltViewModel(),
+    authViewModel: AuthViewModel = hiltViewModel()
 ) {
     // * reload info user
-    val statusChange = registryViewModel.stateUpdateUser.collectAsState()
+    val statusChange = registryViewModel.stateUpdateUser.collectAsState(null)
     val scaffoldState = rememberScaffoldState()
     val sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
+    val isDataComplete = authViewModel.stateAuthUser.collectAsState()
 
 
 
@@ -65,7 +68,13 @@ fun DataUserScreen(
     }, sheetState = sheetState) {
         Scaffold(
             scaffoldState = scaffoldState,
-            topBar = { ToolbarBack(title = "Información de perfil") },
+            topBar = {
+                if (isDataComplete.value is LoginStatus.Authenticated.CompleteData) {
+                    ToolbarBack(title = "Información de perfil")
+                } else {
+                    ToolbarBack(title = "Completa tu cuenta")
+                }
+            },
             floatingActionButton = {
                 ButtonRegistryStatus(
                     statusChange.value) {
@@ -197,8 +206,8 @@ fun TextInputName(
 
 @Composable
 fun ButtonRegistryStatus(
-
-    statusChange: Resource<Unit>?, actionClick: () -> Unit,
+    statusChange: Resource<Unit>?,
+    actionClick: () -> Unit,
 ) {
     FloatingActionButton(onClick = { if (statusChange == null) actionClick() },
         modifier = Modifier

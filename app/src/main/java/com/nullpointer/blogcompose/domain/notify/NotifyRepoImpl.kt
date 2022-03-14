@@ -46,4 +46,7 @@ class NotifyRepoImpl(
         return listConcatNotify.size
     }
 
+    override suspend fun deleterAllNotify() =
+        notifyDAO.deleterAll()
+
 }
