@@ -1,22 +1,26 @@
 package com.nullpointer.blogcompose.domain.auth
 
+import com.nullpointer.blogcompose.data.local.PreferencesDataSource
 import com.nullpointer.blogcompose.data.remote.AuthDataSource
-import com.nullpointer.blogcompose.models.CurrentUser
+import com.nullpointer.blogcompose.models.User
 import kotlinx.coroutines.flow.Flow
 
 class AuthRepoImpl(
     private val authDataSource: AuthDataSource,
+    private val prefDataSource: PreferencesDataSource,
 ) : AuthRepository {
-    override val isDataComplete = authDataSource.isDataComplete
-    override val urlImgProfile = authDataSource.uriImgUser
-    override val nameUser: String? = authDataSource.nameUser
-    override val uuidUser: String? = authDataSource.uuidUser
 
-    override suspend fun authWithTokeGoogle(token: String) =
-        authDataSource.authWithTokenGoogle(token)
+    override val user: Flow<User> = prefDataSource.getUserFromProtoStore()
 
-    override suspend fun deleterUser() =
+    override suspend fun authWithTokeGoogle(token: String) {
+        val user = authDataSource.authWithTokenGoogle(token)
+        prefDataSource.saveUser(user)
+    }
+
+    override suspend fun deleterUser() {
         authDataSource.deleterUser()
+        deleterUser()
+    }
 
     override suspend fun updatePhotoUser(urlImg: String) =
         authDataSource.updateImgUser(urlImg)
@@ -27,9 +31,10 @@ class AuthRepoImpl(
     override suspend fun uploadDataUser(urlImg: String, name: String) =
         authDataSource.updateDataUser(name, urlImg)
 
-    override fun logOut() =
+    override suspend fun logOut() {
         authDataSource.logOut()
+        deleterUser()
+    }
 
-    override fun getCurrentUser(): Flow<CurrentUser?> =
-        authDataSource.getCurrentUser()
+
 }

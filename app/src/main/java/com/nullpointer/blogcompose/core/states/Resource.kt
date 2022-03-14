@@ -1,4 +1,3 @@
-
 package com.nullpointer.blogcompose.core.states
 
 sealed class Resource<out T> {

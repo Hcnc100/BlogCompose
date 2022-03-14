@@ -32,16 +32,10 @@ fun HomeNavHost(
     val loginStatus = authViewModel.stateAuthUser.collectAsState()
 
     val initialRoute: String? = when (loginStatus.value) {
-        LoginStatus.Authenticated -> {
-            if (authViewModel.isDataComplete)
-                MainDestinations.HomeScreen.route
-            else
-                MainDestinations.RegistryScreen.route
-        }
         LoginStatus.Authenticating -> null
-        LoginStatus.Unauthenticated -> {
-            MainDestinations.LoginScreen.route
-        }
+        LoginStatus.Unauthenticated -> MainDestinations.LoginScreen.route
+        LoginStatus.Authenticated.CompleteData ->MainDestinations.HomeScreen.route
+        LoginStatus.Authenticated.CompletingData -> MainDestinations.RegistryScreen.route
     }
     if (initialRoute != null) {
         NavHost(navController = navController, startDestination = initialRoute) {

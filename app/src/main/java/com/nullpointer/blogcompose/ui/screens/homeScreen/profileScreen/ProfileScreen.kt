@@ -23,11 +23,13 @@ import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.presentation.AuthViewModel
 import com.nullpointer.blogcompose.presentation.MyPostViewModel
 import com.nullpointer.blogcompose.presentation.PostViewModel
+import com.nullpointer.blogcompose.presentation.RegistryViewModel
 import com.nullpointer.blogcompose.ui.screens.swipePosts.ScreenSwiperPost
 import kotlinx.coroutines.flow.collect
 
 @Composable
 fun ProfileScreen(
+    registryViewModel: RegistryViewModel = hiltViewModel(),
     authViewModel: AuthViewModel = hiltViewModel(),
     myPostViewModel: MyPostViewModel = hiltViewModel(),
     postViewModel: PostViewModel = hiltViewModel(),
@@ -49,13 +51,14 @@ fun ProfileScreen(
         updateListPost = { myPostViewModel.requestNewPost(true) },
         actionBottomReached = myPostViewModel::concatenatePost,
         actionChangePost = postViewModel::likePost,
-        staticInfo = Pair(authViewModel.photoUser, authViewModel.nameUser),
+        staticInfo = Pair(registryViewModel.photoUser, registryViewModel.nameUser),
         isLoadNewData = stateLoading.value is Resource.Loading,
         isConcatenateData = stateConcatenate.value is Resource.Loading
     ) {
         HeaderProfile(
-            urlImgProfile = authViewModel.photoUser,
-            nameProfile = authViewModel.nameUser
+            urlImgProfile = registryViewModel.photoUser,
+            nameProfile = registryViewModel.nameUser,
+            authViewModel::logOut
         )
     }
 }
@@ -64,10 +67,11 @@ fun ProfileScreen(
 fun HeaderProfile(
     urlImgProfile: String,
     nameProfile: String,
+    actionLogOut:()->Unit
 ) {
     Box {
         InfoProfile(urlImgProfile, nameProfile)
-        IconButton(onClick = { /*TODO*/ }, modifier = Modifier
+        IconButton(onClick = { actionLogOut()}, modifier = Modifier
             .align(Alignment.TopEnd)
             .padding(10.dp)) {
             Icon(painterResource(id = R.drawable.ic_settings), "")

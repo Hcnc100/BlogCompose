@@ -35,8 +35,8 @@ object AppModule {
     fun getPostRepository(
         postDataSource: PostDataSource,
         postDAO: PostDAO,
-        myPostDAO: MyPostDAO
-    ): PostRepoImpl = PostRepoImpl(postDataSource, postDAO,myPostDAO)
+        myPostDAO: MyPostDAO,
+    ): PostRepoImpl = PostRepoImpl(postDataSource, postDAO, myPostDAO)
 
 
     @Provides
@@ -59,7 +59,8 @@ object AppModule {
     @Singleton
     fun provideAuthRepository(
         authDataSource: AuthDataSource,
-    ): AuthRepoImpl = AuthRepoImpl(authDataSource)
+        preferencesDataSource: PreferencesDataSource,
+    ): AuthRepoImpl = AuthRepoImpl(authDataSource, preferencesDataSource)
 
     @Provides
     @Singleton
@@ -121,7 +122,7 @@ object AppModule {
     @Provides
     @Singleton
     fun getMyPost(
-        database: BlogDataBase
-    ):MyPostDAO = database.getMyPostDAO()
+        database: BlogDataBase,
+    ): MyPostDAO = database.getMyPostDAO()
 
 }

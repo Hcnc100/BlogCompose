@@ -1,20 +1,14 @@
 package com.nullpointer.blogcompose.domain.auth
 
-import android.net.Uri
-import com.nullpointer.blogcompose.models.CurrentUser
+import com.nullpointer.blogcompose.models.User
 import kotlinx.coroutines.flow.Flow
 
 interface AuthRepository {
-    val isDataComplete:Boolean
-    val urlImgProfile: String?
-    val nameUser: String?
-    val uuidUser:String?
-
-    suspend fun authWithTokeGoogle(token:String): Flow<Pair<String?, String?>>
+    val user: Flow<User>
+    suspend fun authWithTokeGoogle(token: String)
     suspend fun deleterUser()
-    suspend fun updatePhotoUser(urlImg:String):String
-    suspend fun uploadNameUser(name:String):String
-    suspend fun uploadDataUser(urlImg: String,name: String)
-     fun getCurrentUser():Flow<CurrentUser?>
-     fun logOut()
+    suspend fun updatePhotoUser(urlImg: String): String
+    suspend fun uploadNameUser(name: String): String
+    suspend fun uploadDataUser(urlImg: String, name: String)
+    suspend fun logOut()
 }

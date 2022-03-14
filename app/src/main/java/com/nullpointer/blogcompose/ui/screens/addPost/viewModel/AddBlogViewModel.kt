@@ -7,7 +7,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nullpointer.blogcompose.R
-import com.nullpointer.blogcompose.core.delegates.SaveableComposeState
+import com.nullpointer.blogcompose.core.delegates.SavableComposeState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -31,16 +31,16 @@ class AddBlogViewModel @Inject constructor(
         const val MAX_LENGTH_DESCRIPTION = 250
     }
 
-    var fileImg: File? by SaveableComposeState(state, KEY_FILE_IMG, null)
+    var fileImg: File? by SavableComposeState(state, KEY_FILE_IMG, null)
         private set
 
-    var errorImage: Int by SaveableComposeState(state, KEY_HAS_ERROR_IMG, 0)
+    var errorImage: Int by SavableComposeState(state, KEY_HAS_ERROR_IMG, 0)
         private set
 
-    var description: String by SaveableComposeState(state, KEY_DESCRIPTION, "")
+    var description: String by SavableComposeState(state, KEY_DESCRIPTION, "")
         private set
 
-    var errorDescription: Int by SaveableComposeState(state, KEY_HAS_ERROR_DESC, 0)
+    var errorDescription: Int by SavableComposeState(state, KEY_HAS_ERROR_DESC, 0)
         private set
 
     private var jobCompress: Job? = null

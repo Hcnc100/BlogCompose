@@ -3,6 +3,8 @@ package com.nullpointer.blogcompose.ui.screens.addPost.components
 import android.content.Context
 
 import android.net.Uri
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.DrawableRes
@@ -10,39 +12,78 @@ import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import coil.compose.rememberImagePainter
 import com.nullpointer.blogcompose.BuildConfig
 import com.nullpointer.blogcompose.R
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 import java.io.File
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ButtonSheetContent(
-    actionBeforeSelect: (Uri) -> Unit,
+    scope:CoroutineScope,
+    sheetState: ModalBottomSheetState,
+    actionBeforeSelect: (Uri?) -> Unit,
 ) {
+
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    // * this back callback for remove the button sheet when clicked back and this show
+    val backCallback = remember {
+        object : OnBackPressedCallback(false) {
+            override fun handleOnBackPressed() {
+                scope.launch { sheetState.hide() }
+            }
+        }
+    }
+
+    // * enable or disable callback with the visibility of sheet state
+    backCallback.isEnabled = sheetState.isVisible
+
+    // * get the lifecycle and onBackPressedDispatcher
+    val backDispatcher = checkNotNull(LocalOnBackPressedDispatcherOwner.current) {
+        "No OnBackPressedDispatcherOwner was provided via LocalOnBackPressedDispatcherOwner"
+    }.onBackPressedDispatcher
+
+    // * registry callback
+    DisposableEffect(lifecycleOwner, backDispatcher) {
+        backDispatcher.addCallback(lifecycleOwner, backCallback)
+        // ! When the effect leaves the Composition, remove the callback
+        onDispose {
+            backCallback.remove()
+        }
+    }
+
     // ! this no work with delegate
     // * this is import for save state
     val tmpUri = rememberSaveable { mutableStateOf<Uri?>(null) }
-    val launcherPhoto =
-        rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) {
-            tmpUri.value?.let { actionBeforeSelect(it) }
+
+    // * this work create a tmp file, and when no select, the tmp file is no null
+    // * so, use the argument to know if take the photo or no
+    val launcherPhoto = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture()) { isCapture ->
+            val response=if(isCapture) tmpUri.value else null
+            actionBeforeSelect(response)
         }
-    val launcherImg =
-        rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-            uri?.let { actionBeforeSelect(it) }
+    // * this only get uri of select image, is null if not select any image
+    val launcherImg = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()) { uri ->
+            actionBeforeSelect(uri)
         }
     val context = LocalContext.current
 
@@ -56,7 +97,8 @@ fun ButtonSheetContent(
 
         Column {
 
-            Text(text = stringResource(R.string.text_select_option), modifier = Modifier.padding(10.dp))
+            Text(text = stringResource(R.string.text_select_option),
+                modifier = Modifier.padding(10.dp))
             Spacer(modifier = Modifier.padding(vertical = 5.dp))
             ItemButtonSheet(
                 iconResource = R.drawable.ic_camera,
@@ -103,6 +145,7 @@ fun ItemButtonSheet(
     }
 }
 
+// * get cache file from system provider
 private fun getTmpFileUri(context: Context): Uri {
     val tmpFile = File.createTempFile("tmp_image_file", ".png").apply {
         createNewFile()

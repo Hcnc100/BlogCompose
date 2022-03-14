@@ -6,7 +6,8 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import kotlin.reflect.KProperty
 
-class SaveableComposeState<T>(
+// * delegate to save state in view model with SavedStateHandle
+class SavableComposeState<T>(
     private val savedStateHandle: SavedStateHandle,
     private val key: String,
     defaultValue: T,

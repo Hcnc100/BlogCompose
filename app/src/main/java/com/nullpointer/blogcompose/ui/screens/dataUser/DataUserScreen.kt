@@ -1,21 +1,21 @@
 package com.nullpointer.blogcompose.ui.screens.dataUser
 
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -26,6 +26,7 @@ import coil.request.CachePolicy
 import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.presentation.AuthViewModel
+import com.nullpointer.blogcompose.presentation.RegistryViewModel
 import com.nullpointer.blogcompose.ui.customs.ToolbarBack
 import com.nullpointer.blogcompose.ui.screens.addPost.components.ButtonSheetContent
 import kotlinx.coroutines.flow.collect
@@ -35,29 +36,31 @@ import java.io.File
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun DataUserScreen(
-    authViewModel: AuthViewModel = hiltViewModel(),
+    registryViewModel: RegistryViewModel = hiltViewModel(),
 ) {
     // * reload info user
-    val statusChange = authViewModel.stateUpdateUser.collectAsState()
+    val statusChange = registryViewModel.stateUpdateUser.collectAsState()
     val scaffoldState = rememberScaffoldState()
     val sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
 
+
+
     LaunchedEffect(key1 = Unit) {
-        authViewModel.messageAuth.collect {
+        registryViewModel.registryMessage.collect {
             scaffoldState.snackbarHostState.showSnackbar(message = it,
                 duration = SnackbarDuration.Short)
         }
     }
 
     ModalBottomSheetLayout(sheetContent = {
-        ButtonSheetContent {
-            authViewModel.changeImgFileTemp(it, context)
-            scope.launch {
-                sheetState.hide()
-            }
-
+        ButtonSheetContent(
+            scope = scope,
+            sheetState = sheetState
+        ) { uri ->
+            uri?.let { registryViewModel.changeImgFileTemp(it, context) }
+            scope.launch { sheetState.hide() }
         }
     }, sheetState = sheetState) {
         Scaffold(
@@ -66,7 +69,7 @@ fun DataUserScreen(
             floatingActionButton = {
                 ButtonRegistryStatus(
                     statusChange.value) {
-                    authViewModel.updateDataUser(context)
+                    registryViewModel.updateDataUser(context)
                 }
             }
         ) {
@@ -78,10 +81,10 @@ fun DataUserScreen(
                         .fillMaxWidth()
                         .fillMaxHeight(.5f)
                         .background(MaterialTheme.colors.primary))
-                    ImageCirculateUser(fileTemp = authViewModel.fileImg,
-                        imageProfile = authViewModel.photoUser,
+                    ImageCirculateUser(fileTemp = registryViewModel.fileImg,
+                        imageProfile = registryViewModel.photoUser,
                         modifier = Modifier.align(Alignment.Center),
-                        isCompress = authViewModel.isCompress.value) {
+                        isCompress = registryViewModel.isCompress.value) {
                         scope.launch {
                             sheetState.show()
                         }
@@ -93,10 +96,10 @@ fun DataUserScreen(
                     .weight(4f)
                 ) {
                     TextInputName(
-                        nameUser = authViewModel.nameUser,
-                        changeNameUser = authViewModel::changeNameUserTemp,
-                        errorMessage = authViewModel.errorName,
-                        maxLength = AuthViewModel.MAX_LENGTH_NAME_USER,
+                        nameUser = registryViewModel.nameUser,
+                        changeNameUser = registryViewModel::changeNameUserTemp,
+                        errorMessage = registryViewModel.errorName,
+                        maxLength = 150,
                         modifier = Modifier.align(Alignment.Center))
                 }
                 Spacer(modifier = Modifier.weight(2f))

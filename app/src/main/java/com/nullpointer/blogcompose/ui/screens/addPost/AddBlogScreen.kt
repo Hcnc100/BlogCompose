@@ -24,6 +24,7 @@ import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.models.Post
 import com.nullpointer.blogcompose.models.Poster
 import com.nullpointer.blogcompose.presentation.AuthViewModel
+import com.nullpointer.blogcompose.presentation.RegistryViewModel
 import com.nullpointer.blogcompose.services.uploadImg.UploadPostServices
 import com.nullpointer.blogcompose.ui.customs.ToolbarBack
 import com.nullpointer.blogcompose.ui.screens.addPost.components.ButtonSheetContent
@@ -36,18 +37,20 @@ import java.io.File
 fun AddBlogScreen(
     addBlogVM: AddBlogViewModel = hiltViewModel(),
     authViewModel: AuthViewModel = hiltViewModel(),
+    registryViewModel: RegistryViewModel = hiltViewModel(),
     goBack: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
     val modalState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
     val context = LocalContext.current
     ModalBottomSheetLayout(sheetState = modalState, sheetContent = {
-        ButtonSheetContent(actionBeforeSelect = {
-            addBlogVM.changeFileImg(it, context)
-            scope.launch {
-                modalState.hide()
-            }
-        })
+        ButtonSheetContent(
+            scope = scope,
+            sheetState = modalState
+        ) { uri ->
+            scope.launch { modalState.hide() }
+            uri?.let { addBlogVM.changeFileImg(it, context) }
+        }
     }) {
         Scaffold(
             topBar = { ToolbarBack("Nuevo Post", goBack) },
@@ -58,9 +61,9 @@ fun AddBlogScreen(
                             Post(
                                 description = addBlogVM.description,
                                 poster = Poster(
-                                    uuid = authViewModel.uuidUser,
-                                    name = authViewModel.nameUser,
-                                    urlImg = authViewModel.photoUser
+                                    uuid = registryViewModel.uuidUser,
+                                    name = registryViewModel.nameUser,
+                                    urlImg = registryViewModel.photoUser
                                 )
                             ), addBlogVM.fileImg!!)
                         goBack()

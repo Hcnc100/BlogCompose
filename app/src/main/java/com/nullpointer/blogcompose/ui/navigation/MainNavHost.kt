@@ -30,7 +30,7 @@ fun MainNavHost(
             NotifyScreen()
         }
         composable(HomeDestinations.ProfileScreen.route) {
-            ProfileScreen(authViewModel)
+            ProfileScreen()
         }
     }
 }

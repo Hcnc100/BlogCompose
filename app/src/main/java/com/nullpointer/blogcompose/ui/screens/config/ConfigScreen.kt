@@ -34,11 +34,11 @@ fun ConfigScreen(
                     .fillMaxWidth()
                     .padding(10.dp)) {
                     Row {
-                        Text(text = authViewModel.nameUser, overflow = TextOverflow.Ellipsis)
-                        val painter = rememberImagePainter(data = authViewModel.photoUser)
-                        Image(painter = painter,
-                            contentDescription = "",
-                            modifier = Modifier.size(50.dp))
+//                        Text(text = authViewModel.nameUser, overflow = TextOverflow.Ellipsis)
+//                        val painter = rememberImagePainter(data = authViewModel.photoUser)
+//                        Image(painter = painter,
+//                            contentDescription = "",
+//                            modifier = Modifier.size(50.dp))
                     }
                 }
 

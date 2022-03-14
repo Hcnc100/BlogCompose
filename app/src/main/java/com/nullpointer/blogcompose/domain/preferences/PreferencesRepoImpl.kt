@@ -1,20 +1,18 @@
 package com.nullpointer.blogcompose.domain.preferences
 
 import com.nullpointer.blogcompose.data.local.PreferencesDataSource
+import com.nullpointer.blogcompose.models.User
 import kotlinx.coroutines.flow.Flow
 
 class PreferencesRepoImpl(
     private val preferencesDataSource: PreferencesDataSource,
 ) : PreferencesRepository {
-    override val isDataChange: Flow<Boolean> =
-        preferencesDataSource.isDataExternChange
-    override val hasNewNotify: Flow<Boolean> =
-        preferencesDataSource.hasReciveNotify
 
-    override suspend fun changeData(isDataChange: Boolean) =
-        preferencesDataSource.changeIsDataExternChange(isDataChange)
 
-    override suspend fun changeHasNotify(isHasNotify: Boolean) =
-        preferencesDataSource.changeReciveNotify(isHasNotify)
+    override fun getCurrentUser(): Flow<User> =
+        preferencesDataSource.getUserFromProtoStore()
+
+    override suspend fun updateUser(user: User) =
+        preferencesDataSource.saveUser(user)
 
 }

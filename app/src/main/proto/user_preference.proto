@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+option java_package = "com.nullpointer.blogcompose.data.local";
+option java_multiple_files = true;
+
+message UserPreference {
+  string name = 1;
+  string uuid = 2;
+  string urlImg = 4;
+}

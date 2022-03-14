@@ -1,10 +1,9 @@
 package com.nullpointer.blogcompose.domain.preferences
 
+import com.nullpointer.blogcompose.models.User
 import kotlinx.coroutines.flow.Flow
 
 interface PreferencesRepository {
-    val isDataChange:Flow<Boolean>
-    val hasNewNotify:Flow<Boolean>
-    suspend fun changeData(isDataChange:Boolean)
-    suspend fun changeHasNotify(isHasNotify:Boolean)
+    fun getCurrentUser(): Flow<User>
+    suspend fun updateUser(user: User)
 }
