@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.lang.Exception
+import java.lang.NullPointerException
 import java.util.concurrent.CancellationException
 import javax.inject.Inject
 
@@ -52,6 +53,8 @@ class NotifyViewModel @Inject constructor(
     init {
         // * always request last notifications
         requestLastNotify()
+
+        Timber.e("Se inicio el notofy view model")
     }
 
     fun concatenateNotify() {
@@ -95,6 +98,7 @@ class NotifyViewModel @Inject constructor(
                 when (e) {
                     is CancellationException -> throw e
                     is NetworkException -> _messageNotify.trySend("Verifique su conexion a internet")
+                    is NullPointerException -> Timber.e(" Error al obtener ultimas notificaciones El usuario posiblemente es nulo")
                     else -> {
                         _messageNotify.trySend("Error desconocido")
                         Timber.e("Error al obtener ultimas notificaciones $e")

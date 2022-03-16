@@ -19,13 +19,17 @@ import coil.compose.rememberImagePainter
 import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.presentation.AuthViewModel
 import com.nullpointer.blogcompose.ui.customs.ToolbarBack
+import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
 @Composable
+@Destination
 fun ConfigScreen(
-    authViewModel: AuthViewModel = hiltViewModel(),
+    authViewModel: AuthViewModel,
+    navigator: DestinationsNavigator,
 ) {
     Scaffold(
-        topBar = { ToolbarBack(title = "Configuración") }
+        topBar = { ToolbarBack(title = "Configuración",navigator::popBackStack) }
     ) {
         Column(verticalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxSize()) {
             Column {

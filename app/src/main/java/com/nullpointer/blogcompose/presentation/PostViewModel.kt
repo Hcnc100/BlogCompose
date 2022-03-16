@@ -15,6 +15,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import timber.log.Timber
 import java.lang.Exception
+import java.lang.NullPointerException
 import javax.inject.Inject
 
 @HiltViewModel
@@ -53,6 +54,7 @@ class PostViewModel @Inject constructor(
     init {
         // * when init this view model , request new post if is needed
         requestNewPost()
+        Timber.e("Se inicio el post view model")
     }
 
 
@@ -71,6 +73,7 @@ class PostViewModel @Inject constructor(
                 when (e) {
                     is CancellationException -> throw e
                     is NetworkException -> _messagePost.trySend("Verifique su conexion a internet")
+                    is NullPointerException -> Timber.e(" Error al obtener ultimas notificaciones El usuario posiblemente es nulo")
                     else -> {
                         _messagePost.trySend("Error desconocido")
                         Timber.e("Error en el request de todos los post $e")

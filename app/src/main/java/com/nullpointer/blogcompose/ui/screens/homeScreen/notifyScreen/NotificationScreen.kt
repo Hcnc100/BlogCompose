@@ -26,11 +26,14 @@ import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.core.utils.TimeUtils
 import com.nullpointer.blogcompose.presentation.NotifyViewModel
 import com.nullpointer.blogcompose.ui.screens.swipePosts.OnBottomReached
+import com.ramcosta.composedestinations.annotation.Destination
 import kotlinx.coroutines.flow.collect
 
+
 @Composable
+@Destination("NotifyScreen")
 fun NotifyScreen(
-    notifyVM: NotifyViewModel = hiltViewModel(),
+    notifyVM: NotifyViewModel
 ) {
     val stateListNotify = notifyVM.listNotify.collectAsState()
     val stateLoading = notifyVM.stateRequest.collectAsState()

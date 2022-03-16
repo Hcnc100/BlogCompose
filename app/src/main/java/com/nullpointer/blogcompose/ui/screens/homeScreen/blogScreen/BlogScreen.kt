@@ -7,13 +7,18 @@ import androidx.compose.runtime.collectAsState
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.presentation.PostViewModel
+import com.nullpointer.blogcompose.ui.navigation.HomeDestinations
+import com.nullpointer.blogcompose.ui.screens.destinations.AddBlogScreenDestination
 import com.nullpointer.blogcompose.ui.screens.swipePosts.ScreenSwiperPost
+import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.flow.collect
 
+@Destination(route = "BlogScreen", start = true)
 @Composable
 fun BlogScreen(
-    postVM: PostViewModel = hiltViewModel(),
-    actionGoToAddPost: () -> Unit,
+    postVM: PostViewModel,
+    navigator: DestinationsNavigator,
 ) {
 //    if (UploadPostServices.updatePostComplete.value) postVM.fetchLastPost()
     val resultGetPost = postVM.listPost.collectAsState()
@@ -31,7 +36,7 @@ fun BlogScreen(
         scaffoldState = scaffoldState,
         updateListPost = { postVM.requestNewPost(true) },
         actionBottomReached = postVM::concatenatePost,
-        actionButtonAdd = actionGoToAddPost,
+        actionButtonAdd = { navigator.navigate(AddBlogScreenDestination) },
         actionChangePost = postVM::likePost,
         isLoadNewData = stateLoading.value is Resource.Loading,
         isConcatenateData = stateConcatenate.value is Resource.Loading

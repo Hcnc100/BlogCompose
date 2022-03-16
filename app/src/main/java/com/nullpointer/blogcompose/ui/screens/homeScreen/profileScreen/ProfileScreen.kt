@@ -23,15 +23,16 @@ import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.presentation.AuthViewModel
 import com.nullpointer.blogcompose.presentation.MyPostViewModel
 import com.nullpointer.blogcompose.presentation.PostViewModel
-import com.nullpointer.blogcompose.presentation.RegistryViewModel
 import com.nullpointer.blogcompose.ui.screens.swipePosts.ScreenSwiperPost
+import com.ramcosta.composedestinations.annotation.Destination
 import kotlinx.coroutines.flow.collect
 
 @Composable
+@Destination("ProfileScreen")
 fun ProfileScreen(
-    authViewModel: AuthViewModel = hiltViewModel(),
-    myPostViewModel: MyPostViewModel = hiltViewModel(),
-    postViewModel: PostViewModel = hiltViewModel(),
+    authViewModel: AuthViewModel,
+    myPostViewModel: MyPostViewModel,
+    postViewModel: PostViewModel,
 ) {
 
     val stateListPost = myPostViewModel.listMyPost.collectAsState()

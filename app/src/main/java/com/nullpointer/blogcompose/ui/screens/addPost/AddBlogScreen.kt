@@ -1,18 +1,24 @@
 package com.nullpointer.blogcompose.ui.screens.addPost
 
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
+import androidx.compose.animation.*
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -24,54 +30,86 @@ import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.models.Post
 import com.nullpointer.blogcompose.models.Poster
 import com.nullpointer.blogcompose.presentation.AuthViewModel
+
 import com.nullpointer.blogcompose.presentation.RegistryViewModel
 import com.nullpointer.blogcompose.services.uploadImg.UploadPostServices
 import com.nullpointer.blogcompose.ui.customs.ToolbarBack
 import com.nullpointer.blogcompose.ui.screens.addPost.components.ButtonSheetContent
 import com.nullpointer.blogcompose.ui.screens.addPost.viewModel.AddBlogViewModel
+import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.File
 
 @OptIn(ExperimentalMaterialApi::class)
+@Destination
 @Composable
 fun AddBlogScreen(
     addBlogVM: AddBlogViewModel = hiltViewModel(),
-    authViewModel: AuthViewModel = hiltViewModel(),
-    registryViewModel: RegistryViewModel = hiltViewModel(),
-    goBack: () -> Unit,
+    registryViewModel: RegistryViewModel,
+    navigator: DestinationsNavigator,
 ) {
     val scope = rememberCoroutineScope()
     val modalState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
     val context = LocalContext.current
-    ModalBottomSheetLayout(sheetState = modalState, sheetContent = {
-        ButtonSheetContent(
-            scope = scope,
-            sheetState = modalState
-        ) { uri ->
-            scope.launch { modalState.hide() }
-            uri?.let { addBlogVM.changeFileImg(it, context) }
-        }
-    }) {
-        Scaffold(
-            topBar = { ToolbarBack("Nuevo Post", goBack) },
-            floatingActionButton = {
-                ButtonPublish {
-                    if (addBlogVM.validate()) {
-                        UploadPostServices.startServicesUploadPost(context,
-                            Post(
-                                description = addBlogVM.description,
-                                poster = Poster(
-                                    uuid = registryViewModel.uuidUser,
-                                    name = registryViewModel.nameUser,
-                                    urlImg = registryViewModel.photoUser
-                                )
-                            ), addBlogVM.fileImg!!)
-                        goBack()
-                    } else {
-                        Toast.makeText(context, "Verifique sus datos", Toast.LENGTH_SHORT).show()
-                    }
+    val (buttonVisible, changeButtonVisible) = rememberSaveable { mutableStateOf(false) }
+
+    LaunchedEffect(key1 = Unit) {
+        delay(300)
+        changeButtonVisible(true)
+    }
+    BackHandler(buttonVisible) {
+        changeButtonVisible(false)
+        navigator.popBackStack()
+    }
+
+    ModalBottomSheetLayout(sheetState = modalState,
+        sheetContent = {
+
+            if (modalState.isVisible) {
+                ButtonSheetContent(
+                    scope = scope,
+                    sheetState = modalState
+                ) { uri ->
+                    scope.launch { modalState.hide() }
+                    uri?.let { addBlogVM.changeFileImg(it, context) }
                 }
+            } else {
+                Box(modifier = Modifier
+                    .fillMaxWidth()
+                    .height(1.dp))
             }
+
+        },
+        sheetBackgroundColor = if (modalState.isVisible) MaterialTheme.colors.surface else Color.Transparent) {
+        Scaffold(
+            topBar = {
+                ToolbarBack("Nuevo Post") {
+                    navigator.popBackStack()
+                }
+            },
+            floatingActionButton = {
+                if (buttonVisible)
+                    ButtonPublish {
+                        if (addBlogVM.validate()) {
+                            UploadPostServices.startServicesUploadPost(context,
+                                Post(
+                                    description = addBlogVM.description,
+                                    poster = Poster(
+                                        uuid = registryViewModel.uuidUser,
+                                        name = registryViewModel.nameUser,
+                                        urlImg = registryViewModel.photoUser
+                                    )
+                                ), addBlogVM.fileImg!!)
+
+                        } else {
+                            Toast.makeText(context, "Verifique sus datos", Toast.LENGTH_SHORT)
+                                .show()
+                        }
+                    }
+
+            },
         ) {
             Column(modifier = Modifier
                 .verticalScroll(rememberScrollState())) {
@@ -92,6 +130,36 @@ fun AddBlogScreen(
 
 }
 
+
+@Composable
+public fun BackHandler(enabled: Boolean = true, onBack: () -> Unit) {
+    // Safely update the current `onBack` lambda when a new one is provided
+    val currentOnBack by rememberUpdatedState(onBack)
+    // Remember in Composition a back callback that calls the `onBack` lambda
+    val backCallback = remember {
+        object : OnBackPressedCallback(enabled) {
+            override fun handleOnBackPressed() {
+                currentOnBack()
+            }
+        }
+    }
+    // On every successful composition, update the callback with the `enabled` value
+    SideEffect {
+        backCallback.isEnabled = enabled
+    }
+    val backDispatcher = checkNotNull(LocalOnBackPressedDispatcherOwner.current) {
+        "No OnBackPressedDispatcherOwner was provided via LocalOnBackPressedDispatcherOwner"
+    }.onBackPressedDispatcher
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner, backDispatcher) {
+        // Add callback to the backDispatcher
+        backDispatcher.addCallback(lifecycleOwner, backCallback)
+        // When the effect leaves the Composition, remove the callback
+        onDispose {
+            backCallback.remove()
+        }
+    }
+}
 
 @Composable
 fun ButtonPublish(

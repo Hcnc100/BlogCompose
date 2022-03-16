@@ -32,6 +32,9 @@ class MyPostViewModel @Inject constructor(
     private val _stateConcatenateData = MutableStateFlow<Resource<Unit>>(Resource.Loading())
     val stateConcatenate = _stateConcatenateData.asStateFlow()
 
+    // * var to save job, to like
+    private var jobLike: Job? = null
+
     val listMyPost = postRepo.listMyLastPost.catch {
         Timber.e("Error al obtener my post de la base de datos $it")
         _messageMyPosts.trySend("Error deconocido")
@@ -43,6 +46,7 @@ class MyPostViewModel @Inject constructor(
 
     init {
         requestNewPost()
+        Timber.e("Se inicio el my repo view model")
     }
 
 
@@ -61,6 +65,7 @@ class MyPostViewModel @Inject constructor(
                 when (e) {
                     is CancellationException -> throw e
                     is NetworkException -> _messageMyPosts.trySend("Verifique su conexion a internet")
+                    is NullPointerException-> Timber.e(" Error al obtener ultimas notificaciones El usuario posiblemente es nulo")
                     else -> {
                         _messageMyPosts.trySend("Error desconocido")
                         Timber.e("Error en el request 'myPost' $e")

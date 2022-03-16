@@ -30,15 +30,19 @@ import com.nullpointer.blogcompose.presentation.AuthViewModel
 import com.nullpointer.blogcompose.presentation.RegistryViewModel
 import com.nullpointer.blogcompose.ui.customs.ToolbarBack
 import com.nullpointer.blogcompose.ui.screens.addPost.components.ButtonSheetContent
+import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import java.io.File
 
 @OptIn(ExperimentalMaterialApi::class)
+@Destination
 @Composable
 fun DataUserScreen(
-    registryViewModel: RegistryViewModel = hiltViewModel(),
-    authViewModel: AuthViewModel = hiltViewModel()
+    registryViewModel: RegistryViewModel,
+    authViewModel: AuthViewModel,
+    navigator: DestinationsNavigator
 ) {
     // * reload info user
     val statusChange = registryViewModel.stateUpdateUser.collectAsState(null)

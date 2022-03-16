@@ -31,11 +31,15 @@ import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.states.LoginStatus
 import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.presentation.AuthViewModel
+import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import timber.log.Timber
 
 @Composable
+@Destination
 fun AuthScreen(
-    authViewModel: AuthViewModel = hiltViewModel(),
+    authViewModel: AuthViewModel,
+    navigator: DestinationsNavigator,
 ) {
     val scaffoldState = rememberScaffoldState()
     val authStatus = authViewModel.stateAuthentication.collectAsState()

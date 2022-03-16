@@ -1,27 +1,45 @@
 package com.nullpointer.blogcompose.ui.navigation
 
-import androidx.compose.ui.graphics.BlendMode.Companion.Screen
 import com.nullpointer.blogcompose.R
+import com.nullpointer.blogcompose.ui.screens.destinations.BlogScreenDestination
+import com.nullpointer.blogcompose.ui.screens.destinations.NotifyScreenDestination
+import com.nullpointer.blogcompose.ui.screens.destinations.ProfileScreenDestination
+import com.ramcosta.composedestinations.spec.DirectionDestinationSpec
 
-sealed class HomeDestinations(
-    val route: String,
+enum class HomeDestinations(
+    val direction: DirectionDestinationSpec,
     val title: String,
     val icon: Int,
 ) {
-    object BlogScreen : HomeDestinations(
-        route = "BlogScreen",
+     BlogScreen (
+        direction = BlogScreenDestination,
         title = "Blogs",
         icon = R.drawable.ic_home
-    )
-    object NotifyScreen : HomeDestinations(
-        route = "NotifyScreen",
+    ),
+
+     NotifyScreen (
+        direction = NotifyScreenDestination,
         title = "Notificaciones",
         icon = R.drawable.ic_notify
-    )
-    object ProfileScreen : HomeDestinations(
-        route = "PerfilScreen",
+    ),
+
+     ProfileScreen (
+        direction = ProfileScreenDestination,
         title = "Perfil",
         icon = R.drawable.ic_account
-    )
+    );
+
+    companion object {
+        private val listDestinations = listOf(
+            BlogScreen,
+            NotifyScreen,
+            ProfileScreen
+        )
+
+        fun isHomeRoute(route: String?): Boolean {
+            if (route == null) return false
+            return listDestinations.find { it.direction.route == route } != null
+        }
+    }
 
 }
