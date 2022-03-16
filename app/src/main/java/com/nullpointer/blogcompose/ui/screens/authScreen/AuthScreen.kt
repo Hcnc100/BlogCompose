@@ -2,12 +2,9 @@ package com.nullpointer.blogcompose.ui.screens.authScreen
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
@@ -22,13 +19,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberImagePainter
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.nullpointer.blogcompose.R
-import com.nullpointer.blogcompose.core.states.LoginStatus
 import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.presentation.AuthViewModel
 import com.ramcosta.composedestinations.annotation.Destination
@@ -139,6 +134,8 @@ fun ButtonLoginGoogle(
         contract = ActivityResultContracts.StartActivityForResult()) {
         val task = GoogleSignIn.getSignedInAccountFromIntent(it.data)
         try {
+            val exception=task.exception
+            if(exception!=null) throw exception
             val account = task.getResult(ApiException::class.java)!!
             authWithTokeGoogle(account.idToken!!)
         } catch (e: ApiException) {

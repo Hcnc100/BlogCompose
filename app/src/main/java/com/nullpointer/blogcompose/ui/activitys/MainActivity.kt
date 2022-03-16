@@ -41,6 +41,9 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val authViewModel:AuthViewModel by viewModels()
+    private val myPostViewModel:MyPostViewModel by viewModels()
+    private val postViewModel:PostViewModel by viewModels()
+    private val notifyViewModel:NotifyViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -63,7 +66,12 @@ class MainActivity : ComponentActivity() {
                     val stateAuth = authViewModel.stateAuthUser.collectAsState()
                     val initRoute = when (stateAuth.value) {
                         LoginStatus.Authenticating -> null
-                        LoginStatus.Authenticated.CompleteData -> BlogScreenDestination
+                        LoginStatus.Authenticated.CompleteData -> {
+                            myPostViewModel.requestNewPost()
+                            postViewModel.requestNewPost()
+                            notifyViewModel.requestLastNotify()
+                            BlogScreenDestination
+                        }
                         LoginStatus.Authenticated.CompletingData -> DataUserScreenDestination
                         LoginStatus.Unauthenticated -> AuthScreenDestination
                     }

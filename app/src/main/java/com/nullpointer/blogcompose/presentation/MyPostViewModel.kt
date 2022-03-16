@@ -32,8 +32,6 @@ class MyPostViewModel @Inject constructor(
     private val _stateConcatenateData = MutableStateFlow<Resource<Unit>>(Resource.Loading())
     val stateConcatenate = _stateConcatenateData.asStateFlow()
 
-    // * var to save job, to like
-    private var jobLike: Job? = null
 
     val listMyPost = postRepo.listMyLastPost.catch {
         Timber.e("Error al obtener my post de la base de datos $it")
@@ -45,7 +43,6 @@ class MyPostViewModel @Inject constructor(
     )
 
     init {
-        requestNewPost()
         Timber.e("Se inicio el my repo view model")
     }
 

@@ -71,12 +71,6 @@ class AuthViewModel @Inject constructor(
         try {
             authRepoImpl.authWithTokeGoogle(token)
             _stateAuthentication.value = Resource.Success(Unit)
-
-            // * if auth is success force refresh data
-            // ! this is important for refresh data if de-auth and auth in one session
-            notifyRepoImpl.requestLastNotify(true)
-            postRepoImpl.requestLastPost(true)
-            postRepoImpl.requestMyLastPost(true)
         } catch (e: Exception) {
             when (e) {
                 is CancellationException -> throw e
