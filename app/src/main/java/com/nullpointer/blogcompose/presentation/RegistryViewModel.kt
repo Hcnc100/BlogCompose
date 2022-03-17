@@ -54,9 +54,6 @@ class RegistryViewModel @Inject constructor(
         private set
     var photoUser by SavableComposeState(savedStateHandle, KEY_PHOTO_USER, "")
         private set
-    var uuidUser by SavableComposeState(savedStateHandle, KEY_UUID_USER, "")
-        private set
-
     var errorName by SavableComposeState(savedStateHandle, KEY_ERROR_NAME, 0)
         private set
     var fileImg: File? by SavableComposeState(savedStateHandle, KEY_IMAGE_USER, null)
@@ -75,10 +72,18 @@ class RegistryViewModel @Inject constructor(
     var isCompress = mutableStateOf(false)
         private set
 
-    fun setInitData(name: String, urlImg: String) {
-        nameUser = name
-        photoUser = urlImg
+    init {
+        viewModelScope.launch {
+            try {
+                val currentUser = authRepoImpl.user.first()
+                nameUser = currentUser.nameUser
+                photoUser = currentUser.urlImg
+            } catch (e: Exception) {
+                if (e is CancellationException) throw e else Timber.e("$e")
+            }
+        }
     }
+
 
     fun updateDataUser(context: Context) = viewModelScope.launch {
         when {

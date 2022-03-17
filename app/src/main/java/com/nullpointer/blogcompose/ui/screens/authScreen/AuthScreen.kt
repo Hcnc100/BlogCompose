@@ -36,7 +36,6 @@ import timber.log.Timber
 @Destination(start = true)
 fun AuthScreen(
     authViewModel: AuthViewModel,
-    navigator: DestinationsNavigator,
 ) {
     val scaffoldState = rememberScaffoldState()
     val authStatus = authViewModel.stateAuthentication.collectAsState()

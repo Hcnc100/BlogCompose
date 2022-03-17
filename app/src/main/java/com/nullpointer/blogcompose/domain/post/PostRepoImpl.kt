@@ -28,11 +28,12 @@ class PostRepoImpl(
         val idFirstPost = if (forceRefresh) null else postDAO.getFirstPost()?.id
         val listLastPost = postDataSource.getLatestPost(
             nPosts = SIZE_POST_REQUEST,
-            beforeId = idFirstPost
+            endWithPostId = idFirstPost
         )
         if (listLastPost.isNotEmpty()) postDAO.updateAllPost(listLastPost)
         return listLastPost.size
     }
+
 
     override suspend fun requestMyLastPost(forceRefresh: Boolean): Int {
         if (!InternetCheck.isNetworkAvailable()) throw NetworkException()
@@ -41,7 +42,7 @@ class PostRepoImpl(
         val idMyFirstPost = if (forceRefresh) null else myPostDAO.getFirstPost()?.id
         val listMyLastPost = postDataSource.getMyLastPost(
             nPosts = SIZE_POST_REQUEST,
-            beforeId = idMyFirstPost
+            endWithPostId = idMyFirstPost
         ).map { MyPost.fromPost(it) }
         if (listMyLastPost.isNotEmpty()) myPostDAO.updateAllPost(listMyLastPost)
         return listMyLastPost.size
@@ -54,7 +55,7 @@ class PostRepoImpl(
         if (!InternetCheck.isNetworkAvailable()) throw NetworkException()
         val listNewPost = postDataSource.getLatestPost(
             nPosts = SIZE_POST_REQUEST,
-            afterId = postDAO.getLastPost()?.id
+            startWithPostId = postDAO.getLastPost()?.id
         )
         postDAO.insertListPost(listNewPost)
         return listNewPost.size
@@ -67,7 +68,7 @@ class PostRepoImpl(
         if (!InternetCheck.isNetworkAvailable()) throw NetworkException()
         val listMyNewPost = postDataSource.getMyLastPost(
             nPosts = SIZE_POST_REQUEST,
-            afterId = myPostDAO.getLastPost()?.id
+            startWithPostId = myPostDAO.getLastPost()?.id
         )
         val listSimplePost = listMyNewPost.map { MyPost.fromPost(it) }
         myPostDAO.insertListPost(listSimplePost)
@@ -103,13 +104,33 @@ class PostRepoImpl(
         }
     }
 
+    private suspend fun requestLastPostInitWith(idPost: String) {
+        if (!InternetCheck.isNetworkAvailable()) throw NetworkException()
+        val listLastPost = postDataSource.getLatestPost(
+            nPosts = SIZE_POST_REQUEST,
+            startWithPostId = idPost,
+            includePost = true
+        )
+        if (listLastPost.isNotEmpty()) postDAO.updateAllPost(listLastPost)
+
+        val listMyPost = postDataSource.getMyLastPost(
+            nPosts = SIZE_POST_REQUEST,
+            startWithPostId = idPost,
+            includePost = true
+        )
+        if (listLastPost.isNotEmpty()) myPostDAO.updateAllPost(listMyPost.map { MyPost.fromPost(it) })
+
+    }
+
     override suspend fun deleterAllPost() {
         postDAO.deleterAll()
         myPostDAO.deleterAll()
     }
 
-    override suspend fun addNewPost(post: Post) =
+    override suspend fun addNewPost(post: Post) {
         postDataSource.addNewPost(post)
+        requestLastPostInitWith(post.id)
+    }
 
     override suspend fun deleterPost(post: Post) =
         postDataSource.deleterPost(post)

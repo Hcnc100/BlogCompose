@@ -108,7 +108,6 @@ class MainActivity : ComponentActivity() {
                                         dependency(hiltViewModel<NotifyViewModel>(this@MainActivity))
                                         dependency(hiltViewModel<MyPostViewModel>(this@MainActivity))
                                         dependency(hiltViewModel<PostViewModel>(this@MainActivity))
-                                        dependency(hiltViewModel<RegistryViewModel>(this@MainActivity))
                                     }
                                 )
                             }

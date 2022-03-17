@@ -3,19 +3,21 @@ package com.nullpointer.blogcompose.services.uploadImg
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
 import com.nullpointer.blogcompose.core.states.StorageUploadTaskResult
+import com.nullpointer.blogcompose.domain.auth.AuthRepoImpl
 import com.nullpointer.blogcompose.domain.images.ImagesRepoImpl
 import com.nullpointer.blogcompose.domain.post.PostRepoImpl
 import com.nullpointer.blogcompose.models.Post
+import com.nullpointer.blogcompose.models.Poster
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.io.File
+import java.util.*
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -27,11 +29,12 @@ class UploadPostServices : LifecycleService() {
         private const val ACTION_STOP = "ACTION_STOP"
         private const val KEY_FILE_IMG_POST = "KEY_FILE_IMG_POST"
         private const val KEY_POST = "KEY_POST"
+        private const val KEY_DESCRIPTION_POST = "KEY_DESCRIPTION_POST"
 
-        fun startServicesUploadPost(context: Context, post: Post, fileImage: File) {
+        fun startServicesUploadPost(context: Context, description: String, fileImage: File) {
             Intent(context, UploadPostServices::class.java).also {
                 it.putExtra(KEY_FILE_IMG_POST, fileImage)
-                it.putExtra(KEY_POST, post)
+                it.putExtra(KEY_DESCRIPTION_POST, description)
                 it.action = ACTION_START
                 context.startService(it)
             }
@@ -44,7 +47,7 @@ class UploadPostServices : LifecycleService() {
             }
         }
 
-        val updatePostComplete = mutableStateOf(false)
+
     }
 
     private val notifyHelper = NotificationHelper(this)
@@ -55,6 +58,9 @@ class UploadPostServices : LifecycleService() {
 
     @Inject
     lateinit var postRepoImpl: PostRepoImpl
+
+    @Inject
+    lateinit var authRepoImpl: AuthRepoImpl
 
 
     private val _stateUpload = MutableStateFlow<StorageUploadTaskResult?>(null)
@@ -74,14 +80,32 @@ class UploadPostServices : LifecycleService() {
 
     private fun actionStartCommand(intent: Intent) {
         val fileImage = intent.getSerializableExtra(KEY_FILE_IMG_POST)
-        val post = intent.getParcelableExtra<Post>(KEY_POST)
-        if (fileImage != null && post != null) {
+        val description = intent.getStringExtra(KEY_DESCRIPTION_POST)
+        if (fileImage != null && description != null) {
             lifecycleScope.launch {
-                startUploadImg(Uri.fromFile(fileImage as File), post.id) {
-                    postRepoImpl.updatePost(post.copy(urlImage = it))
+                val uuid = UUID.randomUUID().toString()
+                startUploadImg(Uri.fromFile(fileImage as File), uuid) {
+                    postRepoImpl.addNewPost(
+                        createNewPost(uuid, description, it)
+                    )
                 }
+
             }
         }
+    }
+
+    suspend fun createNewPost(uuidPost: String, description: String, urlImg: String): Post {
+        val user = authRepoImpl.user.first()
+        return Post(
+            id=uuidPost,
+            description = description,
+            urlImage = urlImg,
+            poster = Poster(
+                uuid = user.uuid,
+                name = user.nameUser,
+                urlImg = user.urlImg
+            )
+        )
     }
 
     private fun actionStopCommand() {
@@ -109,7 +133,6 @@ class UploadPostServices : LifecycleService() {
                     servicesNotification.setProgress(100, 100, true)
                     _stateUpload.value = task
                     uploadPost(task.urlFile)
-                    updatePostComplete.value = true
                     killServices()
                 }
                 is StorageUploadTaskResult.InProgress -> {
@@ -122,7 +145,6 @@ class UploadPostServices : LifecycleService() {
     }
 
     private fun killServices() {
-        updatePostComplete.value = false
         stopForeground(true)
         stopSelf()
     }

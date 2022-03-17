@@ -40,7 +40,7 @@ import java.io.File
 @Destination
 @Composable
 fun DataUserScreen(
-    registryViewModel: RegistryViewModel,
+    registryViewModel: RegistryViewModel = hiltViewModel(),
     authViewModel: AuthViewModel,
     navigator: DestinationsNavigator,
 ) {
@@ -78,9 +78,6 @@ fun DataUserScreen(
                 if (isDataComplete) {
                     // * if data is complete , show data saved
                     ToolbarBack(title = "Información de perfil") { navigator.popBackStack() }
-                    registryViewModel.setInitData(
-                        name = currentUser.value!!.nameUser,
-                        urlImg = currentUser.value!!.urlImg)
                 } else {
                     // ? if data is no complete no show nothing
                     ToolbarBack(title = "Completa tu cuenta")

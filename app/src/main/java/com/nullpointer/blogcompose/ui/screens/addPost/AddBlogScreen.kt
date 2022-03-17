@@ -3,9 +3,7 @@ package com.nullpointer.blogcompose.ui.screens.addPost
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
-import androidx.compose.animation.*
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -27,11 +25,6 @@ import coil.annotation.ExperimentalCoilApi
 import coil.compose.ImagePainter
 import coil.compose.rememberImagePainter
 import com.nullpointer.blogcompose.R
-import com.nullpointer.blogcompose.models.Post
-import com.nullpointer.blogcompose.models.Poster
-import com.nullpointer.blogcompose.presentation.AuthViewModel
-
-import com.nullpointer.blogcompose.presentation.RegistryViewModel
 import com.nullpointer.blogcompose.services.uploadImg.UploadPostServices
 import com.nullpointer.blogcompose.ui.customs.ToolbarBack
 import com.nullpointer.blogcompose.ui.screens.addPost.components.ButtonSheetContent
@@ -47,7 +40,6 @@ import java.io.File
 @Composable
 fun AddBlogScreen(
     addBlogVM: AddBlogViewModel = hiltViewModel(),
-    registryViewModel: RegistryViewModel,
     navigator: DestinationsNavigator,
 ) {
     val scope = rememberCoroutineScope()
@@ -93,22 +85,15 @@ fun AddBlogScreen(
                 if (buttonVisible)
                     ButtonPublish {
                         if (addBlogVM.validate()) {
-                            UploadPostServices.startServicesUploadPost(context,
-                                Post(
-                                    description = addBlogVM.description,
-                                    poster = Poster(
-                                        uuid = registryViewModel.uuidUser,
-                                        name = registryViewModel.nameUser,
-                                        urlImg = registryViewModel.photoUser
-                                    )
-                                ), addBlogVM.fileImg!!)
-
-                        } else {
-                            Toast.makeText(context, "Verifique sus datos", Toast.LENGTH_SHORT)
-                                .show()
+                            UploadPostServices.startServicesUploadPost(
+                                context = context,
+                                description = addBlogVM.description,
+                                fileImage = addBlogVM.fileImg!!
+                            )
+                            Toast.makeText(context, "Subiendo post", Toast.LENGTH_SHORT).show()
+                            navigator.popBackStack()
                         }
                     }
-
             },
         ) {
             Column(modifier = Modifier
