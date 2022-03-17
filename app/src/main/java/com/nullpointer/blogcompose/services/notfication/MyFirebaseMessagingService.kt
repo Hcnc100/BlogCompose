@@ -60,7 +60,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             CoroutineScope(job).launch {
                 notifyHelper.launchNotifyLike(
                     bitmapPost = getBitMapUser(notify.urlImgPost, false)!!,
-                    bitmapUser = getBitMapUser("https://picsum.photos/200", true)!!,
+                    bitmapUser = getBitMapUser(notify.imgUserLiked, true)!!,
                     notify.nameUserLiked,
                     ""
                 )
