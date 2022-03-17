@@ -11,19 +11,19 @@ enum class HomeDestinations(
     val title: String,
     val icon: Int,
 ) {
-     BlogScreen (
+    BlogScreen(
         direction = BlogScreenDestination,
         title = "Blogs",
         icon = R.drawable.ic_home
     ),
 
-     NotifyScreen (
+    NotifyScreen(
         direction = NotifyScreenDestination,
         title = "Notificaciones",
         icon = R.drawable.ic_notify
     ),
 
-     ProfileScreen (
+    ProfileScreen(
         direction = ProfileScreenDestination,
         title = "Perfil",
         icon = R.drawable.ic_account

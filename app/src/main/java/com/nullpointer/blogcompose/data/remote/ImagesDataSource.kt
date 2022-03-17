@@ -15,7 +15,7 @@ import kotlin.math.absoluteValue
 
 class ImagesDataSource {
     private val refStorage = Firebase.storage.getReference("imgPost")
-    private val refImgUser= Firebase.storage.getReference("imgUsers")
+    private val refImgUser = Firebase.storage.getReference("imgUsers")
     private val idUser = Firebase.auth.currentUser?.uid ?: "NoAuth"
 
 

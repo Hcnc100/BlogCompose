@@ -1,7 +1,6 @@
 package com.nullpointer.blogcompose.data.local.cache
 
 import androidx.room.*
-import com.nullpointer.blogcompose.models.Post
 import com.nullpointer.blogcompose.models.MyPost
 import kotlinx.coroutines.flow.Flow
 
@@ -23,7 +22,7 @@ interface MyPostDAO {
     suspend fun deleterAll()
 
     @Transaction
-    suspend fun updateAllPost(list:List<MyPost>){
+    suspend fun updateAllPost(list: List<MyPost>) {
         deleterAll()
         insertListPost(list)
     }

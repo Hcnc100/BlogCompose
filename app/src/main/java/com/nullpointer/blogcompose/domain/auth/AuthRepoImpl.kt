@@ -4,7 +4,6 @@ import com.nullpointer.blogcompose.data.local.PreferencesDataSource
 import com.nullpointer.blogcompose.data.remote.AuthDataSource
 import com.nullpointer.blogcompose.models.User
 import kotlinx.coroutines.flow.Flow
-import timber.log.Timber
 
 class AuthRepoImpl(
     private val authDataSource: AuthDataSource,

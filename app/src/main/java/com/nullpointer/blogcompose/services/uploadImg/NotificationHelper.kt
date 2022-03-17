@@ -63,7 +63,8 @@ class NotificationHelper(context: Context) : ContextWrapper(context) {
         val remoteViews = RemoteViews(this.packageName, R.layout.notify_liked)
         remoteViews.setImageViewBitmap(R.id.img_user_liked, bitmapUser)
         remoteViews.setImageViewBitmap(R.id.img_post_liked, bitmapPost)
-        remoteViews.setTextViewText(R.id.text_date_notify,System.currentTimeMillis().toFormat(this))
+        remoteViews.setTextViewText(R.id.text_date_notify,
+            System.currentTimeMillis().toFormat(this))
         remoteViews.setTextViewText(R.id.title, "Recibiste un like")
         remoteViews.setTextViewText(R.id.text, "A $nameUserLiked le gusta tu post")
 

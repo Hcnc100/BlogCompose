@@ -29,7 +29,8 @@ class PostDataSource {
         if (startWithPostId != null) {
             val refDocument = refPosts.document(startWithPostId).get().await()
             if (refDocument.exists())
-                query = if (includePost) query.startAt(refDocument) else query.startAfter(refDocument)
+                query =
+                    if (includePost) query.startAt(refDocument) else query.startAfter(refDocument)
         }
         if (endWithPostId != null) {
             val refDocument = refPosts.document(endWithPostId).get().await()

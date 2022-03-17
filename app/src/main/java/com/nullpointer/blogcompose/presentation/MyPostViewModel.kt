@@ -66,7 +66,7 @@ class MyPostViewModel @Inject constructor(
                 when (e) {
                     is CancellationException -> throw e
                     is NetworkException -> _messageMyPosts.trySend("Verifique su conexion a internet")
-                    is NullPointerException-> Timber.e(" Error al obtener ultimas notificaciones El usuario posiblemente es nulo")
+                    is NullPointerException -> Timber.e(" Error al obtener ultimas notificaciones El usuario posiblemente es nulo")
                     else -> {
                         _messageMyPosts.trySend("Error desconocido")
                         Timber.e("Error en el request 'myPost' $e")

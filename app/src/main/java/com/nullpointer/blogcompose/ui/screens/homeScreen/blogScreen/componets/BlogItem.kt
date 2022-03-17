@@ -6,7 +6,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -16,7 +19,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.annotation.ExperimentalCoilApi
 import com.nullpointer.blogcompose.core.utils.TimeUtils
-import com.nullpointer.blogcompose.models.Post
 import com.nullpointer.blogcompose.models.SimplePost
 import java.util.*
 
@@ -24,12 +26,12 @@ import java.util.*
 @Composable
 fun BlogItem(
     post: SimplePost,
-    actionChangePost:(String,Boolean)->Unit,
-    staticInfo:Pair<String,String>? = null
+    actionChangePost: (String, Boolean) -> Unit,
+    staticInfo: Pair<String, String>? = null,
 ) {
     val (ownerLike, changeOwnerLike) = remember { mutableStateOf(post.ownerLike) }
     SideEffect {
-        if(ownerLike!=post.ownerLike){
+        if (ownerLike != post.ownerLike) {
             changeOwnerLike(post.ownerLike)
         }
     }
@@ -40,17 +42,17 @@ fun BlogItem(
         shape = RoundedCornerShape(10.dp)
     ) {
         Column {
-            if(staticInfo!=null){
-                HeaderBlog(staticInfo.first,staticInfo.second)
-            }else{
+            if (staticInfo != null) {
+                HeaderBlog(staticInfo.first, staticInfo.second)
+            } else {
                 HeaderBlog(post.poster!!.urlImg, post.poster!!.name)
             }
             ImageBlog(post.urlImage)
             ButtonsInteractionBlog(ownerLike) {
-                actionChangePost(post.id,it)
+                actionChangePost(post.id, it)
                 changeOwnerLike(it)
-                post.ownerLike=!post.ownerLike
-                post.numberLikes=if (it) post.numberLikes+1 else post.numberLikes-1
+                post.ownerLike = !post.ownerLike
+                post.numberLikes = if (it) post.numberLikes + 1 else post.numberLikes - 1
             }
             TextLikes(post.numberLikes, post.numberComments)
             DescriptionBlog(Modifier.padding(5.dp), post.description)

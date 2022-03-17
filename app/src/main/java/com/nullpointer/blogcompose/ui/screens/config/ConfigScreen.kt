@@ -45,8 +45,8 @@ fun ConfigScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         modifier = Modifier.padding(10.dp)
                     ) {
-                        Text(text = currentUser?.nameUser?:"", overflow = TextOverflow.Ellipsis)
-                        val painter = rememberImagePainter(data = currentUser?.urlImg?:"") {
+                        Text(text = currentUser?.nameUser ?: "", overflow = TextOverflow.Ellipsis)
+                        val painter = rememberImagePainter(data = currentUser?.urlImg ?: "") {
                             transformations(
                                 CircleCropTransformation()
                             )

@@ -13,7 +13,7 @@ interface NotifyDAO {
     suspend fun insertListNotify(list: List<Notify>)
 
     @Transaction
-    suspend fun updateAllNotify(list:List<Notify>){
+    suspend fun updateAllNotify(list: List<Notify>) {
         deleterAll()
         insertListNotify(list)
     }
@@ -25,8 +25,8 @@ interface NotifyDAO {
     fun getAllNotify(): Flow<List<Notify>>
 
     @Query("SELECT * FROM table_notify ORDER BY timestamp DESC LIMIT 1")
-    suspend fun getFirstNotify():Notify?
+    suspend fun getFirstNotify(): Notify?
 
     @Query("SELECT * FROM table_notify ORDER BY timestamp LIMIT 1")
-    suspend fun getLastNotify():Notify?
+    suspend fun getLastNotify(): Notify?
 }

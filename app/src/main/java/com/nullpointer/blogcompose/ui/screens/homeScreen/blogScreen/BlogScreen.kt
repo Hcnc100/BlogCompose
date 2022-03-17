@@ -7,8 +7,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.presentation.PostViewModel
-import com.nullpointer.blogcompose.services.uploadImg.UploadPostServices
-import com.nullpointer.blogcompose.ui.navigation.HomeDestinations
 import com.nullpointer.blogcompose.ui.screens.destinations.AddBlogScreenDestination
 import com.nullpointer.blogcompose.ui.screens.swipePosts.ScreenSwiperPost
 import com.ramcosta.composedestinations.annotation.Destination
@@ -22,8 +20,6 @@ fun BlogScreen(
     postVM: PostViewModel = hiltViewModel(),
     navigator: DestinationsNavigator,
 ) {
-
-
     val resultGetPost = postVM.listPost.collectAsState()
     val stateLoading = postVM.stateLoad.collectAsState()
     val stateConcatenate = postVM.stateConcatenate.collectAsState()

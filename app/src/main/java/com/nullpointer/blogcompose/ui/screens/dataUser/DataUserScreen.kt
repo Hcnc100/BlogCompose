@@ -1,28 +1,27 @@
 package com.nullpointer.blogcompose.ui.screens.dataUser
 
-import androidx.activity.OnBackPressedCallback
-import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.annotation.ExperimentalCoilApi
 import coil.compose.ImagePainter
 import coil.compose.rememberImagePainter
-import coil.request.CachePolicy
 import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.states.LoginStatus
 import com.nullpointer.blogcompose.core.states.Resource
@@ -52,7 +51,7 @@ fun DataUserScreen(
     val context = LocalContext.current
     val isDataComplete =
         authViewModel.stateAuthUser.collectAsState().value is LoginStatus.Authenticated.CompleteData
-    val currentUser = authViewModel.currentUser.collectAsState()
+    authViewModel.currentUser.collectAsState()
 
 
 
@@ -128,6 +127,7 @@ fun DataUserScreen(
 
 }
 
+@OptIn(ExperimentalCoilApi::class)
 @Composable
 fun ImageCirculateUser(
     fileTemp: File?,

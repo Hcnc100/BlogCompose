@@ -2,10 +2,12 @@ package com.nullpointer.blogcompose.ui.customs
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.*
+import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.FloatingActionButton
+import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -16,12 +18,12 @@ import com.nullpointer.blogcompose.R
 
 @Composable
 fun FabProgress(
-    modifier: Modifier=Modifier,
-    cancelAction:(()->Unit)?=null,
+    modifier: Modifier = Modifier,
+    cancelAction: (() -> Unit)? = null,
     isLoading: Boolean,
-    changeLoading:(Boolean)->Unit,
-    colorNormal:Color,
-    contentNormal: @Composable ()->Unit,
+    changeLoading: (Boolean) -> Unit,
+    colorNormal: Color,
+    contentNormal: @Composable () -> Unit,
 ) {
     FloatingActionButton(
         onClick = { changeLoading(!isLoading) },
@@ -31,7 +33,7 @@ fun FabProgress(
         if (isLoading) {
             Box(contentAlignment = Alignment.Center) {
                 CircularProgressIndicator(modifier = Modifier.size(54.dp))
-                if(cancelAction!=null){
+                if (cancelAction != null) {
                     Icon(painterResource(id = R.drawable.ic_clear),
                         contentDescription = "",
                         Modifier.padding(10.dp))

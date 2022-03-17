@@ -129,9 +129,9 @@ class PostRepoImpl(
         myPostDAO.deleterAll()
     }
 
-    override suspend fun addNewPost(post: Post,context: Context) {
+    override suspend fun addNewPost(post: Post, context: Context) {
         postDataSource.addNewPost(post)
-        Toast.makeText(context,"Post subido con exito", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, "Post subido con exito", Toast.LENGTH_SHORT).show()
         requestLastPostInitWith(post.id)
     }
 

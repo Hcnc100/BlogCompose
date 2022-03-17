@@ -99,7 +99,7 @@ class UploadPostServices : LifecycleService() {
     suspend fun createNewPost(uuidPost: String, description: String, urlImg: String): Post {
         val user = authRepoImpl.user.first()
         return Post(
-            id=uuidPost,
+            id = uuidPost,
             description = description,
             urlImage = urlImg,
             poster = Poster(

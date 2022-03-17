@@ -1,9 +1,5 @@
 package com.nullpointer.blogcompose.models
 
-import androidx.room.Ignore
-import androidx.room.PrimaryKey
-import com.google.firebase.firestore.Exclude
-import com.google.firebase.firestore.ServerTimestamp
 import java.util.*
 
 interface SimplePost {

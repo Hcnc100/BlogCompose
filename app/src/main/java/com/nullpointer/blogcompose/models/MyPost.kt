@@ -1,6 +1,5 @@
 package com.nullpointer.blogcompose.models
 
-import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.Ignore
 import androidx.room.PrimaryKey
@@ -23,9 +22,9 @@ data class MyPost(
     override var id: String = UUID.randomUUID().toString(),
     @Ignore
     override var poster: Poster? = null,
-):SimplePost{
-    companion object{
-        fun fromPost(post:Post) = MyPost(
+) : SimplePost {
+    companion object {
+        fun fromPost(post: Post) = MyPost(
             description = post.description,
             urlImage = post.urlImage,
             numberComments = post.numberComments,
@@ -35,8 +34,9 @@ data class MyPost(
             id = post.id
         )
     }
-    fun copyInnerLike(isLiked:Boolean):MyPost{
-        val newCount=if(isLiked) numberLikes+1 else numberLikes-1
+
+    fun copyInnerLike(isLiked: Boolean): MyPost {
+        val newCount = if (isLiked) numberLikes + 1 else numberLikes - 1
         return this.copy(
             numberLikes = newCount,
             ownerLike = isLiked

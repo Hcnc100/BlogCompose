@@ -25,9 +25,9 @@ data class Post(
     @set:Exclude @get:Exclude
     @PrimaryKey
     override var id: String = UUID.randomUUID().toString(),
-) : Parcelable,SimplePost{
-    fun copyInnerLike(isLiked:Boolean):Post{
-        val newCount=if(isLiked) numberLikes+1 else numberLikes-1
+) : Parcelable, SimplePost {
+    fun copyInnerLike(isLiked: Boolean): Post {
+        val newCount = if (isLiked) numberLikes + 1 else numberLikes - 1
         return this.copy(
             numberLikes = newCount,
             ownerLike = isLiked

@@ -118,14 +118,14 @@ fun ButtonsAuth(
 }
 
 fun getGoogleSignInClient(
-    context: Context
+    context: Context,
 ): GoogleSignInClient {
-    val token =context.getString(R.string.default_web_client_id)
+    val token = context.getString(R.string.default_web_client_id)
     val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
         .requestIdToken(token)
         .requestEmail()
         .build()
-     return  GoogleSignIn.getClient(context, gso)
+    return GoogleSignIn.getClient(context, gso)
 }
 
 @Composable
@@ -133,13 +133,13 @@ fun ButtonLoginGoogle(
     modifier: Modifier = Modifier,
     authWithTokeGoogle: (String) -> Unit,
 ) {
-    val googleSignInClient= getGoogleSignInClient(LocalContext.current)
+    val googleSignInClient = getGoogleSignInClient(LocalContext.current)
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()) {
         val task = GoogleSignIn.getSignedInAccountFromIntent(it.data)
         try {
-            val exception=task.exception
-            if(exception!=null) throw exception
+            val exception = task.exception
+            if (exception != null) throw exception
             val account = task.getResult(ApiException::class.java)!!
             authWithTokeGoogle(account.idToken!!)
         } catch (e: ApiException) {

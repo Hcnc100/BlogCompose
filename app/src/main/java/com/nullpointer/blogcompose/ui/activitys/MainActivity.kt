@@ -111,7 +111,6 @@ class MainActivity : ComponentActivity() {
 }
 
 
-
 @Composable
 fun ButtonNavigation(
     navController: NavController,
@@ -128,10 +127,12 @@ fun ButtonNavigation(
                 onClick = {
                     navController.navigateTo(destination.direction) {
                         popUpTo(navController.graph.findStartDestination().id) {
-                            if(HomeDestinations.isHomeRoute(destination.direction.route)) saveState = true
+                            if (HomeDestinations.isHomeRoute(destination.direction.route)) saveState =
+                                true
                         }
                         launchSingleTop = true
-                        if(HomeDestinations.isHomeRoute(destination.direction.route)) restoreState = true
+                        if (HomeDestinations.isHomeRoute(destination.direction.route)) restoreState =
+                            true
                     }
                 },
                 icon = { Icon(painterResource(id = destination.icon), "") },

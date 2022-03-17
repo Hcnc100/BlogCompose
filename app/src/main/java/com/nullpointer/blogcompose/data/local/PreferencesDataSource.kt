@@ -3,14 +3,9 @@ package com.nullpointer.blogcompose.data.local
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.dataStore
-import androidx.datastore.preferences.core.booleanPreferencesKey
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.intPreferencesKey
-import androidx.datastore.preferences.preferencesDataStore
 import com.nullpointer.blogcompose.models.User
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import java.util.prefs.Preferences
 
 class PreferencesDataSource(
     private val context: Context,

@@ -1,6 +1,5 @@
 package com.nullpointer.blogcompose.ui.customs
 
-import android.icu.text.CaseMap
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Text
@@ -13,7 +12,7 @@ import com.nullpointer.blogcompose.R
 fun ToolbarBack(title: String, actionBack: (() -> Unit)? = null) {
     TopAppBar(title = { Text(title) },
         navigationIcon = {
-            actionBack?.let {action->
+            actionBack?.let { action ->
                 IconButton(onClick = { action() }) {
                     Icon(painterResource(id = R.drawable.ic_arrow_back), "")
                 }

@@ -8,14 +8,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.delegates.SavableComposeState
-import com.nullpointer.blogcompose.domain.auth.AuthRepoImpl
-import com.nullpointer.blogcompose.models.Post
-import com.nullpointer.blogcompose.models.Poster
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.single
 import kotlinx.coroutines.launch
 import me.shouheng.compress.Compress
 import me.shouheng.compress.concrete

@@ -6,11 +6,11 @@ import com.nullpointer.blogcompose.data.remote.ImagesDataSource
 import kotlinx.coroutines.flow.Flow
 
 class ImagesRepoImpl(
-    private val imagesDataSource: ImagesDataSource
-):ImagesRepository {
+    private val imagesDataSource: ImagesDataSource,
+) : ImagesRepository {
     override fun uploadImgProfile(uri: Uri): Flow<StorageUploadTaskResult> =
-        imagesDataSource.uploadImagePost(uri,"imgProfile")
+        imagesDataSource.uploadImagePost(uri, "imgProfile")
 
-    override fun uploadImgBlog(uri: Uri,name:String): Flow<StorageUploadTaskResult> =
+    override fun uploadImgBlog(uri: Uri, name: String): Flow<StorageUploadTaskResult> =
         imagesDataSource.uploadImagePost(uri, name)
 }

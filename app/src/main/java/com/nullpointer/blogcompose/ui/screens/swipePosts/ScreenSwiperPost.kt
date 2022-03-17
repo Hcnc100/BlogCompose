@@ -16,8 +16,6 @@ import androidx.compose.ui.unit.dp
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.SwipeRefreshState
 import com.nullpointer.blogcompose.R
-import com.nullpointer.blogcompose.core.states.Resource
-import com.nullpointer.blogcompose.models.Post
 import com.nullpointer.blogcompose.models.SimplePost
 import com.nullpointer.blogcompose.ui.screens.homeScreen.blogScreen.componets.BlogItem
 import kotlinx.coroutines.InternalCoroutinesApi

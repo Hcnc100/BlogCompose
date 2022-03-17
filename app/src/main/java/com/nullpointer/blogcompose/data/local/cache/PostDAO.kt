@@ -23,7 +23,7 @@ interface PostDAO {
     suspend fun deleterAll()
 
     @Transaction
-    suspend fun updateAllPost(list:List<Post>){
+    suspend fun updateAllPost(list: List<Post>) {
         deleterAll()
         insertListPost(list)
     }

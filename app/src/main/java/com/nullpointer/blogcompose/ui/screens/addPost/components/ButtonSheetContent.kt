@@ -36,7 +36,7 @@ import java.io.File
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ButtonSheetContent(
-    scope:CoroutineScope,
+    scope: CoroutineScope,
     sheetState: ModalBottomSheetState,
     actionBeforeSelect: (Uri?) -> Unit,
 ) {
@@ -77,14 +77,14 @@ fun ButtonSheetContent(
     // * so, use the argument to know if take the photo or no
     val launcherPhoto = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture()) { isCapture ->
-            val response=if(isCapture) tmpUri.value else null
-            actionBeforeSelect(response)
-        }
+        val response = if (isCapture) tmpUri.value else null
+        actionBeforeSelect(response)
+    }
     // * this only get uri of select image, is null if not select any image
     val launcherImg = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()) { uri ->
-            actionBeforeSelect(uri)
-        }
+        actionBeforeSelect(uri)
+    }
     val context = LocalContext.current
 
     Box(modifier = Modifier
