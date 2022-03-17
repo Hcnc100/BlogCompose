@@ -31,7 +31,7 @@ import kotlinx.coroutines.flow.collect
 
 
 @Composable
-@Destination("NotifyScreen")
+@Destination( navGraph = "homeDestinations")
 fun NotifyScreen(
     notifyVM: NotifyViewModel
 ) {

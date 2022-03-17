@@ -28,7 +28,7 @@ import com.ramcosta.composedestinations.annotation.Destination
 import kotlinx.coroutines.flow.collect
 
 @Composable
-@Destination("ProfileScreen")
+@Destination( navGraph = "homeDestinations")
 fun ProfileScreen(
     authViewModel: AuthViewModel,
     myPostViewModel: MyPostViewModel,

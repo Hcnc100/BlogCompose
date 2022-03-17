@@ -14,7 +14,8 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.flow.collect
 
-@Destination(route = "BlogScreen", start = true)
+@Destination(
+    navGraph = "homeDestinations", start = true)
 @Composable
 fun BlogScreen(
     postVM: PostViewModel,

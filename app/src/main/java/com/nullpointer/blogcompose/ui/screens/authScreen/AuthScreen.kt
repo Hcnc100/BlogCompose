@@ -31,7 +31,7 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import timber.log.Timber
 
 @Composable
-@Destination
+@Destination(start = true)
 fun AuthScreen(
     authViewModel: AuthViewModel,
     navigator: DestinationsNavigator,
@@ -39,6 +39,7 @@ fun AuthScreen(
     val scaffoldState = rememberScaffoldState()
     val authStatus = authViewModel.stateAuthentication.collectAsState()
     val messageError = authViewModel.messageAuth.collectAsState(null)
+
 
     LaunchedEffect(messageError.value) {
         messageError.value?.let {

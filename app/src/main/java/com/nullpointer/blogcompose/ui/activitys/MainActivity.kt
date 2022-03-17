@@ -20,6 +20,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.insets.ProvideWindowInsets
@@ -32,6 +33,7 @@ import com.nullpointer.blogcompose.ui.screens.destinations.AuthScreenDestination
 import com.nullpointer.blogcompose.ui.screens.destinations.BlogScreenDestination
 import com.nullpointer.blogcompose.ui.screens.destinations.DataUserScreenDestination
 import com.nullpointer.blogcompose.ui.screens.navDestination
+import com.nullpointer.blogcompose.ui.screens.startDestination
 import com.nullpointer.blogcompose.ui.theme.BlogComposeTheme
 import com.ramcosta.composedestinations.DestinationsNavHost
 import com.ramcosta.composedestinations.navigation.dependency
@@ -40,10 +42,10 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    private val authViewModel:AuthViewModel by viewModels()
-    private val myPostViewModel:MyPostViewModel by viewModels()
-    private val postViewModel:PostViewModel by viewModels()
-    private val notifyViewModel:NotifyViewModel by viewModels()
+    private val authViewModel: AuthViewModel by viewModels()
+    private val myPostViewModel: MyPostViewModel by viewModels()
+    private val postViewModel: PostViewModel by viewModels()
+    private val notifyViewModel: NotifyViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,23 +66,18 @@ class MainActivity : ComponentActivity() {
 
 
                     val stateAuth = authViewModel.stateAuthUser.collectAsState()
-                    val initRoute = when (stateAuth.value) {
-                        LoginStatus.Authenticating -> null
+                    val destination = when (stateAuth.value) {
+
                         LoginStatus.Authenticated.CompleteData -> {
                             myPostViewModel.requestNewPost()
                             postViewModel.requestNewPost()
                             notifyViewModel.requestLastNotify()
-                            BlogScreenDestination
+                            NavGraphs.homeDestinations
                         }
-                        LoginStatus.Authenticated.CompletingData -> DataUserScreenDestination
-                        LoginStatus.Unauthenticated -> AuthScreenDestination
+                        LoginStatus.Authenticated.CompletingData -> DataUserScreenDestination.startDestination
+                        LoginStatus.Authenticating -> null
+                        LoginStatus.Unauthenticated -> AuthScreenDestination.startDestination
                     }
-                    if (initRoute != null) {
-                        navController.navigateTo(initRoute)
-                        loading = false
-                    }
-
-
 
                     Scaffold(modifier = Modifier
                         .navigationBarsWithImePadding()
@@ -97,25 +94,35 @@ class MainActivity : ComponentActivity() {
                             }
                         }
                     ) { innerPadding ->
-                        Box(modifier = Modifier.padding(innerPadding)) {
-                            DestinationsNavHost(
-                                navController = navController,
-                                navGraph = NavGraphs.root,
-                                dependenciesContainerBuilder = {
-                                    dependency(hiltViewModel<AuthViewModel>(this@MainActivity))
-                                    dependency(hiltViewModel<NotifyViewModel>(this@MainActivity))
-                                    dependency(hiltViewModel<MyPostViewModel>(this@MainActivity))
-                                    dependency(hiltViewModel<PostViewModel>(this@MainActivity))
-                                    dependency(hiltViewModel<RegistryViewModel>(this@MainActivity))
-                                }
-                            )
+
+                        if (destination != null) {
+                            loading = false
+
+                            Box(modifier = Modifier.padding(innerPadding)) {
+                                DestinationsNavHost(
+                                    navController = navController,
+                                    navGraph = NavGraphs.root,
+                                    startRoute = destination,
+                                    dependenciesContainerBuilder = {
+                                        dependency(hiltViewModel<AuthViewModel>(this@MainActivity))
+                                        dependency(hiltViewModel<NotifyViewModel>(this@MainActivity))
+                                        dependency(hiltViewModel<MyPostViewModel>(this@MainActivity))
+                                        dependency(hiltViewModel<PostViewModel>(this@MainActivity))
+                                        dependency(hiltViewModel<RegistryViewModel>(this@MainActivity))
+                                    }
+                                )
+                            }
                         }
                     }
                 }
+
+
             }
         }
     }
 }
+
+
 
 @Composable
 fun ButtonNavigation(
@@ -132,6 +139,9 @@ fun ButtonNavigation(
                 selected = currentDestination == destination.direction,
                 onClick = {
                     navController.navigateTo(destination.direction) {
+                        popUpTo(navController.graph.findStartDestination().id) {
+                            saveState = true
+                        }
                         launchSingleTop = true
                         restoreState = true
                     }
