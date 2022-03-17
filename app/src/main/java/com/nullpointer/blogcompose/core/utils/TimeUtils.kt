@@ -17,7 +17,7 @@ object TimeUtils {
             diff < 2 * MINUTE_IN_MILLIS -> context.getString(R.string.text_time_one_minute_ago)
             diff < 60 * MINUTE_IN_MILLIS -> context.getString(R.string.text_time_more_minutes_ago,diff / MINUTE_IN_MILLIS)
             diff < 2 * HOUR_IN_MILLIS -> context.getString(R.string.text_time_one_hour_ago)
-            diff < 24 * HOUR_IN_MILLIS -> context.getString(R.string.text_time_more_hour_ago,diff / MINUTE_IN_MILLIS)
+            diff < 24 * HOUR_IN_MILLIS -> context.getString(R.string.text_time_more_hour_ago,diff / HOUR_IN_MILLIS)
             diff < 48 * HOUR_IN_MILLIS -> context.getString(R.string.text_time_yesterday)
             else -> context.getString(R.string.text_time_days_Ago,diff / DAY_IN_MILLIS)
         }
