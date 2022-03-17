@@ -9,6 +9,7 @@ import coil.transform.CircleCropTransformation
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.nullpointer.blogcompose.domain.notify.NotifyRepoImpl
+import com.nullpointer.blogcompose.domain.post.PostRepoImpl
 import com.nullpointer.blogcompose.domain.preferences.PreferencesRepoImpl
 import com.nullpointer.blogcompose.domain.toke.TokenRepoImpl
 import com.nullpointer.blogcompose.models.Notify
@@ -28,6 +29,9 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
     @Inject
     lateinit var notifyRepoImpl: NotifyRepoImpl
+
+    @Inject
+    lateinit var postRepoImpl: PostRepoImpl
 
     private val job = SupervisorJob()
 
@@ -62,9 +66,10 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
                     bitmapPost = getBitMapUser(notify.urlImgPost, false)!!,
                     bitmapUser = getBitMapUser(notify.imgUserLiked, true)!!,
                     notify.nameUserLiked,
-                    ""
+                    notify.idPost
                 )
                 notifyRepoImpl.requestLastNotify()
+                postRepoImpl.updateLikePost(notify.idPost)
             }
         } catch (e: Exception) {
             Timber.e("Message $e")

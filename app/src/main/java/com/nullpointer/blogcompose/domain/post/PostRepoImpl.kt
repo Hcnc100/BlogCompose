@@ -82,17 +82,21 @@ class PostRepoImpl(
     }
 
 
-    override suspend fun updateLikePost(idPost: String, isLiked: Boolean) {
+    override suspend fun updateLikePost(idPost: String, isLiked: Boolean?) {
         val oldPost = postDAO.getPostById(idPost)
         val oldMyPost = myPostDAO.getPostById(idPost)
         try {
-            // * update fake post
-            if (oldPost != null) postDAO.updatePost(oldPost.copyInnerLike(isLiked))
-            if (oldMyPost != null) myPostDAO.updatePost(oldMyPost.copyInnerLike(isLiked))
+            val postUpdate = if(isLiked!=null){
+                // * update fake post
+                if (oldPost != null) postDAO.updatePost(oldPost.copyInnerLike(isLiked))
+                if (oldMyPost != null) myPostDAO.updatePost(oldMyPost.copyInnerLike(isLiked))
 
-            // * if has null update post or dont have internet, launch exception
-            if (!InternetCheck.isNetworkAvailable()) throw NetworkException()
-            val postUpdate = postDataSource.updateLikes(idPost, isLiked)!!
+                // * if has null update post or dont have internet, launch exception
+                if (!InternetCheck.isNetworkAvailable()) throw NetworkException()
+                 postDataSource.updateLikes(idPost, isLiked)!!
+            }else{
+                postDataSource.getPost(idPost)!!
+            }
 
             // * update the info from post
             if (oldPost != null) postDAO.updatePost(postUpdate)

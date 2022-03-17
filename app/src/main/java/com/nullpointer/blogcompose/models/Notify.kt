@@ -9,6 +9,7 @@ data class Notify(
     val idUserLiked: String = "",
     val nameUserLiked: String = "",
     val imgUserLiked: String = "",
+    val idPost: String = "",
     val urlImgPost: String = "",
     var timestamp: Date? = null,
     val isOpen: Boolean = false,
@@ -16,6 +17,7 @@ data class Notify(
     var id: String = "",
 ) {
     constructor(map: Map<String, String>) : this(
+        idPost= map["idPost"]!!,
         idUserLiked = map["idUserLiked"]!!,
         nameUserLiked = map["nameUserLiked"]!!,
         imgUserLiked = map["imgUserLiked"]!!,
