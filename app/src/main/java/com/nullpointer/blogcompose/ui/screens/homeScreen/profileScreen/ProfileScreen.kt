@@ -22,9 +22,7 @@ import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.presentation.AuthViewModel
 import com.nullpointer.blogcompose.presentation.MyPostViewModel
-import com.nullpointer.blogcompose.presentation.PostViewModel
 import com.nullpointer.blogcompose.ui.screens.destinations.ConfigScreenDestination
-import com.nullpointer.blogcompose.ui.screens.destinations.DataUserScreenDestination
 import com.nullpointer.blogcompose.ui.screens.swipePosts.ScreenSwiperPost
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -34,8 +32,7 @@ import kotlinx.coroutines.flow.collect
 @Destination(navGraph = "homeDestinations")
 fun ProfileScreen(
     authViewModel: AuthViewModel,
-    myPostViewModel: MyPostViewModel,
-    postViewModel: PostViewModel,
+    myPostViewModel: MyPostViewModel = hiltViewModel(),
     navigator: DestinationsNavigator,
 ) {
 
@@ -59,7 +56,7 @@ fun ProfileScreen(
         scaffoldState = scaffoldState,
         updateListPost = { myPostViewModel.requestNewPost(true) },
         actionBottomReached = myPostViewModel::concatenatePost,
-        actionChangePost = postViewModel::likePost,
+        actionChangePost = myPostViewModel::likePost,
         staticInfo = Pair(photoUser, name),
         isLoadNewData = stateLoading.value is Resource.Loading,
         isConcatenateData = stateConcatenate.value is Resource.Loading

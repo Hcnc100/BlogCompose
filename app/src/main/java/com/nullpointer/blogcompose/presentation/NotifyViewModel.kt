@@ -53,6 +53,7 @@ class NotifyViewModel @Inject constructor(
     init {
         // * always request last notifications
         Timber.e("Se inicio el notofy view model")
+        requestLastNotify()
     }
 
     fun concatenateNotify() {

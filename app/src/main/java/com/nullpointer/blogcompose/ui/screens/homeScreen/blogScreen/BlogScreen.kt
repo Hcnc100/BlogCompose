@@ -19,7 +19,7 @@ import kotlinx.coroutines.flow.collect
     navGraph = "homeDestinations", start = true)
 @Composable
 fun BlogScreen(
-    postVM: PostViewModel,
+    postVM: PostViewModel = hiltViewModel(),
     navigator: DestinationsNavigator,
 ) {
 

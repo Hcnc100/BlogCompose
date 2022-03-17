@@ -15,7 +15,6 @@ class AuthRepoImpl(
 
     override suspend fun authWithTokeGoogle(token: String) {
         val user = authDataSource.authWithTokenGoogle(token)
-        Timber.d("User $user")
         prefDataSource.saveUser(user)
     }
 

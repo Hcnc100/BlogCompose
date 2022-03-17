@@ -43,9 +43,6 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val authViewModel: AuthViewModel by viewModels()
-    private val myPostViewModel: MyPostViewModel by viewModels()
-    private val postViewModel: PostViewModel by viewModels()
-    private val notifyViewModel: NotifyViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -68,12 +65,7 @@ class MainActivity : ComponentActivity() {
                     val stateAuth = authViewModel.stateAuthUser.collectAsState()
                     val destination = when (stateAuth.value) {
 
-                        LoginStatus.Authenticated.CompleteData -> {
-                            myPostViewModel.requestNewPost()
-                            postViewModel.requestNewPost()
-                            notifyViewModel.requestLastNotify()
-                            NavGraphs.homeDestinations
-                        }
+                        LoginStatus.Authenticated.CompleteData -> NavGraphs.homeDestinations
                         LoginStatus.Authenticated.CompletingData -> DataUserScreenDestination.startDestination
                         LoginStatus.Authenticating -> null
                         LoginStatus.Unauthenticated -> AuthScreenDestination.startDestination
@@ -104,10 +96,7 @@ class MainActivity : ComponentActivity() {
                                     navGraph = NavGraphs.root,
                                     startRoute = destination,
                                     dependenciesContainerBuilder = {
-                                        dependency(hiltViewModel<AuthViewModel>(this@MainActivity))
-                                        dependency(hiltViewModel<NotifyViewModel>(this@MainActivity))
-                                        dependency(hiltViewModel<MyPostViewModel>(this@MainActivity))
-                                        dependency(hiltViewModel<PostViewModel>(this@MainActivity))
+                                        dependency(authViewModel)
                                     }
                                 )
                             }
@@ -139,10 +128,10 @@ fun ButtonNavigation(
                 onClick = {
                     navController.navigateTo(destination.direction) {
                         popUpTo(navController.graph.findStartDestination().id) {
-                            saveState = true
+                            if(HomeDestinations.isHomeRoute(destination.direction.route)) saveState = true
                         }
                         launchSingleTop = true
-                        restoreState = true
+                        if(HomeDestinations.isHomeRoute(destination.direction.route)) restoreState = true
                     }
                 },
                 icon = { Icon(painterResource(id = destination.icon), "") },

@@ -54,6 +54,7 @@ class PostViewModel @Inject constructor(
     init {
         // * when init this view model , request new post if is needed
         Timber.e("Se inicio el post view model")
+        requestNewPost()
     }
 
 

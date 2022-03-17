@@ -33,7 +33,7 @@ import kotlinx.coroutines.flow.collect
 @Composable
 @Destination( navGraph = "homeDestinations")
 fun NotifyScreen(
-    notifyVM: NotifyViewModel
+    notifyVM: NotifyViewModel = hiltViewModel(),
 ) {
     val stateListNotify = notifyVM.listNotify.collectAsState()
     val stateLoading = notifyVM.stateRequest.collectAsState()

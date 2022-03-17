@@ -32,6 +32,9 @@ class MyPostViewModel @Inject constructor(
     private val _stateConcatenateData = MutableStateFlow<Resource<Unit>>(Resource.Loading())
     val stateConcatenate = _stateConcatenateData.asStateFlow()
 
+    // * var to save job, to like
+    private var jobLike: Job? = null
+
 
     val listMyPost = postRepo.listMyLastPost.catch {
         Timber.e("Error al obtener my post de la base de datos $it")
@@ -44,6 +47,7 @@ class MyPostViewModel @Inject constructor(
 
     init {
         Timber.e("Se inicio el my repo view model")
+        requestNewPost()
     }
 
 
@@ -89,6 +93,26 @@ class MyPostViewModel @Inject constructor(
                     else -> {
                         _messageMyPosts.trySend("Error desconocido")
                         Timber.e("Error en el request  de mis post $e")
+                    }
+                }
+            }
+        }
+    }
+
+    fun likePost(idPost: String, isLiked: Boolean) {
+        // * this init like job, update the database with new data with the new data of
+        // * server
+        jobLike?.cancel()
+        jobLike = viewModelScope.launch(Dispatchers.IO) {
+            try {
+                postRepo.updateLikePost(idPost, isLiked)
+            } catch (e: java.lang.Exception) {
+                when (e) {
+                    is CancellationException -> throw e
+                    is NetworkException -> _messageMyPosts.send("Necesita conexion para esto")
+                    else -> {
+                        Timber.e("Erro al dar like $e")
+                        _messageMyPosts.send("Error desconocido")
                     }
                 }
             }

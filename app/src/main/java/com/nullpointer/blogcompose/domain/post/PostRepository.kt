@@ -1,5 +1,6 @@
 package com.nullpointer.blogcompose.domain.post
 
+import android.content.Context
 import com.nullpointer.blogcompose.models.MyPost
 import com.nullpointer.blogcompose.models.Post
 import kotlinx.coroutines.flow.Flow
@@ -12,7 +13,7 @@ interface PostRepository {
     suspend fun requestMyLastPost(forceRefresh: Boolean = false): Int
     suspend fun concatenatePost(): Int
     suspend fun concatenateMyPost(): Int
-    suspend fun addNewPost(post: Post)
+    suspend fun addNewPost(post: Post,context: Context)
     suspend fun deleterPost(post: Post)
     suspend fun updatePost(post: Post)
     suspend fun getPost(idPost: String): Post?

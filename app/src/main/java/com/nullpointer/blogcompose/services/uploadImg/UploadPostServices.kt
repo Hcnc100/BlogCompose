@@ -3,6 +3,7 @@ package com.nullpointer.blogcompose.services.uploadImg
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.widget.Toast
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
 import com.nullpointer.blogcompose.core.states.StorageUploadTaskResult
@@ -86,7 +87,8 @@ class UploadPostServices : LifecycleService() {
                 val uuid = UUID.randomUUID().toString()
                 startUploadImg(Uri.fromFile(fileImage as File), uuid) {
                     postRepoImpl.addNewPost(
-                        createNewPost(uuid, description, it)
+                        post = createNewPost(uuid, description, it),
+                        context = this@UploadPostServices
                     )
                 }
 

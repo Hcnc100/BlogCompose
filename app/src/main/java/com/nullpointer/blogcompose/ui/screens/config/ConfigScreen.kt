@@ -1,7 +1,6 @@
 package com.nullpointer.blogcompose.ui.screens.config
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Card
@@ -11,12 +10,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberImagePainter
 import coil.transform.CircleCropTransformation
 import com.nullpointer.blogcompose.R
@@ -48,8 +45,8 @@ fun ConfigScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         modifier = Modifier.padding(10.dp)
                     ) {
-                        Text(text = currentUser!!.nameUser, overflow = TextOverflow.Ellipsis)
-                        val painter = rememberImagePainter(data = currentUser.urlImg) {
+                        Text(text = currentUser?.nameUser?:"", overflow = TextOverflow.Ellipsis)
+                        val painter = rememberImagePainter(data = currentUser?.urlImg?:"") {
                             transformations(
                                 CircleCropTransformation()
                             )
