@@ -75,6 +75,10 @@ class RegistryViewModel @Inject constructor(
     var isCompress = mutableStateOf(false)
         private set
 
+    fun setInitData(name: String, urlImg: String) {
+        nameUser = name
+        photoUser = urlImg
+    }
 
     fun updateDataUser(context: Context) = viewModelScope.launch {
         when {

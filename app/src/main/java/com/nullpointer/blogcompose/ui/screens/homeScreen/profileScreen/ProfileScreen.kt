@@ -23,16 +23,20 @@ import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.presentation.AuthViewModel
 import com.nullpointer.blogcompose.presentation.MyPostViewModel
 import com.nullpointer.blogcompose.presentation.PostViewModel
+import com.nullpointer.blogcompose.ui.screens.destinations.ConfigScreenDestination
+import com.nullpointer.blogcompose.ui.screens.destinations.DataUserScreenDestination
 import com.nullpointer.blogcompose.ui.screens.swipePosts.ScreenSwiperPost
 import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.flow.collect
 
 @Composable
-@Destination( navGraph = "homeDestinations")
+@Destination(navGraph = "homeDestinations")
 fun ProfileScreen(
     authViewModel: AuthViewModel,
     myPostViewModel: MyPostViewModel,
     postViewModel: PostViewModel,
+    navigator: DestinationsNavigator,
 ) {
 
     val stateListPost = myPostViewModel.listMyPost.collectAsState()
@@ -63,7 +67,7 @@ fun ProfileScreen(
         HeaderProfile(
             urlImgProfile = photoUser,
             nameProfile = name,
-            authViewModel::logOut
+            actionLogOut = { navigator.navigate(ConfigScreenDestination) }
         )
     }
 }

@@ -21,7 +21,7 @@ import timber.log.Timber
 class AuthDataSource {
     private val auth = Firebase.auth
     private val nodeUsers = Firebase.firestore.collection("Users")
-    private val nodeTokes=Firebase.firestore.collection("tokens")
+    private val nodeTokes = Firebase.firestore.collection("tokens")
 
     suspend fun createUser(newUser: User) {
         nodeUsers.document(auth.currentUser!!.uid).set(newUser).await()
@@ -34,9 +34,9 @@ class AuthDataSource {
     suspend fun authWithTokenGoogle(token: String): User {
         val credential = GoogleAuthProvider.getCredential(token, null)
         val resultAuth = auth.signInWithCredential(credential).await()
-        nodeTokes.document(resultAuth.user!!.uid).set(
-            mapOf("token" to FirebaseMessaging.getInstance().token.await())
-        ).await()
+        // ! when susses auth update token in database
+        nodeTokes.document(resultAuth.user!!.uid)
+            .set(mapOf("token" to FirebaseMessaging.getInstance().token.await())).await()
         return User(
             nameUser = resultAuth.user?.displayName ?: "",
             uuid = resultAuth.user?.uid ?: "",
@@ -45,7 +45,7 @@ class AuthDataSource {
     }
 
 
-    suspend fun updateDataUser(name: String, urlImg: String):User {
+    suspend fun updateDataUser(name: String, urlImg: String): User {
         val profileUpdate = userProfileChangeRequest {
             displayName = name
             photoUri = Uri.parse(urlImg)

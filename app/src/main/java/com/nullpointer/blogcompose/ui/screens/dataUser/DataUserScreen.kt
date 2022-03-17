@@ -42,7 +42,7 @@ import java.io.File
 fun DataUserScreen(
     registryViewModel: RegistryViewModel,
     authViewModel: AuthViewModel,
-    navigator: DestinationsNavigator
+    navigator: DestinationsNavigator,
 ) {
     // * reload info user
     val statusChange = registryViewModel.stateUpdateUser.collectAsState(null)
@@ -50,7 +50,9 @@ fun DataUserScreen(
     val sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
-    val isDataComplete = authViewModel.stateAuthUser.collectAsState()
+    val isDataComplete =
+        authViewModel.stateAuthUser.collectAsState().value is LoginStatus.Authenticated.CompleteData
+    val currentUser = authViewModel.currentUser.collectAsState()
 
 
 
@@ -73,15 +75,21 @@ fun DataUserScreen(
         Scaffold(
             scaffoldState = scaffoldState,
             topBar = {
-                if (isDataComplete.value is LoginStatus.Authenticated.CompleteData) {
-                    ToolbarBack(title = "Información de perfil")
+                if (isDataComplete) {
+                    // * if data is complete , show data saved
+                    ToolbarBack(title = "Información de perfil") { navigator.popBackStack() }
+                    registryViewModel.setInitData(
+                        name = currentUser.value!!.nameUser,
+                        urlImg = currentUser.value!!.urlImg)
                 } else {
+                    // ? if data is no complete no show nothing
                     ToolbarBack(title = "Completa tu cuenta")
                 }
             },
             floatingActionButton = {
                 ButtonRegistryStatus(
-                    statusChange.value) {
+                    statusChange.value,
+                    isDataComplete) {
                     registryViewModel.updateDataUser(context)
                 }
             }
@@ -211,6 +219,7 @@ fun TextInputName(
 @Composable
 fun ButtonRegistryStatus(
     statusChange: Resource<Unit>?,
+    isRegistry: Boolean,
     actionClick: () -> Unit,
 ) {
     FloatingActionButton(onClick = { if (statusChange == null) actionClick() },
@@ -229,7 +238,10 @@ fun ButtonRegistryStatus(
             is Resource.Success -> Icon(
                 painter = painterResource(id = R.drawable.ic_ckeck),
                 contentDescription = "")
-            null -> Text("Registrarse", modifier = Modifier.padding(horizontal = 20.dp))
+            null -> {
+                val text = if (isRegistry) "Actulizar" else "Registrarse"
+                Text(text, modifier = Modifier.padding(horizontal = 20.dp))
+            }
         }
     }
 }

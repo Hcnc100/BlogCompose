@@ -1,5 +1,6 @@
 package com.nullpointer.blogcompose.ui.screens.authScreen
 
+import android.content.Context
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.fadeIn
@@ -21,6 +22,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberImagePainter
 import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.nullpointer.blogcompose.R
@@ -118,19 +120,23 @@ fun ButtonsAuth(
     }
 }
 
+fun getGoogleSignInClient(
+    context: Context
+): GoogleSignInClient {
+    val token =context.getString(R.string.default_web_client_id)
+    val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+        .requestIdToken(token)
+        .requestEmail()
+        .build()
+     return  GoogleSignIn.getClient(context, gso)
+}
 
 @Composable
 fun ButtonLoginGoogle(
     modifier: Modifier = Modifier,
     authWithTokeGoogle: (String) -> Unit,
 ) {
-    val context = LocalContext.current
-    val token = stringResource(R.string.default_web_client_id)
-    val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-        .requestIdToken(token)
-        .requestEmail()
-        .build()
-    val googleSignInClient = GoogleSignIn.getClient(context, gso)
+    val googleSignInClient= getGoogleSignInClient(LocalContext.current)
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()) {
         val task = GoogleSignIn.getSignedInAccountFromIntent(it.data)
