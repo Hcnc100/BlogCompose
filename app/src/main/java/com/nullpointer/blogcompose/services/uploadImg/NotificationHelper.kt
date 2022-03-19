@@ -1,9 +1,6 @@
 package com.nullpointer.blogcompose.services.uploadImg
 
-import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
+import android.app.*
 import android.content.Context
 import android.content.ContextWrapper
 import android.content.Intent
@@ -12,6 +9,7 @@ import android.os.Build
 import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.net.toUri
 import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.utils.toFormat
 import com.nullpointer.blogcompose.ui.activitys.MainActivity
@@ -49,8 +47,18 @@ class NotificationHelper(context: Context) : ContextWrapper(context) {
             NotificationManagerCompat.IMPORTANCE_HIGH
         )
         val baseNotify = getBaseNotificationLiked()
-        val completeNotify =
-            createCustomNotification(bitmapUser, bitmapPost, nameUserLiked, baseNotify)
+        val deepLinkIntent = Intent(
+            Intent.ACTION_VIEW,
+            "https://www.blog-compose.com/post/$idPost".toUri(),
+            this,
+            MainActivity::class.java
+        )
+        val deepLinkPendingIntent: PendingIntent? = TaskStackBuilder.create(this).run {
+            addNextIntentWithParentStack(deepLinkIntent)
+            getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT)
+        }
+        baseNotify.setContentIntent(deepLinkPendingIntent)
+        val completeNotify = createCustomNotification(bitmapUser, bitmapPost, nameUserLiked, baseNotify)
         notificationManager.notify(Random.nextInt(), completeNotify)
     }
 

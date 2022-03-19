@@ -16,8 +16,12 @@ import androidx.compose.ui.unit.dp
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.SwipeRefreshState
 import com.nullpointer.blogcompose.R
+import com.nullpointer.blogcompose.models.Post
 import com.nullpointer.blogcompose.models.SimplePost
+import com.nullpointer.blogcompose.ui.screens.destinations.PostDetailsDestination
 import com.nullpointer.blogcompose.ui.screens.homeScreen.blogScreen.componets.BlogItem
+import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.flow.collect
 
@@ -25,6 +29,7 @@ import kotlinx.coroutines.flow.collect
 fun ScreenSwiperPost(
     resultListPost: List<SimplePost>,
     isLoadNewData: Boolean,
+    actionDetails:(String)->Unit,
     isConcatenateData: Boolean = false,
     scaffoldState: ScaffoldState = rememberScaffoldState(),
     updateListPost: () -> Unit,
@@ -58,7 +63,8 @@ fun ScreenSwiperPost(
                 header = header,
                 actionChangePost = actionChangePost,
                 isConcatenateData = isConcatenateData,
-                staticInfo = staticInfo
+                staticInfo = staticInfo,
+                actionDetails = actionDetails
             )
 
         }
@@ -69,6 +75,7 @@ fun ScreenSwiperPost(
 fun ListInfinitePost(
     listPost: List<SimplePost>,
     listState: LazyListState,
+    actionDetails:(String)->Unit,
     actionChangePost: (String, Boolean) -> Unit,
     header: (@Composable () -> Unit)? = null,
     actionBottomReached: () -> Unit,
@@ -81,7 +88,7 @@ fun ListInfinitePost(
             item { it() }
         }
         items(listPost.size) { index ->
-            BlogItem(listPost[index], actionChangePost, staticInfo)
+            BlogItem(listPost[index],actionDetails, actionChangePost, staticInfo)
         }
 
         item {

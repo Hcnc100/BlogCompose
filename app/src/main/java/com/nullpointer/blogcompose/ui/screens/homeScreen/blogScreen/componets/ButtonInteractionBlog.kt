@@ -16,6 +16,8 @@ import com.nullpointer.blogcompose.R
 @Composable
 fun ButtonsInteractionBlog(
     ownerLike: Boolean,
+    actionShare: () -> Unit,
+    actionComments:()->Unit,
     changeLike: (Boolean) -> Unit,
 ) {
 
@@ -32,12 +34,10 @@ fun ButtonsInteractionBlog(
                 }
 
             }
-            IconButton(onClick = { /*TODO*/ }) {
+            IconButton(onClick = { actionComments()}) {
                 Icon(painterResource(id = R.drawable.ic_comment), "")
             }
-            IconButton(onClick = { /*TODO*/ }) {
-                Icon(painterResource(id = R.drawable.ic_share), "")
-            }
+
         }
 
 
@@ -47,8 +47,8 @@ fun ButtonsInteractionBlog(
             IconButton(onClick = { /*TODO*/ }) {
                 Icon(painterResource(id = R.drawable.ic_download), "")
             }
-            IconButton(onClick = { /*TODO*/ }) {
-                Icon(painterResource(id = R.drawable.ic_bookmark), "")
+            IconButton(onClick = { actionShare() }) {
+                Icon(painterResource(id = R.drawable.ic_share), "")
             }
         }
 

@@ -16,21 +16,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.insets.ProvideWindowInsets
 import com.google.accompanist.insets.navigationBarsWithImePadding
 import com.nullpointer.blogcompose.core.states.LoginStatus
-import com.nullpointer.blogcompose.presentation.*
+import com.nullpointer.blogcompose.presentation.AuthViewModel
 import com.nullpointer.blogcompose.ui.navigation.HomeDestinations
 import com.nullpointer.blogcompose.ui.screens.NavGraphs
 import com.nullpointer.blogcompose.ui.screens.destinations.AuthScreenDestination
-import com.nullpointer.blogcompose.ui.screens.destinations.BlogScreenDestination
 import com.nullpointer.blogcompose.ui.screens.destinations.DataUserScreenDestination
 import com.nullpointer.blogcompose.ui.screens.navDestination
 import com.nullpointer.blogcompose.ui.screens.startDestination
@@ -108,6 +105,7 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
 }
 
 

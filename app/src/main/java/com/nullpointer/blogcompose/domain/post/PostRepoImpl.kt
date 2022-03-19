@@ -7,6 +7,7 @@ import com.nullpointer.blogcompose.core.utils.NetworkException
 import com.nullpointer.blogcompose.data.local.cache.MyPostDAO
 import com.nullpointer.blogcompose.data.local.cache.PostDAO
 import com.nullpointer.blogcompose.data.remote.PostDataSource
+import com.nullpointer.blogcompose.models.Comment
 import com.nullpointer.blogcompose.models.MyPost
 import com.nullpointer.blogcompose.models.Post
 import kotlinx.coroutines.flow.Flow
@@ -86,15 +87,15 @@ class PostRepoImpl(
         val oldPost = postDAO.getPostById(idPost)
         val oldMyPost = myPostDAO.getPostById(idPost)
         try {
-            val postUpdate = if(isLiked!=null){
+            val postUpdate = if (isLiked != null) {
                 // * update fake post
                 if (oldPost != null) postDAO.updatePost(oldPost.copyInnerLike(isLiked))
                 if (oldMyPost != null) myPostDAO.updatePost(oldMyPost.copyInnerLike(isLiked))
 
                 // * if has null update post or dont have internet, launch exception
                 if (!InternetCheck.isNetworkAvailable()) throw NetworkException()
-                 postDataSource.updateLikes(idPost, isLiked)!!
-            }else{
+                postDataSource.updateLikes(idPost, isLiked)!!
+            } else {
                 postDataSource.getPost(idPost)!!
             }
 
@@ -133,6 +134,15 @@ class PostRepoImpl(
         myPostDAO.deleterAll()
     }
 
+    override fun getRealTimePost(idPost: String): Flow<Post?> =
+        postDataSource.getRealTimePost(idPost)
+
+    override fun getCommetsRealTime(idPost: String): Flow<List<Comment>> =
+        postDataSource.getRealTimeComments(idPost)
+
+    override suspend fun addNewComment(idPost: String, comment: String) =
+        postDataSource.addNewComment(idPost, comment)
+
     override suspend fun addNewPost(post: Post, context: Context) {
         postDataSource.addNewPost(post)
         Toast.makeText(context, "Post subido con exito", Toast.LENGTH_SHORT).show()
@@ -142,8 +152,12 @@ class PostRepoImpl(
     override suspend fun deleterPost(post: Post) =
         postDataSource.deleterPost(post)
 
-    override suspend fun updatePost(post: Post) =
-        postDataSource.update(post)
+    override suspend fun updateInnerPost(post: Post) {
+        val oldPost = postDAO.getPostById(post.id)
+        val oldMyPost = myPostDAO.getPostById(post.id)
+        if (oldPost != null) postDAO.updatePost(post)
+        if (oldMyPost != null) myPostDAO.updatePost(MyPost.fromPost(post))
+    }
 
     override suspend fun getPost(idPost: String) =
         postDataSource.getPost(idPost)

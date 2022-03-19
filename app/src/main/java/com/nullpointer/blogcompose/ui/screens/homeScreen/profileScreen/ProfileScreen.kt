@@ -23,6 +23,7 @@ import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.presentation.AuthViewModel
 import com.nullpointer.blogcompose.presentation.MyPostViewModel
 import com.nullpointer.blogcompose.ui.screens.destinations.ConfigScreenDestination
+import com.nullpointer.blogcompose.ui.screens.destinations.PostDetailsDestination
 import com.nullpointer.blogcompose.ui.screens.swipePosts.ScreenSwiperPost
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -59,7 +60,8 @@ fun ProfileScreen(
         actionChangePost = myPostViewModel::likePost,
         staticInfo = Pair(photoUser, name),
         isLoadNewData = stateLoading.value is Resource.Loading,
-        isConcatenateData = stateConcatenate.value is Resource.Loading
+        isConcatenateData = stateConcatenate.value is Resource.Loading,
+        actionDetails = { navigator.navigate(PostDetailsDestination(it)) }
     ) {
         HeaderProfile(
             urlImgProfile = photoUser,

@@ -1,5 +1,6 @@
 package com.nullpointer.blogcompose.ui.screens.homeScreen.blogScreen.componets
 
+import android.content.Intent
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -19,17 +20,23 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.annotation.ExperimentalCoilApi
 import com.nullpointer.blogcompose.core.utils.TimeUtils
+import com.nullpointer.blogcompose.models.Post
 import com.nullpointer.blogcompose.models.SimplePost
+import com.nullpointer.blogcompose.ui.screens.destinations.PostDetailsDestination
+import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import java.util.*
 
 @OptIn(ExperimentalCoilApi::class)
 @Composable
 fun BlogItem(
     post: SimplePost,
+    actionDetails: (String) -> Unit,
     actionChangePost: (String, Boolean) -> Unit,
     staticInfo: Pair<String, String>? = null,
 ) {
     val (ownerLike, changeOwnerLike) = remember { mutableStateOf(post.ownerLike) }
+    val context = LocalContext.current
     SideEffect {
         if (ownerLike != post.ownerLike) {
             changeOwnerLike(post.ownerLike)
@@ -48,7 +55,15 @@ fun BlogItem(
                 HeaderBlog(post.poster!!.urlImg, post.poster!!.name)
             }
             ImageBlog(post.urlImage)
-            ButtonsInteractionBlog(ownerLike) {
+            ButtonsInteractionBlog(ownerLike, actionShare = {
+                val intent = Intent(Intent.ACTION_SEND)
+                    .putExtra(Intent.EXTRA_TEXT, "https://www.blog-compose.com/post/${post.id}")
+                    .setType("text/plain")
+                context.startActivity(Intent.createChooser(intent, "Share Using"))
+
+            }, actionComments = {
+                actionDetails(post.id)
+            }) {
                 actionChangePost(post.id, it)
                 changeOwnerLike(it)
                 post.ownerLike = !post.ownerLike

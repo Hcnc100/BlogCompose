@@ -8,13 +8,13 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.presentation.PostViewModel
 import com.nullpointer.blogcompose.ui.screens.destinations.AddBlogScreenDestination
+import com.nullpointer.blogcompose.ui.screens.destinations.PostDetailsDestination
 import com.nullpointer.blogcompose.ui.screens.swipePosts.ScreenSwiperPost
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.flow.collect
 
-@Destination(
-    navGraph = "homeDestinations", start = true)
+@Destination(navGraph = "homeDestinations", start = true)
 @Composable
 fun BlogScreen(
     postVM: PostViewModel = hiltViewModel(),
@@ -38,7 +38,8 @@ fun BlogScreen(
         actionButtonAdd = { navigator.navigate(AddBlogScreenDestination) },
         actionChangePost = postVM::likePost,
         isLoadNewData = stateLoading.value is Resource.Loading,
-        isConcatenateData = stateConcatenate.value is Resource.Loading
+        isConcatenateData = stateConcatenate.value is Resource.Loading,
+        actionDetails = {navigator.navigate(PostDetailsDestination(it))}
     )
 }
 
