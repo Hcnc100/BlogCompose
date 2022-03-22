@@ -4,6 +4,7 @@ import android.content.Context
 import android.widget.Toast
 import com.nullpointer.blogcompose.core.utils.InternetCheck
 import com.nullpointer.blogcompose.core.utils.NetworkException
+import com.nullpointer.blogcompose.data.local.cache.CommentsDAO
 import com.nullpointer.blogcompose.data.local.cache.MyPostDAO
 import com.nullpointer.blogcompose.data.local.cache.PostDAO
 import com.nullpointer.blogcompose.data.remote.PostDataSource
@@ -16,14 +17,18 @@ class PostRepoImpl(
     private val postDataSource: PostDataSource,
     private val postDAO: PostDAO,
     private val myPostDAO: MyPostDAO,
+    private val commentsDAO: CommentsDAO,
 ) : PostRepository {
 
     companion object {
         private const val SIZE_POST_REQUEST = 5
+        private const val SIZE_COMMENTS = 4
     }
 
     override val listLastPost: Flow<List<Post>> = postDAO.getAllPost()
     override val listMyLastPost: Flow<List<MyPost>> = myPostDAO.getAllPost()
+    override val listComments: Flow<List<Comment>> = commentsDAO.getAllComments()
+
 
     override suspend fun requestLastPost(forceRefresh: Boolean): Int {
         if (!InternetCheck.isNetworkAvailable()) throw NetworkException()
@@ -137,11 +142,33 @@ class PostRepoImpl(
     override fun getRealTimePost(idPost: String): Flow<Post?> =
         postDataSource.getRealTimePost(idPost)
 
-    override fun getCommetsRealTime(idPost: String): Flow<List<Comment>> =
-        postDataSource.getRealTimeComments(idPost)
+    override suspend fun getLastComments(idPost: String) {
+        val listComments = postDataSource.getCommentsForPost(nComments = SIZE_COMMENTS, idPost = idPost)
+        commentsDAO.updateAllComments(listComments)
+    }
 
-    override suspend fun addNewComment(idPost: String, comment: String) =
-        postDataSource.addNewComment(idPost, comment)
+
+    override suspend fun addNewComment(idPost: String, comment: String) {
+        val idComment = postDataSource.addNewComment(idPost, comment)
+        val list = postDataSource.getCommentsForPost(nComments = SIZE_COMMENTS,
+            idPost = idPost,
+            startWithCommentId = idComment,
+            includePost = true)
+        commentsDAO.updateAllComments(list)
+    }
+
+    override suspend fun clearComments() {
+        commentsDAO.deleterAll()
+    }
+
+    suspend fun concatenateComments(idPost: String) {
+        val idComment = commentsDAO.getLastComment()?.id
+        val list = postDataSource.getCommentsForPost(nComments = SIZE_COMMENTS,
+            idPost = idPost,
+            startWithCommentId = idComment)
+        commentsDAO.insertListComments(list)
+    }
+
 
     override suspend fun addNewPost(post: Post, context: Context) {
         postDataSource.addNewPost(post)

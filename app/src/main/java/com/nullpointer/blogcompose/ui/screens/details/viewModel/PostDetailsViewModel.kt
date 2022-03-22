@@ -1,7 +1,9 @@
 package com.nullpointer.blogcompose.ui.screens.details.viewModel
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.nullpointer.blogcompose.core.delegates.SavableProperty
 import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.domain.post.PostRepoImpl
 import com.nullpointer.blogcompose.models.Comment
@@ -16,16 +18,31 @@ import javax.inject.Inject
 @HiltViewModel
 class PostDetailsViewModel @Inject constructor(
     private val postRepoImpl: PostRepoImpl,
+    savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
-    private val _idPost = MutableStateFlow("")
 
+    init {
+        viewModelScope.launch {
+            postRepoImpl.clearComments()
+        }
+    }
+
+    private val _idPost = MutableStateFlow("")
+    private val _hasNewComments = MutableStateFlow(false)
+    val hasNewComments = _hasNewComments.asStateFlow()
+    var numberComments by SavableProperty(savedStateHandle, "KEY_COMMENTS", -1)
+        private set
     val postState: StateFlow<Resource<Post>> = flow {
         _idPost.collect { idPost ->
             if (idPost.isNotEmpty()) {
                 postRepoImpl.getRealTimePost(idPost).collect {
                     emit(Resource.Success(it!!))
                     postRepoImpl.updateInnerPost(it)
+                    if (it.numberComments != numberComments) {
+                        if (numberComments != -1) _hasNewComments.value = true
+                        numberComments = it.numberComments
+                    }
                 }
             }
         }
@@ -39,29 +56,40 @@ class PostDetailsViewModel @Inject constructor(
     )
 
     val commentState: StateFlow<Resource<List<Comment>>> = flow {
-        _idPost.collect { idPost ->
-            if (idPost.isNotEmpty()) {
-                postRepoImpl.getCommetsRealTime(idPost).collect {
-                    emit(Resource.Success(it))
-                }
-            }
+        postRepoImpl.listComments.collect {
+            emit(Resource.Success(it))
         }
-    }.catch { c: Throwable ->
-        Timber.d("Error al colectar los comentarios $c ")
-        Resource.Failure<List<Comment>>(Exception(c))
+    }.catch {
+        Resource.Failure<List<Comment>>(Exception(it))
     }.stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(5000),
         Resource.Loading()
     )
 
-    fun addComment(idPost: String, comment: String,callBack:()->Unit) = viewModelScope.launch {
-        postRepoImpl.addNewComment(idPost, comment)
-        callBack()
+    fun concatenateComments() = viewModelScope.launch {
+        postRepoImpl.concatenateComments(_idPost.value)
     }
 
-    fun initIdPost(idPost: String) {
-        _idPost.value = idPost
+
+    fun addComment(idPost: String, comment: String) = viewModelScope.launch {
+        try {
+            numberComments++
+            postRepoImpl.addNewComment(idPost, comment)
+        } catch (e: Exception) {
+            Timber.e("Error al agregar un commet")
+        }
     }
+
+    fun initIdPost(idPost: String) = viewModelScope.launch {
+        _idPost.value = idPost
+        postRepoImpl.getLastComments(idPost)
+    }
+
+    fun reloadNewComment() = viewModelScope.launch {
+        postRepoImpl.getLastComments(_idPost.value)
+        _hasNewComments.value = false
+    }
+
 
 }

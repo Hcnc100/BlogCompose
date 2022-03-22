@@ -3,11 +3,8 @@ package com.nullpointer.blogcompose.inject
 import android.content.Context
 import androidx.room.Room
 import com.nullpointer.blogcompose.data.local.PreferencesDataSource
-import com.nullpointer.blogcompose.data.local.cache.BlogDataBase
+import com.nullpointer.blogcompose.data.local.cache.*
 import com.nullpointer.blogcompose.data.local.cache.BlogDataBase.Companion.BLOG_DATABASE
-import com.nullpointer.blogcompose.data.local.cache.MyPostDAO
-import com.nullpointer.blogcompose.data.local.cache.NotifyDAO
-import com.nullpointer.blogcompose.data.local.cache.PostDAO
 import com.nullpointer.blogcompose.data.remote.*
 import com.nullpointer.blogcompose.domain.auth.AuthRepoImpl
 import com.nullpointer.blogcompose.domain.images.ImagesRepoImpl
@@ -36,7 +33,8 @@ object AppModule {
         postDataSource: PostDataSource,
         postDAO: PostDAO,
         myPostDAO: MyPostDAO,
-    ): PostRepoImpl = PostRepoImpl(postDataSource, postDAO, myPostDAO)
+        commentsDAO: CommentsDAO,
+    ): PostRepoImpl = PostRepoImpl(postDataSource, postDAO, myPostDAO, commentsDAO)
 
 
     @Provides
@@ -125,4 +123,9 @@ object AppModule {
         database: BlogDataBase,
     ): MyPostDAO = database.getMyPostDAO()
 
+    @Provides
+    @Singleton
+    fun getMCommentDao(
+        database: BlogDataBase,
+    ): CommentsDAO = database.getCommentsDAO()
 }

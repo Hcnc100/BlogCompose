@@ -14,12 +14,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 import coil.transform.CircleCropTransformation
 import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.presentation.AuthViewModel
 import com.nullpointer.blogcompose.ui.customs.ToolbarBack
 import com.nullpointer.blogcompose.ui.screens.authScreen.getGoogleSignInClient
+import com.nullpointer.blogcompose.ui.screens.destinations.ConfigScreenDestination
 import com.nullpointer.blogcompose.ui.screens.destinations.DataUserScreenDestination
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -80,6 +82,8 @@ fun ConfigScreen(
                 Row(modifier = Modifier
                     .padding(15.dp)
                     .clickable {
+                        // ! this is need for no crash for with restore state navigate
+                        navigator.popBackStack()
                         authViewModel.logOut()
                     }) {
                     Image(painter = painterResource(id = R.drawable.ic_logout),

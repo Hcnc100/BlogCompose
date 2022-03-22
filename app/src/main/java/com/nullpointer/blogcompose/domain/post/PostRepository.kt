@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.Flow
 interface PostRepository {
     val listLastPost: Flow<List<Post>>
     val listMyLastPost: Flow<List<MyPost>>
+    val listComments:Flow<List<Comment>>
     suspend fun getLastPostByUser(idUser: String, inCaching: Boolean): List<Post>
     suspend fun requestLastPost(forceRefresh: Boolean = false): Int
     suspend fun requestMyLastPost(forceRefresh: Boolean = false): Int
@@ -21,6 +22,7 @@ interface PostRepository {
     suspend fun updateLikePost(idPost: String, isLiked: Boolean? = null)
     suspend fun deleterAllPost()
     suspend fun addNewComment(idPost: String,comment: String)
+    suspend fun clearComments()
     fun getRealTimePost(idPost: String): Flow<Post?>
-    fun getCommetsRealTime(idPost: String): Flow<List<Comment>>
+    suspend fun getLastComments(idPost: String)
 }

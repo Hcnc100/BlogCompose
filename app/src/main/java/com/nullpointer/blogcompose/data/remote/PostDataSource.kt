@@ -3,7 +3,6 @@ package com.nullpointer.blogcompose.data.remote
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.*
 import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
 import com.nullpointer.blogcompose.core.utils.InternetCheck
 import com.nullpointer.blogcompose.models.Comment
@@ -103,21 +102,39 @@ class PostDataSource {
         }
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    fun getRealTimeComments(idPost: String) = callbackFlow {
-        val refComments =
-            refComment.document(idPost).collection("listComments").orderBy("timestamp")
-        val listener = refComments.addSnapshotListener { value, error ->
-            if (error != null) close(error)
-            Timber.d("Se envio un post")
-            val list =
-                value?.documents?.mapNotNull { transformDocumentToComment(it) } ?: emptyList()
-            trySend(list)
+
+    suspend fun getCommentsForPost(
+        nComments: Int = Integer.MAX_VALUE,
+        startWithCommentId: String? = null,
+        endWithCommentId: String? = null,
+        includePost: Boolean = false,
+        idPost: String,
+    ): List<Comment> {
+
+        var query = refComment
+            .document(idPost)
+            .collection("listComments")
+            .orderBy("timestamp",Query.Direction.DESCENDING)
+
+        val refCommentCurrent=refComment.document(idPost).collection("listComments")
+
+        if (startWithCommentId != null) {
+            val refDocument = refCommentCurrent.document(startWithCommentId).get().await()
+            if (refDocument.exists())
+                query = if (includePost) query.startAt(refDocument) else query.startAfter(refDocument)
         }
 
-        awaitClose {
-            Timber.d("Se removio el listener del post $idPost")
-            listener.remove()
+        if (endWithCommentId != null) {
+            val refDocument = refCommentCurrent.document(endWithCommentId).get().await()
+            if (refDocument.exists())
+                query = if (includePost) query.endAt(refDocument) else query.endBefore(refDocument)
+        }
+
+        // * limit result or for default all
+        if (nComments != Integer.MAX_VALUE) query = query.limit(nComments.toLong())
+
+        return query.get(Source.SERVER).await().documents.mapNotNull {
+            transformDocumentToComment(it)
         }
     }
 
@@ -201,7 +218,7 @@ class PostDataSource {
         refPosts.document(post.id).set(post).await()
     }
 
-    suspend fun addNewComment(idPost: String, comment: String) {
+    suspend fun addNewComment(idPost: String, comment: String): String {
         val increment = FieldValue.increment(1)
         val currentPost = refPosts.document(idPost)
         val newComment = Comment(
@@ -209,12 +226,13 @@ class PostDataSource {
             nameUser = auth.currentUser?.displayName.toString(),
             comment = comment
         )
-        val refCommentPost =
-            refComment.document(idPost).collection("listComments").document(newComment.id)
+        val refCommentPost = refComment
+            .document(idPost)
+            .collection("listComments").document(newComment.id)
         database.runTransaction { transition ->
             transition.set(refCommentPost, newComment)
             transition.update(currentPost, "numberComments", increment)
         }.await()
-
+        return newComment.id
     }
 }

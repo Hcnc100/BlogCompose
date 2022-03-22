@@ -1,14 +1,12 @@
 package com.nullpointer.blogcompose.ui.screens.details
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -16,10 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberImagePainter
@@ -52,11 +47,25 @@ fun PostDetails(
     LaunchedEffect(Unit) {
         postDetailsViewModel.initIdPost(idPost)
     }
+//    val detailsMessage=postDetailsViewModel.
+//    LaunchedEffect(postMessage) {
+//        postMessage.collect {
+//            scaffoldState.snackbarHostState.showSnackbar(it)
+//        }
+//    }
     val postState = postDetailsViewModel.postState.collectAsState()
     val commetsState = postDetailsViewModel.commentState.collectAsState()
-    PostReal(post = postState.value, list = commetsState.value, navigator::popBackStack) {comment,callback->
-        postDetailsViewModel.addComment(idPost, comment,callback)
-    }
+    val hasNewComments = postDetailsViewModel.hasNewComments.collectAsState()
+    PostReal(post = postState.value,
+        list = commetsState.value,
+        scaffoldState = rememberScaffoldState(),
+        hasNewComment = hasNewComments.value,
+        concatenate = postDetailsViewModel::concatenateComments,
+        totalComments = postDetailsViewModel.numberComments,
+        reloadNewComment = postDetailsViewModel::reloadNewComment,
+        actionBack = navigator::popBackStack,
+        addComment = { postDetailsViewModel.addComment(idPost, it) }
+    )
 }
 
 
@@ -98,71 +107,100 @@ fun InfoPost(post: Post) {
 fun PostReal(
     post: Resource<Post>,
     list: Resource<List<Comment>>,
+    scaffoldState: ScaffoldState,
+    hasNewComment: Boolean,
+    totalComments: Int,
+    reloadNewComment: () -> Unit,
+    concatenate: () -> Unit,
     actionBack: () -> Unit,
-    addComment: (String,callBack:()->Unit) -> Unit,
+    addComment: (String) -> Unit,
 ) {
 
     val stateLazy = rememberLazyListState()
-    val scope= rememberCoroutineScope()
-    var sizeComment by remember { mutableStateOf(0) }
+    val scope = rememberCoroutineScope()
 
     Scaffold(
+        scaffoldState = scaffoldState,
         topBar = { ToolbarBack(title = "Post", actionBack = actionBack) },
-        bottomBar = { TextInputComment(stateLazy, sizeComment){
-            addComment(it){
+        bottomBar = {
+            TextInputComment {
+                addComment(it)
                 scope.launch {
-                    stateLazy.animateScrollToItem(sizeComment)
+                    stateLazy.animateScrollToItem(0)
                 }
             }
-        } },
+        },
     ) {
 
-        LazyColumn(
-            Modifier.padding(it),
-            state = stateLazy,
-        ) {
-            item {
-                when (post) {
+        Box(modifier = Modifier
+            .fillMaxSize()
+            .padding(it)) {
+            LazyColumn(
+                state = stateLazy,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                item {
+                    when (post) {
+                        is Resource.Failure -> {}
+                        is Resource.Loading -> Box(modifier = Modifier
+                            .fillMaxWidth()
+                            .height(250.dp), contentAlignment = Alignment.Center) {
+                            CircularProgressIndicator()
+                        }
+                        is Resource.Success -> HeaderBlog(post.data)
+                    }
+
+                }
+
+                when (list) {
                     is Resource.Failure -> {}
-                    is Resource.Loading -> Box(modifier = Modifier
-                        .fillMaxWidth()
-                        .height(250.dp), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator()
+                    is Resource.Loading -> {}
+                    is Resource.Success -> {
+                        val listComments = list.data
+                        items(listComments.size) { index ->
+                            val comment = list.data[index]
+                            Comments(
+                                comment.urlImg,
+                                comment.nameUser,
+                                comment.timestamp?.time ?: 0,
+                                comment.comment
+                            )
+                        }
+                        if (listComments.isNotEmpty() && listComments.size != totalComments) {
+                            item {
+                                Box(modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { concatenate() }
+                                    .padding(vertical = 10.dp)) {
+                                    Text(text = "Cargar mas comentarios")
+                                }
+                            }
+                        }
                     }
-                    is Resource.Success -> HeaderBlog(post.data)
                 }
-
             }
 
-            when (list) {
-                is Resource.Failure -> {}
-                is Resource.Loading -> {}
-                is Resource.Success -> {
-                    items(list.data.size) { index ->
-                        sizeComment = list.data.size
-                        val comment = list.data[index]
-                        Comments(
-                            comment.urlImg,
-                            comment.nameUser,
-                            comment.timestamp?.time ?: 0,
-                            comment.comment
-                        )
-                    }
+            if (hasNewComment)
+                Box(modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 35.dp)
+                    ) {
+                    Text(text = "Hay nuevos comentarios", modifier = Modifier
+                        .background(MaterialTheme.colors.primary)
+                        .padding(horizontal = 10.dp, vertical = 10.dp)
+                        .clickable {
+                            reloadNewComment()
+                        })
                 }
-            }
         }
+
 
     }
 }
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun TextInputComment(
-    lazyListState: LazyListState,
-    lastPosition: Int,
-    actionSendComment: (String) -> Unit,
-) {
-    val scope = rememberCoroutineScope()
+fun TextInputComment(actionSendComment: (String) -> Unit) {
     val (text, changeText) = rememberSaveable { mutableStateOf("") }
     Box() {
         OutlinedTextField(

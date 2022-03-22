@@ -28,6 +28,7 @@ import com.nullpointer.blogcompose.presentation.AuthViewModel
 import com.nullpointer.blogcompose.ui.navigation.HomeDestinations
 import com.nullpointer.blogcompose.ui.screens.NavGraphs
 import com.nullpointer.blogcompose.ui.screens.destinations.AuthScreenDestination
+import com.nullpointer.blogcompose.ui.screens.destinations.ConfigScreenDestination
 import com.nullpointer.blogcompose.ui.screens.destinations.DataUserScreenDestination
 import com.nullpointer.blogcompose.ui.screens.navDestination
 import com.nullpointer.blogcompose.ui.screens.startDestination
@@ -35,7 +36,10 @@ import com.nullpointer.blogcompose.ui.theme.BlogComposeTheme
 import com.ramcosta.composedestinations.DestinationsNavHost
 import com.ramcosta.composedestinations.navigation.dependency
 import com.ramcosta.composedestinations.navigation.navigateTo
+import com.ramcosta.composedestinations.spec.Route
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.first
+import timber.log.Timber
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -61,7 +65,6 @@ class MainActivity : ComponentActivity() {
 
                     val stateAuth = authViewModel.stateAuthUser.collectAsState()
                     val destination = when (stateAuth.value) {
-
                         LoginStatus.Authenticated.CompleteData -> NavGraphs.homeDestinations
                         LoginStatus.Authenticated.CompletingData -> DataUserScreenDestination.startDestination
                         LoginStatus.Authenticating -> null
@@ -86,6 +89,8 @@ class MainActivity : ComponentActivity() {
 
                         if (destination != null) {
                             loading = false
+
+
 
                             Box(modifier = Modifier.padding(innerPadding)) {
                                 DestinationsNavHost(
@@ -125,12 +130,10 @@ fun ButtonNavigation(
                 onClick = {
                     navController.navigateTo(destination.direction) {
                         popUpTo(navController.graph.findStartDestination().id) {
-                            if (HomeDestinations.isHomeRoute(destination.direction.route)) saveState =
-                                true
+                            saveState = true
                         }
                         launchSingleTop = true
-                        if (HomeDestinations.isHomeRoute(destination.direction.route)) restoreState =
-                            true
+                        restoreState = true
                     }
                 },
                 icon = { Icon(painterResource(id = destination.icon), "") },
