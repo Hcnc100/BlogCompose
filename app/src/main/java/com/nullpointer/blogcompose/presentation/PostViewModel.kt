@@ -39,9 +39,6 @@ class PostViewModel @Inject constructor(
     private val _stateConcatenateData = MutableStateFlow<Resource<Unit>>(Resource.Loading())
     val stateConcatenate = _stateConcatenateData.asStateFlow()
 
-    // * var to save job, to like
-    private var jobLike: Job? = null
-
     val listPost = postRepo.listLastPost.catch {
         Timber.d("Error al obtener los post de la base de datos $it")
         _messagePost.trySend("Error desconocido")
@@ -108,24 +105,6 @@ class PostViewModel @Inject constructor(
         }
     }
 
-    fun likePost(idPost: String, isLiked: Boolean) {
-        // * this init like job, update the database with new data with the new data of
-        // * server
-        jobLike?.cancel()
-        jobLike = viewModelScope.launch(Dispatchers.IO) {
-            try {
-                postRepo.updateLikePost(idPost, isLiked)
-            } catch (e: Exception) {
-                when (e) {
-                    is CancellationException -> throw e
-                    is NetworkException -> _messagePost.send("Necesita conexion para esto")
-                    else -> {
-                        Timber.e("Erro al dar like $e")
-                        _messagePost.send("Error desconocido")
-                    }
-                }
-            }
-        }
-    }
+
 
 }

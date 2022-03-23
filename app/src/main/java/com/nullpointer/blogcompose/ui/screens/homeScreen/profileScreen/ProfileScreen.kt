@@ -15,6 +15,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.presentation.AuthViewModel
+import com.nullpointer.blogcompose.presentation.LikeViewModel
 import com.nullpointer.blogcompose.presentation.MyPostViewModel
 import com.nullpointer.blogcompose.ui.screens.destinations.ConfigScreenDestination
 import com.nullpointer.blogcompose.ui.screens.destinations.PostDetailsDestination
@@ -29,15 +30,19 @@ import kotlinx.coroutines.flow.collect
 fun ProfileScreen(
     authViewModel: AuthViewModel,
     myPostViewModel: MyPostViewModel = hiltViewModel(),
+    likeViewModel: LikeViewModel = hiltViewModel(),
     navigator: DestinationsNavigator,
 ) {
 
     val stateListPost = myPostViewModel.listMyPost.collectAsState()
     val stateLoading = myPostViewModel.stateLoad.collectAsState()
     val stateConcatenate = myPostViewModel.stateConcatenate.collectAsState()
-    val postMessage = myPostViewModel.messageMyPosts
-    val scaffoldState = rememberScaffoldState()
     val currentUser = authViewModel.currentUser.collectAsState()
+
+    val likeMessage = likeViewModel.messageLike
+    val postMessage = myPostViewModel.messageMyPosts
+
+    val scaffoldState = rememberScaffoldState()
 
     val photoUser = currentUser.value?.urlImg ?: ""
     val name = currentUser.value?.nameUser ?: ""
@@ -48,11 +53,17 @@ fun ProfileScreen(
         }
     }
 
+    LaunchedEffect(likeMessage){
+        likeMessage.collect {
+            scaffoldState.snackbarHostState.showSnackbar(it)
+        }
+    }
+
     ScreenSwiperPost(resultListPost = stateListPost.value,
         scaffoldState = scaffoldState,
         updateListPost = { myPostViewModel.requestNewPost(true) },
         actionBottomReached = myPostViewModel::concatenatePost,
-        actionChangePost = myPostViewModel::likePost,
+        actionChangePost = likeViewModel::likePost,
         staticInfo = Pair(photoUser, name),
         isLoadNewData = stateLoading.value is Resource.Loading,
         isConcatenateData = stateConcatenate.value is Resource.Loading,

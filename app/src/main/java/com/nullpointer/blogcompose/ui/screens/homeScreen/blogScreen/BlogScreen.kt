@@ -6,6 +6,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.nullpointer.blogcompose.core.states.Resource
+import com.nullpointer.blogcompose.presentation.LikeViewModel
 import com.nullpointer.blogcompose.presentation.PostViewModel
 import com.nullpointer.blogcompose.ui.screens.destinations.AddBlogScreenDestination
 import com.nullpointer.blogcompose.ui.screens.destinations.PostDetailsDestination
@@ -18,15 +19,25 @@ import kotlinx.coroutines.flow.collect
 @Composable
 fun BlogScreen(
     postVM: PostViewModel = hiltViewModel(),
+    likeVM: LikeViewModel = hiltViewModel(),
     navigator: DestinationsNavigator,
 ) {
     val resultGetPost = postVM.listPost.collectAsState()
     val stateLoading = postVM.stateLoad.collectAsState()
     val stateConcatenate = postVM.stateConcatenate.collectAsState()
-    val postMessage = postVM.messagePost
     val scaffoldState = rememberScaffoldState()
+
+    val postMessage = postVM.messagePost
+    val likeMessage = likeVM.messageLike
+
     LaunchedEffect(postMessage) {
         postMessage.collect {
+            scaffoldState.snackbarHostState.showSnackbar(it)
+        }
+    }
+
+    LaunchedEffect(likeMessage) {
+        likeMessage.collect {
             scaffoldState.snackbarHostState.showSnackbar(it)
         }
     }
@@ -36,10 +47,10 @@ fun BlogScreen(
         updateListPost = { postVM.requestNewPost(true) },
         actionBottomReached = postVM::concatenatePost,
         actionButtonAdd = { navigator.navigate(AddBlogScreenDestination) },
-        actionChangePost = postVM::likePost,
+        actionChangePost = likeVM::likePost,
         isLoadNewData = stateLoading.value is Resource.Loading,
         isConcatenateData = stateConcatenate.value is Resource.Loading,
-        actionDetails = {navigator.navigate(PostDetailsDestination(it))}
+        actionDetails = { navigator.navigate(PostDetailsDestination(it)) }
     )
 }
 

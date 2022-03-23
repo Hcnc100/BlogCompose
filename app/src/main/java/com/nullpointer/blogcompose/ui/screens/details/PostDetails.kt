@@ -1,5 +1,7 @@
 package com.nullpointer.blogcompose.ui.screens.details
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -22,13 +24,13 @@ import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.models.Comment
 import com.nullpointer.blogcompose.models.Post
+import com.nullpointer.blogcompose.presentation.LikeViewModel
 import com.nullpointer.blogcompose.ui.customs.ToolbarBack
 import com.nullpointer.blogcompose.ui.screens.details.componets.Comments
 import com.nullpointer.blogcompose.ui.screens.details.viewModel.PostDetailsViewModel
 import com.ramcosta.composedestinations.annotation.DeepLink
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import com.valentinilk.shimmer.shimmer
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -44,24 +46,32 @@ fun PostDetails(
     idPost: String,
     navigator: DestinationsNavigator,
     postDetailsViewModel: PostDetailsViewModel = hiltViewModel(),
+    likeViewModel: LikeViewModel = hiltViewModel(),
 ) {
-
-    LaunchedEffect(Unit) {
-        postDetailsViewModel.initIdPost(idPost)
-    }
-
     val postState = postDetailsViewModel.postState.collectAsState()
     val commetsState = postDetailsViewModel.commentState.collectAsState()
     val hasNewComments = postDetailsViewModel.hasNewComments.collectAsState()
     val stateRequestComments = postDetailsViewModel.stateConcatenate.collectAsState()
-    val scaffoldState = rememberScaffoldState()
     val detailsMessage = postDetailsViewModel.messageDetails
+    val likeMessage = likeViewModel.messageLike
+    val scaffoldState = rememberScaffoldState()
+
+    LaunchedEffect(Unit) {
+        postDetailsViewModel.initIdPost(idPost)
+    }
 
     LaunchedEffect(detailsMessage) {
         detailsMessage.collect {
             scaffoldState.snackbarHostState.showSnackbar(it)
         }
     }
+
+    LaunchedEffect(likeMessage) {
+        likeMessage.collect {
+            scaffoldState.snackbarHostState.showSnackbar(it)
+        }
+    }
+
     PostReal(post = postState.value,
         list = commetsState.value,
         scaffoldState = scaffoldState,
@@ -71,6 +81,7 @@ fun PostDetails(
         totalComments = postDetailsViewModel.numberComments,
         reloadNewComment = postDetailsViewModel::reloadNewComment,
         actionBack = navigator::popBackStack,
+        actionLike = { likeViewModel.likePost(idPost, it) },
         addComment = { postDetailsViewModel.addComment(idPost, it) }
     )
 
@@ -78,7 +89,7 @@ fun PostDetails(
 
 
 @Composable
-fun HeaderBlog(post: Post) {
+fun HeaderBlog(post: Post, actionLike: (Boolean) -> Unit) {
     Column {
         val painter = rememberImagePainter(post.urlImage)
         Image(painter = painter,
@@ -86,22 +97,37 @@ fun HeaderBlog(post: Post) {
             modifier = Modifier
                 .fillMaxWidth()
                 .height(250.dp))
-        InfoPost(post = post)
+        InfoPost(post = post, actionLike)
     }
 }
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun InfoPost(post: Post) {
+fun InfoPost(post: Post, actionLike: (Boolean) -> Unit) {
+
+    var likeState by remember { mutableStateOf(post.ownerLike) }
+    var numberLike by remember { mutableStateOf(post.numberLikes) }
+    
     Row(horizontalArrangement = Arrangement.SpaceBetween,
         modifier = Modifier
             .fillMaxWidth()
             .padding(10.dp)) {
-        Row {
-            val res = if (post.ownerLike) R.drawable.ic_fav else R.drawable.ic_unfav
-            Image(painter = painterResource(id = res), contentDescription = "")
-            Spacer(modifier = Modifier.width(10.dp))
-            Text("${post.numberLikes} likes")
-        }
+
+            AnimatedContent(targetState = likeState) {
+                Row(modifier = Modifier.clickable {
+                    actionLike(!likeState)
+                    likeState = !likeState
+                    if (likeState) numberLike+=1 else numberLike-=1
+                }){
+                    Icon(painterResource(
+                        id = if (likeState) R.drawable.ic_fav else R.drawable.ic_unfav),
+                        contentDescription = "")
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Text("${numberLike} likes")
+                }
+
+            }
+
         Text("${post.numberComments} comentarios")
     }
 }
@@ -116,6 +142,7 @@ fun PostReal(
     hasNewComment: Boolean,
     totalComments: Int,
     stateRequestComments: Resource<Unit>?,
+    actionLike: (Boolean) -> Unit,
     reloadNewComment: () -> Unit,
     concatenate: () -> Unit,
     actionBack: () -> Unit,
@@ -153,7 +180,7 @@ fun PostReal(
                             .height(250.dp), contentAlignment = Alignment.Center) {
                             CircularProgressIndicator()
                         }
-                        is Resource.Success -> HeaderBlog(post.data)
+                        is Resource.Success -> HeaderBlog(post.data, actionLike = actionLike)
                     }
 
                 }
@@ -161,7 +188,7 @@ fun PostReal(
                 when (list) {
                     is Resource.Failure -> {}
                     is Resource.Loading -> {
-                        items(10){
+                        items(10) {
                             Comments()
                         }
                     }
