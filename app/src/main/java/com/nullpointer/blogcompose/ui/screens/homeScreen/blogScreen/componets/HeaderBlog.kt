@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.rememberImagePainter
 import coil.transform.CircleCropTransformation
 import com.nullpointer.blogcompose.R
+import com.nullpointer.blogcompose.ui.share.ImageProfile
 
 @Composable
 fun HeaderBlog(
@@ -27,19 +28,11 @@ fun HeaderBlog(
         modifier = Modifier.padding(7.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        val painter = rememberImagePainter(
-            data = urlImgOwnerPost, builder = {
-                transformations(CircleCropTransformation())
-                crossfade(true)
-                placeholder(R.drawable.ic_account)
-            }
-        )
-        Image(painter = painter,
-            contentDescription = "Imagen del usuario",
-            modifier = Modifier
-                .size(40.dp)
-                .weight(1f)
-        )
+
+        ImageProfile(urlImgProfile = urlImgOwnerPost,
+            paddingLoading = 5.dp,
+            sizeImage = 40.dp,
+            modifier = Modifier.weight(1f))
         Spacer(modifier = Modifier.width(10.dp))
         Text(text = nameOwnerPost,
             maxLines = 1,

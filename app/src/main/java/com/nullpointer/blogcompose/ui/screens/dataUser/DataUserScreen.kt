@@ -29,6 +29,7 @@ import com.nullpointer.blogcompose.presentation.AuthViewModel
 import com.nullpointer.blogcompose.presentation.RegistryViewModel
 import com.nullpointer.blogcompose.ui.customs.ToolbarBack
 import com.nullpointer.blogcompose.ui.screens.addPost.components.ButtonSheetContent
+import com.nullpointer.blogcompose.ui.share.ImageProfile
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.flow.collect
@@ -136,32 +137,18 @@ fun ImageCirculateUser(
     isCompress: Boolean,
     actionEdit: () -> Unit,
 ) {
-    val painter = rememberImagePainter(data = when {
-        fileTemp != null -> fileTemp
-        imageProfile.isNotEmpty() -> imageProfile
-        else -> R.drawable.ic_person
-    }) {
-        crossfade(true)
 
-    }
-    val state = painter.state
+
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
-        Card(shape = CircleShape, elevation = 10.dp) {
-            Image(
-                painter = when (state) {
-                    is ImagePainter.State.Error -> painterResource(id = R.drawable.ic_broken_image)
-                    else -> painter
-                },
-                contentScale = ContentScale.Crop,
-                contentDescription = "",
-                modifier = Modifier
-                    .size(150.dp)
-                    .padding(if (state !is ImagePainter.State.Success) 30.dp else 0.dp)
-            )
-        }
-        if (state is ImagePainter.State.Loading || isCompress) {
-            CircularProgressIndicator()
-        }
+        ImageProfile(
+            urlImgProfile = imageProfile,
+            paddingLoading = 20.dp,
+            sizeImage = 150.dp,
+            showProgress = true,
+            fileImg = fileTemp,
+        )
+        if (isCompress) CircularProgressIndicator()
+
         FloatingActionButton(onClick = { actionEdit() }, modifier = Modifier
             .padding(10.dp)
             .size(35.dp)

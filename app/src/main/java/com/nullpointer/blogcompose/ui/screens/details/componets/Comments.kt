@@ -20,6 +20,7 @@ import coil.compose.rememberImagePainter
 import coil.transform.CircleCropTransformation
 import com.nullpointer.blogcompose.core.utils.TimeUtils
 import com.nullpointer.blogcompose.models.Comment
+import com.nullpointer.blogcompose.ui.share.ImageProfile
 import com.valentinilk.shimmer.shimmer
 
 
@@ -71,18 +72,15 @@ fun TimeComment(timeComment: Long?) {
 fun ImageComment(
     urlImgProfile: String? = null,
 ) {
-    val modifierImg = Modifier
-        .padding(start = 10.dp, top = 10.dp)
-        .size(40.dp)
     if (urlImgProfile != null) {
-        val painter = rememberImagePainter(urlImgProfile) {
-            transformations(CircleCropTransformation())
-        }
-        Image(painter = painter,
-            contentDescription = "",
-            modifier = modifierImg)
+        ImageProfile(urlImgProfile = urlImgProfile,
+            paddingLoading = 5.dp,
+            sizeImage = 40.dp,
+            modifier = Modifier.padding(start = 10.dp, top = 10.dp))
     } else {
-        Box(modifier = modifierImg
+        Box(modifier = Modifier
+            .padding(start = 10.dp, top = 10.dp)
+            .size(40.dp)
             .shimmer()
             .clip(CircleShape))
     }

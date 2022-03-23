@@ -23,6 +23,7 @@ import com.nullpointer.blogcompose.ui.customs.ToolbarBack
 import com.nullpointer.blogcompose.ui.screens.authScreen.getGoogleSignInClient
 import com.nullpointer.blogcompose.ui.screens.destinations.ConfigScreenDestination
 import com.nullpointer.blogcompose.ui.screens.destinations.DataUserScreenDestination
+import com.nullpointer.blogcompose.ui.share.ImageProfile
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
@@ -48,14 +49,10 @@ fun ConfigScreen(
                         modifier = Modifier.padding(10.dp)
                     ) {
                         Text(text = currentUser?.nameUser ?: "", overflow = TextOverflow.Ellipsis)
-                        val painter = rememberImagePainter(data = currentUser?.urlImg ?: "") {
-                            transformations(
-                                CircleCropTransformation()
-                            )
-                        }
-                        Image(painter = painter,
-                            contentDescription = "",
-                            modifier = Modifier.size(35.dp))
+
+                        ImageProfile(urlImgProfile = currentUser?.urlImg.toString(),
+                            paddingLoading = 5.dp,
+                            sizeImage = 35.dp)
                     }
                 }
 

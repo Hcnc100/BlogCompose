@@ -26,6 +26,7 @@ import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.core.utils.TimeUtils
 import com.nullpointer.blogcompose.presentation.NotifyViewModel
 import com.nullpointer.blogcompose.ui.screens.swipePosts.OnBottomReached
+import com.nullpointer.blogcompose.ui.share.ImageProfile
 import com.ramcosta.composedestinations.annotation.Destination
 import kotlinx.coroutines.flow.collect
 
@@ -105,15 +106,11 @@ fun ItemNotify(
         Row(modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 10.dp)) {
-            val painter = rememberImagePainter(data = imgProfile) {
-                transformations(CircleCropTransformation())
-            }
-            Image(painter = painter,
-                contentDescription = "",
-                modifier = Modifier
-                    .size(60.dp)
-                    .weight(2f)
-                    .align(Alignment.CenterVertically))
+
+            ImageProfile(urlImgProfile = imgProfile,
+                paddingLoading = 10.dp,
+                sizeImage = 60.dp,
+                modifier = Modifier.weight(2f))
 
             Spacer(modifier = Modifier.width(10.dp))
 
