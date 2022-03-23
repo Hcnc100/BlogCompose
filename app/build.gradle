@@ -149,7 +149,11 @@ dependencies {
     implementation("androidx.datastore:datastore-preferences:1.0.0")
     implementation "com.google.protobuf:protobuf-javalite:3.17.2"
 
+    // * shimmer effect
+    implementation 'com.valentinilk.shimmer:compose-shimmer:1.0.2'
 
+    // *lottie compose
+    implementation "com.airbnb.android:lottie-compose:4.2.2"
 
 }
 

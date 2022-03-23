@@ -35,13 +35,7 @@ fun BlogItem(
     actionChangePost: (String, Boolean) -> Unit,
     staticInfo: Pair<String, String>? = null,
 ) {
-    val (ownerLike, changeOwnerLike) = remember { mutableStateOf(post.ownerLike) }
     val context = LocalContext.current
-    SideEffect {
-        if (ownerLike != post.ownerLike) {
-            changeOwnerLike(post.ownerLike)
-        }
-    }
     Card(
         modifier = Modifier
             .padding(10.dp)
@@ -55,7 +49,7 @@ fun BlogItem(
                 HeaderBlog(post.poster!!.urlImg, post.poster!!.name)
             }
             ImageBlog(post.urlImage)
-            ButtonsInteractionBlog(ownerLike, actionShare = {
+            ButtonsInteractionBlog(post.ownerLike, actionShare = {
                 val intent = Intent(Intent.ACTION_SEND)
                     .putExtra(Intent.EXTRA_TEXT, "https://www.blog-compose.com/post/${post.id}")
                     .setType("text/plain")
@@ -65,9 +59,6 @@ fun BlogItem(
                 actionDetails(post.id)
             }) {
                 actionChangePost(post.id, it)
-                changeOwnerLike(it)
-                post.ownerLike = !post.ownerLike
-                post.numberLikes = if (it) post.numberLikes + 1 else post.numberLikes - 1
             }
             TextLikes(post.numberLikes, post.numberComments)
             DescriptionBlog(Modifier.padding(5.dp), post.description)

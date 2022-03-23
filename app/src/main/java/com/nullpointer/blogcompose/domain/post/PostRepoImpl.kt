@@ -139,10 +139,11 @@ class PostRepoImpl(
         myPostDAO.deleterAll()
     }
 
-    override fun getRealTimePost(idPost: String): Flow<Post?> =
+    override suspend fun getRealTimePost(idPost: String): Flow<Post?> =
         postDataSource.getRealTimePost(idPost)
 
     override suspend fun getLastComments(idPost: String) {
+
         val listComments = postDataSource.getCommentsForPost(nComments = SIZE_COMMENTS, idPost = idPost)
         commentsDAO.updateAllComments(listComments)
     }
@@ -162,6 +163,7 @@ class PostRepoImpl(
     }
 
     suspend fun concatenateComments(idPost: String) {
+        if (!InternetCheck.isNetworkAvailable()) throw NetworkException()
         val idComment = commentsDAO.getLastComment()?.id
         val list = postDataSource.getCommentsForPost(nComments = SIZE_COMMENTS,
             idPost = idPost,

@@ -28,6 +28,8 @@ import com.nullpointer.blogcompose.ui.screens.details.viewModel.PostDetailsViewM
 import com.ramcosta.composedestinations.annotation.DeepLink
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import com.valentinilk.shimmer.shimmer
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 @Destination(
@@ -39,33 +41,39 @@ import kotlinx.coroutines.launch
 )
 @Composable
 fun PostDetails(
-    navigator: DestinationsNavigator,
     idPost: String,
+    navigator: DestinationsNavigator,
     postDetailsViewModel: PostDetailsViewModel = hiltViewModel(),
 ) {
 
     LaunchedEffect(Unit) {
         postDetailsViewModel.initIdPost(idPost)
     }
-//    val detailsMessage=postDetailsViewModel.
-//    LaunchedEffect(postMessage) {
-//        postMessage.collect {
-//            scaffoldState.snackbarHostState.showSnackbar(it)
-//        }
-//    }
+
     val postState = postDetailsViewModel.postState.collectAsState()
     val commetsState = postDetailsViewModel.commentState.collectAsState()
     val hasNewComments = postDetailsViewModel.hasNewComments.collectAsState()
+    val stateRequestComments = postDetailsViewModel.stateConcatenate.collectAsState()
+    val scaffoldState = rememberScaffoldState()
+    val detailsMessage = postDetailsViewModel.messageDetails
+
+    LaunchedEffect(detailsMessage) {
+        detailsMessage.collect {
+            scaffoldState.snackbarHostState.showSnackbar(it)
+        }
+    }
     PostReal(post = postState.value,
         list = commetsState.value,
-        scaffoldState = rememberScaffoldState(),
+        scaffoldState = scaffoldState,
         hasNewComment = hasNewComments.value,
+        stateRequestComments = stateRequestComments.value,
         concatenate = postDetailsViewModel::concatenateComments,
         totalComments = postDetailsViewModel.numberComments,
         reloadNewComment = postDetailsViewModel::reloadNewComment,
         actionBack = navigator::popBackStack,
         addComment = { postDetailsViewModel.addComment(idPost, it) }
     )
+
 }
 
 
@@ -78,11 +86,8 @@ fun HeaderBlog(post: Post) {
             modifier = Modifier
                 .fillMaxWidth()
                 .height(250.dp))
-
         InfoPost(post = post)
     }
-
-
 }
 
 @Composable
@@ -110,6 +115,7 @@ fun PostReal(
     scaffoldState: ScaffoldState,
     hasNewComment: Boolean,
     totalComments: Int,
+    stateRequestComments: Resource<Unit>?,
     reloadNewComment: () -> Unit,
     concatenate: () -> Unit,
     actionBack: () -> Unit,
@@ -154,25 +160,30 @@ fun PostReal(
 
                 when (list) {
                     is Resource.Failure -> {}
-                    is Resource.Loading -> {}
+                    is Resource.Loading -> {
+                        items(10){
+                            Comments()
+                        }
+                    }
                     is Resource.Success -> {
                         val listComments = list.data
                         items(listComments.size) { index ->
-                            val comment = list.data[index]
-                            Comments(
-                                comment.urlImg,
-                                comment.nameUser,
-                                comment.timestamp?.time ?: 0,
-                                comment.comment
-                            )
+                            Comments(comment = list.data[index])
                         }
                         if (listComments.isNotEmpty() && listComments.size != totalComments) {
                             item {
-                                Box(modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable { concatenate() }
-                                    .padding(vertical = 10.dp)) {
-                                    Text(text = "Cargar mas comentarios")
+                                if (stateRequestComments is Resource.Loading) {
+                                    Box(modifier = Modifier.fillMaxWidth()) {
+                                        CircularProgressIndicator(modifier = Modifier.size(25.dp),
+                                            strokeWidth = 4.dp)
+                                    }
+                                } else {
+                                    Box(modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable { concatenate() }
+                                        .padding(vertical = 10.dp)) {
+                                        Text(text = "Cargar mas comentarios")
+                                    }
                                 }
                             }
                         }
@@ -184,7 +195,7 @@ fun PostReal(
                 Box(modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .padding(bottom = 35.dp)
-                    ) {
+                ) {
                     Text(text = "Hay nuevos comentarios", modifier = Modifier
                         .background(MaterialTheme.colors.primary)
                         .padding(horizontal = 10.dp, vertical = 10.dp)
@@ -202,7 +213,7 @@ fun PostReal(
 @Composable
 fun TextInputComment(actionSendComment: (String) -> Unit) {
     val (text, changeText) = rememberSaveable { mutableStateOf("") }
-    Box() {
+    Box {
         OutlinedTextField(
             modifier = Modifier
                 .fillMaxWidth()
