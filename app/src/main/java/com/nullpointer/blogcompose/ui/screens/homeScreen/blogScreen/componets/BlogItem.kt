@@ -62,7 +62,7 @@ fun BlogItem(
             }
             TextLikes(post.numberLikes, post.numberComments)
             DescriptionBlog(Modifier.padding(5.dp), post.description)
-            TextTime(post.timeStamp)
+            TextTime(post.timestamp)
         }
     }
 }

@@ -16,7 +16,7 @@ data class MyPost(
     @set:Exclude @get:Exclude
     override var ownerLike: Boolean = false,
     @ServerTimestamp
-    override var timeStamp: Date? = null,
+    override var timestamp: Date? = null,
     @set:Exclude @get:Exclude
     @PrimaryKey
     override var id: String = UUID.randomUUID().toString(),
@@ -30,7 +30,7 @@ data class MyPost(
             numberComments = post.numberComments,
             numberLikes = post.numberLikes,
             ownerLike = post.ownerLike,
-            timeStamp = post.timeStamp,
+            timestamp  = post.timestamp,
             id = post.id
         )
     }

@@ -9,7 +9,7 @@ class ImagesRepoImpl(
     private val imagesDataSource: ImagesDataSource,
 ) : ImagesRepository {
     override fun uploadImgProfile(uri: Uri): Flow<StorageUploadTaskResult> =
-        imagesDataSource.uploadImagePost(uri, "imgProfile")
+        imagesDataSource.uploadImageUser(uri, "imgProfile")
 
     override fun uploadImgBlog(uri: Uri, name: String): Flow<StorageUploadTaskResult> =
         imagesDataSource.uploadImagePost(uri, name)

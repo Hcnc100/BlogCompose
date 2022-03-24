@@ -21,43 +21,44 @@ class NotifyDataSource {
     private val nodeNotify = Firebase.firestore.collection(NOTIFICATIONS)
 
     suspend fun getLastNotifications(
-        afterId: String? = null,
-        beforeId: String? = null,
+        startWith: String? = null,
+        endWith: String? = null,
         numberRequest: Int = Integer.MAX_VALUE,
     ): List<Notify> {
         // * get last notify consideration the id passed from parameter, this for no reload all
         // * else just return the request number of notify, this is "pagination"
-
         val nodeUserNotify = nodeNotify.document(auth.currentUser?.uid!!).collection(LIST_NOTIFY)
-
+        // * order for timestamp
         var baseQuery = nodeUserNotify.orderBy(TIMESTAMP, Query.Direction.DESCENDING)
-        if (afterId != null) {
-            val lastDocument = nodeUserNotify.document(afterId).get(Source.CACHE).await()
-            baseQuery = baseQuery.startAfter(lastDocument)
-        }
-        if (beforeId != null) {
-            val lastDocument = nodeUserNotify.document(beforeId).get(Source.CACHE).await()
-            baseQuery = baseQuery.endBefore(lastDocument)
+        // ? if passed id, indicate start, request notifications, that initial with this
+        // ? or get request notifications that end with notifications
+        if (startWith != null) {
+            val refDocument = nodeUserNotify.document(startWith).get(Source.CACHE).await()
+            if (refDocument.exists())
+            baseQuery = baseQuery.startAfter(refDocument)
+        }else if (endWith != null) {
+            val refDocument = nodeUserNotify.document(endWith).get(Source.CACHE).await()
+            if (refDocument.exists())
+            baseQuery = baseQuery.endBefore(refDocument)
         }
         // * limit result or for default all
         if (numberRequest != Integer.MAX_VALUE) baseQuery = baseQuery.limit(numberRequest.toLong())
-
+        // * transform document to notifications
         return baseQuery.get(Source.SERVER).await().documents.mapNotNull { document ->
             transformDocumentInNotify(document)
         }
     }
 
     suspend fun getLastNotifyDate(numberRequest: Int, date: Date?): List<Notify> {
-
+        // * node of notifications
         val nodeUserNotify = nodeNotify.document(auth.currentUser?.uid!!).collection(LIST_NOTIFY)
-
+        // * order for timestamp
         var baseQuery = nodeUserNotify.orderBy(TIMESTAMP, Query.Direction.DESCENDING)
-
+        // * search get notifications more recently if pass date
         if (date != null) baseQuery = baseQuery.whereGreaterThan(TIMESTAMP, date)
-
-        // * limit result or for default all
+        // * limit result or get all notifications (no recommended)
         if (numberRequest != Integer.MAX_VALUE) baseQuery = baseQuery.limit(numberRequest.toLong())
-
+        // * transform result in notify
         return baseQuery.get(Source.SERVER).await().documents.mapNotNull { document ->
             transformDocumentInNotify(document)
         }
@@ -65,15 +66,14 @@ class NotifyDataSource {
 
     private fun transformDocumentInNotify(document: DocumentSnapshot): Notify? {
         // * transform the document in notify
+        // ? adding id and timestamp estimate
         return document.toObject(Notify::class.java)?.apply {
             id = document.id
-            timestamp = document.getTimestamp(
-                TIMESTAMP,
-                DocumentSnapshot.ServerTimestampBehavior.ESTIMATE
-            )?.toDate()
+            timestamp = document
+                .getTimestamp(TIMESTAMP, DocumentSnapshot.ServerTimestampBehavior.ESTIMATE
+                )?.toDate()
         }
     }
-
 
 
 }

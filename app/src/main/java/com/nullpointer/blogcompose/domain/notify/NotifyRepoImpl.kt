@@ -4,7 +4,6 @@ import com.nullpointer.blogcompose.core.utils.InternetCheck
 import com.nullpointer.blogcompose.core.utils.NetworkException
 import com.nullpointer.blogcompose.data.local.cache.NotifyDAO
 import com.nullpointer.blogcompose.data.remote.NotifyDataSource
-import com.nullpointer.blogcompose.domain.post.PostRepoImpl
 import com.nullpointer.blogcompose.models.Notify
 import kotlinx.coroutines.flow.Flow
 
@@ -30,12 +29,7 @@ class NotifyRepoImpl(
         val listNewNotify = notifyDataSource.getLastNotifyDate(
             numberRequest = SIZE_NOTIFY_REQUEST,
             date = firstNotify?.timestamp)
-        if (listNewNotify.size == SIZE_NOTIFY_REQUEST) {
-            notifyDAO.updateAllNotify(listNewNotify)
-        } else {
-            notifyDAO.updateListPost(SIZE_NOTIFY_REQUEST, listNewNotify)
-        }
-
+        if (listNewNotify.isNotEmpty()) notifyDAO.updateAllNotify(listNewNotify)
         return listNewNotify.size
     }
 
@@ -46,7 +40,7 @@ class NotifyRepoImpl(
         // ? this notifications no override the notification from database
         val listConcatNotify = notifyDataSource.getLastNotifications(
             numberRequest = SIZE_NOTIFY_REQUEST,
-            afterId = notifyDAO.getLastNotify()?.id
+            startWith = notifyDAO.getLastNotify()?.id
         )
         if (listConcatNotify.isNotEmpty()) notifyDAO.insertListNotify(listConcatNotify)
         return listConcatNotify.size

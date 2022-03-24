@@ -34,17 +34,10 @@ class PostRepoImpl(
         if (!InternetCheck.isNetworkAvailable()) throw NetworkException()
         val firstPost = if (forceRefresh) null else postDAO.getFirstPost()
         val listLastPost = postDataSource.getLastPostDate(
-            date = firstPost?.timeStamp,
+            date = firstPost?.timestamp,
             nPosts = SIZE_POST_REQUEST
         )
-        if (listLastPost.isNotEmpty()) {
-            if (listLastPost.size == SIZE_POST_REQUEST) {
-                postDAO.updateAllPost(listLastPost)
-            } else {
-                postDAO.updateListPost(SIZE_POST_REQUEST, listLastPost)
-            }
-
-        }
+        if (listLastPost.isNotEmpty()) postDAO.updateAllPost(listLastPost)
         return listLastPost.size
     }
 
@@ -54,18 +47,12 @@ class PostRepoImpl(
         // * get last post consideration "my" first post saved in database
         // ? and remove repeater info because owner is me
         val firstPost = if (forceRefresh) null else myPostDAO.getFirstPost()
-        val listMyLastPost = postDataSource
-            .getMyLastPostDate(
-                date = firstPost?.timeStamp,
-                nPosts = SIZE_POST_REQUEST
-            )
+        val listMyLastPost = postDataSource.getMyLastPostDate(
+            date = firstPost?.timestamp,
+            nPosts = SIZE_POST_REQUEST
+        )
             .map { MyPost.fromPost(it) }
-        if (listMyLastPost.size == SIZE_POST_REQUEST) {
-            myPostDAO.updateAllPost(listMyLastPost)
-        } else {
-            myPostDAO.updateListPost(SIZE_POST_REQUEST, listMyLastPost)
-        }
-
+        if (listMyLastPost.isNotEmpty()) myPostDAO.updateAllPost(listMyLastPost)
         return listMyLastPost.size
     }
 
@@ -74,7 +61,7 @@ class PostRepoImpl(
         // * this nos remove old post
         // * consideration first post saved
         if (!InternetCheck.isNetworkAvailable()) throw NetworkException()
-        val listNewPost = postDataSource.getLatestPost(
+        val listNewPost = postDataSource.getLastPost(
             nPosts = SIZE_POST_REQUEST,
             startWithPostId = postDAO.getLastPost()?.id
         )
@@ -131,7 +118,7 @@ class PostRepoImpl(
 
     private suspend fun requestLastPostInitWith(idPost: String) {
         if (!InternetCheck.isNetworkAvailable()) throw NetworkException()
-        val listLastPost = postDataSource.getLatestPost(
+        val listLastPost = postDataSource.getLastPost(
             nPosts = SIZE_POST_REQUEST,
             startWithPostId = idPost,
             includePost = true
@@ -193,7 +180,7 @@ class PostRepoImpl(
     }
 
     override suspend fun deleterPost(post: Post) =
-        postDataSource.deleterPost(post)
+        postDataSource.deleterPost(post.id)
 
     override suspend fun updateInnerPost(post: Post) {
         val oldPost = postDAO.getPostById(post.id)

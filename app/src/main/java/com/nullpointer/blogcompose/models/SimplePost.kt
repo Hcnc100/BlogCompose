@@ -8,7 +8,7 @@ interface SimplePost {
     var numberComments: Int
     var numberLikes: Int
     var ownerLike: Boolean
-    var timeStamp: Date?
+    var timestamp: Date?
     var id: String
     var poster: Poster?
 }

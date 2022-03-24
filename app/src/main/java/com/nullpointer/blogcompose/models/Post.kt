@@ -21,7 +21,7 @@ data class Post(
     @set:Exclude @get:Exclude
     override var ownerLike: Boolean = false,
     @ServerTimestamp
-    override var timeStamp: Date? = null,
+    override var timestamp: Date? = null,
     @set:Exclude @get:Exclude
     @PrimaryKey
     override var id: String = UUID.randomUUID().toString(),

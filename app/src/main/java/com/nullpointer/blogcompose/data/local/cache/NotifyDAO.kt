@@ -18,19 +18,6 @@ interface NotifyDAO {
         insertListNotify(list)
     }
 
-    @Transaction
-    suspend fun updateListPost(numberNotify: Int, list: List<Notify>) {
-        if (list.size == numberNotify) {
-            updateAllNotify(list)
-        } else {
-            val retainPost = list + getListFirstPost(numberNotify - list.size)
-            updateAllNotify(retainPost)
-        }
-    }
-
-    @Query("SELECT * FROM table_notify ORDER BY timestamp DESC LIMIT :numberNotify")
-    suspend fun getListFirstPost(numberNotify: Int): List<Notify>
-
     @Query("DELETE FROM table_notify")
     suspend fun deleterAll()
 

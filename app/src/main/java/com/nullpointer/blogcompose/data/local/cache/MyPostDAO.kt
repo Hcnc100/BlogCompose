@@ -27,19 +27,6 @@ interface MyPostDAO {
         insertListPost(list)
     }
 
-    @Transaction
-    suspend fun updateListPost(numberPost: Int, list: List<MyPost>) {
-        if (list.size == numberPost) {
-            updateAllPost(list)
-        } else {
-            val retainPost = list + getListFirstPost(numberPost - list.size)
-            updateAllPost(retainPost)
-        }
-    }
-
-    @Query("SELECT * FROM table_my_post ORDER BY timeStamp DESC LIMIT :numberPost")
-    suspend fun getListFirstPost(numberPost: Int): List<MyPost>
-
     @Query("SELECT * FROM table_my_post ORDER BY timeStamp DESC")
     fun getAllPost(): Flow<List<MyPost>>
 
