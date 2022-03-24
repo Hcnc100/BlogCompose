@@ -61,12 +61,11 @@ class PostViewModel @Inject constructor(
         jobRequestNew?.cancel()
         jobRequestNew = viewModelScope.launch(Dispatchers.IO) {
             _stateLoadData.value = Resource.Loading()
-            try {
+            _stateLoadData.value=try {
                 val sizeNewPost = postRepo.requestLastPost(forceRefresh)
                 Timber.d("Se obtuvieron $sizeNewPost post nuevos ")
-                _stateLoadData.value = Resource.Success(Unit)
+                Resource.Success(Unit)
             } catch (e: Exception) {
-                _stateLoadData.value = Resource.Failure(e)
                 when (e) {
                     is CancellationException -> throw e
                     is NetworkException -> _messagePost.trySend("Verifique su conexion a internet")
@@ -76,6 +75,7 @@ class PostViewModel @Inject constructor(
                         Timber.e("Error en el request de todos los post $e")
                     }
                 }
+                Resource.Failure(e)
             }
         }
     }
@@ -104,7 +104,6 @@ class PostViewModel @Inject constructor(
             }
         }
     }
-
 
 
 }

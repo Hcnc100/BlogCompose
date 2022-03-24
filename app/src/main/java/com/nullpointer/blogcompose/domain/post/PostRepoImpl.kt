@@ -32,13 +32,19 @@ class PostRepoImpl(
 
     override suspend fun requestLastPost(forceRefresh: Boolean): Int {
         if (!InternetCheck.isNetworkAvailable()) throw NetworkException()
-        // * get last post consideration first post saved in database
-        val idFirstPost = if (forceRefresh) null else postDAO.getFirstPost()?.id
-        val listLastPost = postDataSource.getLatestPost(
-            nPosts = SIZE_POST_REQUEST,
-            endWithPostId = idFirstPost
+        val firstPost = if (forceRefresh) null else postDAO.getFirstPost()
+        val listLastPost = postDataSource.getLastPostDate(
+            date = firstPost?.timeStamp,
+            nPosts = SIZE_POST_REQUEST
         )
-        if (listLastPost.isNotEmpty()) postDAO.updateAllPost(listLastPost)
+        if (listLastPost.isNotEmpty()) {
+            if (listLastPost.size == SIZE_POST_REQUEST) {
+                postDAO.updateAllPost(listLastPost)
+            } else {
+                postDAO.updateListPost(SIZE_POST_REQUEST, listLastPost)
+            }
+
+        }
         return listLastPost.size
     }
 
@@ -47,12 +53,19 @@ class PostRepoImpl(
         if (!InternetCheck.isNetworkAvailable()) throw NetworkException()
         // * get last post consideration "my" first post saved in database
         // ? and remove repeater info because owner is me
-        val idMyFirstPost = if (forceRefresh) null else myPostDAO.getFirstPost()?.id
-        val listMyLastPost = postDataSource.getMyLastPost(
-            nPosts = SIZE_POST_REQUEST,
-            endWithPostId = idMyFirstPost
-        ).map { MyPost.fromPost(it) }
-        if (listMyLastPost.isNotEmpty()) myPostDAO.updateAllPost(listMyLastPost)
+        val firstPost = if (forceRefresh) null else myPostDAO.getFirstPost()
+        val listMyLastPost = postDataSource
+            .getMyLastPostDate(
+                date = firstPost?.timeStamp,
+                nPosts = SIZE_POST_REQUEST
+            )
+            .map { MyPost.fromPost(it) }
+        if (listMyLastPost.size == SIZE_POST_REQUEST) {
+            myPostDAO.updateAllPost(listMyLastPost)
+        } else {
+            myPostDAO.updateListPost(SIZE_POST_REQUEST, listMyLastPost)
+        }
+
         return listMyLastPost.size
     }
 
@@ -144,7 +157,8 @@ class PostRepoImpl(
 
     override suspend fun getLastComments(idPost: String) {
 
-        val listComments = postDataSource.getCommentsForPost(nComments = SIZE_COMMENTS, idPost = idPost)
+        val listComments =
+            postDataSource.getCommentsForPost(nComments = SIZE_COMMENTS, idPost = idPost)
         commentsDAO.updateAllComments(listComments)
     }
 

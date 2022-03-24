@@ -8,6 +8,7 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.nullpointer.blogcompose.models.Notify
 import kotlinx.coroutines.tasks.await
+import java.util.*
 
 class NotifyDataSource {
     companion object {
@@ -46,6 +47,22 @@ class NotifyDataSource {
         }
     }
 
+    suspend fun getLastNotifyDate(numberRequest: Int, date: Date?): List<Notify> {
+
+        val nodeUserNotify = nodeNotify.document(auth.currentUser?.uid!!).collection(LIST_NOTIFY)
+
+        var baseQuery = nodeUserNotify.orderBy(TIMESTAMP, Query.Direction.DESCENDING)
+
+        if (date != null) baseQuery = baseQuery.whereGreaterThan(TIMESTAMP, date)
+
+        // * limit result or for default all
+        if (numberRequest != Integer.MAX_VALUE) baseQuery = baseQuery.limit(numberRequest.toLong())
+
+        return baseQuery.get(Source.SERVER).await().documents.mapNotNull { document ->
+            transformDocumentInNotify(document)
+        }
+    }
+
     private fun transformDocumentInNotify(document: DocumentSnapshot): Notify? {
         // * transform the document in notify
         return document.toObject(Notify::class.java)?.apply {
@@ -56,5 +73,7 @@ class NotifyDataSource {
             )?.toDate()
         }
     }
+
+
 
 }

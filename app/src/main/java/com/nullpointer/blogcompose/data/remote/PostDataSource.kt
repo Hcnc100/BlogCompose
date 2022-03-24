@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import timber.log.Timber
+import java.util.*
 
 class PostDataSource {
     private val database = Firebase.firestore
@@ -102,6 +103,31 @@ class PostDataSource {
         }
     }
 
+    suspend fun getLastPostDate(
+        date: Date? = null,
+        nPosts: Int = Integer.MAX_VALUE,
+        fromUserId: String? = null,
+    ): List<Post> {
+        var query = refPosts.orderBy("timeStamp", Query.Direction.DESCENDING)
+        if (date != null) query = query.whereGreaterThan("timeStamp", date)
+        // * filter to user or for default get all
+        if (fromUserId != null) query = query.whereEqualTo("poster.uuid", fromUserId)
+        if (nPosts != Integer.MAX_VALUE) query = query.limit(nPosts.toLong())
+        return query.get(Source.SERVER).await().documents.mapNotNull {
+            transformDocumentPost(it)
+        }
+    }
+
+    suspend fun getMyLastPostDate(
+        date: Date? = null,
+        nPosts: Int = Integer.MAX_VALUE,
+    ): List<Post> {
+        return getLastPostDate(
+            date, nPosts,
+            auth.currentUser!!.uid
+        )
+    }
+
 
     suspend fun getCommentsForPost(
         nComments: Int = Integer.MAX_VALUE,
@@ -114,14 +140,15 @@ class PostDataSource {
         var query = refComment
             .document(idPost)
             .collection("listComments")
-            .orderBy("timestamp",Query.Direction.DESCENDING)
+            .orderBy("timestamp", Query.Direction.DESCENDING)
 
-        val refCommentCurrent=refComment.document(idPost).collection("listComments")
+        val refCommentCurrent = refComment.document(idPost).collection("listComments")
 
         if (startWithCommentId != null) {
             val refDocument = refCommentCurrent.document(startWithCommentId).get().await()
             if (refDocument.exists())
-                query = if (includePost) query.startAt(refDocument) else query.startAfter(refDocument)
+                query =
+                    if (includePost) query.startAt(refDocument) else query.startAfter(refDocument)
         }
 
         if (endWithCommentId != null) {

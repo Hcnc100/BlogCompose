@@ -4,6 +4,7 @@ import com.nullpointer.blogcompose.core.utils.InternetCheck
 import com.nullpointer.blogcompose.core.utils.NetworkException
 import com.nullpointer.blogcompose.data.local.cache.NotifyDAO
 import com.nullpointer.blogcompose.data.remote.NotifyDataSource
+import com.nullpointer.blogcompose.domain.post.PostRepoImpl
 import com.nullpointer.blogcompose.models.Notify
 import kotlinx.coroutines.flow.Flow
 
@@ -25,11 +26,16 @@ class NotifyRepoImpl(
         // * get the first id from notify order for date
         // ? if the database is empty o the parameter "force refresh" is true
         // ? request new data and replace data in database
-        val firstIdNotify = if (forceRefresh) null else notifyDAO.getFirstNotify()?.id
-        val listNewNotify = notifyDataSource.getLastNotifications(
+        val firstNotify = if (forceRefresh) null else notifyDAO.getFirstNotify()
+        val listNewNotify = notifyDataSource.getLastNotifyDate(
             numberRequest = SIZE_NOTIFY_REQUEST,
-            beforeId = firstIdNotify)
-        if (listNewNotify.isNotEmpty()) notifyDAO.updateAllNotify(listNewNotify)
+            date = firstNotify?.timestamp)
+        if (listNewNotify.size == SIZE_NOTIFY_REQUEST) {
+            notifyDAO.updateAllNotify(listNewNotify)
+        } else {
+            notifyDAO.updateListPost(SIZE_NOTIFY_REQUEST, listNewNotify)
+        }
+
         return listNewNotify.size
     }
 
