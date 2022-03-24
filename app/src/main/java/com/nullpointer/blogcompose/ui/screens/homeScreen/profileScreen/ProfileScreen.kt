@@ -34,19 +34,20 @@ fun ProfileScreen(
     likeViewModel: LikeViewModel = hiltViewModel(),
     navigator: DestinationsNavigator,
 ) {
-
+    // * states
     val stateListPost = myPostViewModel.listMyPost.collectAsState()
     val stateLoading = myPostViewModel.stateLoad.collectAsState()
     val stateConcatenate = myPostViewModel.stateConcatenate.collectAsState()
     val currentUser = authViewModel.currentUser.collectAsState()
 
-    val likeMessage = likeViewModel.messageLike
-    val postMessage = myPostViewModel.messageMyPosts
-
-    val scaffoldState = rememberScaffoldState()
-
+    // * data user
     val photoUser = currentUser.value?.urlImg ?: ""
     val name = currentUser.value?.nameUser ?: ""
+
+    // * messages
+    val likeMessage = likeViewModel.messageLike
+    val postMessage = myPostViewModel.messageMyPosts
+    val scaffoldState = rememberScaffoldState()
 
     LaunchedEffect(postMessage) {
         postMessage.collect {
@@ -69,10 +70,14 @@ fun ProfileScreen(
         staticInfo = Pair(photoUser, name),
         isLoadNewData = stateLoading.value is Resource.Loading,
         isConcatenateData = stateConcatenate.value is Resource.Loading,
-        actionDetails = { navigator.navigate(PostDetailsDestination(it)) },
+        actionDetails = { idPost, goToBottom ->
+            navigator.navigate(PostDetailsDestination(idPost, goToBottom))
+        },
         emptyResRaw = R.raw.empty1,
         emptyString = "No has hecho ningun post"
     ) {
+        // * add header for the swipe list
+        // ! only function composable
         HeaderProfile(
             urlImgProfile = photoUser,
             nameProfile = name,
@@ -87,6 +92,7 @@ fun HeaderProfile(
     nameProfile: String,
     actionLogOut: () -> Unit,
 ) {
+    // * header for user information, with button to send config app
     Box {
         InfoProfile(urlImgProfile, nameProfile)
         IconButton(onClick = { actionLogOut() }, modifier = Modifier
@@ -102,6 +108,7 @@ fun InfoProfile(
     urlImgProfile: String,
     nameProfile: String,
 ) {
+    // * header for user information
     Card {
         Column(
             modifier = Modifier
@@ -121,18 +128,5 @@ fun InfoProfile(
                 overflow = TextOverflow.Ellipsis,
                 fontWeight = FontWeight.W600)
         }
-    }
-
-}
-
-
-@Composable
-fun StatisticText(
-    name: String,
-    value: String,
-) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(value, style = MaterialTheme.typography.body1, fontWeight = FontWeight.W600)
-        Text(name, style = MaterialTheme.typography.body2)
     }
 }

@@ -51,7 +51,9 @@ fun BlogScreen(
         actionChangePost = likeVM::likePost,
         isLoadNewData = stateLoading.value is Resource.Loading,
         isConcatenateData = stateConcatenate.value is Resource.Loading,
-        actionDetails = { navigator.navigate(PostDetailsDestination(it)) },
+        actionDetails = { idPost, goToBottom ->
+            navigator.navigate(PostDetailsDestination(idPost, goToBottom))
+        },
         emptyResRaw = R.raw.empty2,
         emptyString = "No hay post, deberias hacer uno"
     )

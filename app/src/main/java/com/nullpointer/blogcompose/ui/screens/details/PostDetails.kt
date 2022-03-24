@@ -15,11 +15,14 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberImagePainter
+import com.google.accompanist.insets.navigationBarsWithImePadding
 import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.models.Comment
@@ -31,6 +34,7 @@ import com.nullpointer.blogcompose.ui.screens.details.viewModel.PostDetailsViewM
 import com.ramcosta.composedestinations.annotation.DeepLink
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -44,6 +48,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun PostDetails(
     idPost: String,
+    goToBottom: Boolean = false,
     navigator: DestinationsNavigator,
     postDetailsViewModel: PostDetailsViewModel = hiltViewModel(),
     likeViewModel: LikeViewModel = hiltViewModel(),
@@ -76,6 +81,7 @@ fun PostDetails(
         list = commetsState.value,
         scaffoldState = scaffoldState,
         hasNewComment = hasNewComments.value,
+        goToBottom = goToBottom,
         stateRequestComments = stateRequestComments.value,
         concatenate = postDetailsViewModel::concatenateComments,
         totalComments = postDetailsViewModel.numberComments,
@@ -107,26 +113,26 @@ fun InfoPost(post: Post, actionLike: (Boolean) -> Unit) {
 
     var likeState by remember { mutableStateOf(post.ownerLike) }
     var numberLike by remember { mutableStateOf(post.numberLikes) }
-    
+
     Row(horizontalArrangement = Arrangement.SpaceBetween,
         modifier = Modifier
             .fillMaxWidth()
             .padding(10.dp)) {
 
-            AnimatedContent(targetState = likeState) {
-                Row(modifier = Modifier.clickable {
-                    actionLike(!likeState)
-                    likeState = !likeState
-                    if (likeState) numberLike+=1 else numberLike-=1
-                }){
-                    Icon(painterResource(
-                        id = if (likeState) R.drawable.ic_fav else R.drawable.ic_unfav),
-                        contentDescription = "")
-                    Spacer(modifier = Modifier.width(10.dp))
-                    Text("${numberLike} likes")
-                }
-
+        AnimatedContent(targetState = likeState) {
+            Row(modifier = Modifier.clickable {
+                actionLike(!likeState)
+                likeState = !likeState
+                if (likeState) numberLike += 1 else numberLike -= 1
+            }) {
+                Icon(painterResource(
+                    id = if (likeState) R.drawable.ic_fav else R.drawable.ic_unfav),
+                    contentDescription = "")
+                Spacer(modifier = Modifier.width(10.dp))
+                Text("${numberLike} likes")
             }
+
+        }
 
         Text("${post.numberComments} comentarios")
     }
@@ -141,6 +147,7 @@ fun PostReal(
     scaffoldState: ScaffoldState,
     hasNewComment: Boolean,
     totalComments: Int,
+    goToBottom: Boolean,
     stateRequestComments: Resource<Unit>?,
     actionLike: (Boolean) -> Unit,
     reloadNewComment: () -> Unit,
@@ -151,12 +158,21 @@ fun PostReal(
 
     val stateLazy = rememberLazyListState()
     val scope = rememberCoroutineScope()
+    val focusRequester = remember { FocusRequester() }
+
+    LaunchedEffect(list) {
+        delay(500)
+        if (goToBottom) focusRequester.requestFocus()
+    }
+
 
     Scaffold(
         scaffoldState = scaffoldState,
         topBar = { ToolbarBack(title = "Post", actionBack = actionBack) },
         bottomBar = {
-            TextInputComment {
+            TextInputComment(
+                focusRequester = focusRequester
+            ) {
                 addComment(it)
                 scope.launch {
                     stateLazy.animateScrollToItem(0)
@@ -238,14 +254,15 @@ fun PostReal(
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun TextInputComment(actionSendComment: (String) -> Unit) {
+fun TextInputComment(focusRequester: FocusRequester, actionSendComment: (String) -> Unit) {
     val (text, changeText) = rememberSaveable { mutableStateOf("") }
     Box {
         OutlinedTextField(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(5.dp)
-                .height(60.dp),
+                .height(60.dp)
+                .focusRequester(focusRequester),
             value = text,
             onValueChange = changeText,
             singleLine = true,
@@ -257,7 +274,6 @@ fun TextInputComment(actionSendComment: (String) -> Unit) {
                     if (text.isNotEmpty()) {
                         actionSendComment(text)
                         changeText("")
-
                     }
                 }) {
                     Icon(painterResource(id = R.drawable.ic_send),

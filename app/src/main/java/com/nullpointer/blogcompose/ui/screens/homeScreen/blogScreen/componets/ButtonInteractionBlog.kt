@@ -21,38 +21,34 @@ fun ButtonsInteractionBlog(
     changeLike: (Boolean) -> Unit,
 ) {
 
-    Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
-
+    Row(
+        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier.fillMaxWidth()
+    ) {
         Row {
-            IconButton(onClick = {
-                changeLike(!ownerLike)
-            }) {
+            // * change with animation, when like post
+            IconButton(onClick = { changeLike(!ownerLike) }) {
                 AnimatedContent(targetState = ownerLike) {
                     Icon(painterResource(
                         id = if (ownerLike) R.drawable.ic_fav else R.drawable.ic_unfav),
                         contentDescription = "")
                 }
-
             }
+            // * when click in this, show keyboard
             IconButton(onClick = { actionComments()}) {
                 Icon(painterResource(id = R.drawable.ic_comment), "")
             }
-
         }
-
-
-
-
         Row {
+            // * download image post
             IconButton(onClick = { /*TODO*/ }) {
                 Icon(painterResource(id = R.drawable.ic_download), "")
             }
+            // * share post
             IconButton(onClick = { actionShare() }) {
                 Icon(painterResource(id = R.drawable.ic_share), "")
             }
         }
-
-
     }
 
 }

@@ -1,40 +1,30 @@
 package com.nullpointer.blogcompose.ui.screens.swipePosts
 
 import androidx.annotation.RawRes
-import androidx.compose.animation.*
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.dp
+import androidx.compose.material.Scaffold
+import androidx.compose.material.ScaffoldState
+import androidx.compose.material.rememberScaffoldState
+import androidx.compose.runtime.Composable
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.SwipeRefreshState
-import com.nullpointer.blogcompose.R
-import com.nullpointer.blogcompose.models.Post
 import com.nullpointer.blogcompose.models.SimplePost
-import com.nullpointer.blogcompose.ui.screens.destinations.PostDetailsDestination
 import com.nullpointer.blogcompose.ui.screens.emptyScreen.EmptyScreen
 import com.nullpointer.blogcompose.ui.screens.homeScreen.blogScreen.componets.BlogItem
-import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import kotlinx.coroutines.InternalCoroutinesApi
-import kotlinx.coroutines.flow.collect
+import com.nullpointer.blogcompose.ui.share.ButtonAdd
+import com.nullpointer.blogcompose.ui.share.CircularProgressAnimation
+import com.nullpointer.blogcompose.ui.share.OnBottomReached
 
 @Composable
 fun ScreenSwiperPost(
-    resultListPost: List<SimplePost>,
+    resultListPost: List<SimplePost>?,
     isLoadNewData: Boolean,
     emptyString: String,
     @RawRes emptyResRaw: Int,
-    actionDetails: (String) -> Unit,
+    actionDetails: (String,Boolean) -> Unit,
     isConcatenateData: Boolean = false,
     scaffoldState: ScaffoldState = rememberScaffoldState(),
     updateListPost: () -> Unit,
@@ -44,6 +34,7 @@ fun ScreenSwiperPost(
     actionButtonAdd: (() -> Unit)? = null,
     header: @Composable (() -> Unit)? = null,
 ) {
+    // * this is necessary for hide button add when scroll
     val listState = rememberLazyListState()
 
     SwipeRefresh(
@@ -52,6 +43,8 @@ fun ScreenSwiperPost(
     ) {
         Scaffold(
             scaffoldState = scaffoldState,
+            // * button to add new post, this hide when scroll and only
+            // * show when passed action click
             floatingActionButton = {
                 actionButtonAdd?.let {
                     ButtonAdd(
@@ -61,24 +54,27 @@ fun ScreenSwiperPost(
                 }
             }
         ) {
-            if (resultListPost.isEmpty()) {
-                // * show header when no has post
-                Column {
-                    header?.invoke()
-                    EmptyScreen(resourceRaw = emptyResRaw, emptyText = emptyString)
+            if (resultListPost != null) {
+                if (resultListPost.isEmpty()) {
+                    // * show header when no has post
+                    // ! this for no lost header when this list post is empty
+                    Column {
+                        header?.invoke()
+                        EmptyScreen(resourceRaw = emptyResRaw, emptyText = emptyString)
+                    }
+                } else {
+                    // ? show swipe list of posts
+                    ListInfinitePost(
+                        listPost = resultListPost,
+                        listState = listState,
+                        actionBottomReached = actionBottomReached,
+                        header = header,
+                        actionChangePost = actionChangePost,
+                        isConcatenateData = isConcatenateData,
+                        staticInfo = staticInfo,
+                        actionDetails = actionDetails,
+                    )
                 }
-            } else {
-                // ? show swipe list of posts
-                ListInfinitePost(
-                    listPost = resultListPost,
-                    listState = listState,
-                    actionBottomReached = actionBottomReached,
-                    header = header,
-                    actionChangePost = actionChangePost,
-                    isConcatenateData = isConcatenateData,
-                    staticInfo = staticInfo,
-                    actionDetails = actionDetails,
-                )
             }
         }
     }
@@ -88,7 +84,7 @@ fun ScreenSwiperPost(
 fun ListInfinitePost(
     listPost: List<SimplePost>,
     listState: LazyListState,
-    actionDetails: (String) -> Unit,
+    actionDetails: (String,Boolean) -> Unit,
     actionChangePost: (String, Boolean) -> Unit,
     header: (@Composable () -> Unit)? = null,
     actionBottomReached: () -> Unit,
@@ -97,77 +93,28 @@ fun ListInfinitePost(
     staticInfo: Pair<String, String>? = null,
 ) {
     LazyColumn(state = listState) {
+        // * if pass header, so add this
         header?.let {
             item { it() }
         }
+        // * list post
         items(listPost.size) { index ->
-            BlogItem(listPost[index], actionDetails, actionChangePost, staticInfo)
+            BlogItem(post = listPost[index],
+                actionDetails = actionDetails,
+                actionChangePost = actionChangePost,
+                staticInfo = staticInfo)
         }
+        // * circular indicator that show when request new data
         item {
-            AnimatedVisibility(
-                visible = isConcatenateData && listPost.isNotEmpty(),
-                enter = expandVertically(),
-                exit = shrinkVertically()
-            ) {
-                Box(modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 20.dp),
-                    contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
-                }
-            }
-
-        }
-
-
-    }
-    // ! this is import for no call with this list is empty
-    if (listPost.isNotEmpty()) {
-        listState.OnBottomReached(buffer) {
-            actionBottomReached()
+            CircularProgressAnimation(isVisible = isConcatenateData)
         }
     }
-
-}
-
-@OptIn(InternalCoroutinesApi::class)
-@Composable
-fun LazyListState.OnBottomReached(
-    buffer: Int = 0,
-    onLoadMore: () -> Unit,
-) {
-    require(buffer >= 0) { "buffer cannot be negative, but was $buffer" }
-    val shouldLoadMore = remember {
-        derivedStateOf {
-            // * get the las item index and determinate if is the last minus the buffer
-            val lastVisibleItem =
-                layoutInfo.visibleItemsInfo.lastOrNull() ?: return@derivedStateOf true
-            lastVisibleItem.index >= layoutInfo.totalItemsCount - 1 - buffer
-        }
-    }
-    // * listener changes and require more if is needed
-    LaunchedEffect(shouldLoadMore) {
-        snapshotFlow { shouldLoadMore.value }
-            .collect { if (it) onLoadMore() }
+    // * request new data when go to the last post
+    listState.OnBottomReached(buffer) {
+        actionBottomReached()
     }
 }
 
-@OptIn(ExperimentalAnimationApi::class)
-@Composable
-fun ButtonAdd(
-    modifier: Modifier = Modifier,
-    isScrollInProgress: Boolean,
-    action: () -> Unit,
-) {
-    AnimatedVisibility(
-        modifier = modifier,
-        visible = !isScrollInProgress,
-        enter = scaleIn() + fadeIn(),
-        exit = scaleOut() + fadeOut()
-    ) {
-        FloatingActionButton(onClick = { action() }) {
-            Icon(painterResource(id = R.drawable.ic_add),
-                contentDescription = "")
-        }
-    }
-}
+
+
+

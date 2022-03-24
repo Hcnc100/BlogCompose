@@ -1,6 +1,7 @@
 package com.nullpointer.blogcompose.ui.screens.homeScreen.blogScreen.componets
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -21,12 +22,14 @@ import com.nullpointer.blogcompose.R
 
 @ExperimentalCoilApi
 @Composable
-fun ImageBlog(urlImage: String) {
+fun ImageBlog(urlImage: String,actionToDetails:()->Unit) {
     val painter = rememberImagePainter(data = urlImage, builder = {
         crossfade(true)
     })
     val statePainter = painter.state
-    Box(contentAlignment = Alignment.Center) {
+    Box(contentAlignment = Alignment.Center, modifier = Modifier.clickable {
+        actionToDetails()
+    }) {
         SquareImage(painter = painter)
         when (statePainter) {
             is ImagePainter.State.Loading -> Box(contentAlignment = Alignment.Center) {
