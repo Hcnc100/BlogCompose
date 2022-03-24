@@ -107,4 +107,8 @@ class NotifyViewModel @Inject constructor(
         }
     }
 
+    fun openNotifications(notify:Notify)=viewModelScope.launch{
+        notifyRepoImpl.openNotify(notify)
+    }
+
 }

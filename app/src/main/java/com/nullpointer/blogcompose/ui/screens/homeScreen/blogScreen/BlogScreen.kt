@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.presentation.LikeViewModel
 import com.nullpointer.blogcompose.presentation.PostViewModel
@@ -50,7 +51,9 @@ fun BlogScreen(
         actionChangePost = likeVM::likePost,
         isLoadNewData = stateLoading.value is Resource.Loading,
         isConcatenateData = stateConcatenate.value is Resource.Loading,
-        actionDetails = { navigator.navigate(PostDetailsDestination(it)) }
+        actionDetails = { navigator.navigate(PostDetailsDestination(it)) },
+        emptyResRaw = R.raw.empty2,
+        emptyString = "No hay post, deberias hacer uno"
     )
 }
 

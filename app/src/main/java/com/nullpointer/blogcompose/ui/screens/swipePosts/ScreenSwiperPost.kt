@@ -1,7 +1,9 @@
 package com.nullpointer.blogcompose.ui.screens.swipePosts
 
+import androidx.annotation.RawRes
 import androidx.compose.animation.*
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -19,6 +21,7 @@ import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.models.Post
 import com.nullpointer.blogcompose.models.SimplePost
 import com.nullpointer.blogcompose.ui.screens.destinations.PostDetailsDestination
+import com.nullpointer.blogcompose.ui.screens.emptyScreen.EmptyScreen
 import com.nullpointer.blogcompose.ui.screens.homeScreen.blogScreen.componets.BlogItem
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -29,7 +32,9 @@ import kotlinx.coroutines.flow.collect
 fun ScreenSwiperPost(
     resultListPost: List<SimplePost>,
     isLoadNewData: Boolean,
-    actionDetails:(String)->Unit,
+    emptyString: String,
+    @RawRes emptyResRaw: Int,
+    actionDetails: (String) -> Unit,
     isConcatenateData: Boolean = false,
     scaffoldState: ScaffoldState = rememberScaffoldState(),
     updateListPost: () -> Unit,
@@ -56,17 +61,25 @@ fun ScreenSwiperPost(
                 }
             }
         ) {
-            ListInfinitePost(
-                listPost = resultListPost,
-                listState = listState,
-                actionBottomReached = actionBottomReached,
-                header = header,
-                actionChangePost = actionChangePost,
-                isConcatenateData = isConcatenateData,
-                staticInfo = staticInfo,
-                actionDetails = actionDetails
-            )
-
+            if (resultListPost.isEmpty()) {
+                // * show header when no has post
+                Column {
+                    header?.invoke()
+                    EmptyScreen(resourceRaw = emptyResRaw, emptyText = emptyString)
+                }
+            } else {
+                // ? show swipe list of posts
+                ListInfinitePost(
+                    listPost = resultListPost,
+                    listState = listState,
+                    actionBottomReached = actionBottomReached,
+                    header = header,
+                    actionChangePost = actionChangePost,
+                    isConcatenateData = isConcatenateData,
+                    staticInfo = staticInfo,
+                    actionDetails = actionDetails,
+                )
+            }
         }
     }
 }
@@ -75,7 +88,7 @@ fun ScreenSwiperPost(
 fun ListInfinitePost(
     listPost: List<SimplePost>,
     listState: LazyListState,
-    actionDetails:(String)->Unit,
+    actionDetails: (String) -> Unit,
     actionChangePost: (String, Boolean) -> Unit,
     header: (@Composable () -> Unit)? = null,
     actionBottomReached: () -> Unit,
@@ -88,9 +101,8 @@ fun ListInfinitePost(
             item { it() }
         }
         items(listPost.size) { index ->
-            BlogItem(listPost[index],actionDetails, actionChangePost, staticInfo)
+            BlogItem(listPost[index], actionDetails, actionChangePost, staticInfo)
         }
-
         item {
             AnimatedVisibility(
                 visible = isConcatenateData && listPost.isNotEmpty(),
@@ -110,7 +122,7 @@ fun ListInfinitePost(
 
     }
     // ! this is import for no call with this list is empty
-    if(listPost.isNotEmpty()){
+    if (listPost.isNotEmpty()) {
         listState.OnBottomReached(buffer) {
             actionBottomReached()
         }

@@ -9,6 +9,9 @@ interface NotifyDAO {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertNotify(notify: Notify)
 
+    @Update
+    suspend fun updateNotify(notify: Notify)
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertListNotify(list: List<Notify>)
 

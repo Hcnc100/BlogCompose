@@ -1,7 +1,9 @@
 package com.nullpointer.blogcompose.ui.share
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -10,6 +12,7 @@ import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -48,8 +51,9 @@ fun ImageProfile(
         crossfade(true)
     }
     val state = painter.state
-    Card(shape = CircleShape, modifier = modifier) {
-        Box(contentAlignment = Alignment.Center) {
+
+        Box(contentAlignment = Alignment.Center,
+            modifier = modifier.size(sizeImage)) {
             Image(
                 painter = when (state) {
                     is ImagePainter.State.Error -> painterResource(id = R.drawable.ic_broken_image)
@@ -57,10 +61,10 @@ fun ImageProfile(
                 },
                 contentDescription = "",
                 modifier = Modifier
-                    .size(sizeImage)
+                    .fillMaxSize()
                     .padding(if (state !is ImagePainter.State.Success) paddingLoading else 0.dp),
             )
             if (state is ImagePainter.State.Loading && showProgress) CircularProgressIndicator()
         }
-    }
+
 }

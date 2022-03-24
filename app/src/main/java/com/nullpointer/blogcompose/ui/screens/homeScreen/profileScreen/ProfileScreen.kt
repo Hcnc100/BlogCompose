@@ -17,6 +17,7 @@ import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.presentation.AuthViewModel
 import com.nullpointer.blogcompose.presentation.LikeViewModel
 import com.nullpointer.blogcompose.presentation.MyPostViewModel
+import com.nullpointer.blogcompose.ui.screens.destinations.AddBlogScreenDestination
 import com.nullpointer.blogcompose.ui.screens.destinations.ConfigScreenDestination
 import com.nullpointer.blogcompose.ui.screens.destinations.PostDetailsDestination
 import com.nullpointer.blogcompose.ui.screens.swipePosts.ScreenSwiperPost
@@ -53,7 +54,7 @@ fun ProfileScreen(
         }
     }
 
-    LaunchedEffect(likeMessage){
+    LaunchedEffect(likeMessage) {
         likeMessage.collect {
             scaffoldState.snackbarHostState.showSnackbar(it)
         }
@@ -63,11 +64,14 @@ fun ProfileScreen(
         scaffoldState = scaffoldState,
         updateListPost = { myPostViewModel.requestNewPost(true) },
         actionBottomReached = myPostViewModel::concatenatePost,
+        actionButtonAdd = { navigator.navigate(AddBlogScreenDestination) },
         actionChangePost = likeViewModel::likePost,
         staticInfo = Pair(photoUser, name),
         isLoadNewData = stateLoading.value is Resource.Loading,
         isConcatenateData = stateConcatenate.value is Resource.Loading,
-        actionDetails = { navigator.navigate(PostDetailsDestination(it)) }
+        actionDetails = { navigator.navigate(PostDetailsDestination(it)) },
+        emptyResRaw = R.raw.empty1,
+        emptyString = "No has hecho ningun post"
     ) {
         HeaderProfile(
             urlImgProfile = photoUser,

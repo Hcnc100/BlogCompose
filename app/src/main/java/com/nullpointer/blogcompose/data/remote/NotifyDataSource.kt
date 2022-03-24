@@ -15,6 +15,7 @@ class NotifyDataSource {
         private const val TIMESTAMP = "timestamp"
         private const val NOTIFICATIONS = "notifications"
         private const val LIST_NOTIFY = "listNotify"
+        private const val FIELD_IS_OPEN="isOpen"
     }
 
     private val auth = Firebase.auth
@@ -35,11 +36,11 @@ class NotifyDataSource {
         if (startWith != null) {
             val refDocument = nodeUserNotify.document(startWith).get(Source.CACHE).await()
             if (refDocument.exists())
-            baseQuery = baseQuery.startAfter(refDocument)
-        }else if (endWith != null) {
+                baseQuery = baseQuery.startAfter(refDocument)
+        } else if (endWith != null) {
             val refDocument = nodeUserNotify.document(endWith).get(Source.CACHE).await()
             if (refDocument.exists())
-            baseQuery = baseQuery.endBefore(refDocument)
+                baseQuery = baseQuery.endBefore(refDocument)
         }
         // * limit result or for default all
         if (numberRequest != Integer.MAX_VALUE) baseQuery = baseQuery.limit(numberRequest.toLong())
@@ -73,6 +74,11 @@ class NotifyDataSource {
                 .getTimestamp(TIMESTAMP, DocumentSnapshot.ServerTimestampBehavior.ESTIMATE
                 )?.toDate()
         }
+    }
+
+    suspend fun updateOpenNotify(idNotify: String) {
+        val nodeUserNotify = nodeNotify.document(auth.currentUser?.uid!!).collection(LIST_NOTIFY)
+        nodeUserNotify.document(idNotify).update(FIELD_IS_OPEN, true).await()
     }
 
 
