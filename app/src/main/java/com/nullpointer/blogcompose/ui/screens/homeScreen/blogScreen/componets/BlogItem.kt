@@ -66,7 +66,7 @@ fun BlogItem(
         }
     }
 }
-
+// * action to share comment
 fun sharePost(idPost: String, context: Context) {
     val intent = Intent(Intent.ACTION_SEND)
         .putExtra(Intent.EXTRA_TEXT, "https://www.blog-compose.com/post/$idPost")

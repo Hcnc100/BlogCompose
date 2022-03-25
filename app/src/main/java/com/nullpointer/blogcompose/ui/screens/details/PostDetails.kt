@@ -7,6 +7,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
@@ -19,18 +20,20 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberImagePainter
-import com.google.accompanist.insets.navigationBarsWithImePadding
 import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.models.Comment
 import com.nullpointer.blogcompose.models.Post
 import com.nullpointer.blogcompose.presentation.LikeViewModel
 import com.nullpointer.blogcompose.ui.customs.ToolbarBack
+import com.nullpointer.blogcompose.ui.screens.dataUser.ImageCirculateUser
 import com.nullpointer.blogcompose.ui.screens.details.componets.Comments
 import com.nullpointer.blogcompose.ui.screens.details.viewModel.PostDetailsViewModel
+import com.nullpointer.blogcompose.ui.share.ImageProfile
 import com.ramcosta.composedestinations.annotation.DeepLink
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -53,14 +56,17 @@ fun PostDetails(
     postDetailsViewModel: PostDetailsViewModel = hiltViewModel(),
     likeViewModel: LikeViewModel = hiltViewModel(),
 ) {
+    // * state
     val postState = postDetailsViewModel.postState.collectAsState()
-    val commetsState = postDetailsViewModel.commentState.collectAsState()
+    val commentsState = postDetailsViewModel.commentState.collectAsState()
     val hasNewComments = postDetailsViewModel.hasNewComments.collectAsState()
     val stateRequestComments = postDetailsViewModel.stateConcatenate.collectAsState()
+    // * messages post
     val detailsMessage = postDetailsViewModel.messageDetails
     val likeMessage = likeViewModel.messageLike
     val scaffoldState = rememberScaffoldState()
 
+    // * init post loading (likes and comments)
     LaunchedEffect(Unit) {
         postDetailsViewModel.initIdPost(idPost)
     }
@@ -78,7 +84,7 @@ fun PostDetails(
     }
 
     PostReal(post = postState.value,
-        list = commetsState.value,
+        list = commentsState.value,
         scaffoldState = scaffoldState,
         hasNewComment = hasNewComments.value,
         goToBottom = goToBottom,
@@ -96,13 +102,25 @@ fun PostDetails(
 
 @Composable
 fun HeaderBlog(post: Post, actionLike: (Boolean) -> Unit) {
-    Column {
-        val painter = rememberImagePainter(post.urlImage)
+    // * image post and number like and comments
+    val painter = rememberImagePainter(post.urlImage)
+    Column(modifier = Modifier.padding(10.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            ImageProfile(urlImgProfile = post.poster?.urlImg.toString(),
+                paddingLoading = 5.dp,
+                sizeImage = 30.dp)
+            Spacer(modifier = Modifier.width(15.dp))
+            Text(post.poster?.name.toString(),
+                style = MaterialTheme.typography.body1,
+                fontWeight = FontWeight.W600)
+        }
+        Spacer(modifier = Modifier.height(10.dp))
+        Text(text = post.description, modifier = Modifier.padding(10.dp))
         Image(painter = painter,
             contentDescription = "",
             modifier = Modifier
                 .fillMaxWidth()
-                .height(250.dp))
+                .height(300.dp))
         InfoPost(post = post, actionLike)
     }
 }
@@ -111,6 +129,7 @@ fun HeaderBlog(post: Post, actionLike: (Boolean) -> Unit) {
 @Composable
 fun InfoPost(post: Post, actionLike: (Boolean) -> Unit) {
 
+    // * when is in realtime so need mutable state
     var likeState by remember { mutableStateOf(post.ownerLike) }
     var numberLike by remember { mutableStateOf(post.numberLikes) }
 
@@ -118,8 +137,9 @@ fun InfoPost(post: Post, actionLike: (Boolean) -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(10.dp)) {
-
+        // * animate content that can change
         AnimatedContent(targetState = likeState) {
+            // * button like and number likes
             Row(modifier = Modifier.clickable {
                 actionLike(!likeState)
                 likeState = !likeState
@@ -129,11 +149,10 @@ fun InfoPost(post: Post, actionLike: (Boolean) -> Unit) {
                     id = if (likeState) R.drawable.ic_fav else R.drawable.ic_unfav),
                     contentDescription = "")
                 Spacer(modifier = Modifier.width(10.dp))
-                Text("${numberLike} likes")
+                Text("$numberLike likes")
             }
-
         }
-
+        // * info comments
         Text("${post.numberComments} comentarios")
     }
 }
@@ -160,6 +179,7 @@ fun PostReal(
     val scope = rememberCoroutineScope()
     val focusRequester = remember { FocusRequester() }
 
+    // ! this for no overlap text input
     LaunchedEffect(list) {
         delay(500)
         if (goToBottom) focusRequester.requestFocus()
@@ -170,17 +190,24 @@ fun PostReal(
         scaffoldState = scaffoldState,
         topBar = { ToolbarBack(title = "Post", actionBack = actionBack) },
         bottomBar = {
+            // * input comment
             TextInputComment(
-                focusRequester = focusRequester
-            ) {
-                addComment(it)
-                scope.launch {
-                    stateLazy.animateScrollToItem(0)
+                // * request focus when click in icon comment
+                // * when enter normal no request focus
+                focusRequester = focusRequester,
+                // * when add new comment, so scroll to start list
+                // * list order is ascending (more recent first)
+                actionSendComment = {
+                    addComment(it)
+                    scope.launch {
+                        stateLazy.animateScrollToItem(0)
+                    }
                 }
-            }
+            )
         },
     ) {
-
+        // * needed a box to positioned button "has new comments"
+        // * because this is "floating"
         Box(modifier = Modifier
             .fillMaxSize()
             .padding(it)) {
@@ -188,67 +215,108 @@ fun PostReal(
                 state = stateLazy,
                 modifier = Modifier.fillMaxWidth()
             ) {
+                // * image with post
                 item {
-                    when (post) {
-                        is Resource.Failure -> {}
-                        is Resource.Loading -> Box(modifier = Modifier
-                            .fillMaxWidth()
-                            .height(250.dp), contentAlignment = Alignment.Center) {
-                            CircularProgressIndicator()
-                        }
-                        is Resource.Success -> HeaderBlog(post.data, actionLike = actionLike)
-                    }
-
+                    ImagePost(
+                        statePost = post,
+                        actionLike = actionLike)
                 }
+                // * comments list
+                listComments(listState = list,
+                    stateRequestComments = stateRequestComments,
+                    totalComments = totalComments,
+                    lazyListScope = this,
+                    actionConcatenate = concatenate
+                )
+            }
+            // * floating button "has new comments"
+            // ? only show when has new comments xd
+            ButtonRecentComment(
+                hasNewComment = hasNewComment,
+                actionReload = reloadNewComment,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 35.dp))
 
-                when (list) {
-                    is Resource.Failure -> {}
-                    is Resource.Loading -> {
-                        items(10) {
-                            Comments()
+        }
+    }
+}
+
+@Composable
+fun ButtonRecentComment(
+    hasNewComment: Boolean,
+    actionReload: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    // * show button when has new comments
+    if (hasNewComment) {
+        Box(modifier = modifier
+        ) {
+            Text(text = "Hay nuevos comentarios", modifier = Modifier
+                .background(MaterialTheme.colors.primary)
+                .padding(horizontal = 10.dp, vertical = 10.dp)
+                .clickable { actionReload() })
+        }
+    }
+}
+
+
+fun listComments(
+    listState: Resource<List<Comment>>,
+    stateRequestComments: Resource<Unit>?,
+    totalComments: Int,
+    lazyListScope: LazyListScope,
+    actionConcatenate: () -> Unit,
+) = with(lazyListScope) {
+
+    when (listState) {
+        is Resource.Failure -> {}
+        is Resource.Loading -> {
+            // * show empty comments (with shimmer, as facebook)
+            items(10) { Comments() }
+        }
+        is Resource.Success -> {
+            val listComments = listState.data
+            // * show list comments
+            items(listComments.size) { index ->
+                Comments(comment = listState.data[index])
+            }
+            // * if has comments and no load all, so show clicked item
+            // * that load more, this change a progress circular when load state
+            if (listComments.isNotEmpty() && listComments.size != totalComments) {
+                item {
+                    if (stateRequestComments is Resource.Loading) {
+                        Box(modifier = Modifier.fillMaxWidth()) {
+                            CircularProgressIndicator(modifier = Modifier.size(25.dp),
+                                strokeWidth = 4.dp)
                         }
-                    }
-                    is Resource.Success -> {
-                        val listComments = list.data
-                        items(listComments.size) { index ->
-                            Comments(comment = list.data[index])
-                        }
-                        if (listComments.isNotEmpty() && listComments.size != totalComments) {
-                            item {
-                                if (stateRequestComments is Resource.Loading) {
-                                    Box(modifier = Modifier.fillMaxWidth()) {
-                                        CircularProgressIndicator(modifier = Modifier.size(25.dp),
-                                            strokeWidth = 4.dp)
-                                    }
-                                } else {
-                                    Box(modifier = Modifier
-                                        .fillMaxWidth()
-                                        .clickable { concatenate() }
-                                        .padding(vertical = 10.dp)) {
-                                        Text(text = "Cargar mas comentarios")
-                                    }
-                                }
-                            }
+                    } else {
+                        Box(modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { actionConcatenate() }
+                            .padding(vertical = 10.dp)) {
+                            Text(text = "Cargar mas comentarios")
                         }
                     }
                 }
             }
-
-            if (hasNewComment)
-                Box(modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 35.dp)
-                ) {
-                    Text(text = "Hay nuevos comentarios", modifier = Modifier
-                        .background(MaterialTheme.colors.primary)
-                        .padding(horizontal = 10.dp, vertical = 10.dp)
-                        .clickable {
-                            reloadNewComment()
-                        })
-                }
         }
+    }
+}
 
-
+@Composable
+fun ImagePost(
+    statePost: Resource<Post>,
+    actionLike: (Boolean) -> Unit,
+) {
+    when (statePost) {
+        is Resource.Failure -> {}
+        is Resource.Loading -> Box(modifier = Modifier
+            .fillMaxWidth()
+            .height(250.dp), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
+        }
+        is Resource.Success -> HeaderBlog(statePost.data, actionLike = actionLike)
     }
 }
 

@@ -28,7 +28,6 @@ fun HeaderBlog(
         modifier = Modifier.padding(7.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-
         ImageProfile(urlImgProfile = urlImgOwnerPost,
             paddingLoading = 5.dp,
             sizeImage = 40.dp,
@@ -41,7 +40,6 @@ fun HeaderBlog(
             style = MaterialTheme.typography.body1,
             fontWeight = FontWeight.W600
         )
-
         IconButton(onClick = { }, modifier = Modifier
             .weight(1f)
             .size(20.dp)) {
