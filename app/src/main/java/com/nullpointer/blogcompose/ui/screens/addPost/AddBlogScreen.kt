@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -45,6 +46,7 @@ fun AddBlogScreen(
     val scope = rememberCoroutineScope()
     val modalState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
     val context = LocalContext.current
+    val focusManager = LocalFocusManager.current
     val (buttonVisible, changeButtonVisible) = rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(key1 = Unit) {
@@ -99,6 +101,7 @@ fun AddBlogScreen(
             Column(modifier = Modifier
                 .verticalScroll(rememberScrollState())) {
                 ImageNewBlog(addBlogVM.fileImg, addBlogVM.isCompress.value, addBlogVM.errorImage) {
+                    focusManager.clearFocus()
                     scope.launch {
                         modalState.show()
                     }

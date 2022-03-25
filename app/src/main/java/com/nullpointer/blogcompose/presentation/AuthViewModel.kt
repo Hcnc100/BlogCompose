@@ -37,6 +37,8 @@ class AuthViewModel @Inject constructor(
     private val _messageAuth = Channel<String>()
     val messageAuth = _messageAuth.receiveAsFlow()
 
+    val isDataComplete:Boolean get() =
+        stateAuthUser.value is LoginStatus.Authenticated.CompleteData
 
     val stateAuthUser = flow {
         authRepoImpl.user.collect { user ->

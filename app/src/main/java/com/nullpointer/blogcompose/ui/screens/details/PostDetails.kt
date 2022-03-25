@@ -1,39 +1,28 @@
 package com.nullpointer.blogcompose.ui.screens.details
 
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import coil.compose.rememberImagePainter
-import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.models.Comment
 import com.nullpointer.blogcompose.models.Post
 import com.nullpointer.blogcompose.presentation.LikeViewModel
 import com.nullpointer.blogcompose.ui.customs.ToolbarBack
-import com.nullpointer.blogcompose.ui.screens.dataUser.ImageCirculateUser
+import com.nullpointer.blogcompose.ui.screens.details.componets.ButtonHasNewComment
 import com.nullpointer.blogcompose.ui.screens.details.componets.Comments
+import com.nullpointer.blogcompose.ui.screens.details.componets.ImagePost
+import com.nullpointer.blogcompose.ui.screens.details.componets.TextInputComment
 import com.nullpointer.blogcompose.ui.screens.details.viewModel.PostDetailsViewModel
-import com.nullpointer.blogcompose.ui.share.ImageProfile
 import com.ramcosta.composedestinations.annotation.DeepLink
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -100,62 +89,6 @@ fun PostDetails(
 }
 
 
-@Composable
-fun HeaderBlog(post: Post, actionLike: (Boolean) -> Unit) {
-    // * image post and number like and comments
-    val painter = rememberImagePainter(post.urlImage)
-    Column(modifier = Modifier.padding(10.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            ImageProfile(urlImgProfile = post.poster?.urlImg.toString(),
-                paddingLoading = 5.dp,
-                sizeImage = 30.dp)
-            Spacer(modifier = Modifier.width(15.dp))
-            Text(post.poster?.name.toString(),
-                style = MaterialTheme.typography.body1,
-                fontWeight = FontWeight.W600)
-        }
-        Spacer(modifier = Modifier.height(10.dp))
-        Text(text = post.description, modifier = Modifier.padding(10.dp))
-        Image(painter = painter,
-            contentDescription = "",
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(300.dp))
-        InfoPost(post = post, actionLike)
-    }
-}
-
-@OptIn(ExperimentalAnimationApi::class)
-@Composable
-fun InfoPost(post: Post, actionLike: (Boolean) -> Unit) {
-
-    // * when is in realtime so need mutable state
-    var likeState by remember { mutableStateOf(post.ownerLike) }
-    var numberLike by remember { mutableStateOf(post.numberLikes) }
-
-    Row(horizontalArrangement = Arrangement.SpaceBetween,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(10.dp)) {
-        // * animate content that can change
-        AnimatedContent(targetState = likeState) {
-            // * button like and number likes
-            Row(modifier = Modifier.clickable {
-                actionLike(!likeState)
-                likeState = !likeState
-                if (likeState) numberLike += 1 else numberLike -= 1
-            }) {
-                Icon(painterResource(
-                    id = if (likeState) R.drawable.ic_fav else R.drawable.ic_unfav),
-                    contentDescription = "")
-                Spacer(modifier = Modifier.width(10.dp))
-                Text("$numberLike likes")
-            }
-        }
-        // * info comments
-        Text("${post.numberComments} comentarios")
-    }
-}
 
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -231,7 +164,7 @@ fun PostReal(
             }
             // * floating button "has new comments"
             // ? only show when has new comments xd
-            ButtonRecentComment(
+            ButtonHasNewComment(
                 hasNewComment = hasNewComment,
                 actionReload = reloadNewComment,
                 modifier = Modifier
@@ -242,23 +175,6 @@ fun PostReal(
     }
 }
 
-@Composable
-fun ButtonRecentComment(
-    hasNewComment: Boolean,
-    actionReload: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    // * show button when has new comments
-    if (hasNewComment) {
-        Box(modifier = modifier
-        ) {
-            Text(text = "Hay nuevos comentarios", modifier = Modifier
-                .background(MaterialTheme.colors.primary)
-                .padding(horizontal = 10.dp, vertical = 10.dp)
-                .clickable { actionReload() })
-        }
-    }
-}
 
 
 fun listComments(
@@ -304,51 +220,6 @@ fun listComments(
     }
 }
 
-@Composable
-fun ImagePost(
-    statePost: Resource<Post>,
-    actionLike: (Boolean) -> Unit,
-) {
-    when (statePost) {
-        is Resource.Failure -> {}
-        is Resource.Loading -> Box(modifier = Modifier
-            .fillMaxWidth()
-            .height(250.dp), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
-        }
-        is Resource.Success -> HeaderBlog(statePost.data, actionLike = actionLike)
-    }
-}
 
-@OptIn(ExperimentalComposeUiApi::class)
-@Composable
-fun TextInputComment(focusRequester: FocusRequester, actionSendComment: (String) -> Unit) {
-    val (text, changeText) = rememberSaveable { mutableStateOf("") }
-    Box {
-        OutlinedTextField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(5.dp)
-                .height(60.dp)
-                .focusRequester(focusRequester),
-            value = text,
-            onValueChange = changeText,
-            singleLine = true,
-            label = { Text("Comentario") },
-            shape = RoundedCornerShape(20.dp),
-            placeholder = { Text("Escribe algo ...") },
-            trailingIcon = {
-                IconButton(onClick = {
-                    if (text.isNotEmpty()) {
-                        actionSendComment(text)
-                        changeText("")
-                    }
-                }) {
-                    Icon(painterResource(id = R.drawable.ic_send),
-                        contentDescription = "",
-                        tint = if (text.isEmpty()) Color.Gray else MaterialTheme.colors.primary)
-                }
-            }
-        )
-    }
-}
+
+

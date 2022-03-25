@@ -39,10 +39,10 @@ class AuthDataSource {
     }
 
 
-    suspend fun updateDataUser(name: String, urlImg: String): User {
+    suspend fun updateDataUser(name: String?, urlImg: String?): User {
         val profileUpdate = userProfileChangeRequest {
-            displayName = name
-            photoUri = Uri.parse(urlImg)
+            name?.let { displayName = it }
+            urlImg?.let { photoUri = Uri.parse(it) }
         }
         auth.currentUser?.updateProfile(profileUpdate)?.await()
         return User(

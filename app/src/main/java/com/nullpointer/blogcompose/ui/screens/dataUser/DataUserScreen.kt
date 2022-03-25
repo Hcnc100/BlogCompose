@@ -1,10 +1,8 @@
 package com.nullpointer.blogcompose.ui.screens.dataUser
 
 import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -13,17 +11,14 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.annotation.ExperimentalCoilApi
-import coil.compose.ImagePainter
-import coil.compose.rememberImagePainter
 import com.nullpointer.blogcompose.R
-import com.nullpointer.blogcompose.core.states.LoginStatus
 import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.presentation.AuthViewModel
 import com.nullpointer.blogcompose.presentation.RegistryViewModel
@@ -46,15 +41,13 @@ fun DataUserScreen(
 ) {
     // * reload info user
     val statusChange = registryViewModel.stateUpdateUser.collectAsState(null)
+    val stateCompressImg = registryViewModel.stateCompressImg.collectAsState()
     val scaffoldState = rememberScaffoldState()
     val sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
     val scope = rememberCoroutineScope()
+    val focusManager = LocalFocusManager.current
     val context = LocalContext.current
-    val isDataComplete =
-        authViewModel.stateAuthUser.collectAsState().value is LoginStatus.Authenticated.CompleteData
-    authViewModel.currentUser.collectAsState()
-
-
+    val isDataComplete = authViewModel.isDataComplete
 
     LaunchedEffect(key1 = Unit) {
         registryViewModel.registryMessage.collect {
@@ -63,21 +56,27 @@ fun DataUserScreen(
         }
     }
 
-    ModalBottomSheetLayout(sheetContent = {
-        ButtonSheetContent(
-            scope = scope,
-            sheetState = sheetState
-        ) { uri ->
-            uri?.let { registryViewModel.changeImgFileTemp(it, context) }
-            scope.launch { sheetState.hide() }
-        }
-    }, sheetState = sheetState) {
+    ModalBottomSheetLayout(
+        sheetState = sheetState,
+        sheetContent = {
+            ButtonSheetContent(
+                scope = scope,
+                sheetState = sheetState,
+                actionBeforeSelect = { uri ->
+                    uri?.let { registryViewModel.changeImgFileTemp(it, context) }
+                    scope.launch { sheetState.hide() }
+                }
+            )
+        },
+    ) {
         Scaffold(
             scaffoldState = scaffoldState,
             topBar = {
                 if (isDataComplete) {
                     // * if data is complete , show data saved
-                    ToolbarBack(title = "Información de perfil") { navigator.popBackStack() }
+                    ToolbarBack(
+                        title = "Información de perfil",
+                        actionBack = navigator::popBackStack)
                 } else {
                     // ? if data is no complete no show nothing
                     ToolbarBack(title = "Completa tu cuenta")
@@ -85,43 +84,36 @@ fun DataUserScreen(
             },
             floatingActionButton = {
                 ButtonRegistryStatus(
-                    statusChange.value,
-                    isDataComplete) {
-                    registryViewModel.updateDataUser(context)
-                }
+                    statusChange = statusChange.value,
+                    isRegistry = isDataComplete,
+                    actionClick = { registryViewModel.updateDataUser(context) }
+                )
             }
         ) {
-            Column {
-                Box(modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(5f)) {
-                    Box(modifier = Modifier
-                        .fillMaxWidth()
-                        .fillMaxHeight(.5f)
-                        .background(MaterialTheme.colors.primary))
-                    ImageCirculateUser(fileTemp = registryViewModel.fileImg,
-                        imageProfile = registryViewModel.photoUser,
-                        modifier = Modifier.align(Alignment.Center),
-                        isCompress = registryViewModel.isCompress.value) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                ImageCirculateUser(fileTemp = registryViewModel.fileImg,
+                    imageProfile = registryViewModel.photoUser,
+                    isCompress = stateCompressImg.value is Resource.Loading,
+                    modifier = Modifier.weight(3f),
+                    actionEdit = {
+                        // * when launch sheet dialog, hide keyboard if is needed
+                        focusManager.clearFocus()
                         scope.launch {
                             sheetState.show()
                         }
                     }
-                }
+                )
+                TextInputName(
+                    nameUser = registryViewModel.nameUser,
+                    changeNameUser = registryViewModel::changeNameUserTemp,
+                    errorMessage = registryViewModel.errorName,
+                    maxLength = 150,
+                    modifier = Modifier.weight(4f))
 
-                Box(modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(4f)
-                ) {
-                    TextInputName(
-                        nameUser = registryViewModel.nameUser,
-                        changeNameUser = registryViewModel::changeNameUserTemp,
-                        errorMessage = registryViewModel.errorName,
-                        maxLength = 150,
-                        modifier = Modifier.align(Alignment.Center))
-                }
+                // * spacer to center edit text
                 Spacer(modifier = Modifier.weight(2f))
-
             }
         }
     }
@@ -137,28 +129,40 @@ fun ImageCirculateUser(
     isCompress: Boolean,
     actionEdit: () -> Unit,
 ) {
-
-
-    Box(modifier = modifier, contentAlignment = Alignment.Center) {
-        ImageProfile(
-            urlImgProfile = imageProfile,
-            paddingLoading = 20.dp,
-            sizeImage = 150.dp,
-            showProgress = true,
-            fileImg = fileTemp,
-        )
-        if (isCompress) CircularProgressIndicator()
-
-        FloatingActionButton(onClick = { actionEdit() }, modifier = Modifier
-            .padding(10.dp)
-            .size(35.dp)
-            .align(Alignment.BottomEnd)
-        ) {
-            Icon(
-                painterResource(id = R.drawable.ic_edit),
-                "",
+    Box(modifier = modifier) {
+        // * background color
+        Box(modifier = Modifier
+            .fillMaxWidth()
+            .fillMaxHeight(.5f)
+            .background(MaterialTheme.colors.error))
+        // * image and button edit
+        Box(contentAlignment = Alignment.Center,
+            modifier = Modifier.align(Alignment.Center)) {
+            // * image circular
+            ImageProfile(
+                urlImgProfile = imageProfile,
+                paddingLoading = 20.dp,
+                sizeImage = 150.dp,
+                showProgress = true,
+                fileImg = fileTemp
             )
+            // * progress load when compress
+            if (isCompress) CircularProgressIndicator()
+
+            // * button edit img
+            FloatingActionButton(
+                onClick = actionEdit, modifier = Modifier
+                    .padding(10.dp)
+                    .size(35.dp)
+                    .align(Alignment.BottomEnd)
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_edit),
+                    contentDescription = "",
+                )
+            }
         }
+
     }
 
 
@@ -173,8 +177,11 @@ fun TextInputName(
     maxLength: Int,
 ) {
     Column(modifier = modifier
-        .fillMaxWidth(.8f)
+        .fillMaxWidth(.8f),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.End
     ) {
+        // * input text name user
         OutlinedTextField(
             value = nameUser,
             singleLine = true,
@@ -182,21 +189,14 @@ fun TextInputName(
             label = { Text("Nombre de usuario") },
             isError = errorMessage != 0
         )
-        if (errorMessage != 0) {
-            Text(stringResource(id = errorMessage),
-                style = MaterialTheme.typography.caption,
-                color = MaterialTheme.colors.error,
-                modifier = Modifier
-                    .align(Alignment.End)
-                    .padding(end = 20.dp))
-        } else {
-            Text("${nameUser.length}/$maxLength",
-                style = MaterialTheme.typography.caption,
-                modifier = Modifier
-                    .align(Alignment.End)
-                    .padding(end = 10.dp))
-        }
+        // * text error message
+        Text(if (errorMessage != 0) stringResource(id = errorMessage) else "${nameUser.length}/$maxLength",
+            style = MaterialTheme.typography.caption,
+            color = if (errorMessage != 0) MaterialTheme.colors.error else Color.Unspecified,
+            modifier = Modifier.padding(end = 10.dp))
+
     }
+
 
 }
 

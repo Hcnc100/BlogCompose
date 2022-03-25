@@ -1,5 +1,7 @@
 package com.nullpointer.blogcompose.domain.auth
 
+import com.nullpointer.blogcompose.core.utils.InternetCheck
+import com.nullpointer.blogcompose.core.utils.NetworkException
 import com.nullpointer.blogcompose.data.local.PreferencesDataSource
 import com.nullpointer.blogcompose.data.remote.AuthDataSource
 import com.nullpointer.blogcompose.models.User
@@ -22,13 +24,8 @@ class AuthRepoImpl(
         prefDataSource.deleterUser()
     }
 
-    override suspend fun updatePhotoUser(urlImg: String) =
-        authDataSource.updateImgUser(urlImg)
-
-    override suspend fun uploadNameUser(name: String) =
-        authDataSource.updateNameUser(name)
-
-    override suspend fun uploadDataUser(urlImg: String, name: String) {
+    override suspend fun uploadDataUser(urlImg: String?, name: String?) {
+        if (!InternetCheck.isNetworkAvailable()) throw NetworkException()
         val updateUser = authDataSource.updateDataUser(name, urlImg)
         prefDataSource.saveUser(updateUser)
     }
