@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.sp
 import coil.annotation.ExperimentalCoilApi
 import com.nullpointer.blogcompose.core.utils.TimeUtils
 import com.nullpointer.blogcompose.models.SimplePost
+import com.nullpointer.blogcompose.ui.share.ImagePost
 import java.util.*
 
 @OptIn(ExperimentalCoilApi::class)
@@ -47,10 +48,17 @@ fun BlogItem(
                 HeaderBlog(post.poster!!.urlImg, post.poster!!.name)
             }
             // * image
-            ImageBlog(
-                urlImage = post.urlImage,
-                actionToDetails = { actionDetails(post.id, false) }
+            ImagePost(
+                urlImgPost = post.urlImage,
+                paddingLoading = 70.dp,
+                showProgress = true,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(1f).clickable {
+                        actionDetails(post.id, false)
+                    }
             )
+
             // * buttons to interactive with post
             ButtonsInteractionBlog(
                 ownerLike = post.ownerLike,

@@ -2,7 +2,6 @@ package com.nullpointer.blogcompose.ui.screens.details.componets
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.CircularProgressIndicator
@@ -15,15 +14,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import coil.compose.rememberImagePainter
 import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.models.Post
+import com.nullpointer.blogcompose.ui.share.ImagePost
 import com.nullpointer.blogcompose.ui.share.ImageProfile
 
 
 @Composable
-fun ImagePost(
+fun DataPost(
     statePost: Resource<Post>,
     actionLike: (Boolean) -> Unit,
 ) {
@@ -42,7 +41,6 @@ fun ImagePost(
 @Composable
 fun HeaderBlog(post: Post, actionLike: (Boolean) -> Unit) {
     // * image post and number like and comments
-    val painter = rememberImagePainter(post.urlImage)
     Column(modifier = Modifier.padding(10.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             ImageProfile(urlImgProfile = post.poster?.urlImg.toString(),
@@ -55,11 +53,14 @@ fun HeaderBlog(post: Post, actionLike: (Boolean) -> Unit) {
         }
         Spacer(modifier = Modifier.height(10.dp))
         Text(text = post.description, modifier = Modifier.padding(10.dp))
-        Image(painter = painter,
-            contentDescription = "",
+       ImagePost(
+            urlImgPost = post.urlImage,
+            paddingLoading = 70.dp,
+            showProgress = true,
             modifier = Modifier
-                .fillMaxWidth()
-                .height(300.dp))
+                .fillMaxWidth(0.9f)
+                .height(300.dp)
+        )
         InfoPost(post = post, actionLike)
     }
 }

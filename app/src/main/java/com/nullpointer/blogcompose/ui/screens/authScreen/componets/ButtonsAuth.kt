@@ -54,9 +54,7 @@ fun ButtonAuthGoogle(
         modifier = modifier,
         onClick = { launcher.launch(googleSignInClient.signInIntent) },
         backgroundColor = Color.White,
-        text = {
-            Text("Ingresa con Google")
-        },
+        text = { Text("Ingresa con Google") },
         icon = {
             Icon(painterResource(id = R.drawable.ic_google),
                 contentDescription = "",

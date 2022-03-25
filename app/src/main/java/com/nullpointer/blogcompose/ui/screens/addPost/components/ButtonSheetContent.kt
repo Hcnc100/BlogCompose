@@ -28,6 +28,7 @@ import androidx.core.content.FileProvider
 import coil.compose.rememberImagePainter
 import com.nullpointer.blogcompose.BuildConfig
 import com.nullpointer.blogcompose.R
+import com.nullpointer.blogcompose.ui.share.BackHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -40,33 +41,8 @@ fun ButtonSheetContent(
     sheetState: ModalBottomSheetState,
     actionBeforeSelect: (Uri?) -> Unit,
 ) {
-
-    val lifecycleOwner = LocalLifecycleOwner.current
-
-    // * this back callback for remove the button sheet when clicked back and this show
-    val backCallback = remember {
-        object : OnBackPressedCallback(false) {
-            override fun handleOnBackPressed() {
-                scope.launch { sheetState.hide() }
-            }
-        }
-    }
-
-    // * enable or disable callback with the visibility of sheet state
-    backCallback.isEnabled = sheetState.isVisible
-
-    // * get the lifecycle and onBackPressedDispatcher
-    val backDispatcher = checkNotNull(LocalOnBackPressedDispatcherOwner.current) {
-        "No OnBackPressedDispatcherOwner was provided via LocalOnBackPressedDispatcherOwner"
-    }.onBackPressedDispatcher
-
-    // * registry callback
-    DisposableEffect(lifecycleOwner, backDispatcher) {
-        backDispatcher.addCallback(lifecycleOwner, backCallback)
-        // ! When the effect leaves the Composition, remove the callback
-        onDispose {
-            backCallback.remove()
-        }
+    BackHandler(sheetState.isVisible) {
+        scope.launch { sheetState.hide() }
     }
 
     // ! this no work with delegate
@@ -92,7 +68,6 @@ fun ButtonSheetContent(
         .height(160.dp)
         .clip(shape = RoundedCornerShape(10.dp))
         .padding(10.dp)
-
     ) {
 
         Column {

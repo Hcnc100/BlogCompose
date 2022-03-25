@@ -20,7 +20,7 @@ import com.nullpointer.blogcompose.presentation.LikeViewModel
 import com.nullpointer.blogcompose.ui.customs.ToolbarBack
 import com.nullpointer.blogcompose.ui.screens.details.componets.ButtonHasNewComment
 import com.nullpointer.blogcompose.ui.screens.details.componets.Comments
-import com.nullpointer.blogcompose.ui.screens.details.componets.ImagePost
+import com.nullpointer.blogcompose.ui.screens.details.componets.DataPost
 import com.nullpointer.blogcompose.ui.screens.details.componets.TextInputComment
 import com.nullpointer.blogcompose.ui.screens.details.viewModel.PostDetailsViewModel
 import com.ramcosta.composedestinations.annotation.DeepLink
@@ -150,7 +150,7 @@ fun PostReal(
             ) {
                 // * image with post
                 item {
-                    ImagePost(
+                    DataPost(
                         statePost = post,
                         actionLike = actionLike)
                 }

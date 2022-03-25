@@ -1,10 +1,7 @@
 package com.nullpointer.blogcompose.ui.share
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -47,20 +44,57 @@ fun ImageProfile(
         crossfade(true)
     }
     val state = painter.state
+    Box(contentAlignment = Alignment.Center,
+        modifier = modifier.size(sizeImage)) {
+        Image(
+            painter = when (state) {
+                is ImagePainter.State.Error -> painterResource(id = R.drawable.ic_broken_image)
+                else -> painter
+            },
+            contentDescription = "",
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(if (state !is ImagePainter.State.Success) paddingLoading else 0.dp),
+        )
+        if (state is ImagePainter.State.Loading && showProgress) CircularProgressIndicator()
+    }
+}
 
-        Box(contentAlignment = Alignment.Center,
-            modifier = modifier.size(sizeImage)) {
-            Image(
-                painter = when (state) {
-                    is ImagePainter.State.Error -> painterResource(id = R.drawable.ic_broken_image)
-                    else -> painter
-                },
-                contentDescription = "",
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(if (state !is ImagePainter.State.Success) paddingLoading else 0.dp),
-            )
-            if (state is ImagePainter.State.Loading && showProgress) CircularProgressIndicator()
+@OptIn(ExperimentalCoilApi::class)
+@Composable
+fun ImagePost(
+    paddingLoading: Dp,
+    modifier: Modifier = Modifier,
+    urlImgPost: String? = null,
+    fileImg: File? = null,
+    showProgress: Boolean = false,
+) {
+    val painter = rememberImagePainter(
+        // * if pass file img so ,load first,
+        // * else load urlImg if this is not empty
+        // * else load default
+        data = when {
+            fileImg != null -> fileImg
+            !urlImgPost.isNullOrEmpty() -> urlImgPost
+            else -> R.drawable.ic_image
         }
-
+    ) {
+        placeholder(R.drawable.ic_image)
+        crossfade(true)
+    }
+    val state = painter.state
+    Box(contentAlignment = Alignment.Center,
+        modifier = modifier.padding(
+            if (state !is ImagePainter.State.Success || fileImg == null && urlImgPost.isNullOrEmpty())
+                paddingLoading else 0.dp)) {
+        Image(
+            painter = when (state) {
+                is ImagePainter.State.Error -> painterResource(id = R.drawable.ic_broken_image)
+                else -> painter
+            },
+            contentDescription = "",
+            modifier = Modifier.fillMaxSize(),
+        )
+        if (state is ImagePainter.State.Loading && showProgress) CircularProgressIndicator()
+    }
 }
