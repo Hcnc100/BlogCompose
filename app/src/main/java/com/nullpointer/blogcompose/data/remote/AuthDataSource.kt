@@ -1,6 +1,8 @@
 package com.nullpointer.blogcompose.data.remote
 
 import android.net.Uri
+import com.google.firebase.auth.AuthCredential
+import com.google.firebase.auth.FacebookAuthProvider
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.auth.ktx.userProfileChangeRequest
@@ -25,18 +27,18 @@ class AuthDataSource {
         nodeUsers.document(auth.currentUser!!.uid).update(infoUpdate).await()
     }
 
-    suspend fun authWithTokenGoogle(token: String): User {
-        val credential = GoogleAuthProvider.getCredential(token, null)
+    suspend fun authWithCredential(credential: AuthCredential): User {
         val resultAuth = auth.signInWithCredential(credential).await()
         // ! when susses auth update token in database
-        nodeTokes.document(resultAuth.user!!.uid)
-            .set(mapOf("token" to FirebaseMessaging.getInstance().token.await())).await()
+        nodeTokes.document(resultAuth.user!!.uid).set(
+            mapOf("token" to FirebaseMessaging.getInstance().token.await())).await()
         return User(
             nameUser = resultAuth.user?.displayName ?: "",
             uuid = resultAuth.user?.uid ?: "",
             urlImg = resultAuth.user?.photoUrl.toString(),
             token = FirebaseMessaging.getInstance().token.await())
     }
+
 
 
     suspend fun updateDataUser(name: String?, urlImg: String?): User {

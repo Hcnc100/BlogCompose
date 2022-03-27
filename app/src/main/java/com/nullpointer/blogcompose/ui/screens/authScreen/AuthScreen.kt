@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberImagePainter
+import com.google.firebase.auth.AuthCredential
 import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.presentation.AuthViewModel
@@ -59,7 +60,7 @@ fun AuthScreen(
                 ButtonsAuth(
                     authStatus.value !is Resource.Loading,
                     modifier = Modifier.fillMaxSize(),
-                    authWithTokeGoogle = authViewModel::authWithTokeGoogle
+                    authWithCredential = authViewModel::authWithCredential
                 )
                 ProgressAuth(isVisible = authStatus.value is Resource.Loading)
             }
@@ -106,7 +107,7 @@ fun ProgressAuth(
 fun ButtonsAuth(
     showButtonsAuth: Boolean,
     modifier: Modifier = Modifier,
-    authWithTokeGoogle: (String) -> Unit,
+    authWithCredential: (AuthCredential) -> Unit,
 ) {
     AnimatedVisibility(visible = showButtonsAuth,
         enter = fadeIn(),
@@ -127,10 +128,13 @@ fun ButtonsAuth(
             // * button auth with google
             ButtonAuthGoogle(
                 modifier = Modifier.width(250.dp),
-                actionBeforeAuth = authWithTokeGoogle,
+                actionBeforeAuth = authWithCredential,
             )
             // * button auth with facebook
-            ButtonAuthFacebook(modifier = Modifier.width(250.dp))
+            ButtonAuthFacebook(
+                modifier = Modifier.width(250.dp),
+                actionBeforeAuth = authWithCredential,
+            )
         }
     }
 

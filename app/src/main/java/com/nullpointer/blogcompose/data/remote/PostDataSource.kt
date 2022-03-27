@@ -80,6 +80,7 @@ class PostDataSource {
         // * limit result or for default all
         if (nPosts != Integer.MAX_VALUE) query = query.limit(nPosts.toLong())
         return query.get(Source.SERVER).await().documents.mapNotNull {
+            
             transformDocumentPost(it)
         }
     }

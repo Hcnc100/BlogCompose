@@ -120,8 +120,6 @@ class RegistryViewModel @Inject constructor(
             authRepoImpl.uploadDataUser(urlImg, if (oldName != nameUser) nameUser else null)
             // * if is success update state
             _stateUpdateUser.value = Resource.Success(Unit)
-            // * and saved new name
-            oldName = nameUser
             // * notify to user
             _registryMessage.send("Cambios guardados")
         } catch (exception: Exception) {

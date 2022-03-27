@@ -1,5 +1,6 @@
 package com.nullpointer.blogcompose.domain.auth
 
+import com.google.firebase.auth.AuthCredential
 import com.nullpointer.blogcompose.core.utils.InternetCheck
 import com.nullpointer.blogcompose.core.utils.NetworkException
 import com.nullpointer.blogcompose.data.local.PreferencesDataSource
@@ -14,8 +15,8 @@ class AuthRepoImpl(
 
     override val user: Flow<User> = prefDataSource.getUserFromProtoStore()
 
-    override suspend fun authWithTokeGoogle(token: String) {
-        val user = authDataSource.authWithTokenGoogle(token)
+    override suspend fun authWithCredential(authCredential: AuthCredential) {
+        val user = authDataSource.authWithCredential(authCredential)
         prefDataSource.saveUser(user)
     }
 

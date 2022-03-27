@@ -2,6 +2,7 @@ package com.nullpointer.blogcompose.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.AuthCredential
 import com.nullpointer.blogcompose.core.states.LoginStatus
 import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.domain.auth.AuthRepoImpl
@@ -68,10 +69,10 @@ class AuthViewModel @Inject constructor(
     private val _stateAuthentication = MutableStateFlow<Resource<Unit>?>(null)
     val stateAuthentication = _stateAuthentication.asStateFlow()
 
-    fun authWithTokeGoogle(token: String) = viewModelScope.launch {
+    fun authWithCredential(authCredential: AuthCredential) = viewModelScope.launch {
         _stateAuthentication.value = Resource.Loading()
         try {
-            authRepoImpl.authWithTokeGoogle(token)
+            authRepoImpl.authWithCredential(authCredential)
             _stateAuthentication.value = Resource.Success(Unit)
         } catch (e: Exception) {
             when (e) {
