@@ -72,7 +72,7 @@ class RegistryViewModel @Inject constructor(
 
     init {
         Timber.d("Se inicio el registry view model")
-        viewModelScope.launch {
+        viewModelScope.launch (Dispatchers.IO){
             try {
                 // * get info for user saved
                 val currentUser = authRepoImpl.user.first()
@@ -82,7 +82,8 @@ class RegistryViewModel @Inject constructor(
                 // * change var to know when name is change or no
                 oldName = nameUser
             } catch (e: Exception) {
-                if (e is CancellationException) throw e else Timber.e("$e")
+                if (e is CancellationException) throw e
+                else Timber.e("Error al obtener los datos del usuario $e")
             }
         }
     }

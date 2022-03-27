@@ -2,20 +2,17 @@ package com.nullpointer.blogcompose.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import coil.request.Disposable
 import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.core.utils.NetworkException
 import com.nullpointer.blogcompose.domain.post.PostRepoImpl
-import com.nullpointer.blogcompose.domain.preferences.PreferencesRepoImpl
-import com.nullpointer.blogcompose.models.MyPost
-import com.nullpointer.blogcompose.models.Post
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import timber.log.Timber
-import java.lang.Exception
-import java.lang.NullPointerException
 import javax.inject.Inject
 
 @HiltViewModel
@@ -104,6 +101,4 @@ class PostViewModel @Inject constructor(
             }
         }
     }
-
-
 }

@@ -10,12 +10,9 @@ import com.nullpointer.blogcompose.domain.post.PostRepoImpl
 import com.nullpointer.blogcompose.models.Comment
 import com.nullpointer.blogcompose.models.Post
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.lang.Exception
 import javax.inject.Inject
@@ -32,8 +29,6 @@ class PostDetailsViewModel @Inject constructor(
 
     // * job to control init comments and emit state
     private var jobInitComments: Job? = null
-    private val _stateInitComments = MutableStateFlow<Resource<Unit>?>(null)
-    val stateInitComments = _stateInitComments.asStateFlow()
 
     // * save job to concatenate comments
     private var jobConcatenate: Job? = null
@@ -62,7 +57,7 @@ class PostDetailsViewModel @Inject constructor(
         }
     }
 
-    val postState: StateFlow<Resource<Post>> = flow {
+    val postState: StateFlow<Resource<Post>> = flow<Resource<Post>> {
         // * update the comments when idPost is updated and this is not empty
         _idPost.collect { idPost ->
             if (idPost.isNotEmpty()) {
@@ -82,9 +77,10 @@ class PostDetailsViewModel @Inject constructor(
                 }
             }
         }
-    }.catch {
+    }.flowOn(Dispatchers.IO).catch {
         Timber.d("Error con el post $it")
-        Resource.Failure<Post>(Exception(it))
+        _messageDetails.send("Error al cargar el post")
+        emit(Resource.Failure<Post>(Exception(it)))
     }.stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(5000),
@@ -93,13 +89,15 @@ class PostDetailsViewModel @Inject constructor(
 
     // * this show commnets saved in database
     // * the update is for demand and only update database
-    val commentState: StateFlow<Resource<List<Comment>>> = flow {
+    val commentState: StateFlow<Resource<List<Comment>>> = flow<Resource<List<Comment>>> {
         postRepoImpl.listComments.collect {
             emit(Resource.Success(it))
         }
     }.catch {
-        Resource.Failure<List<Comment>>(Exception(it))
-    }.stateIn(
+        Timber.d("Error al cargar los comentarios del post $it")
+        _messageDetails.send("No se pudieron cargar los comentarios")
+        emit(Resource.Failure<List<Comment>>(Exception(it)))
+    }.flowOn(Dispatchers.IO).stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(5000),
         Resource.Loading()
@@ -152,8 +150,7 @@ class PostDetailsViewModel @Inject constructor(
         // * this override comments in database and get last comments
         jobInitComments?.cancel()
         jobInitComments = viewModelScope.launch {
-            _stateInitComments.value = Resource.Loading()
-            _stateInitComments.value = try {
+            try {
                 postRepoImpl.getLastComments(_idPost.value)
                 _hasNewComments.value = false
                 Resource.Success(Unit)
@@ -166,7 +163,6 @@ class PostDetailsViewModel @Inject constructor(
                         Timber.e("Error al recargar comentarios ${_idPost.value} : $e")
                     }
                 }
-                Resource.Failure(e)
             }
         }
     }

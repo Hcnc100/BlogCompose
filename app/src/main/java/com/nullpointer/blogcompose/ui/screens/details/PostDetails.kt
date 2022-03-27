@@ -8,7 +8,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.unit.dp
@@ -27,7 +26,6 @@ import com.ramcosta.composedestinations.annotation.DeepLink
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 @Destination(
@@ -88,10 +86,6 @@ fun PostDetails(
 
 }
 
-
-
-
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun PostReal(
     post: Resource<Post>,
@@ -152,7 +146,11 @@ fun PostReal(
                 item {
                     DataPost(
                         statePost = post,
-                        actionLike = actionLike)
+                        actionLike = actionLike,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(250.dp)
+                    )
                 }
                 // * comments list
                 listComments(listState = list,
@@ -176,7 +174,6 @@ fun PostReal(
 }
 
 
-
 fun listComments(
     listState: Resource<List<Comment>>,
     stateRequestComments: Resource<Unit>?,
@@ -186,7 +183,7 @@ fun listComments(
 ) = with(lazyListScope) {
 
     when (listState) {
-        is Resource.Failure -> {}
+        is Resource.Failure -> Unit
         is Resource.Loading -> {
             // * show empty comments (with shimmer, as facebook)
             items(10) { Comments() }

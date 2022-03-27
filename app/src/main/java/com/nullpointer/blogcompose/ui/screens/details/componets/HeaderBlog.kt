@@ -19,27 +19,42 @@ import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.models.Post
 import com.nullpointer.blogcompose.ui.share.ImagePost
 import com.nullpointer.blogcompose.ui.share.ImageProfile
+import com.nullpointer.blogcompose.ui.share.LottieContainer
 
 
 @Composable
 fun DataPost(
     statePost: Resource<Post>,
     actionLike: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     when (statePost) {
-        is Resource.Failure -> {}
-        is Resource.Loading -> Box(modifier = Modifier
-            .fillMaxWidth()
-            .height(250.dp), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
-        }
-        is Resource.Success -> HeaderBlog(statePost.data, actionLike = actionLike)
+        is Resource.Failure ->
+            LottieContainer(
+                modifier = modifier,
+                animation = R.raw.error3
+            )
+        is Resource.Loading ->
+            Box(modifier = modifier,
+                contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
+            }
+        is Resource.Success ->
+            HeaderBlog(
+                post = statePost.data,
+                actionLike = actionLike,
+                modifier = modifier
+            )
     }
 }
 
 
 @Composable
-fun HeaderBlog(post: Post, actionLike: (Boolean) -> Unit) {
+fun HeaderBlog(
+    post: Post,
+    actionLike: (Boolean) -> Unit,
+    modifier: Modifier,
+) {
     // * image post and number like and comments
     Column(modifier = Modifier.padding(10.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -53,13 +68,11 @@ fun HeaderBlog(post: Post, actionLike: (Boolean) -> Unit) {
         }
         Spacer(modifier = Modifier.height(10.dp))
         Text(text = post.description, modifier = Modifier.padding(10.dp))
-       ImagePost(
+        ImagePost(
             urlImgPost = post.urlImage,
             paddingLoading = 70.dp,
             showProgress = true,
-            modifier = Modifier
-                .fillMaxWidth(0.9f)
-                .height(300.dp)
+            modifier = modifier
         )
         InfoPost(post = post, actionLike)
     }
