@@ -17,7 +17,7 @@ import com.nullpointer.blogcompose.R
 fun ButtonsInteractionBlog(
     ownerLike: Boolean,
     actionShare: () -> Unit,
-    actionComments:()->Unit,
+    actionComments: () -> Unit,
     changeLike: (Boolean) -> Unit,
 ) {
 
@@ -35,15 +35,18 @@ fun ButtonsInteractionBlog(
                 }
             }
             // * when click in this, show keyboard
-            IconButton(onClick = { actionComments()}) {
+            IconButton(onClick = { actionComments() }) {
                 Icon(painterResource(id = R.drawable.ic_comment), "")
             }
         }
         Row {
-            // * download image post
-            IconButton(onClick = { /*TODO*/ }) {
-                Icon(painterResource(id = R.drawable.ic_download), "")
-            }
+            // ! i don't should add this
+//            // * download image post
+//            IconButton(onClick = {
+//                permissionState.launchPermissionRequest()
+//            }) {
+//                Icon(painterResource(id = R.drawable.ic_download), "")
+//            }
             // * share post
             IconButton(onClick = { actionShare() }) {
                 Icon(painterResource(id = R.drawable.ic_share), "")

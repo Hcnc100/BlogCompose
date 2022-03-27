@@ -40,11 +40,12 @@ fun HeaderBlog(
             style = MaterialTheme.typography.body1,
             fontWeight = FontWeight.W600
         )
-        IconButton(onClick = { }, modifier = Modifier
-            .weight(1f)
-            .size(20.dp)) {
-            Icon(painterResource(id = R.drawable.ic_options_vertical),
-                "")
-        }
+        // ! this options
+//        IconButton(onClick = { }, modifier = Modifier
+//            .weight(1f)
+//            .size(20.dp)) {
+//            Icon(painterResource(id = R.drawable.ic_options_vertical),
+//                "")
+//        }
     }
 }
