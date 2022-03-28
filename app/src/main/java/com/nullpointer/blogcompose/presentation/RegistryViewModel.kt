@@ -72,10 +72,10 @@ class RegistryViewModel @Inject constructor(
 
     init {
         Timber.d("Se inicio el registry view model")
-        viewModelScope.launch (Dispatchers.IO){
+        viewModelScope.launch{
             try {
                 // * get info for user saved
-                val currentUser = authRepoImpl.user.first()
+                val currentUser = with(Dispatchers.IO){authRepoImpl.user.first()}
                 nameUser = currentUser.nameUser
                 photoUser = currentUser.urlImg
 

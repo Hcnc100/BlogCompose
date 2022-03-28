@@ -6,6 +6,7 @@ import com.google.firebase.auth.FacebookAuthProvider
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.auth.ktx.userProfileChangeRequest
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.FirebaseMessaging
@@ -16,8 +17,7 @@ import kotlinx.coroutines.tasks.await
 @OptIn(ExperimentalCoroutinesApi::class)
 class AuthDataSource {
     private val auth = Firebase.auth
-    private val nodeUsers = Firebase.firestore.collection("Users")
-    private val nodeTokes = Firebase.firestore.collection("tokens")
+    private val nodeUsers = Firebase.firestore.collection("users")
 
     suspend fun createUser(newUser: User) {
         nodeUsers.document(auth.currentUser!!.uid).set(newUser).await()
@@ -30,45 +30,54 @@ class AuthDataSource {
     suspend fun authWithCredential(credential: AuthCredential): User {
         val resultAuth = auth.signInWithCredential(credential).await()
         // ! when susses auth update token in database
-        nodeTokes.document(resultAuth.user!!.uid).set(
-            mapOf("token" to FirebaseMessaging.getInstance().token.await())).await()
-        return User(
-            nameUser = resultAuth.user?.displayName ?: "",
-            uuid = resultAuth.user?.uid ?: "",
-            urlImg = resultAuth.user?.photoUrl.toString(),
-            token = FirebaseMessaging.getInstance().token.await())
+        val nodeUser = nodeUsers.document(resultAuth.user!!.uid)
+        val nodeResult = nodeUser.get().await()
+        return if (nodeResult.exists()) {
+            val mapUpdate = mapOf(
+                "timeUpdate" to FieldValue.serverTimestamp(),
+                "token" to FirebaseMessaging.getInstance().token.await()
+            )
+            nodeResult.toObject(User::class.java)!!
+        } else {
+            User()
+        }.apply {
+            idUser = resultAuth.user!!.uid
+        }
     }
 
+    suspend fun updateTokenUser(newToken: String) {
+        val mapUpdate = mapOf(
+            "timeUpdate" to FieldValue.serverTimestamp(),
+            "token" to FirebaseMessaging.getInstance().token.await()
+        )
+        nodeUsers.document(auth.currentUser!!.uid).update(mapUpdate).await()
+    }
 
 
     suspend fun updateDataUser(name: String?, urlImg: String?): User {
-        val profileUpdate = userProfileChangeRequest {
-            name?.let { displayName = it }
-            urlImg?.let { photoUri = Uri.parse(it) }
+        val nodeUser = nodeUsers.document(auth.currentUser!!.uid)
+        val nodeResult = nodeUser.get().await()
+        if (nodeResult.exists()) {
+            val mapUpdate = mutableMapOf<String, Any>()
+            name?.let { mapUpdate["nameUser"] = name }
+            urlImg?.let { mapUpdate["urlImg"] = urlImg }
+            mapUpdate["token"] = FirebaseMessaging.getInstance().token.await()
+            mapUpdate["timeUpdate"] = FieldValue.serverTimestamp()
+            nodeUser.update(mapUpdate).await()
+        } else {
+            val newUser = User(
+                token = FirebaseMessaging.getInstance().token.await(),
+                urlImg = urlImg!!,
+                nameUser = name!!
+            )
+            nodeUsers.document(auth.currentUser!!.uid).set(newUser).await()
         }
-        auth.currentUser?.updateProfile(profileUpdate)?.await()
-        return User(
-            nameUser = auth.currentUser?.displayName ?: "",
-            uuid = auth.currentUser?.uid ?: "",
-            urlImg = auth.currentUser?.photoUrl.toString(),
-            token = FirebaseMessaging.getInstance().token.await())
+        return nodeUser.get().await().toObject(User::class.java)!!.apply {
+            idUser = auth.currentUser?.uid ?: ""
+        }
+
     }
 
-    suspend fun updateImgUser(urlImg: String): String {
-        val profileUpdate = userProfileChangeRequest {
-            photoUri = Uri.parse(urlImg)
-        }
-        auth.currentUser?.updateProfile(profileUpdate)?.await()
-        return auth.currentUser?.photoUrl.toString()
-    }
-
-    suspend fun updateNameUser(name: String): String {
-        val profileUpdate = userProfileChangeRequest {
-            displayName = name
-        }
-        auth.currentUser?.updateProfile(profileUpdate)?.await()
-        return auth.currentUser?.displayName!!
-    }
 
 
     suspend fun deleterUser() {

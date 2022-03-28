@@ -8,10 +8,10 @@ import coil.request.SuccessResult
 import coil.transform.CircleCropTransformation
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
+import com.nullpointer.blogcompose.domain.auth.AuthRepoImpl
 import com.nullpointer.blogcompose.domain.notify.NotifyRepoImpl
 import com.nullpointer.blogcompose.domain.post.PostRepoImpl
 import com.nullpointer.blogcompose.domain.preferences.PreferencesRepoImpl
-import com.nullpointer.blogcompose.domain.toke.TokenRepoImpl
 import com.nullpointer.blogcompose.models.Notify
 import com.nullpointer.blogcompose.services.uploadImg.NotificationHelper
 import dagger.hilt.android.AndroidEntryPoint
@@ -25,7 +25,7 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class MyFirebaseMessagingService : FirebaseMessagingService() {
     @Inject
-    lateinit var tokenRepoImpl: TokenRepoImpl
+    lateinit var authRepoImpl: AuthRepoImpl
 
     @Inject
     lateinit var notifyRepoImpl: NotifyRepoImpl
@@ -41,7 +41,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         super.onNewToken(token)
         CoroutineScope(job).launch {
             try {
-                tokenRepoImpl.updateCurrentToken(token)
+                authRepoImpl.updateTokenUser(token)
             } catch (e: Exception) {
                 when (e) {
                     is CancellationException -> throw e

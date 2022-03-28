@@ -43,10 +43,10 @@ class AuthViewModel @Inject constructor(
 
     val stateAuthUser = flow {
         authRepoImpl.user.collect { user ->
-            val state = if (user.uuid.isEmpty()) {
+            val state = if (user.idUser.isEmpty()) {
                 LoginStatus.Unauthenticated
             } else {
-                if (user.nameUser.isEmpty() || user.uuid.isEmpty()) {
+                if (user.nameUser.isEmpty() || user.idUser.isEmpty()) {
                     LoginStatus.Authenticated.CompletingData
                 } else {
                     LoginStatus.Authenticated.CompleteData

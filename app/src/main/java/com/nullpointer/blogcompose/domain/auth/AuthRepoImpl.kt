@@ -20,6 +20,10 @@ class AuthRepoImpl(
         prefDataSource.saveUser(user)
     }
 
+    override suspend fun updateTokenUser(token: String){
+        authDataSource.updateTokenUser(token)
+    }
+
     override suspend fun deleterUser() {
         authDataSource.deleterUser()
         prefDataSource.deleterUser()

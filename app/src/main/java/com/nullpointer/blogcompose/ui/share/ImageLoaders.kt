@@ -23,7 +23,6 @@ import java.io.File
 fun ImageProfile(
     urlImgProfile: String,
     paddingLoading: Dp,
-    sizeImage: Dp,
     modifier: Modifier = Modifier,
     fileImg: File? = null,
     showProgress: Boolean = false,
@@ -40,12 +39,13 @@ fun ImageProfile(
     ) {
         transformations(CircleCropTransformation())
         placeholder(R.drawable.ic_person)
-        size(OriginalSize)
         crossfade(true)
     }
     val state = painter.state
     Box(contentAlignment = Alignment.Center,
-        modifier = modifier.size(sizeImage)) {
+        modifier = modifier.padding(
+            if (state !is ImagePainter.State.Success || fileImg == null && urlImgProfile.isEmpty())
+                paddingLoading else 0.dp)) {
         Image(
             painter = when (state) {
                 is ImagePainter.State.Error -> painterResource(id = R.drawable.ic_broken_image)
@@ -53,8 +53,7 @@ fun ImageProfile(
             },
             contentDescription = "",
             modifier = Modifier
-                .fillMaxSize()
-                .padding(if (state !is ImagePainter.State.Success) paddingLoading else 0.dp),
+                .fillMaxSize(),
         )
         if (state is ImagePainter.State.Loading && showProgress) CircularProgressIndicator()
     }

@@ -30,8 +30,9 @@ fun HeaderBlog(
     ) {
         ImageProfile(urlImgProfile = urlImgOwnerPost,
             paddingLoading = 5.dp,
-            sizeImage = 40.dp,
-            modifier = Modifier.weight(1f))
+            modifier = Modifier
+                .weight(1f)
+                .size(40.dp))
         Spacer(modifier = Modifier.width(10.dp))
         Text(text = nameOwnerPost,
             maxLines = 1,

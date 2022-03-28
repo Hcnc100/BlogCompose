@@ -60,7 +60,7 @@ fun HeaderBlog(
         Row(verticalAlignment = Alignment.CenterVertically) {
             ImageProfile(urlImgProfile = post.poster?.urlImg.toString(),
                 paddingLoading = 5.dp,
-                sizeImage = 30.dp)
+                modifier = Modifier.size(30.dp))
             Spacer(modifier = Modifier.width(15.dp))
             Text(post.poster?.name.toString(),
                 style = MaterialTheme.typography.body1,

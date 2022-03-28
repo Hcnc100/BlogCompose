@@ -11,7 +11,6 @@ import com.nullpointer.blogcompose.domain.images.ImagesRepoImpl
 import com.nullpointer.blogcompose.domain.notify.NotifyRepoImpl
 import com.nullpointer.blogcompose.domain.post.PostRepoImpl
 import com.nullpointer.blogcompose.domain.preferences.PreferencesRepoImpl
-import com.nullpointer.blogcompose.domain.toke.TokenRepoImpl
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -60,15 +59,7 @@ object AppModule {
         preferencesDataSource: PreferencesDataSource,
     ): AuthRepoImpl = AuthRepoImpl(authDataSource, preferencesDataSource)
 
-    @Provides
-    @Singleton
-    fun provideTokenDataSource(): TokenDataSource =
-        TokenDataSource()
 
-    @Provides
-    @Singleton
-    fun tokenRepository(tokenDataSource: TokenDataSource): TokenRepoImpl =
-        TokenRepoImpl(tokenDataSource)
 
     @Provides
     @Singleton

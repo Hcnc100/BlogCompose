@@ -29,16 +29,26 @@ class PostDataSource {
         private const val FIELD_POST_ID = "poster.uuid"
         private const val FIELD_NUMBER_COMMENTS = "numberComments"
         private const val FIELD_NUMBER_LIKES = "numberLikes"
+        private const val NAME_REF_USERS = "users"
     }
 
     private val database = Firebase.firestore
     private val refPosts = database.collection(NAME_REF_POST)
     private val refLikePost = database.collection(NAME_REF_LIKE_POST)
     private val refComment = database.collection(NAME_REF_COMMENTS)
+    private val refUsers = database.collection(NAME_REF_USERS)
     private val auth = Firebase.auth
 
     suspend fun addNewPost(post: Post) {
-        refPosts.document(post.id).set(post).await()
+        val newPostRef = refPosts.document(post.id)
+        val nodeUser = refUsers.document(auth.currentUser!!.uid)
+        database.runTransaction { transition ->
+            transition.set(newPostRef, post)
+            val refPost = newPostRef.path + post.id
+            transition.update(nodeUser,
+                "listRefPost",
+                FieldValue.arrayUnion(refPost))
+        }.await()
     }
 
     suspend fun getLastPostByUser(idUser: String, nPost: Int = Integer.MAX_VALUE): List<Post> {
@@ -80,7 +90,7 @@ class PostDataSource {
         // * limit result or for default all
         if (nPosts != Integer.MAX_VALUE) query = query.limit(nPosts.toLong())
         return query.get(Source.SERVER).await().documents.mapNotNull {
-            
+
             transformDocumentPost(it)
         }
     }
@@ -179,26 +189,19 @@ class PostDataSource {
             refLikePost.document(idPost).collection(NAME_REF_USERS_LIKE).document(uuid)
 
         database.runTransaction { transition ->
-            // * get post document
-            val postSnapshot = transition.get(currentPost)
-            // * get field to number of comments
-            val likesCount = postSnapshot.getLong(FIELD_NUMBER_LIKES)
-            if (likesCount != null) {
-                if (isLiked) {
-                    // * if the user liked post, so
-                    // * create one document with the id of the user and save the time when liked
-                    // * add one to number of like
-                    transition.set(refLikePost, mapOf(TIMESTAMP to FieldValue.serverTimestamp()))
-                    transition.update(currentPost, FIELD_NUMBER_LIKES, increment)
-                } else {
-                    // * if the user no like this, so
-                    // * deleter document of user liked adn decrement number of like in this post
-                    transition.update(currentPost, FIELD_NUMBER_LIKES, decrement)
-                    transition.delete(refLikePost)
-                }
+            if (isLiked) {
+                // * if the user liked post, so
+                // * create one document with the id of the user and save the time when liked
+                // * add one to number of like
+                transition.set(refLikePost, mapOf(TIMESTAMP to FieldValue.serverTimestamp()))
+                transition.update(currentPost, FIELD_NUMBER_LIKES, increment)
             } else {
-                isSuccess = false
+                // * if the user no like this, so
+                // * deleter document of user liked adn decrement number of like in this post
+                transition.update(currentPost, FIELD_NUMBER_LIKES, decrement)
+                transition.delete(refLikePost)
             }
+
         }.addOnFailureListener {
             isSuccess = false
         }.await()
@@ -225,7 +228,8 @@ class PostDataSource {
         if (startWithCommentId != null) {
             val refDocument = refCommentCurrent.document(startWithCommentId).get().await()
             if (refDocument.exists())
-                query = if (includePost) query.startAt(refDocument) else query.startAfter(refDocument)
+                query =
+                    if (includePost) query.startAt(refDocument) else query.startAfter(refDocument)
         }
 
         if (endWithCommentId != null) {
@@ -258,6 +262,7 @@ class PostDataSource {
     suspend fun addNewComment(idPost: String, comment: String): String {
         val increment = FieldValue.increment(1)
         val currentPost = refPosts.document(idPost)
+        val userNode = refUsers.document(auth.currentUser?.uid!!)
         // * crete new comment
         val newComment = Comment(
             urlImg = auth.currentUser?.photoUrl.toString(),
@@ -265,11 +270,17 @@ class PostDataSource {
             comment = comment
         )
         // * get ref to saved comment
-        val refCommentPost = refComment.document(idPost).collection(NAME_REF_LIST_COMMENTS).document(newComment.id)
+        val refCommentPost =
+            refComment.document(idPost).collection(NAME_REF_LIST_COMMENTS).document(newComment.id)
+
         database.runTransaction { transition ->
             // * add comment and update field comments to post
             transition.set(refCommentPost, newComment)
             transition.update(currentPost, FIELD_NUMBER_COMMENTS, increment)
+            val refComment = refCommentPost.path + newComment.id
+            transition.update(userNode,
+                "listRefComments",
+                FieldValue.arrayUnion(refComment))
         }.await()
         return newComment.id
     }

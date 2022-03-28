@@ -3,6 +3,7 @@ package com.nullpointer.blogcompose.ui.screens.dataUser
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -138,13 +139,16 @@ fun ImageCirculateUser(
         Box(contentAlignment = Alignment.Center,
             modifier = Modifier.align(Alignment.Center)) {
             // * image circular
-            ImageProfile(
-                urlImgProfile = imageProfile,
-                paddingLoading = 20.dp,
-                sizeImage = 150.dp,
-                showProgress = true,
-                fileImg = fileTemp
-            )
+            Card(shape = CircleShape) {
+                ImageProfile(
+                    urlImgProfile = imageProfile,
+                    paddingLoading = 20.dp,
+                    modifier = Modifier.size(150.dp),
+                    showProgress = true,
+                    fileImg = fileTemp
+                )
+            }
+
             // * progress load when compress
             if (isCompress) CircularProgressIndicator()
 

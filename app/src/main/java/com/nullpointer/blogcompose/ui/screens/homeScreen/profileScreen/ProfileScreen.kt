@@ -118,7 +118,7 @@ fun InfoProfile(
 
             ImageProfile(urlImgProfile = urlImgProfile,
                 paddingLoading = 30.dp,
-                sizeImage = 120.dp)
+                modifier = Modifier.size(120.dp))
 
             Spacer(modifier = Modifier.height(20.dp))
 

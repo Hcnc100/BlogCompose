@@ -103,7 +103,7 @@ class UploadPostServices : LifecycleService() {
             description = description,
             urlImage = urlImg,
             poster = Poster(
-                uuid = user.uuid,
+                uuid = user.idUser,
                 name = user.nameUser,
                 urlImg = user.urlImg
             )

@@ -19,7 +19,7 @@ class PreferencesDataSource(
         context.userProtoDataStore.updateData { currentUserData ->
             currentUserData.toBuilder()
                 .setName(user.nameUser)
-                .setUuid(user.uuid)
+                .setUuid(user.idUser)
                 .setUrlImg(user.urlImg)
                 .build()
         }
@@ -40,7 +40,7 @@ class PreferencesDataSource(
         context.userProtoDataStore.data.map { user ->
             User(
                 nameUser = user.name,
-                uuid = user.uuid,
+                idUser = user.uuid,
                 urlImg = user.urlImg
             )
         }

@@ -138,8 +138,7 @@ fun ItemNotify(
                 ImageProfile(
                     urlImgProfile = notify.imgUserLiked,
                     paddingLoading = 10.dp,
-                    sizeImage = 60.dp,
-                    modifier = Modifier.weight(2f),
+                    modifier = Modifier.weight(2f).size(60.dp),
                 )
 
                 Spacer(modifier = Modifier.width(10.dp))

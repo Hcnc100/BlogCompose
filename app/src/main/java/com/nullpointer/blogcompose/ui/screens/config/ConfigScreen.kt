@@ -40,7 +40,8 @@ fun ConfigScreen(
                 ButtonCard(text = currentUser?.nameUser.toString()) {
                     ImageProfile(urlImgProfile = currentUser?.urlImg.toString(),
                         paddingLoading = 5.dp,
-                        sizeImage = 30.dp)
+                        modifier = Modifier.size(30.dp)
+                    )
                 }
                 ButtonCard(text = "Cambiar nombre o foto", actionClick = {
                     navigator.navigate(DataUserScreenDestination)

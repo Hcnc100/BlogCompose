@@ -6,10 +6,12 @@ import java.util.*
 
 data class User(
     @set:Exclude @get:Exclude
-    var uuid: String = "",
+    var idUser: String = "",
     val token: String = "",
     val nameUser: String = "",
     val urlImg: String = "",
     @ServerTimestamp
     var timeCreate: Date? = null,
+    @ServerTimestamp
+    var timeUpdate: Date? = null,
 )

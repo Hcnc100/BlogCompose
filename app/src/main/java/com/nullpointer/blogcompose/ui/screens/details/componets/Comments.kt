@@ -75,8 +75,9 @@ fun ImageComment(
     if (urlImgProfile != null) {
         ImageProfile(urlImgProfile = urlImgProfile,
             paddingLoading = 5.dp,
-            sizeImage = 40.dp,
-            modifier = Modifier.padding(start = 10.dp, top = 10.dp))
+            modifier = Modifier
+                .padding(start = 10.dp, top = 10.dp)
+                .size(40.dp))
     } else {
         Box(modifier = Modifier
             .padding(start = 10.dp, top = 10.dp)
