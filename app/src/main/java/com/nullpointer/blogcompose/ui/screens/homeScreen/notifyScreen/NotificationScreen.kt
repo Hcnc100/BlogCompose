@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
@@ -14,7 +15,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -25,10 +28,13 @@ import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.core.utils.TimeUtils
 import com.nullpointer.blogcompose.models.notify.Notify
+import com.nullpointer.blogcompose.models.notify.TypeNotify
+import com.nullpointer.blogcompose.models.notify.TypeNotify.*
 import com.nullpointer.blogcompose.presentation.NotifyViewModel
 import com.nullpointer.blogcompose.ui.screens.destinations.PostDetailsDestination
 import com.nullpointer.blogcompose.ui.screens.emptyScreen.EmptyScreen
 import com.nullpointer.blogcompose.ui.share.CircularProgressAnimation
+import com.nullpointer.blogcompose.ui.share.ImagePost
 import com.nullpointer.blogcompose.ui.share.ImageProfile
 import com.nullpointer.blogcompose.ui.share.OnBottomReached
 import com.ramcosta.composedestinations.annotation.Destination
@@ -134,30 +140,53 @@ fun ItemNotify(
                 .fillMaxWidth()
                 .padding(vertical = 10.dp)) {
 
-                ImageProfile(
-                    urlImgProfile = notify.userInNotify?.urlImg.toString(),
-                    paddingLoading = 10.dp,
+                Box(
                     modifier = Modifier
                         .weight(2f)
                         .size(60.dp),
-                )
+                ) {
+                    ImageProfile(
+                        urlImgProfile = notify.userInNotify?.urlImg.toString(),
+                        paddingLoading = 10.dp,
+                        modifier = Modifier
+                            .fillMaxSize(),
+                    )
+                    Card(
+                        backgroundColor = when (notify.type) {
+                            LIKE -> Color.Red
+                            COMMENT -> Color.DarkGray
+                        },
+                        shape = CircleShape,
+                        modifier = Modifier.align(Alignment.BottomEnd).size(22.dp)
+                    ) {
+                        Image(
+                            painter = painterResource(id = when (notify.type) {
+                                LIKE -> R.drawable.ic_fav
+                                COMMENT -> R.drawable.ic_comment
+                            }),
+                            contentDescription = "",
+                            modifier = Modifier.fillMaxSize().padding(3.dp)
+                        )
+                    }
+
+                }
 
                 Spacer(modifier = Modifier.width(10.dp))
 
                 TextNotifyInfo(modifier = Modifier.weight(5f),
                     nameLiked = notify.userInNotify?.nameUser.toString(),
-                    timeStamp = notify.timestamp?.time ?: 0)
+                    timeStamp = notify.timestamp?.time ?: 0,
+                    typeNotify = notify.type)
 
-                Image(painter = rememberImagePainter(data = notify.urlImgPost),
-                    contentDescription = "",
+                ImagePost(
+                    urlImgPost = notify.urlImgPost,
+                    paddingLoading = 0.dp,
                     modifier = Modifier
                         .size(60.dp)
                         .weight(2f)
                         .align(Alignment.CenterVertically))
-
             }
         }
-
     }
 }
 
@@ -166,11 +195,16 @@ fun TextNotifyInfo(
     modifier: Modifier,
     nameLiked: String,
     timeStamp: Long,
+    typeNotify: TypeNotify,
 ) {
+    val textNotify = when (typeNotify) {
+        LIKE -> "A $nameLiked le gusta tu post"
+        COMMENT -> "$nameLiked a comentado tu post"
+    }
     val context = LocalContext.current
     Column(modifier = modifier) {
         Text(
-            text = "A $nameLiked le gusta tu post",
+            text = textNotify,
             style = MaterialTheme.typography.body2,
             fontSize = 13.sp,
         )

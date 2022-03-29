@@ -72,10 +72,10 @@ class RegistryViewModel @Inject constructor(
 
     init {
         Timber.d("Se inicio el registry view model")
-        viewModelScope.launch{
+        viewModelScope.launch {
             try {
                 // * get info for myUser saved
-                val currentUser = with(Dispatchers.IO){authRepoImpl.myUser.first()}
+                val currentUser = with(Dispatchers.IO) { authRepoImpl.myUser.first() }
                 nameUser = currentUser.nameUser
                 photoUser = currentUser.urlImg
 
@@ -102,10 +102,10 @@ class RegistryViewModel @Inject constructor(
     fun updateDataUser(context: Context) = viewModelScope.launch {
         when {
             // * when no has data myUser send error message
-            nameUser.isEmpty() || (photoUser.isEmpty() && fileImg == null) -> _registryMessage.send(
+            nameUser.trim().isEmpty() || (photoUser.trim().isEmpty() && fileImg == null) -> _registryMessage.send(
                 "Varifique sus datos")
             // * when data no is change send error message
-            fileImg == null && oldName == nameUser -> _registryMessage.send("Sin cambios")
+            fileImg == null && oldName == nameUser.trim() -> _registryMessage.send("Sin cambios")
             // * else update
             else -> updateUser(context)
         }
@@ -118,9 +118,12 @@ class RegistryViewModel @Inject constructor(
             // * upload img to myUser profile if no is null and get url
             val urlImg = fileImg?.toUri()?.let { updateImageUser(context, it) }
             // * update image myUser if no is null and name if is different from name saved
-            authRepoImpl.uploadDataUser(urlImg, if (oldName != nameUser) nameUser else null)
+            val nameFormat=nameUser.trim()
+            authRepoImpl.uploadDataUser(urlImg, if (oldName != nameFormat) nameFormat else null)
             // * if is success update state
             _stateUpdateUser.value = Resource.Success(Unit)
+            // * change var to know when name is change or no
+            oldName = nameFormat
             // * notify to myUser
             _registryMessage.send("Cambios guardados")
         } catch (exception: Exception) {

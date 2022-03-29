@@ -13,8 +13,9 @@ data class Notify(
     val idPost: String = "",
     val urlImgPost: String = "",
     var timestamp: Date? = null,
+    @field:JvmField
     var isOpen: Boolean = false,
     @PrimaryKey
     var id: String = "",
-    var typeNotify: TypeNotify = TypeNotify.LIKE,
+    var type: TypeNotify = TypeNotify.LIKE,
 )

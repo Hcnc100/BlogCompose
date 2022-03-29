@@ -6,6 +6,7 @@ import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.Source
 import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.firestore.ktx.firestoreSettings
 import com.google.firebase.ktx.Firebase
 import com.nullpointer.blogcompose.models.Comment
 import com.nullpointer.blogcompose.models.posts.Post
@@ -26,7 +27,7 @@ class PostDataSource {
         private const val NAME_REF_USERS_LIKE = "usersLike"
         private const val NAME_REF_LIST_COMMENTS = "listComments"
         private const val TIMESTAMP = "timestamp"
-        private const val FIELD_POST_ID = "poster.uuid"
+        private const val FIELD_POST_ID = "userPoster.idUser"
         private const val FIELD_NUMBER_COMMENTS = "numberComments"
         private const val FIELD_NUMBER_LIKES = "numberLikes"
         private const val NAME_REF_USERS = "users"
@@ -89,8 +90,7 @@ class PostDataSource {
         }
         // * limit result or for default all
         if (nPosts != Integer.MAX_VALUE) query = query.limit(nPosts.toLong())
-        return query.get(Source.SERVER).await().documents.mapNotNull {
-
+        return query.get().await().documents.mapNotNull {
             transformDocumentPost(it)
         }
     }
@@ -108,7 +108,7 @@ class PostDataSource {
         if (fromUserId != null) query = query.whereEqualTo(FIELD_POST_ID, fromUserId)
         // * limit the request
         if (nPosts != Integer.MAX_VALUE) query = query.limit(nPosts.toLong())
-        return query.get(Source.SERVER).await().documents.mapNotNull {
+        return query.get().await().documents.mapNotNull {
             transformDocumentPost(it)
         }
     }
@@ -145,8 +145,7 @@ class PostDataSource {
         val listener = refPost.addSnapshotListener { value, error ->
             if (error != null) close(error)
             Timber.d("Se envio un post")
-            if (!value!!.metadata.isFromCache)
-                launch { trySend(transformDocumentPost(value)) }
+            launch { trySend(transformDocumentPost(value)) }
         }
         // ! remove listener with no any listener
         awaitClose {

@@ -34,18 +34,18 @@ class NotifyDataSource {
         // ? if passed id, indicate start, request notifications, that initial with this
         // ? or get request notifications that end with notifications
         if (startWith != null) {
-            val refDocument = nodeUserNotify.document(startWith).get(Source.CACHE).await()
+            val refDocument = nodeUserNotify.document(startWith).get().await()
             if (refDocument.exists())
                 baseQuery = baseQuery.startAfter(refDocument)
         } else if (endWith != null) {
-            val refDocument = nodeUserNotify.document(endWith).get(Source.CACHE).await()
+            val refDocument = nodeUserNotify.document(endWith).get().await()
             if (refDocument.exists())
                 baseQuery = baseQuery.endBefore(refDocument)
         }
         // * limit result or for default all
         if (numberRequest != Integer.MAX_VALUE) baseQuery = baseQuery.limit(numberRequest.toLong())
         // * transform document to notifications
-        return baseQuery.get(Source.SERVER).await().documents.mapNotNull { document ->
+        return baseQuery.get().await().documents.mapNotNull { document ->
             transformDocumentInNotify(document)
         }
     }
@@ -60,7 +60,7 @@ class NotifyDataSource {
         // * limit result or get all notifications (no recommended)
         if (numberRequest != Integer.MAX_VALUE) baseQuery = baseQuery.limit(numberRequest.toLong())
         // * transform result in notify
-        return baseQuery.get(Source.SERVER).await().documents.mapNotNull { document ->
+        return baseQuery.get().await().documents.mapNotNull { document ->
             transformDocumentInNotify(document)
         }
     }
@@ -70,8 +70,6 @@ class NotifyDataSource {
         // ? adding id and timestamp estimate
         return document.toObject(Notify::class.java)?.apply {
             id = document.id
-            // ! i dont know becose no update this field
-            isOpen = document.getBoolean(FIELD_IS_OPEN)!!
             timestamp = document
                 .getTimestamp(TIMESTAMP, DocumentSnapshot.ServerTimestampBehavior.ESTIMATE
                 )?.toDate()

@@ -1,6 +1,9 @@
 package com.nullpointer.blogcompose.inject
 
 import android.app.Application
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.firestore.ktx.firestoreSettings
+import com.google.firebase.ktx.Firebase
 import com.orhanobut.logger.AndroidLogAdapter
 import com.orhanobut.logger.FormatStrategy
 import com.orhanobut.logger.Logger
@@ -13,6 +16,12 @@ class Application : Application() {
 
     override fun onCreate() {
         super.onCreate()
+
+        val settings = firestoreSettings {
+            isPersistenceEnabled = false
+        }
+        Firebase.firestore.firestoreSettings = settings
+
         val formatStrategy: FormatStrategy = PrettyFormatStrategy.newBuilder()
             .showThreadInfo(true) // (Optional) Whether to show thread info or not. Default true
             .methodCount(1) // (Optional) How many method line to show. Default 2

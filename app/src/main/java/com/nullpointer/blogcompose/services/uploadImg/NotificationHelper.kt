@@ -12,6 +12,8 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.net.toUri
 import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.utils.toFormat
+import com.nullpointer.blogcompose.models.notify.TypeNotify
+import com.nullpointer.blogcompose.models.notify.TypeNotify.*
 import com.nullpointer.blogcompose.ui.activitys.MainActivity
 import kotlin.random.Random
 
@@ -35,11 +37,12 @@ class NotificationHelper(context: Context) : ContextWrapper(context) {
 
     }
 
-    fun launchNotifyLike(
+    fun launchNotifyPost(
         bitmapPost: Bitmap,
         bitmapUser: Bitmap,
         nameUserLiked: String,
         idPost: String,
+        typeNotify: TypeNotify,
     ) {
         val notificationManager = createChannel(
             ID_CHANNEL_LIKE,
@@ -58,7 +61,8 @@ class NotificationHelper(context: Context) : ContextWrapper(context) {
             getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT)
         }
         baseNotify.setContentIntent(deepLinkPendingIntent)
-        val completeNotify = createCustomNotification(bitmapUser, bitmapPost, nameUserLiked, baseNotify)
+        val completeNotify =
+            createCustomNotification(bitmapUser, bitmapPost, nameUserLiked, baseNotify, typeNotify)
         notificationManager.notify(Random.nextInt(), completeNotify)
     }
 
@@ -67,14 +71,19 @@ class NotificationHelper(context: Context) : ContextWrapper(context) {
         bitmapPost: Bitmap,
         nameUserLiked: String,
         baseNotify: NotificationCompat.Builder,
+        typeNotify: TypeNotify,
     ): Notification {
+        val (title, body) = when (typeNotify) {
+            LIKE -> Pair("Recibiste un like", "A $nameUserLiked le gusta tu post")
+            COMMENT -> Pair("Recibiste un comentario", "$nameUserLiked comento tu post")
+        }
         val remoteViews = RemoteViews(this.packageName, R.layout.notify_liked)
         remoteViews.setImageViewBitmap(R.id.img_user_liked, bitmapUser)
         remoteViews.setImageViewBitmap(R.id.img_post_liked, bitmapPost)
         remoteViews.setTextViewText(R.id.text_date_notify,
             System.currentTimeMillis().toFormat(this))
-        remoteViews.setTextViewText(R.id.title, "Recibiste un like")
-        remoteViews.setTextViewText(R.id.text, "A $nameUserLiked le gusta tu post")
+        remoteViews.setTextViewText(R.id.title, title)
+        remoteViews.setTextViewText(R.id.text, body)
 
         baseNotify.setCustomContentView(remoteViews)
 

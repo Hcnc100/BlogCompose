@@ -25,7 +25,7 @@ class NotifyDeserializer : JsonDeserializer<Notify?> {
             userInNotify = userInNotify,
             idPost = jsonObject["idPost"].asString,
             urlImgPost = jsonObject["urlImgPost"].asString,
-            typeNotify = TypeNotify.valueOf( jsonObject["type"].asString)
+            type = TypeNotify.valueOf( jsonObject["type"].asString)
         )
     }
 }

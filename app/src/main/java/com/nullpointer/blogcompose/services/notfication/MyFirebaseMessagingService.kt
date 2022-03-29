@@ -8,7 +8,6 @@ import coil.request.ImageRequest
 import coil.transform.CircleCropTransformation
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
-import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.nullpointer.blogcompose.domain.auth.AuthRepoImpl
 import com.nullpointer.blogcompose.domain.notify.NotifyRepoImpl
@@ -84,12 +83,15 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         val bitmapPost = getBitMapUser(notify.urlImgPost, false)
         val bitmapUser = getBitMapUser(notify.userInNotify?.urlImg, true)
         if (bitmapPost != null && bitmapUser != null) {
-            notifyHelper.launchNotifyLike(
+            notifyHelper.launchNotifyPost(
                 bitmapPost = bitmapPost,
                 bitmapUser = bitmapUser,
-                notify.userInNotify?.nameUser.toString(),
-                notify.idPost
+                nameUserLiked = notify.userInNotify?.nameUser.toString(),
+                idPost = notify.idPost,
+                typeNotify = notify.type
             )
+        } else {
+            Timber.e("Error al obtener alguna imagen urlPost=${notify.urlImgPost} urlImgProfile=${notify.userInNotify?.urlImg}")
         }
     }
 
