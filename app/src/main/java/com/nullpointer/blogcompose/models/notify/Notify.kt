@@ -1,4 +1,4 @@
-package com.nullpointer.blogcompose.models
+package com.nullpointer.blogcompose.models.notify
 
 import androidx.room.Embedded
 import androidx.room.Entity
@@ -16,4 +16,5 @@ data class Notify(
     var isOpen: Boolean = false,
     @PrimaryKey
     var id: String = "",
+    var typeNotify: TypeNotify = TypeNotify.LIKE,
 )

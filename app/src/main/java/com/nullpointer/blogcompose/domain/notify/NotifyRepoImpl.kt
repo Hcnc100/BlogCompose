@@ -4,7 +4,7 @@ import com.nullpointer.blogcompose.core.utils.InternetCheck
 import com.nullpointer.blogcompose.core.utils.NetworkException
 import com.nullpointer.blogcompose.data.local.cache.NotifyDAO
 import com.nullpointer.blogcompose.data.remote.NotifyDataSource
-import com.nullpointer.blogcompose.models.Notify
+import com.nullpointer.blogcompose.models.notify.Notify
 import kotlinx.coroutines.flow.Flow
 
 class NotifyRepoImpl(

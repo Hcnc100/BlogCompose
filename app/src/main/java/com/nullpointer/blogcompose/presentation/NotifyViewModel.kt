@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.core.utils.NetworkException
 import com.nullpointer.blogcompose.domain.notify.NotifyRepoImpl
-import com.nullpointer.blogcompose.models.Notify
+import com.nullpointer.blogcompose.models.notify.Notify
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -107,7 +107,7 @@ class NotifyViewModel @Inject constructor(
         }
     }
 
-    fun openNotifications(notify:Notify)=viewModelScope.launch{
+    fun openNotifications(notify: Notify)=viewModelScope.launch{
         notifyRepoImpl.openNotify(notify)
     }
 

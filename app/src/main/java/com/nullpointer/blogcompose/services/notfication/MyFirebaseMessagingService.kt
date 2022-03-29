@@ -9,10 +9,12 @@ import coil.transform.CircleCropTransformation
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import com.nullpointer.blogcompose.domain.auth.AuthRepoImpl
 import com.nullpointer.blogcompose.domain.notify.NotifyRepoImpl
 import com.nullpointer.blogcompose.domain.post.PostRepoImpl
-import com.nullpointer.blogcompose.models.Notify
+import com.nullpointer.blogcompose.models.notify.Notify
+import com.nullpointer.blogcompose.models.notify.NotifyDeserializer
 import com.nullpointer.blogcompose.services.uploadImg.NotificationHelper
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CancellationException
@@ -60,7 +62,11 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
     override fun onMessageReceived(message: RemoteMessage) {
         super.onMessageReceived(message)
         try {
-            val gson = Gson()
+            val gson = GsonBuilder()
+                .registerTypeAdapter(
+                    Notify::class.java,
+                    NotifyDeserializer()
+                ).create()
             val notify = gson.fromJson(message.data["notify"], Notify::class.java)
             CoroutineScope(job).launch {
                 // * launch notification * if is validate

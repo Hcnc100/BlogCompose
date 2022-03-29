@@ -6,7 +6,7 @@ import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.Source
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import com.nullpointer.blogcompose.models.Notify
+import com.nullpointer.blogcompose.models.notify.Notify
 import kotlinx.coroutines.tasks.await
 import java.util.*
 

@@ -1,7 +1,5 @@
 package com.nullpointer.blogcompose.ui.screens.details.componets
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -11,13 +9,9 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import coil.compose.rememberImagePainter
-import coil.transform.CircleCropTransformation
 import com.nullpointer.blogcompose.core.utils.TimeUtils
 import com.nullpointer.blogcompose.models.Comment
 import com.nullpointer.blogcompose.ui.share.ImageProfile

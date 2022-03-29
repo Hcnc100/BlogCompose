@@ -24,7 +24,7 @@ import com.google.accompanist.swiperefresh.SwipeRefreshState
 import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.core.utils.TimeUtils
-import com.nullpointer.blogcompose.models.Notify
+import com.nullpointer.blogcompose.models.notify.Notify
 import com.nullpointer.blogcompose.presentation.NotifyViewModel
 import com.nullpointer.blogcompose.ui.screens.destinations.PostDetailsDestination
 import com.nullpointer.blogcompose.ui.screens.emptyScreen.EmptyScreen

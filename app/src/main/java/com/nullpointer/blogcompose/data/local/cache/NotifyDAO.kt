@@ -1,7 +1,7 @@
 package com.nullpointer.blogcompose.data.local.cache
 
 import androidx.room.*
-import com.nullpointer.blogcompose.models.Notify
+import com.nullpointer.blogcompose.models.notify.Notify
 import kotlinx.coroutines.flow.Flow
 
 @Dao
