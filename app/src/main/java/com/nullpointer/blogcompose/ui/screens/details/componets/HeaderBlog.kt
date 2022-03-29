@@ -16,7 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.states.Resource
-import com.nullpointer.blogcompose.models.Post
+import com.nullpointer.blogcompose.models.posts.Post
 import com.nullpointer.blogcompose.ui.share.ImagePost
 import com.nullpointer.blogcompose.ui.share.ImageProfile
 import com.nullpointer.blogcompose.ui.share.LottieContainer
@@ -58,11 +58,11 @@ fun HeaderBlog(
     // * image post and number like and comments
     Column(modifier = Modifier.padding(10.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            ImageProfile(urlImgProfile = post.poster?.urlImg.toString(),
+            ImageProfile(urlImgProfile = post.userPoster?.urlImg.toString(),
                 paddingLoading = 5.dp,
                 modifier = Modifier.size(30.dp))
             Spacer(modifier = Modifier.width(15.dp))
-            Text(post.poster?.name.toString(),
+            Text(post.userPoster?.nameUser.toString(),
                 style = MaterialTheme.typography.body1,
                 fontWeight = FontWeight.W600)
         }

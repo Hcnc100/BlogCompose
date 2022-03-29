@@ -11,7 +11,7 @@ import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.SwipeRefreshState
-import com.nullpointer.blogcompose.models.SimplePost
+import com.nullpointer.blogcompose.models.posts.SimplePost
 import com.nullpointer.blogcompose.ui.screens.emptyScreen.EmptyScreen
 import com.nullpointer.blogcompose.ui.screens.homeScreen.blogScreen.componets.BlogItem
 import com.nullpointer.blogcompose.ui.share.ButtonAdd

@@ -1,26 +1,19 @@
 package com.nullpointer.blogcompose.models
 
+import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.nullpointer.blogcompose.models.users.InnerUser
 import java.util.*
 
 @Entity(tableName = "table_notify")
 data class Notify(
-    val idUserLiked: String = "",
-    val nameUserLiked: String = "",
-    val imgUserLiked: String = "",
+    @Embedded
+    val userInNotify: InnerUser? = null,
     val idPost: String = "",
     val urlImgPost: String = "",
     var timestamp: Date? = null,
-    val isOpen: Boolean = false,
+    var isOpen: Boolean = false,
     @PrimaryKey
     var id: String = "",
-) {
-    constructor(map: Map<String, String>) : this(
-        idPost= map["idPost"]!!,
-        idUserLiked = map["idUserLiked"]!!,
-        nameUserLiked = map["nameUserLiked"]!!,
-        imgUserLiked = map["imgUserLiked"]!!,
-        urlImgPost = map["urlImgPost"]!!,
-    )
-}
+)

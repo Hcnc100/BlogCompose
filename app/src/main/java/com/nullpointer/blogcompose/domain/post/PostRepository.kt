@@ -2,8 +2,8 @@ package com.nullpointer.blogcompose.domain.post
 
 import android.content.Context
 import com.nullpointer.blogcompose.models.Comment
-import com.nullpointer.blogcompose.models.MyPost
-import com.nullpointer.blogcompose.models.Post
+import com.nullpointer.blogcompose.models.posts.MyPost
+import com.nullpointer.blogcompose.models.posts.Post
 import kotlinx.coroutines.flow.Flow
 
 interface PostRepository {
@@ -21,7 +21,7 @@ interface PostRepository {
     suspend fun getPost(idPost: String): Post?
     suspend fun updateLikePost(idPost: String, isLiked: Boolean? = null)
     suspend fun deleterAllPost()
-    suspend fun addNewComment(idPost: String,comment: String)
+    suspend fun addNewComment(idPost: String,comment: Comment)
     suspend fun clearComments()
     suspend fun getRealTimePost(idPost: String): Flow<Post?>
     suspend fun getLastComments(idPost: String)

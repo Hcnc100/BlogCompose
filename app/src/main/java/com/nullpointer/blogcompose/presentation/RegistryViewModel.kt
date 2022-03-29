@@ -43,7 +43,7 @@ class RegistryViewModel @Inject constructor(
         private const val KEY_IMAGE_USER = "KEY_IMAGE_USER"
     }
 
-    // * fields to save state to data user
+    // * fields to save state to data myUser
     var nameUser by SavableComposeState(savedStateHandle, KEY_NAME_USER, "")
         private set
     var photoUser by SavableComposeState(savedStateHandle, KEY_PHOTO_USER, "")
@@ -74,8 +74,8 @@ class RegistryViewModel @Inject constructor(
         Timber.d("Se inicio el registry view model")
         viewModelScope.launch{
             try {
-                // * get info for user saved
-                val currentUser = with(Dispatchers.IO){authRepoImpl.user.first()}
+                // * get info for myUser saved
+                val currentUser = with(Dispatchers.IO){authRepoImpl.myUser.first()}
                 nameUser = currentUser.nameUser
                 photoUser = currentUser.urlImg
 
@@ -101,7 +101,7 @@ class RegistryViewModel @Inject constructor(
 
     fun updateDataUser(context: Context) = viewModelScope.launch {
         when {
-            // * when no has data user send error message
+            // * when no has data myUser send error message
             nameUser.isEmpty() || (photoUser.isEmpty() && fileImg == null) -> _registryMessage.send(
                 "Varifique sus datos")
             // * when data no is change send error message
@@ -115,13 +115,13 @@ class RegistryViewModel @Inject constructor(
         // * change state update
         _stateUpdateUser.value = Resource.Loading()
         try {
-            // * upload img to user profile if no is null and get url
+            // * upload img to myUser profile if no is null and get url
             val urlImg = fileImg?.toUri()?.let { updateImageUser(context, it) }
-            // * update image user if no is null and name if is different from name saved
+            // * update image myUser if no is null and name if is different from name saved
             authRepoImpl.uploadDataUser(urlImg, if (oldName != nameUser) nameUser else null)
             // * if is success update state
             _stateUpdateUser.value = Resource.Success(Unit)
-            // * notify to user
+            // * notify to myUser
             _registryMessage.send("Cambios guardados")
         } catch (exception: Exception) {
             // * show error message if has exception
@@ -142,14 +142,14 @@ class RegistryViewModel @Inject constructor(
     }
 
     private suspend fun updateImageUser(context: Context, uri: Uri): String? {
-        // * get the last state to update image user
+        // * get the last state to update image myUser
         // * this only can Failed or Success state
-        // ! if is other state return null for no update image user
+        // ! if is other state return null for no update image myUser
         return when (val result = imagesRepoImpl.uploadImgProfile(uri).last()) {
             is StorageUploadTaskResult.Complete.Failed -> throw Exception(result.error)
             is StorageUploadTaskResult.Complete.Success -> {
-                // ! this very important for reload img user, with same url
-                // * without this, only update img user because load img from cache
+                // ! this very important for reload img myUser, with same url
+                // * without this, only update img myUser because load img from cache
                 context.imageLoader.memoryCache.clear()
                 result.urlFile
             }

@@ -1,15 +1,14 @@
-package com.nullpointer.blogcompose.models
+package com.nullpointer.blogcompose.models.posts
 
-import android.os.Parcelable
 import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.google.firebase.firestore.Exclude
 import com.google.firebase.firestore.ServerTimestamp
-import kotlinx.parcelize.Parcelize
+import com.nullpointer.blogcompose.models.users.InnerUser
 import java.util.*
 
-@Parcelize
+
 @Entity(tableName = "table_post")
 data class Post(
     override var description: String = "",
@@ -17,7 +16,7 @@ data class Post(
     override var numberComments: Int = 0,
     override var numberLikes: Int = 0,
     @Embedded
-    override var poster: Poster? = null,
+    override var userPoster: InnerUser? = null,
     @set:Exclude @get:Exclude
     override var ownerLike: Boolean = false,
     @ServerTimestamp
@@ -25,7 +24,7 @@ data class Post(
     @set:Exclude @get:Exclude
     @PrimaryKey
     override var id: String = UUID.randomUUID().toString(),
-) : Parcelable, SimplePost {
+) : SimplePost() {
     fun copyInnerLike(isLiked: Boolean): Post {
         val newCount = if (isLiked) numberLikes + 1 else numberLikes - 1
         return this.copy(
@@ -33,7 +32,5 @@ data class Post(
             ownerLike = isLiked
         )
     }
-
-
 }
 

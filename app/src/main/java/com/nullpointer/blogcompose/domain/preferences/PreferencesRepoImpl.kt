@@ -1,7 +1,7 @@
 package com.nullpointer.blogcompose.domain.preferences
 
 import com.nullpointer.blogcompose.data.local.PreferencesDataSource
-import com.nullpointer.blogcompose.models.User
+import com.nullpointer.blogcompose.models.users.MyUser
 import kotlinx.coroutines.flow.Flow
 
 class PreferencesRepoImpl(
@@ -9,10 +9,10 @@ class PreferencesRepoImpl(
 ) : PreferencesRepository {
 
 
-    override fun getCurrentUser(): Flow<User> =
+    override fun getCurrentUser(): Flow<MyUser> =
         preferencesDataSource.getUserFromProtoStore()
 
-    override suspend fun updateUser(user: User) =
-        preferencesDataSource.saveUser(user)
+    override suspend fun updateUser(myUser: MyUser) =
+        preferencesDataSource.saveUser(myUser)
 
 }

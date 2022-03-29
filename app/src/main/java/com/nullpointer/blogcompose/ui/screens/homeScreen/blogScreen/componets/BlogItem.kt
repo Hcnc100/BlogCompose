@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.annotation.ExperimentalCoilApi
 import com.nullpointer.blogcompose.core.utils.TimeUtils
-import com.nullpointer.blogcompose.models.SimplePost
+import com.nullpointer.blogcompose.models.posts.SimplePost
 import com.nullpointer.blogcompose.ui.share.ImagePost
 import java.util.*
 
@@ -43,9 +43,12 @@ fun BlogItem(
         Column {
             // * info owner post
             if (staticInfo != null) {
-                HeaderBlog(staticInfo.first, staticInfo.second)
+                HeaderBlog(urlImgOwnerPost = staticInfo.first, nameOwnerPost = staticInfo.second)
             } else {
-                HeaderBlog(post.poster!!.urlImg, post.poster!!.name)
+                HeaderBlog(
+                    urlImgOwnerPost = post.userPoster?.urlImg.toString(),
+                    nameOwnerPost = post.userPoster?.nameUser.toString(),
+                )
             }
             // * image
             ImagePost(
@@ -54,7 +57,8 @@ fun BlogItem(
                 showProgress = true,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .aspectRatio(1f).clickable {
+                    .aspectRatio(1f)
+                    .clickable {
                         actionDetails(post.id, false)
                     }
             )
@@ -74,6 +78,7 @@ fun BlogItem(
         }
     }
 }
+
 // * action to share comment
 fun sharePost(idPost: String, context: Context) {
     val intent = Intent(Intent.ACTION_SEND)

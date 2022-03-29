@@ -24,7 +24,6 @@ import com.nullpointer.blogcompose.ui.screens.swipePosts.ScreenSwiperPost
 import com.nullpointer.blogcompose.ui.share.ImageProfile
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import kotlinx.coroutines.flow.collect
 
 @Composable
 @Destination(navGraph = "homeDestinations")
@@ -40,7 +39,7 @@ fun ProfileScreen(
     val stateConcatenate = myPostViewModel.stateConcatenate.collectAsState()
     val currentUser = authViewModel.currentUser.collectAsState()
 
-    // * data user
+    // * data myUser
     val photoUser = currentUser.value?.urlImg ?: ""
     val name = currentUser.value?.nameUser ?: ""
 
@@ -92,7 +91,7 @@ fun HeaderProfile(
     nameProfile: String,
     actionLogOut: () -> Unit,
 ) {
-    // * header for user information, with button to send config app
+    // * header for myUser information, with button to send config app
     Box {
         InfoProfile(urlImgProfile, nameProfile)
         IconButton(onClick = { actionLogOut() }, modifier = Modifier
@@ -108,7 +107,7 @@ fun InfoProfile(
     urlImgProfile: String,
     nameProfile: String,
 ) {
-    // * header for user information
+    // * header for myUser information
     Card {
         Column(
             modifier = Modifier

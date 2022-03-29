@@ -5,7 +5,7 @@ import com.nullpointer.blogcompose.core.utils.InternetCheck
 import com.nullpointer.blogcompose.core.utils.NetworkException
 import com.nullpointer.blogcompose.data.local.PreferencesDataSource
 import com.nullpointer.blogcompose.data.remote.AuthDataSource
-import com.nullpointer.blogcompose.models.User
+import com.nullpointer.blogcompose.models.users.MyUser
 import kotlinx.coroutines.flow.Flow
 
 class AuthRepoImpl(
@@ -13,7 +13,7 @@ class AuthRepoImpl(
     private val prefDataSource: PreferencesDataSource,
 ) : AuthRepository {
 
-    override val user: Flow<User> = prefDataSource.getUserFromProtoStore()
+    override val myUser: Flow<MyUser> = prefDataSource.getUserFromProtoStore()
 
     override suspend fun authWithCredential(authCredential: AuthCredential) {
         val user = authDataSource.authWithCredential(authCredential)

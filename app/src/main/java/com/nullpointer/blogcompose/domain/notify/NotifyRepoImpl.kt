@@ -50,8 +50,8 @@ class NotifyRepoImpl(
         notifyDAO.deleterAll()
 
     override suspend fun openNotify(notify: Notify) {
-        notifyDAO.updateNotify(notify.copy(isOpen = true))
         notifyDataSource.updateOpenNotify(notify.id)
+        notifyDAO.updateNotify(notify.copy(isOpen = true))
     }
 
 }

@@ -8,7 +8,7 @@ import com.google.firebase.firestore.Source
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.nullpointer.blogcompose.models.Comment
-import com.nullpointer.blogcompose.models.Post
+import com.nullpointer.blogcompose.models.posts.Post
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
@@ -74,7 +74,7 @@ class PostDataSource {
     ): List<Post> {
         // * base query
         var query = refPosts.orderBy(TIMESTAMP, Query.Direction.DESCENDING)
-        // * filter to user or for default get all
+        // * filter to myUser or for default get all
         if (fromUserId != null) query = query.whereEqualTo(FIELD_POST_ID, fromUserId)
         // ? indicate if start or end with any id post
         if (startWithPostId != null) {
@@ -104,7 +104,7 @@ class PostDataSource {
         var query = refPosts.orderBy(TIMESTAMP, Query.Direction.DESCENDING)
         // * get more recent post that date passed for args
         if (date != null) query = query.whereGreaterThan(TIMESTAMP, date)
-        // * filter to user or for default get all
+        // * filter to myUser or for default get all
         if (fromUserId != null) query = query.whereEqualTo(FIELD_POST_ID, fromUserId)
         // * limit the request
         if (nPosts != Integer.MAX_VALUE) query = query.limit(nPosts.toLong())
@@ -145,7 +145,8 @@ class PostDataSource {
         val listener = refPost.addSnapshotListener { value, error ->
             if (error != null) close(error)
             Timber.d("Se envio un post")
-            launch { trySend(transformDocumentPost(value)) }
+            if (!value!!.metadata.isFromCache)
+                launch { trySend(transformDocumentPost(value)) }
         }
         // ! remove listener with no any listener
         awaitClose {
@@ -190,14 +191,14 @@ class PostDataSource {
 
         database.runTransaction { transition ->
             if (isLiked) {
-                // * if the user liked post, so
-                // * create one document with the id of the user and save the time when liked
+                // * if the myUser liked post, so
+                // * create one document with the id of the myUser and save the time when liked
                 // * add one to number of like
                 transition.set(refLikePost, mapOf(TIMESTAMP to FieldValue.serverTimestamp()))
                 transition.update(currentPost, FIELD_NUMBER_LIKES, increment)
             } else {
-                // * if the user no like this, so
-                // * deleter document of user liked adn decrement number of like in this post
+                // * if the myUser no like this, so
+                // * deleter document of myUser liked adn decrement number of like in this post
                 transition.update(currentPost, FIELD_NUMBER_LIKES, decrement)
                 transition.delete(refLikePost)
             }
@@ -259,16 +260,10 @@ class PostDataSource {
         }
     }
 
-    suspend fun addNewComment(idPost: String, comment: String): String {
+    suspend fun addNewComment(idPost: String, newComment: Comment): String {
         val increment = FieldValue.increment(1)
         val currentPost = refPosts.document(idPost)
         val userNode = refUsers.document(auth.currentUser?.uid!!)
-        // * crete new comment
-        val newComment = Comment(
-            urlImg = auth.currentUser?.photoUrl.toString(),
-            nameUser = auth.currentUser?.displayName.toString(),
-            comment = comment
-        )
         // * get ref to saved comment
         val refCommentPost =
             refComment.document(idPost).collection(NAME_REF_LIST_COMMENTS).document(newComment.id)

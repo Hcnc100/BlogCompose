@@ -33,7 +33,6 @@ import com.nullpointer.blogcompose.ui.share.ImageProfile
 import com.nullpointer.blogcompose.ui.share.OnBottomReached
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import kotlinx.coroutines.flow.collect
 
 
 @Composable
@@ -67,7 +66,7 @@ fun NotifyScreen(
             ) { notify ->
                 // * when click in notification so, update inner database and
                 // * remote database, and send to post details
-                navigator.navigate(PostDetailsDestination(notify.idPost,false))
+                navigator.navigate(PostDetailsDestination(notify.idPost, false))
                 if (!notify.isOpen) notifyVM.openNotifications(notify)
             }
         }
@@ -136,15 +135,17 @@ fun ItemNotify(
                 .padding(vertical = 10.dp)) {
 
                 ImageProfile(
-                    urlImgProfile = notify.imgUserLiked,
+                    urlImgProfile = notify.userInNotify?.urlImg.toString(),
                     paddingLoading = 10.dp,
-                    modifier = Modifier.weight(2f).size(60.dp),
+                    modifier = Modifier
+                        .weight(2f)
+                        .size(60.dp),
                 )
 
                 Spacer(modifier = Modifier.width(10.dp))
 
                 TextNotifyInfo(modifier = Modifier.weight(5f),
-                    nameLiked = notify.nameUserLiked,
+                    nameLiked = notify.userInNotify?.nameUser.toString(),
                     timeStamp = notify.timestamp?.time ?: 0)
 
                 Image(painter = rememberImagePainter(data = notify.urlImgPost),

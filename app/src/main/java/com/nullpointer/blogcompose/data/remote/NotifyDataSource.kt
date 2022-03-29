@@ -15,7 +15,7 @@ class NotifyDataSource {
         private const val TIMESTAMP = "timestamp"
         private const val NOTIFICATIONS = "notifications"
         private const val LIST_NOTIFY = "listNotify"
-        private const val FIELD_IS_OPEN="isOpen"
+        private const val FIELD_IS_OPEN = "isOpen"
     }
 
     private val auth = Firebase.auth
@@ -70,15 +70,17 @@ class NotifyDataSource {
         // ? adding id and timestamp estimate
         return document.toObject(Notify::class.java)?.apply {
             id = document.id
+            // ! i dont know becose no update this field
+            isOpen = document.getBoolean(FIELD_IS_OPEN)!!
             timestamp = document
                 .getTimestamp(TIMESTAMP, DocumentSnapshot.ServerTimestampBehavior.ESTIMATE
                 )?.toDate()
         }
     }
 
-    suspend fun updateOpenNotify(idNotify: String) {
+    fun updateOpenNotify(idNotify: String) {
         val nodeUserNotify = nodeNotify.document(auth.currentUser?.uid!!).collection(LIST_NOTIFY)
-        nodeUserNotify.document(idNotify).update(FIELD_IS_OPEN, true).await()
+        nodeUserNotify.document(idNotify).update(FIELD_IS_OPEN, true)
     }
 
 

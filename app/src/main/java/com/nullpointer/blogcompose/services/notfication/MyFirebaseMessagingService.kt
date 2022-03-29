@@ -1,17 +1,17 @@
 package com.nullpointer.blogcompose.services.notfication
 
 import android.graphics.Bitmap
-import android.graphics.drawable.BitmapDrawable
+import androidx.core.graphics.drawable.toBitmap
 import coil.ImageLoader
+import coil.annotation.ExperimentalCoilApi
 import coil.request.ImageRequest
-import coil.request.SuccessResult
 import coil.transform.CircleCropTransformation
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
+import com.google.gson.Gson
 import com.nullpointer.blogcompose.domain.auth.AuthRepoImpl
 import com.nullpointer.blogcompose.domain.notify.NotifyRepoImpl
 import com.nullpointer.blogcompose.domain.post.PostRepoImpl
-import com.nullpointer.blogcompose.domain.preferences.PreferencesRepoImpl
 import com.nullpointer.blogcompose.models.Notify
 import com.nullpointer.blogcompose.services.uploadImg.NotificationHelper
 import dagger.hilt.android.AndroidEntryPoint
@@ -21,6 +21,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
+
 
 @AndroidEntryPoint
 class MyFirebaseMessagingService : FirebaseMessagingService() {
@@ -59,32 +60,43 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
     override fun onMessageReceived(message: RemoteMessage) {
         super.onMessageReceived(message)
         try {
-            val notify = Notify(message.data)
-            Timber.d("notificacion recibida $notify")
+            val gson = Gson()
+            val notify = gson.fromJson(message.data["notify"], Notify::class.java)
             CoroutineScope(job).launch {
-                notifyHelper.launchNotifyLike(
-                    bitmapPost = getBitMapUser(notify.urlImgPost, false)!!,
-                    bitmapUser = getBitMapUser(notify.imgUserLiked, true)!!,
-                    notify.nameUserLiked,
-                    notify.idPost
-                )
+                // * launch notification * if is validate
+                launchNotifications(notify)
+                // * lauch update databse
                 notifyRepoImpl.requestLastNotify()
                 postRepoImpl.updateLikePost(notify.idPost)
             }
         } catch (e: Exception) {
-            Timber.e("Message $e")
+            Timber.e("Error al notificar $e")
         }
     }
 
-    private suspend fun getBitMapUser(urlImgUser: String, circleTransform: Boolean): Bitmap? {
+    private suspend fun launchNotifications(notify: Notify) {
+        val bitmapPost = getBitMapUser(notify.urlImgPost, false)
+        val bitmapUser = getBitMapUser(notify.userInNotify?.urlImg, true)
+        if (bitmapPost != null && bitmapUser != null) {
+            notifyHelper.launchNotifyLike(
+                bitmapPost = bitmapPost,
+                bitmapUser = bitmapUser,
+                notify.userInNotify?.nameUser.toString(),
+                notify.idPost
+            )
+        }
+    }
+
+    @OptIn(ExperimentalCoilApi::class)
+    private suspend fun getBitMapUser(urlImgUser: String?, circleTransform: Boolean): Bitmap? {
         val loader = ImageLoader(this)
         val request = ImageRequest.Builder(this)
             .data(urlImgUser)
             .allowHardware(false).apply {
                 if (circleTransform) this.transformations(CircleCropTransformation())
             }.build()
-        val result = (loader.execute(request) as SuccessResult).drawable
-        return (result as BitmapDrawable).bitmap
+        val result = loader.execute(request).drawable
+        return result?.toBitmap()
     }
 
     override fun onDestroy() {

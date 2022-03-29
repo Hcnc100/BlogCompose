@@ -39,7 +39,7 @@ fun DataUserScreen(
     authViewModel: AuthViewModel,
     navigator: DestinationsNavigator,
 ) {
-    // * reload info user
+    // * reload info myUser
     val statusChange = registryViewModel.stateUpdateUser.collectAsState(null)
     val stateCompressImg = registryViewModel.stateCompressImg.collectAsState()
     val scaffoldState = rememberScaffoldState()
@@ -184,7 +184,7 @@ fun TextInputName(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.End
     ) {
-        // * input text name user
+        // * input text name myUser
         OutlinedTextField(
             value = nameUser,
             singleLine = true,

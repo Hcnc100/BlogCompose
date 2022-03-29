@@ -3,18 +3,20 @@ package com.nullpointer.blogcompose.services.uploadImg
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.widget.Toast
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
 import com.nullpointer.blogcompose.core.states.StorageUploadTaskResult
 import com.nullpointer.blogcompose.domain.auth.AuthRepoImpl
 import com.nullpointer.blogcompose.domain.images.ImagesRepoImpl
 import com.nullpointer.blogcompose.domain.post.PostRepoImpl
-import com.nullpointer.blogcompose.models.Post
-import com.nullpointer.blogcompose.models.Poster
+import com.nullpointer.blogcompose.models.posts.Post
+import com.nullpointer.blogcompose.models.users.InnerUser
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.io.File
@@ -96,16 +98,16 @@ class UploadPostServices : LifecycleService() {
         }
     }
 
-    suspend fun createNewPost(uuidPost: String, description: String, urlImg: String): Post {
-        val user = authRepoImpl.user.first()
+    private suspend fun createNewPost(uuidPost: String, description: String, urlImg: String): Post {
+        val user = authRepoImpl.myUser.first()
         return Post(
             id = uuidPost,
             description = description,
             urlImage = urlImg,
-            poster = Poster(
-                uuid = user.idUser,
-                name = user.nameUser,
-                urlImg = user.urlImg
+            userPoster = InnerUser(
+                idUser = user.idUser,
+                nameUser = user.nameUser,
+                urlImg = user.urlImg,
             )
         )
     }

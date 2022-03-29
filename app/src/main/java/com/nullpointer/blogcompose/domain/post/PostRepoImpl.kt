@@ -9,8 +9,8 @@ import com.nullpointer.blogcompose.data.local.cache.MyPostDAO
 import com.nullpointer.blogcompose.data.local.cache.PostDAO
 import com.nullpointer.blogcompose.data.remote.PostDataSource
 import com.nullpointer.blogcompose.models.Comment
-import com.nullpointer.blogcompose.models.MyPost
-import com.nullpointer.blogcompose.models.Post
+import com.nullpointer.blogcompose.models.posts.MyPost
+import com.nullpointer.blogcompose.models.posts.Post
 import kotlinx.coroutines.flow.Flow
 
 class PostRepoImpl(
@@ -50,8 +50,7 @@ class PostRepoImpl(
         val listMyLastPost = postDataSource.getMyLastPostDate(
             date = firstPost?.timestamp,
             nPosts = SIZE_POST_REQUEST
-        )
-            .map { MyPost.fromPost(it) }
+        ).map { MyPost.fromPost(it) }
         if (listMyLastPost.isNotEmpty()) myPostDAO.updateAllPost(listMyLastPost)
         return listMyLastPost.size
     }
@@ -139,19 +138,21 @@ class PostRepoImpl(
         myPostDAO.deleterAll()
     }
 
-    override suspend fun getRealTimePost(idPost: String): Flow<Post?> =
-        postDataSource.getRealTimePost(idPost)
+    override suspend fun getRealTimePost(idPost: String): Flow<Post?> {
+        if (!InternetCheck.isNetworkAvailable()) throw NetworkException()
+        return postDataSource.getRealTimePost(idPost)
+    }
 
     override suspend fun getLastComments(idPost: String) {
-
+        if (!InternetCheck.isNetworkAvailable()) throw NetworkException()
         val listComments =
             postDataSource.getCommentsForPost(nComments = SIZE_COMMENTS, idPost = idPost)
         commentsDAO.updateAllComments(listComments)
     }
 
 
-    override suspend fun addNewComment(idPost: String, comment: String) {
-        val idComment = postDataSource.addNewComment(idPost, comment)
+    override suspend fun addNewComment(idPost: String, comment: Comment) {
+        val idComment = postDataSource.addNewComment(idPost,comment)
         val list = postDataSource.getCommentsForPost(nComments = SIZE_COMMENTS,
             idPost = idPost,
             startWithCommentId = idComment,

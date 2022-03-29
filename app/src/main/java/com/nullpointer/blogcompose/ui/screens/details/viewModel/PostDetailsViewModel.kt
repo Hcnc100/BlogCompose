@@ -7,8 +7,10 @@ import com.nullpointer.blogcompose.core.delegates.SavableProperty
 import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.core.utils.NetworkException
 import com.nullpointer.blogcompose.domain.post.PostRepoImpl
+import com.nullpointer.blogcompose.domain.preferences.PreferencesRepoImpl
 import com.nullpointer.blogcompose.models.Comment
-import com.nullpointer.blogcompose.models.Post
+import com.nullpointer.blogcompose.models.posts.Post
+import com.nullpointer.blogcompose.models.users.InnerUser
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
@@ -20,6 +22,7 @@ import javax.inject.Inject
 @HiltViewModel
 class PostDetailsViewModel @Inject constructor(
     private val postRepoImpl: PostRepoImpl,
+    private val preferencesRepoImpl: PreferencesRepoImpl,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
@@ -64,16 +67,18 @@ class PostDetailsViewModel @Inject constructor(
                 // ! only listener one document
                 // * and request new comments for demand
                 postRepoImpl.getRealTimePost(idPost).collect {
-                    // * emit post reciber
-                    emit(Resource.Success(it!!))
-                    // * update inner post (saved in database)
-                    postRepoImpl.updateInnerPost(it)
+
                     // * if the number of comments is diff and no if for me
                     // * so, there are more comments
-                    if (it.numberComments != numberComments) {
+                    if (it!!.numberComments != numberComments) {
                         if (numberComments != -1) _hasNewComments.value = true
                         numberComments = it.numberComments
                     }
+
+                    // * emit post reciber
+                    emit(Resource.Success(it))
+                    // * update inner post (saved in database)
+                    postRepoImpl.updateInnerPost(it)
                 }
             }
         }
@@ -96,7 +101,7 @@ class PostDetailsViewModel @Inject constructor(
     }.catch {
         Timber.d("Error al cargar los comentarios del post $it")
         _messageDetails.send("No se pudieron cargar los comentarios")
-        emit(Resource.Failure<List<Comment>>(Exception(it)))
+        emit(Resource.Failure(Exception(it)))
     }.flowOn(Dispatchers.IO).stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(5000),
@@ -137,8 +142,16 @@ class PostDetailsViewModel @Inject constructor(
         try {
             // * change number of comments
             // ! this for no show any for "hasNewComments"
+            val lastUser = preferencesRepoImpl.getCurrentUser().first()
             numberComments++
-            postRepoImpl.addNewComment(idPost, comment)
+            postRepoImpl.addNewComment(idPost, Comment(
+                comment = comment,
+                userComment = InnerUser(
+                    idUser = lastUser.idUser,
+                    nameUser = lastUser.nameUser,
+                    urlImg = lastUser.urlImg
+                )
+            ))
         } catch (e: Exception) {
             _messageDetails.send("No se puedo agregar el comentario")
             Timber.e("Error al agregar un commet $e")
@@ -151,19 +164,27 @@ class PostDetailsViewModel @Inject constructor(
         jobInitComments?.cancel()
         jobInitComments = viewModelScope.launch {
             try {
-                postRepoImpl.getLastComments(_idPost.value)
-                _hasNewComments.value = false
-                Resource.Success(Unit)
+                if(_idPost.value.isNotEmpty()){
+                    postRepoImpl.getLastComments(_idPost.value)
+                    _hasNewComments.value = false
+                    Resource.Success(Unit)
+                }
             } catch (e: Exception) {
                 when (e) {
                     is CancellationException -> throw e
                     is NetworkException -> _messageDetails.send("No hay conexion a internet")
                     else -> {
-                        _messageDetails.send("Error desconocido")
+                        _messageDetails.send("Error al cargar los comentarios")
                         Timber.e("Error al recargar comentarios ${_idPost.value} : $e")
                     }
                 }
             }
+        }
+    }
+
+    override fun onCleared() {
+        viewModelScope.launch {
+            postRepoImpl.clearComments()
         }
     }
 

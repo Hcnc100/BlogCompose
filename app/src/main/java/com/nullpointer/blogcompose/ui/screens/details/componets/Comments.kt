@@ -29,7 +29,7 @@ fun Comments(
     comment: Comment? = null,
 ) {
     Row {
-        ImageComment(comment?.urlImg)
+        ImageComment(comment?.userComment?.urlImg.toString())
         Column {
             ContentComment(comment)
             TimeComment(comment?.timestamp?.time)
@@ -49,7 +49,7 @@ fun ContentComment(
     Card(shape = RoundedCornerShape(10.dp),
         modifier = modifierComment.padding(horizontal = 10.dp)) {
         Column(modifier = Modifier.padding(10.dp)) {
-            Text(comment?.nameUser ?: "",
+            Text(comment?.userComment?.nameUser.toString(),
                 style = MaterialTheme.typography.subtitle2,
                 fontWeight = FontWeight.W600)
             Spacer(modifier = Modifier.height(5.dp))

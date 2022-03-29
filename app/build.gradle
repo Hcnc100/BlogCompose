@@ -157,6 +157,8 @@ dependencies {
     // *lottie compose
     implementation "com.airbnb.android:lottie-compose:4.2.2"
 
+    implementation 'com.google.code.gson:gson:2.8.2'
+
 }
 
 protobuf {
