@@ -2,6 +2,7 @@ package com.nullpointer.blogcompose.ui.screens.swipePosts
 
 import androidx.annotation.RawRes
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -9,6 +10,7 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.SwipeRefreshState
 import com.nullpointer.blogcompose.models.posts.SimplePost
@@ -24,7 +26,7 @@ fun ScreenSwiperPost(
     isLoadNewData: Boolean,
     emptyString: String,
     @RawRes emptyResRaw: Int,
-    actionDetails: (String,Boolean) -> Unit,
+    actionDetails: (String, Boolean) -> Unit,
     isConcatenateData: Boolean = false,
     scaffoldState: ScaffoldState = rememberScaffoldState(),
     updateListPost: () -> Unit,
@@ -52,25 +54,27 @@ fun ScreenSwiperPost(
                         action = it
                     )
                 }
+            }, bottomBar = {
+                CircularProgressAnimation(isVisible = isConcatenateData)
             }
         ) {
             if (resultListPost != null) {
                 if (resultListPost.isEmpty()) {
                     // * show header when no has post
                     // ! this for no lost header when this list post is empty
-                    Column {
+                    Column(modifier = Modifier.padding(it)) {
                         header?.invoke()
                         EmptyScreen(resourceRaw = emptyResRaw, emptyText = emptyString)
                     }
                 } else {
                     // ? show swipe list of posts
                     ListInfinitePost(
+                        modifier=Modifier.padding(it),
                         listPost = resultListPost,
                         listState = listState,
                         actionBottomReached = actionBottomReached,
                         header = header,
                         actionChangePost = actionChangePost,
-                        isConcatenateData = isConcatenateData,
                         staticInfo = staticInfo,
                         actionDetails = actionDetails,
                     )
@@ -84,15 +88,16 @@ fun ScreenSwiperPost(
 fun ListInfinitePost(
     listPost: List<SimplePost>,
     listState: LazyListState,
-    actionDetails: (String,Boolean) -> Unit,
+    actionDetails: (String, Boolean) -> Unit,
     actionChangePost: (String, Boolean) -> Unit,
+    modifier: Modifier= Modifier,
     header: (@Composable () -> Unit)? = null,
     actionBottomReached: () -> Unit,
-    isConcatenateData: Boolean,
     buffer: Int = 0,
     staticInfo: Pair<String, String>? = null,
 ) {
-    LazyColumn(state = listState) {
+
+    LazyColumn(state = listState, modifier = Modifier) {
         // * if pass header, so add this
         header?.let {
             item { it() }
@@ -104,15 +109,12 @@ fun ListInfinitePost(
                 actionChangePost = actionChangePost,
                 staticInfo = staticInfo)
         }
-        // * circular indicator that show when request new data
-        item {
-            CircularProgressAnimation(isVisible = isConcatenateData)
-        }
     }
+    if (listState.layoutInfo.visibleItemsInfo.size < listState.layoutInfo.totalItemsCount)
     // * request new data when go to the last post
-    listState.OnBottomReached(buffer) {
-        actionBottomReached()
-    }
+        listState.OnBottomReached(buffer) {
+            actionBottomReached()
+        }
 }
 
 

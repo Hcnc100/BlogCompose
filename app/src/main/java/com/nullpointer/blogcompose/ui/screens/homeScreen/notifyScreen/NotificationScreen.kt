@@ -12,6 +12,7 @@ import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -64,10 +65,13 @@ fun NotifyScreen(
         state = SwipeRefreshState(stateLoading.value is Resource.Loading),
         onRefresh = { notifyVM.requestLastNotify(true) },
     ) {
-        Scaffold(scaffoldState = scaffoldState) {
+        Scaffold(scaffoldState = scaffoldState,
+            bottomBar = {
+                CircularProgressAnimation(stateConcatenate.value is Resource.Loading)
+            }
+        ) {
             ListSwipeNotify(
                 listNotify = stateListNotify.value,
-                stateConcatenate = stateConcatenate.value,
                 actionBottomReached = notifyVM::concatenateNotify
             ) { notify ->
                 // * when click in notification so, update inner database and
@@ -83,10 +87,10 @@ fun NotifyScreen(
 @Composable
 fun ListSwipeNotify(
     listNotify: List<Notify>?,
-    stateConcatenate: Resource<Unit>,
     actionBottomReached: () -> Unit,
     actionClick: (notify: Notify) -> Unit,
 ) {
+
 
     val listState = rememberLazyListState()
 
@@ -97,7 +101,10 @@ fun ListSwipeNotify(
                 emptyText = "No tiene notificaciones")
         } else {
             // * list to show notifications
-            LazyColumn {
+
+            LazyColumn(
+                state = listState
+            ) {
                 // * all notifications
                 items(listNotify.size) { index ->
                     ItemNotify(
@@ -105,19 +112,18 @@ fun ListSwipeNotify(
                         actionClick = actionClick
                     )
                 }
-                // * show progress indicator when load new notifications
-                // ? this is animate
-                item {
-                    CircularProgressAnimation(stateConcatenate is Resource.Loading)
-                }
+
+
             }
+
             // * when go to the finish list, request more notifications
-            listState.OnBottomReached(0) {
-                actionBottomReached()
+            if (listState.layoutInfo.visibleItemsInfo.size < listState.layoutInfo.totalItemsCount) {
+                listState.OnBottomReached(0) {
+                    actionBottomReached()
+                }
             }
         }
     }
-
 }
 
 @Composable
@@ -157,7 +163,9 @@ fun ItemNotify(
                             COMMENT -> Color.DarkGray
                         },
                         shape = CircleShape,
-                        modifier = Modifier.align(Alignment.BottomEnd).size(22.dp)
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .size(22.dp)
                     ) {
                         Image(
                             painter = painterResource(id = when (notify.type) {
@@ -165,7 +173,9 @@ fun ItemNotify(
                                 COMMENT -> R.drawable.ic_comment
                             }),
                             contentDescription = "",
-                            modifier = Modifier.fillMaxSize().padding(3.dp)
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(3.dp)
                         )
                     }
 

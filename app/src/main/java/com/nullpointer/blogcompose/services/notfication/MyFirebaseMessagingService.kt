@@ -71,7 +71,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
                 // * launch notification * if is validate
                 launchNotifications(notify)
                 // * lauch update databse
-                notifyRepoImpl.requestLastNotify()
+                notifyRepoImpl.requestLastNotify(true)
                 postRepoImpl.updateLikePost(notify.idPost)
             }
         } catch (e: Exception) {

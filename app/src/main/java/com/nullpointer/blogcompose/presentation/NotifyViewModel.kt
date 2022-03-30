@@ -1,7 +1,10 @@
 package com.nullpointer.blogcompose.presentation
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.nullpointer.blogcompose.core.delegates.SavableComposeState
+import com.nullpointer.blogcompose.core.delegates.SavableProperty
 import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.core.utils.NetworkException
 import com.nullpointer.blogcompose.domain.notify.NotifyRepoImpl
@@ -21,12 +24,20 @@ import javax.inject.Inject
 @HiltViewModel
 class NotifyViewModel @Inject constructor(
     private val notifyRepoImpl: NotifyRepoImpl,
+    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
+
+    companion object{
+        private const val KEY_CONCATENATE_ENABLE="KEY_CONCATENATE_ENABLE_NOTIFY"
+    }
+
+    private var isConcatenateEnable by SavableProperty(savedStateHandle,
+        KEY_CONCATENATE_ENABLE,true)
 
     // * job to save coroutine concatenate new post
     // * this for update the ui
     private var jobConcatenateNotify: Job? = null
-    private val _stateConcatenateData = MutableStateFlow<Resource<Unit>>(Resource.Loading())
+    private val _stateConcatenateData = MutableStateFlow<Resource<Unit>?>(null)
     val stateConcatenate = _stateConcatenateData.asStateFlow()
 
     // * job to save coroutine request last post
@@ -59,26 +70,30 @@ class NotifyViewModel @Inject constructor(
     fun concatenateNotify() {
         // * request notifications and add to databse
         // * stop job if is alive and create new request
-        jobConcatenateNotify?.cancel()
-        jobConcatenateNotify = viewModelScope.launch(Dispatchers.IO) {
-            _stateConcatenateData.value = Resource.Loading()
-            try {
-                notifyRepoImpl.concatenateNotify().let {
-                    Timber.d("numero de notificaciones obtenidas CONCATENATE:$it")
-                }
-                _stateConcatenateData.value = Resource.Success(Unit)
-            } catch (e: Exception) {
-                _stateConcatenateData.value = Resource.Failure(e)
-                when (e) {
-                    is CancellationException -> throw e
-                    is NetworkException -> _messageNotify.trySend("Verifique su conexion a internet")
-                    else -> {
-                        _messageNotify.trySend("Error desconocido")
-                        Timber.e("Error en el concatenate $e")
+        if(isConcatenateEnable){
+            jobConcatenateNotify?.cancel()
+            jobConcatenateNotify = viewModelScope.launch(Dispatchers.IO) {
+                _stateConcatenateData.value = Resource.Loading()
+                try {
+                    notifyRepoImpl.concatenateNotify().let {
+                        Timber.d("numero de notificaciones obtenidas CONCATENATE:$it")
+                        if(it==0) isConcatenateEnable=false
+                    }
+                    _stateConcatenateData.value = Resource.Success(Unit)
+                } catch (e: Exception) {
+                    _stateConcatenateData.value = Resource.Failure(e)
+                    when (e) {
+                        is CancellationException -> throw e
+                        is NetworkException -> _messageNotify.trySend("Verifique su conexion a internet")
+                        else -> {
+                            _messageNotify.trySend("Error desconocido")
+                            Timber.e("Error en el concatenate $e")
+                        }
                     }
                 }
             }
         }
+
     }
 
     fun requestLastNotify(forceRefresh: Boolean = false) {
