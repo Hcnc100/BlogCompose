@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Blog Compose</string>
+    <string name="description_img_blog">Imagen del blog actual</string>
+    <string name="text_time_future">En el futuro</string>
+    <string name="text_time_just_now">Justo Ahora</string>
+    <string name="text_time_one_minute_ago">Un minuto atras</string>
+    <string name="text_time_more_minutes_ago">%d minutos atras</string>
+    <string name="text_time_one_hour_ago">una hora atras</string>
+    <string name="text_time_more_hour_ago">%d horas atras</string>
+    <string name="text_time_yesterday">ayer</string>
+    <string name="text_time_days_Ago">%d dias atras</string>
+
+    <string name="text_select_option">Seleccione una opción</string>
+    <string name="option_img_camera">Camara</string>
+    <string name="description_img_camera">Toma una foto </string>
+    <string name="option_img_gallery">Galeria</string>
+    <string name="description_img_gallery">Selecciona una foto de la galeria</string>
+    <string name="error_length_description">La descripcion no puede ser muy larga</string>
+    <string name="error_empty_description">El blog necesita una descripcion</string>
+    <string name="error_empty_image">Se necesita una imagen para le blog</string>
+    <string name="error_empty_name">Se necesita un nombre de usuario</string>
+    <string name="error_length_name">El nombre de usuario no puede ser tan largo</string>
+
+
+</resources>
