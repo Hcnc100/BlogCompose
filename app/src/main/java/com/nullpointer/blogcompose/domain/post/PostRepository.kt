@@ -13,6 +13,7 @@ interface PostRepository {
     suspend fun getLastPostByUser(idUser: String, inCaching: Boolean): List<Post>
     suspend fun requestLastPost(forceRefresh: Boolean = false): Int
     suspend fun requestMyLastPost(forceRefresh: Boolean = false): Int
+    suspend fun requestLastPostInitWith(idPost: String)
     suspend fun concatenatePost(): Int
     suspend fun concatenateMyPost(): Int
     suspend fun addNewPost(post: Post, context: Context)

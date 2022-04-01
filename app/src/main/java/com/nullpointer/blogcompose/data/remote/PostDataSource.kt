@@ -10,6 +10,7 @@ import com.google.firebase.firestore.ktx.firestoreSettings
 import com.google.firebase.ktx.Firebase
 import com.nullpointer.blogcompose.models.Comment
 import com.nullpointer.blogcompose.models.posts.Post
+import com.nullpointer.blogcompose.models.posts.StatePost
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
@@ -31,6 +32,7 @@ class PostDataSource {
         private const val FIELD_NUMBER_COMMENTS = "numberComments"
         private const val FIELD_NUMBER_LIKES = "numberLikes"
         private const val NAME_REF_USERS = "users"
+        private const val NAME_FIELD_VALIDATE="stateValidate"
     }
 
     private val database = Firebase.firestore
@@ -77,6 +79,8 @@ class PostDataSource {
         var query = refPosts.orderBy(TIMESTAMP, Query.Direction.DESCENDING)
         // * filter to myUser or for default get all
         if (fromUserId != null) query = query.whereEqualTo(FIELD_POST_ID, fromUserId)
+        // * get only post validating
+        query=query.whereEqualTo(NAME_FIELD_VALIDATE,StatePost.VALIDATED)
         // ? indicate if start or end with any id post
         if (startWithPostId != null) {
             val refDocument = refPosts.document(startWithPostId).get().await()
@@ -104,6 +108,8 @@ class PostDataSource {
         var query = refPosts.orderBy(TIMESTAMP, Query.Direction.DESCENDING)
         // * get more recent post that date passed for args
         if (date != null) query = query.whereGreaterThan(TIMESTAMP, date)
+        // * get only post validating
+        query=query.whereEqualTo(NAME_FIELD_VALIDATE,StatePost.VALIDATED)
         // * filter to myUser or for default get all
         if (fromUserId != null) query = query.whereEqualTo(FIELD_POST_ID, fromUserId)
         // * limit the request

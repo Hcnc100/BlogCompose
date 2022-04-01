@@ -76,6 +76,7 @@ class NotificationHelper(context: Context) : ContextWrapper(context) {
         val (title, body) = when (typeNotify) {
             LIKE -> Pair("Recibiste un like", "A $nameUserLiked le gusta tu post")
             COMMENT -> Pair("Recibiste un comentario", "$nameUserLiked comento tu post")
+            else -> Pair("Notificacion no valida", "")
         }
         val remoteViews = RemoteViews(this.packageName, R.layout.notify_liked)
         remoteViews.setImageViewBitmap(R.id.img_user_liked, bitmapUser)

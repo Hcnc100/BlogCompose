@@ -1,6 +1,9 @@
 package com.nullpointer.blogcompose.services.notfication
 
 import android.graphics.Bitmap
+import android.os.Handler
+import android.os.Looper
+import android.widget.Toast
 import androidx.core.graphics.drawable.toBitmap
 import coil.ImageLoader
 import coil.annotation.ExperimentalCoilApi
@@ -14,6 +17,7 @@ import com.nullpointer.blogcompose.domain.notify.NotifyRepoImpl
 import com.nullpointer.blogcompose.domain.post.PostRepoImpl
 import com.nullpointer.blogcompose.models.notify.Notify
 import com.nullpointer.blogcompose.models.notify.NotifyDeserializer
+import com.nullpointer.blogcompose.models.notify.TypeNotify.*
 import com.nullpointer.blogcompose.services.uploadImg.NotificationHelper
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CancellationException
@@ -39,6 +43,9 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
     private val notifyHelper = NotificationHelper(this)
 
+    private val gson =
+        GsonBuilder().registerTypeAdapter(Notify::class.java, NotifyDeserializer()).create()
+
     override fun onNewToken(token: String) {
         super.onNewToken(token)
         CoroutineScope(job).launch {
@@ -60,23 +67,34 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
     override fun onMessageReceived(message: RemoteMessage) {
         super.onMessageReceived(message)
-        try {
-            val gson = GsonBuilder()
-                .registerTypeAdapter(
-                    Notify::class.java,
-                    NotifyDeserializer()
-                ).create()
-            val notify = gson.fromJson(message.data["notify"], Notify::class.java)
-            CoroutineScope(job).launch {
-                // * launch notification * if is validate
-                launchNotifications(notify)
-                // * lauch update databse
-                notifyRepoImpl.requestLastNotify(true)
-                postRepoImpl.updateLikePost(notify.idPost)
+
+
+        CoroutineScope(job).launch {
+            try {
+                val notify = gson.fromJson(message.data["notify"], Notify::class.java)
+                when (notify.type) {
+                    LIKE, COMMENT -> {
+                        // * launch notification * if is validate
+                        launchNotifications(notify)
+                        // * lauch update databse
+                        notifyRepoImpl.requestLastNotify(true)
+                        postRepoImpl.updateLikePost(notify.idPost)
+                    }
+                    VALIDATE_POST -> {
+                        Handler(Looper.getMainLooper()).post {
+                            Toast.makeText(this@MyFirebaseMessagingService,
+                                "Post subio con exito",
+                                Toast.LENGTH_SHORT).show()
+                        }
+                        postRepoImpl.requestLastPostInitWith(notify.idPost)
+                    }
+                }
+            } catch (e: Exception) {
+                Timber.e("Error al notificar $e")
             }
-        } catch (e: Exception) {
-            Timber.e("Error al notificar $e")
         }
+
+
     }
 
     private suspend fun launchNotifications(notify: Notify) {

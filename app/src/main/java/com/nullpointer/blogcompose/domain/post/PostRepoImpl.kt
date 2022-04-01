@@ -115,7 +115,7 @@ class PostRepoImpl(
         }
     }
 
-    private suspend fun requestLastPostInitWith(idPost: String) {
+     override suspend fun requestLastPostInitWith(idPost: String) {
         if (!InternetCheck.isNetworkAvailable()) throw NetworkException()
         val listLastPost = postDataSource.getLastPost(
             nPosts = SIZE_POST_REQUEST,
@@ -176,8 +176,6 @@ class PostRepoImpl(
 
     override suspend fun addNewPost(post: Post, context: Context) {
         postDataSource.addNewPost(post)
-        Toast.makeText(context, "Post subido con exito", Toast.LENGTH_SHORT).show()
-        requestLastPostInitWith(post.id)
     }
 
     override suspend fun deleterPost(post: Post) =

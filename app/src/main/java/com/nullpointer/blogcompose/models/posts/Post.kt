@@ -2,6 +2,7 @@ package com.nullpointer.blogcompose.models.posts
 
 import androidx.room.Embedded
 import androidx.room.Entity
+import androidx.room.Ignore
 import androidx.room.PrimaryKey
 import com.google.firebase.firestore.Exclude
 import com.google.firebase.firestore.ServerTimestamp
@@ -24,6 +25,8 @@ data class Post(
     @set:Exclude @get:Exclude
     @PrimaryKey
     override var id: String = UUID.randomUUID().toString(),
+    @Ignore
+    var stateValidate: String=StatePost.VALIDATING
 ) : SimplePost() {
     fun copyInnerLike(isLiked: Boolean): Post {
         val newCount = if (isLiked) numberLikes + 1 else numberLikes - 1

@@ -23,10 +23,9 @@ data class MyPost(
     @set:Exclude @get:Exclude
     @PrimaryKey
     override var id: String = UUID.randomUUID().toString(),
+    @Ignore
+    var stateValidate: String=StatePost.VALIDATING
 ) : SimplePost() {
-
-
-
         companion object {
             fun fromPost(post: Post) = MyPost(
                 description = post.description,

@@ -161,6 +161,7 @@ fun ItemNotify(
                         backgroundColor = when (notify.type) {
                             LIKE -> Color.Red
                             COMMENT -> Color.DarkGray
+                            else -> Color.Transparent
                         },
                         shape = CircleShape,
                         modifier = Modifier
@@ -171,6 +172,7 @@ fun ItemNotify(
                             painter = painterResource(id = when (notify.type) {
                                 LIKE -> R.drawable.ic_fav
                                 COMMENT -> R.drawable.ic_comment
+                                else -> R.drawable.ic_clear
                             }),
                             contentDescription = "",
                             modifier = Modifier
@@ -210,6 +212,7 @@ fun TextNotifyInfo(
     val textNotify = when (typeNotify) {
         LIKE -> "A $nameLiked le gusta tu post"
         COMMENT -> "$nameLiked a comentado tu post"
+        else -> ""
     }
     val context = LocalContext.current
     Column(modifier = modifier) {
