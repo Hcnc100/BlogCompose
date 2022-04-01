@@ -66,7 +66,8 @@ class AuthDataSource {
             val newUser = MyUser(
                 token = FirebaseMessaging.getInstance().token.await(),
                 urlImg = urlImg!!,
-                nameUser = name!!
+                nameUser = name!!,
+                emailUser = auth.currentUser?.email?:""
             )
             nodeUsers.document(auth.currentUser!!.uid).set(newUser).await()
         }

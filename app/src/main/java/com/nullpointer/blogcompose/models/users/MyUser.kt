@@ -9,6 +9,7 @@ data class MyUser(
     override var idUser: String = "",
     override var nameUser: String = "",
     override var urlImg: String = "",
+    var emailUser:String="",
     var token: String = "",
     @ServerTimestamp
     var timeCreate: Date? = null,
