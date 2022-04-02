@@ -81,7 +81,7 @@ fun PostDetails(
         reloadNewComment = postDetailsViewModel::reloadNewComment,
         actionBack = navigator::popBackStack,
         actionLike = { likeViewModel.likePost(idPost, it) },
-        addComment = { postDetailsViewModel.addComment(idPost, it) }
+        addComment = { postDetailsViewModel.addComment(it) }
     )
 
 }
@@ -162,8 +162,8 @@ fun PostReal(
             }
             // * floating button "has new comments"
             // ? only show when has new comments xd
+            if(hasNewComment)
             ButtonHasNewComment(
-                hasNewComment = hasNewComment,
                 actionReload = reloadNewComment,
                 modifier = Modifier
                     .align(Alignment.BottomCenter)

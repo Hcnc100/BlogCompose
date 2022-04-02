@@ -1,6 +1,6 @@
 package com.nullpointer.blogcompose.models.notify
 
 enum class TypeNotify {
-    LIKE,COMMENT,VALIDATE_POST;
+    LIKE,COMMENT,VALIDATE_POST,VALIDATE_COMMENT;
 }
 

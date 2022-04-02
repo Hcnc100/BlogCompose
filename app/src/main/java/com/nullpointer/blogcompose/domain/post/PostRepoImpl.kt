@@ -1,7 +1,6 @@
 package com.nullpointer.blogcompose.domain.post
 
 import android.content.Context
-import android.widget.Toast
 import com.nullpointer.blogcompose.core.utils.InternetCheck
 import com.nullpointer.blogcompose.core.utils.NetworkException
 import com.nullpointer.blogcompose.data.local.cache.CommentsDAO
@@ -12,6 +11,7 @@ import com.nullpointer.blogcompose.models.Comment
 import com.nullpointer.blogcompose.models.posts.MyPost
 import com.nullpointer.blogcompose.models.posts.Post
 import kotlinx.coroutines.flow.Flow
+import timber.log.Timber
 
 class PostRepoImpl(
     private val postDataSource: PostDataSource,
@@ -152,11 +152,20 @@ class PostRepoImpl(
 
 
     override suspend fun addNewComment(idPost: String, comment: Comment) {
-        val idComment = postDataSource.addNewComment(idPost,comment)
+        postDataSource.addNewComment(idPost,comment)
+    }
+
+    override suspend fun addNewComment(post:Post, comment: String) {
+        val idComment=postDataSource.addNewComment2(post,comment)
+        Timber.d("id del commentario $idComment")
+        updateAllComments(post.id, idComment)
+    }
+
+    suspend fun updateAllComments(idPost: String,idComment:String){
         val list = postDataSource.getCommentsForPost(nComments = SIZE_COMMENTS,
             idPost = idPost,
             startWithCommentId = idComment,
-            includePost = true)
+            includeComment = true)
         commentsDAO.updateAllComments(list)
     }
 

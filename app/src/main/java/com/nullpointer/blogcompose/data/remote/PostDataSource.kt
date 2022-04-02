@@ -6,7 +6,7 @@ import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.Source
 import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.firestore.ktx.firestoreSettings
+import com.google.firebase.functions.ktx.functions
 import com.google.firebase.ktx.Firebase
 import com.nullpointer.blogcompose.models.Comment
 import com.nullpointer.blogcompose.models.posts.Post
@@ -41,6 +41,7 @@ class PostDataSource {
     private val refComment = database.collection(NAME_REF_COMMENTS)
     private val refUsers = database.collection(NAME_REF_USERS)
     private val auth = Firebase.auth
+    private val functions=Firebase.functions
 
     suspend fun addNewPost(post: Post) {
         val newPostRef = refPosts.document(post.id)
@@ -219,7 +220,7 @@ class PostDataSource {
         nComments: Int = Integer.MAX_VALUE,
         startWithCommentId: String? = null,
         endWithCommentId: String? = null,
-        includePost: Boolean = false,
+        includeComment: Boolean = false,
         idPost: String,
     ): List<Comment> {
 
@@ -229,19 +230,21 @@ class PostDataSource {
             .collection(NAME_REF_LIST_COMMENTS)
             .orderBy(TIMESTAMP, Query.Direction.DESCENDING)
 
+        query=query.whereEqualTo(NAME_FIELD_VALIDATE,StatePost.VALIDATED)
+
         val refCommentCurrent = refComment.document(idPost).collection(NAME_REF_LIST_COMMENTS)
 
         if (startWithCommentId != null) {
             val refDocument = refCommentCurrent.document(startWithCommentId).get().await()
             if (refDocument.exists())
                 query =
-                    if (includePost) query.startAt(refDocument) else query.startAfter(refDocument)
+                    if (includeComment) query.startAt(refDocument) else query.startAfter(refDocument)
         }
 
         if (endWithCommentId != null) {
             val refDocument = refCommentCurrent.document(endWithCommentId).get().await()
             if (refDocument.exists())
-                query = if (includePost) query.endAt(refDocument) else query.endBefore(refDocument)
+                query = if (includeComment) query.endAt(refDocument) else query.endBefore(refDocument)
         }
 
         // * limit result or for default all
@@ -283,5 +286,22 @@ class PostDataSource {
                 FieldValue.arrayUnion(refComment))
         }.await()
         return newComment.id
+    }
+
+    suspend fun addNewComment2(post: Post,newComment: String):String{
+        val response=functions.getHttpsCallable("notifyComment2").call(
+            mapOf(
+                "idPost" to post.id,
+                "comment" to newComment,
+                "urlImgPost" to post.urlImage,
+                "idPostOwner" to post.userPoster?.idUser.toString()
+            )
+        ).continueWith {task->
+            val reponse=task.result.data as (Map<String, Object>)
+            reponse["idComment"] as String
+        }.await()
+
+        Timber.d("response ${response}")
+       return  response
     }
 }

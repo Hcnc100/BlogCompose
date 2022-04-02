@@ -132,6 +132,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-messaging-ktx'
     implementation 'com.google.android.gms:play-services-auth:20.1.0'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.6.0'
+    implementation 'com.google.firebase:firebase-functions-ktx'
 
     // * paddings
     implementation "com.google.accompanist:accompanist-insets:0.24.1-alpha"
@@ -158,6 +159,8 @@ dependencies {
     implementation "com.airbnb.android:lottie-compose:4.2.2"
 
     implementation 'com.google.code.gson:gson:2.8.2'
+
+
 
 }
 

@@ -12,18 +12,17 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun ButtonHasNewComment(
-    hasNewComment: Boolean,
     actionReload: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     // * show button when has new comments
-    if (hasNewComment) {
-        Box(modifier = modifier
+
+        Box(modifier = modifier.clickable { actionReload() }
         ) {
             Text(text = "Hay nuevos comentarios", modifier = Modifier
                 .background(MaterialTheme.colors.primary)
                 .padding(horizontal = 10.dp, vertical = 10.dp)
-                .clickable { actionReload() })
+                )
         }
-    }
+
 }

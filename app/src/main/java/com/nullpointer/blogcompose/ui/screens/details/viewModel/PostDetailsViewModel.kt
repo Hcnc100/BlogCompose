@@ -49,6 +49,8 @@ class PostDetailsViewModel @Inject constructor(
     private val _hasNewComments = MutableStateFlow(false)
     val hasNewComments = _hasNewComments.asStateFlow()
 
+    var post: Post? = null
+
     // * var to saved number of comments
     var numberComments by SavableProperty(savedStateHandle, KEY_COMMENTS, -1)
         private set
@@ -79,6 +81,7 @@ class PostDetailsViewModel @Inject constructor(
                     emit(Resource.Success(it))
                     // * update inner post (saved in database)
                     postRepoImpl.updateInnerPost(it)
+                    post = it
                 }
             }
         }
@@ -138,20 +141,21 @@ class PostDetailsViewModel @Inject constructor(
     }
 
 
-    fun addComment(idPost: String, comment: String) = viewModelScope.launch {
+    fun addComment(comment: String) = viewModelScope.launch {
         try {
             // * change number of comments
             // ! this for no show any for "hasNewComments"
             val lastUser = preferencesRepoImpl.getCurrentUser().first()
             numberComments++
-            postRepoImpl.addNewComment(idPost, Comment(
-                comment = comment,
-                userComment = InnerUser(
-                    idUser = lastUser.idUser,
-                    nameUser = lastUser.nameUser,
-                    urlImg = lastUser.urlImg
-                )
-            ))
+//            postRepoImpl.addNewComment(idPost, Comment(
+//                comment = comment,
+//                userComment = InnerUser(
+//                    idUser = lastUser.idUser,
+//                    nameUser = lastUser.nameUser,
+//                    urlImg = lastUser.urlImg
+//                )
+//            ))
+            post?.let { postRepoImpl.addNewComment(it, comment) }
         } catch (e: Exception) {
             _messageDetails.send("No se puedo agregar el comentario")
             Timber.e("Error al agregar un commet $e")
@@ -164,7 +168,7 @@ class PostDetailsViewModel @Inject constructor(
         jobInitComments?.cancel()
         jobInitComments = viewModelScope.launch {
             try {
-                if(_idPost.value.isNotEmpty()){
+                if (_idPost.value.isNotEmpty()) {
                     postRepoImpl.getLastComments(_idPost.value)
                     _hasNewComments.value = false
                     Resource.Success(Unit)
