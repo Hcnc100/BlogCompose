@@ -54,12 +54,8 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             } catch (e: Exception) {
                 when (e) {
                     is CancellationException -> throw e
-                    is NullPointerException -> {
-                        Timber.d("Error al actulizar el toke, el usurio es nulo")
-                    }
-                    else -> {
-                        Timber.d("Error desconodico $e")
-                    }
+                    is NullPointerException -> Timber.d("Error al actulizar el toke, el usurio es nulo")
+                    else -> Timber.d("Error desconodico $e")
                 }
             }
         }
@@ -79,14 +75,6 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
                         // * lauch update databse
                         notifyRepoImpl.requestLastNotify(true)
                         postRepoImpl.updateLikePost(notify.idPost)
-                    }
-                    VALIDATE_POST -> {
-                        Handler(Looper.getMainLooper()).post {
-                            Toast.makeText(this@MyFirebaseMessagingService,
-                                "Post subio con exito",
-                                Toast.LENGTH_SHORT).show()
-                        }
-                        postRepoImpl.requestLastPostInitWith(notify.idPost)
                     }
                 }
             } catch (e: Exception) {

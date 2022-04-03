@@ -10,7 +10,6 @@ import com.google.firebase.functions.ktx.functions
 import com.google.firebase.ktx.Firebase
 import com.nullpointer.blogcompose.models.Comment
 import com.nullpointer.blogcompose.models.posts.Post
-import com.nullpointer.blogcompose.models.posts.StatePost
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
@@ -32,7 +31,6 @@ class PostDataSource {
         private const val FIELD_NUMBER_COMMENTS = "numberComments"
         private const val FIELD_NUMBER_LIKES = "numberLikes"
         private const val NAME_REF_USERS = "users"
-        private const val NAME_FIELD_VALIDATE="stateValidate"
     }
 
     private val database = Firebase.firestore
@@ -41,7 +39,7 @@ class PostDataSource {
     private val refComment = database.collection(NAME_REF_COMMENTS)
     private val refUsers = database.collection(NAME_REF_USERS)
     private val auth = Firebase.auth
-    private val functions=Firebase.functions
+    private val functions = Firebase.functions
 
     suspend fun addNewPost(post: Post) {
         val newPostRef = refPosts.document(post.id)
@@ -53,6 +51,20 @@ class PostDataSource {
                 "listRefPost",
                 FieldValue.arrayUnion(refPost))
         }.await()
+    }
+
+    suspend fun addNewPost2(post: Post): String {
+        val response = functions.getHttpsCallable("createPostAndValidate").call(
+            mapOf("idPost" to post.id,
+                "urlImg" to post.urlImage,
+                "description" to post.description)
+        ).continueWith { task ->
+            val reponse = task.result.data as (Map<String, Object>)
+            reponse["idPost"] as String
+        }.await()
+
+        Timber.d("response idPost $response")
+        return response
     }
 
     suspend fun getLastPostByUser(idUser: String, nPost: Int = Integer.MAX_VALUE): List<Post> {
@@ -81,7 +93,6 @@ class PostDataSource {
         // * filter to myUser or for default get all
         if (fromUserId != null) query = query.whereEqualTo(FIELD_POST_ID, fromUserId)
         // * get only post validating
-        query=query.whereEqualTo(NAME_FIELD_VALIDATE,StatePost.VALIDATED)
         // ? indicate if start or end with any id post
         if (startWithPostId != null) {
             val refDocument = refPosts.document(startWithPostId).get().await()
@@ -110,7 +121,6 @@ class PostDataSource {
         // * get more recent post that date passed for args
         if (date != null) query = query.whereGreaterThan(TIMESTAMP, date)
         // * get only post validating
-        query=query.whereEqualTo(NAME_FIELD_VALIDATE,StatePost.VALIDATED)
         // * filter to myUser or for default get all
         if (fromUserId != null) query = query.whereEqualTo(FIELD_POST_ID, fromUserId)
         // * limit the request
@@ -230,8 +240,6 @@ class PostDataSource {
             .collection(NAME_REF_LIST_COMMENTS)
             .orderBy(TIMESTAMP, Query.Direction.DESCENDING)
 
-        query=query.whereEqualTo(NAME_FIELD_VALIDATE,StatePost.VALIDATED)
-
         val refCommentCurrent = refComment.document(idPost).collection(NAME_REF_LIST_COMMENTS)
 
         if (startWithCommentId != null) {
@@ -288,20 +296,19 @@ class PostDataSource {
         return newComment.id
     }
 
-    suspend fun addNewComment2(post: Post,newComment: String):String{
-        val response=functions.getHttpsCallable("notifyComment2").call(
+    suspend fun addNewComment2(post: Post, newComment: String): String {
+        val response = functions.getHttpsCallable("createCommentAndNotify").call(
             mapOf(
                 "idPost" to post.id,
                 "comment" to newComment,
                 "urlImgPost" to post.urlImage,
-                "idPostOwner" to post.userPoster?.idUser.toString()
             )
-        ).continueWith {task->
-            val reponse=task.result.data as (Map<String, Object>)
+        ).continueWith { task ->
+            val reponse = task.result.data as (Map<String, Object>)
             reponse["idComment"] as String
         }.await()
 
         Timber.d("response ${response}")
-       return  response
+        return response
     }
 }

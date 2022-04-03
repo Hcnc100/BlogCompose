@@ -86,14 +86,17 @@ class UploadPostServices : LifecycleService() {
         val description = intent.getStringExtra(KEY_DESCRIPTION_POST)
         if (fileImage != null && description != null) {
             lifecycleScope.launch {
-                val uuid = UUID.randomUUID().toString()
-                startUploadImg(Uri.fromFile(fileImage as File), uuid) {
-                    postRepoImpl.addNewPost(
-                        post = createNewPost(uuid, description, it),
-                        context = this@UploadPostServices
-                    )
+                try{
+                    val uuid = UUID.randomUUID().toString()
+                    startUploadImg(Uri.fromFile(fileImage as File), uuid) {
+                        postRepoImpl.addNewPost(
+                            post = createNewPost(uuid, description, it),
+                            context = this@UploadPostServices
+                        )
+                    }
+                }catch (e:Exception){
+                    Timber.d("Error al agregar post $e")
                 }
-
             }
         }
     }

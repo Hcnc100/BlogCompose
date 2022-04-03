@@ -6,7 +6,6 @@ import androidx.room.Ignore
 import androidx.room.PrimaryKey
 import com.google.firebase.firestore.Exclude
 import com.google.firebase.firestore.ServerTimestamp
-import com.nullpointer.blogcompose.models.posts.StatePost
 import com.nullpointer.blogcompose.models.users.InnerUser
 import java.util.*
 
@@ -20,6 +19,4 @@ data class Comment(
     @PrimaryKey
     @set:Exclude @get:Exclude
     var id: String=UUID.randomUUID().toString(),
-    @Ignore
-    var stateValidate: String= StatePost.VALIDATING
 )

@@ -12,17 +12,14 @@ import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import coil.compose.rememberImagePainter
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.SwipeRefreshState
 import com.nullpointer.blogcompose.R
@@ -30,7 +27,8 @@ import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.core.utils.TimeUtils
 import com.nullpointer.blogcompose.models.notify.Notify
 import com.nullpointer.blogcompose.models.notify.TypeNotify
-import com.nullpointer.blogcompose.models.notify.TypeNotify.*
+import com.nullpointer.blogcompose.models.notify.TypeNotify.COMMENT
+import com.nullpointer.blogcompose.models.notify.TypeNotify.LIKE
 import com.nullpointer.blogcompose.presentation.NotifyViewModel
 import com.nullpointer.blogcompose.ui.screens.destinations.PostDetailsDestination
 import com.nullpointer.blogcompose.ui.screens.emptyScreen.EmptyScreen
@@ -161,7 +159,6 @@ fun ItemNotify(
                         backgroundColor = when (notify.type) {
                             LIKE -> Color.Red
                             COMMENT -> Color.DarkGray
-                            else -> Color.Transparent
                         },
                         shape = CircleShape,
                         modifier = Modifier
@@ -172,7 +169,6 @@ fun ItemNotify(
                             painter = painterResource(id = when (notify.type) {
                                 LIKE -> R.drawable.ic_fav
                                 COMMENT -> R.drawable.ic_comment
-                                else -> R.drawable.ic_clear
                             }),
                             contentDescription = "",
                             modifier = Modifier
@@ -212,7 +208,6 @@ fun TextNotifyInfo(
     val textNotify = when (typeNotify) {
         LIKE -> "A $nameLiked le gusta tu post"
         COMMENT -> "$nameLiked a comentado tu post"
-        else -> ""
     }
     val context = LocalContext.current
     Column(modifier = modifier) {

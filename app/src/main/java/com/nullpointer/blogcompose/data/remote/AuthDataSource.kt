@@ -1,7 +1,9 @@
 package com.nullpointer.blogcompose.data.remote
 
+import android.net.Uri
 import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.auth.ktx.userProfileChangeRequest
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -53,6 +55,13 @@ class AuthDataSource {
 
 
     suspend fun updateDataUser(name: String?, urlImg: String?): MyUser {
+
+        val profileUpdate = userProfileChangeRequest {
+            name?.let { displayName = it }
+            urlImg?.let { photoUri = Uri.parse(it) }
+        }
+        auth.currentUser?.updateProfile(profileUpdate)?.await()
+
         val nodeUser = nodeUsers.document(auth.currentUser!!.uid)
         val nodeResult = nodeUser.get().await()
         if (nodeResult.exists()) {
@@ -71,6 +80,7 @@ class AuthDataSource {
             )
             nodeUsers.document(auth.currentUser!!.uid).set(newUser).await()
         }
+
         return nodeUser.get().await().toObject(MyUser::class.java)!!.apply {
             idUser = auth.currentUser?.uid ?: ""
         }
@@ -85,6 +95,5 @@ class AuthDataSource {
     fun logOut() {
         auth.signOut()
     }
-
 
 }
