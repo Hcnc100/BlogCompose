@@ -10,6 +10,7 @@ import com.google.firebase.functions.ktx.functions
 import com.google.firebase.ktx.Firebase
 import com.nullpointer.blogcompose.models.Comment
 import com.nullpointer.blogcompose.models.posts.Post
+import com.nullpointer.blogcompose.models.posts.SimplePost
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
@@ -226,6 +227,24 @@ class PostDataSource {
         return if (isSuccess) transformDocumentPost(currentPost.get().await()) else null
     }
 
+    suspend fun updateLikes2(post:SimplePost,isLiked: Boolean): Post? {
+        val uid:String=post.userPoster?.idUser ?: auth.currentUser!!.uid
+        val response = functions.getHttpsCallable("createLikeAndNotify").call(
+            mapOf(
+                "idPost" to post.id,
+                "isLiked" to isLiked,
+                "idPosterOwner" to uid,
+                "urlImgPost" to post.urlImage,
+            )
+        ).continueWith { task ->
+            val reponse = task.result.data as (Map<String, Object>)
+            reponse["idPost"] as String
+        }.await()
+
+        Timber.d("response ${response}")
+        return getPost(response)
+    }
+
     suspend fun getCommentsForPost(
         nComments: Int = Integer.MAX_VALUE,
         startWithCommentId: String? = null,
@@ -302,6 +321,7 @@ class PostDataSource {
                 "idPost" to post.id,
                 "comment" to newComment,
                 "urlImgPost" to post.urlImage,
+                "idPosterOwner" to post.userPoster?.idUser.toString()
             )
         ).continueWith { task ->
             val reponse = task.result.data as (Map<String, Object>)

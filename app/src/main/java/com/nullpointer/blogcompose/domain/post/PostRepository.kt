@@ -4,6 +4,7 @@ import android.content.Context
 import com.nullpointer.blogcompose.models.Comment
 import com.nullpointer.blogcompose.models.posts.MyPost
 import com.nullpointer.blogcompose.models.posts.Post
+import com.nullpointer.blogcompose.models.posts.SimplePost
 import kotlinx.coroutines.flow.Flow
 
 interface PostRepository {
@@ -20,7 +21,8 @@ interface PostRepository {
     suspend fun deleterPost(post: Post)
     suspend fun updateInnerPost(post: Post)
     suspend fun getPost(idPost: String): Post?
-    suspend fun updateLikePost(idPost: String, isLiked: Boolean? = null)
+    suspend fun updateLikePost(post: SimplePost, isLiked: Boolean)
+    suspend fun updatePost(idPost: String)
     suspend fun deleterAllPost()
     suspend fun addNewComment(idPost: String,comment: Comment)
     suspend fun addNewComment(post: Post,comment: String)

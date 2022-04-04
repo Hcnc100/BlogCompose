@@ -28,7 +28,7 @@ import java.util.*
 fun BlogItem(
     post: SimplePost,
     actionDetails: (String, Boolean) -> Unit,
-    actionChangePost: (String, Boolean) -> Unit,
+    actionChangePost: (SimplePost, Boolean) -> Unit,
     staticInfo: Pair<String, String>? = null,
 ) {
     val context = LocalContext.current
@@ -68,7 +68,7 @@ fun BlogItem(
                 ownerLike = post.ownerLike,
                 actionShare = { sharePost(post.id, context) },
                 actionComments = { actionDetails(post.id, true) },
-                changeLike = { actionChangePost(post.id, it) })
+                changeLike = { actionChangePost(post, it) })
             // * number of likes and comments
             TextLikes(post.numberLikes, post.numberComments)
             // * description, this is folding

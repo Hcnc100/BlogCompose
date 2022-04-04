@@ -11,6 +11,7 @@ import com.nullpointer.blogcompose.data.remote.PostDataSource
 import com.nullpointer.blogcompose.models.Comment
 import com.nullpointer.blogcompose.models.posts.MyPost
 import com.nullpointer.blogcompose.models.posts.Post
+import com.nullpointer.blogcompose.models.posts.SimplePost
 import kotlinx.coroutines.flow.Flow
 import timber.log.Timber
 
@@ -88,21 +89,36 @@ class PostRepoImpl(
     }
 
 
-    override suspend fun updateLikePost(idPost: String, isLiked: Boolean?) {
+    override suspend fun updatePost(idPost: String) {
         val oldPost = postDAO.getPostById(idPost)
         val oldMyPost = myPostDAO.getPostById(idPost)
         try {
-            val postUpdate = if (isLiked != null) {
-                // * update fake post
-                if (oldPost != null) postDAO.updatePost(oldPost.copyInnerLike(isLiked))
-                if (oldMyPost != null) myPostDAO.updatePost(oldMyPost.copyInnerLike(isLiked))
+            val postUpdate = postDataSource.getPost(idPost)!!
 
-                // * if has null update post or dont have internet, launch exception
-                if (!InternetCheck.isNetworkAvailable()) throw NetworkException()
-                postDataSource.updateLikes(idPost, isLiked)!!
-            } else {
-                postDataSource.getPost(idPost)!!
-            }
+            if (oldPost != null) postDAO.updatePost(postUpdate)
+            if (oldMyPost != null) myPostDAO.updatePost(MyPost.fromPost(postUpdate))
+        } catch (e: Exception) {
+            // ? if has problem restore data post
+            oldPost?.let { postDAO.updatePost(oldPost) }
+            oldMyPost?.let { myPostDAO.updatePost(it) }
+
+            throw e
+        }
+    }
+
+    override suspend fun updateLikePost(post: SimplePost, isLiked: Boolean) {
+        val oldPost = postDAO.getPostById(post.id)
+        val oldMyPost = myPostDAO.getPostById(post.id)
+        try {
+
+            // * update fake post
+            if (oldPost != null) postDAO.updatePost(oldPost.copyInnerLike(isLiked))
+            if (oldMyPost != null) myPostDAO.updatePost(oldMyPost.copyInnerLike(isLiked))
+
+            // * if has null update post or dont have internet, launch exception
+            if (!InternetCheck.isNetworkAvailable()) throw NetworkException()
+            val postUpdate = postDataSource.updateLikes2(post, isLiked)!!
+
 
             // * update the info from post
             if (oldPost != null) postDAO.updatePost(postUpdate)
@@ -116,7 +132,7 @@ class PostRepoImpl(
         }
     }
 
-     override suspend fun requestLastPostInitWith(idPost: String) {
+    override suspend fun requestLastPostInitWith(idPost: String) {
         if (!InternetCheck.isNetworkAvailable()) throw NetworkException()
         val listLastPost = postDataSource.getLastPost(
             nPosts = SIZE_POST_REQUEST,
@@ -153,16 +169,16 @@ class PostRepoImpl(
 
 
     override suspend fun addNewComment(idPost: String, comment: Comment) {
-        postDataSource.addNewComment(idPost,comment)
+        postDataSource.addNewComment(idPost, comment)
     }
 
-    override suspend fun addNewComment(post:Post, comment: String) {
-        val idComment=postDataSource.addNewComment2(post,comment)
+    override suspend fun addNewComment(post: Post, comment: String) {
+        val idComment = postDataSource.addNewComment2(post, comment)
         Timber.d("id del commentario $idComment")
         updateAllComments(post.id, idComment)
     }
 
-    suspend fun updateAllComments(idPost: String,idComment:String){
+    suspend fun updateAllComments(idPost: String, idComment: String) {
         val list = postDataSource.getCommentsForPost(nComments = SIZE_COMMENTS,
             idPost = idPost,
             startWithCommentId = idComment,
@@ -185,8 +201,8 @@ class PostRepoImpl(
 
 
     override suspend fun addNewPost(post: Post, context: Context) {
-        val idPost=postDataSource.addNewPost2(post)
-        Toast.makeText(context,"Post subido con exito",Toast.LENGTH_SHORT).show()
+        val idPost = postDataSource.addNewPost2(post)
+        Toast.makeText(context, "Post subido con exito", Toast.LENGTH_SHORT).show()
         requestLastPostInitWith(idPost)
     }
 

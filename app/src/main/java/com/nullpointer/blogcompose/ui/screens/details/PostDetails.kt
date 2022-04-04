@@ -80,7 +80,9 @@ fun PostDetails(
         totalComments = postDetailsViewModel.numberComments,
         reloadNewComment = postDetailsViewModel::reloadNewComment,
         actionBack = navigator::popBackStack,
-        actionLike = { likeViewModel.likePost(idPost, it) },
+        actionLike = { postDetailsViewModel.post?.let {
+                it1 -> likeViewModel.likePost(it1, it)
+        } },
         addComment = { postDetailsViewModel.addComment(it) }
     )
 

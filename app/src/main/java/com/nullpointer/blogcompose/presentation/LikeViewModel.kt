@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nullpointer.blogcompose.core.utils.NetworkException
 import com.nullpointer.blogcompose.domain.post.PostRepoImpl
+import com.nullpointer.blogcompose.models.posts.SimplePost
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -27,13 +28,13 @@ class LikeViewModel @Inject constructor(
     private var jobLike: Job? = null
 
 
-    fun likePost(idPost: String, isLiked: Boolean) {
+    fun likePost(simplePost: SimplePost, isLiked: Boolean) {
         // * this init like job, update the database with new data with the new data of
         // * server
         jobLike?.cancel()
         jobLike = viewModelScope.launch(Dispatchers.IO) {
             try {
-                postRepo.updateLikePost(idPost, isLiked)
+                postRepo.updateLikePost(simplePost, isLiked)
             } catch (e: Exception) {
                 when (e) {
                     is CancellationException -> throw e
