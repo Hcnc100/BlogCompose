@@ -24,7 +24,6 @@ interface PostRepository {
     suspend fun updateLikePost(post: SimplePost, isLiked: Boolean)
     suspend fun updatePost(idPost: String)
     suspend fun deleterAllPost()
-    suspend fun addNewComment(idPost: String,comment: Comment)
     suspend fun addNewComment(post: Post,comment: String)
     suspend fun clearComments()
     suspend fun getRealTimePost(idPost: String): Flow<Post?>

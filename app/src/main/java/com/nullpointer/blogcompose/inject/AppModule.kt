@@ -57,7 +57,8 @@ object AppModule {
     fun provideAuthRepository(
         authDataSource: AuthDataSource,
         preferencesDataSource: PreferencesDataSource,
-    ): AuthRepoImpl = AuthRepoImpl(authDataSource, preferencesDataSource)
+        imagesDataSource: ImagesDataSource
+    ): AuthRepoImpl = AuthRepoImpl(authDataSource, preferencesDataSource, imagesDataSource)
 
 
 

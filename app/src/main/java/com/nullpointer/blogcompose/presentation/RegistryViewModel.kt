@@ -12,6 +12,7 @@ import com.nullpointer.blogcompose.core.delegates.SavableComposeState
 import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.core.states.StorageUploadTaskResult
 import com.nullpointer.blogcompose.core.utils.NetworkException
+import com.nullpointer.blogcompose.data.remote.ImgProfileInvalid
 import com.nullpointer.blogcompose.domain.auth.AuthRepoImpl
 import com.nullpointer.blogcompose.domain.images.ImagesRepoImpl
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -131,6 +132,7 @@ class RegistryViewModel @Inject constructor(
             when (exception) {
                 is CancellationException -> throw exception
                 is NetworkException -> _registryMessage.send("Se necesita internet para actulizar sus datos")
+                is ImgProfileInvalid -> _registryMessage.send("La imagen de permifl no es una imagen valida")
                 else -> {
                     Timber.e("Error al actulizar datos $exception")
                     _registryMessage.send("Error desconocido")

@@ -2,6 +2,7 @@ package com.nullpointer.blogcompose.data.remote
 
 import android.net.Uri
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.functions.ktx.functions
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
 import com.nullpointer.blogcompose.core.states.StorageUploadTaskResult
@@ -10,19 +11,22 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.tasks.await
 import timber.log.Timber
 import kotlin.math.absoluteValue
 
 class ImagesDataSource {
     private val refStorage = Firebase.storage.getReference("imgPost")
+    private val refImgTemp = Firebase.storage.getReference("temp")
     private val refImgUser = Firebase.storage.getReference("imgUsers")
     private val idUser = Firebase.auth.currentUser?.uid ?: "NoAuth"
+    private val functions = Firebase.functions
 
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    fun uploadImageUser(uriImg: Uri, name: String): Flow<StorageUploadTaskResult> =
+    fun uploadImageUser(uriImg: Uri): Flow<StorageUploadTaskResult> =
         callbackFlow {
-            refImgUser.child(idUser).child(name).putFile(uriImg).addOnSuccessListener { task ->
+            refImgTemp.child(idUser).putFile(uriImg).addOnSuccessListener { task ->
                 task.storage.downloadUrl.addOnSuccessListener {
                     trySend(StorageUploadTaskResult.Complete.Success(it.toString()))
                     close()
@@ -83,5 +87,18 @@ class ImagesDataSource {
             awaitClose()
         }
 
+    suspend fun getImageUser(): Uri? {
+        return refImgUser.child(idUser).child("imgProfile").downloadUrl.await()
+    }
 
+    suspend fun invalidPhotoUser(): Boolean {
+        val response =
+            functions.getHttpsCallable("validateImageProfile").call().continueWith { task ->
+                val reponse = task.result.data as (Map<String, Object>)
+                reponse["isPhotoInvalidate"] as Boolean
+
+            }.await()
+        Timber.d("response ${response}")
+        return response
+    }
 }

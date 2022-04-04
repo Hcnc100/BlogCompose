@@ -117,7 +117,7 @@ class PostRepoImpl(
 
             // * if has null update post or dont have internet, launch exception
             if (!InternetCheck.isNetworkAvailable()) throw NetworkException()
-            val postUpdate = postDataSource.updateLikes2(post, isLiked)!!
+            val postUpdate = postDataSource.updateLikes(post, isLiked)!!
 
 
             // * update the info from post
@@ -168,17 +168,13 @@ class PostRepoImpl(
     }
 
 
-    override suspend fun addNewComment(idPost: String, comment: Comment) {
-        postDataSource.addNewComment(idPost, comment)
-    }
-
     override suspend fun addNewComment(post: Post, comment: String) {
-        val idComment = postDataSource.addNewComment2(post, comment)
+        val idComment = postDataSource.addNewComment(post, comment)
         Timber.d("id del commentario $idComment")
         updateAllComments(post.id, idComment)
     }
 
-    suspend fun updateAllComments(idPost: String, idComment: String) {
+    private suspend fun updateAllComments(idPost: String, idComment: String) {
         val list = postDataSource.getCommentsForPost(nComments = SIZE_COMMENTS,
             idPost = idPost,
             startWithCommentId = idComment,
@@ -201,7 +197,7 @@ class PostRepoImpl(
 
 
     override suspend fun addNewPost(post: Post, context: Context) {
-        val idPost = postDataSource.addNewPost2(post)
+        val idPost = postDataSource.addNewPost(post)
         Toast.makeText(context, "Post subido con exito", Toast.LENGTH_SHORT).show()
         requestLastPostInitWith(idPost)
     }

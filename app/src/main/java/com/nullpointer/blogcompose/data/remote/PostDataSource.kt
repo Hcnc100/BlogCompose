@@ -42,19 +42,9 @@ class PostDataSource {
     private val auth = Firebase.auth
     private val functions = Firebase.functions
 
-    suspend fun addNewPost(post: Post) {
-        val newPostRef = refPosts.document(post.id)
-        val nodeUser = refUsers.document(auth.currentUser!!.uid)
-        database.runTransaction { transition ->
-            transition.set(newPostRef, post)
-            val refPost = newPostRef.path + post.id
-            transition.update(nodeUser,
-                "listRefPost",
-                FieldValue.arrayUnion(refPost))
-        }.await()
-    }
 
-    suspend fun addNewPost2(post: Post): String {
+
+    suspend fun addNewPost(post: Post): String {
         val response = functions.getHttpsCallable("createPostAndValidate").call(
             mapOf("idPost" to post.id,
                 "urlImg" to post.urlImage,
@@ -194,40 +184,7 @@ class PostDataSource {
         return refLikePost.get().await().exists()
     }
 
-    suspend fun updateLikes(idPost: String, isLiked: Boolean): Post? {
-        // * var to increment o decrement number likes
-        val increment = FieldValue.increment(1)
-        val decrement = FieldValue.increment(-1)
-
-        val currentPost = refPosts.document(idPost)
-        val uuid = auth.currentUser?.uid ?: ""
-        // * var to save the success operation
-        var isSuccess = true
-        val refLikePost =
-            refLikePost.document(idPost).collection(NAME_REF_USERS_LIKE).document(uuid)
-
-        database.runTransaction { transition ->
-            if (isLiked) {
-                // * if the myUser liked post, so
-                // * create one document with the id of the myUser and save the time when liked
-                // * add one to number of like
-                transition.set(refLikePost, mapOf(TIMESTAMP to FieldValue.serverTimestamp()))
-                transition.update(currentPost, FIELD_NUMBER_LIKES, increment)
-            } else {
-                // * if the myUser no like this, so
-                // * deleter document of myUser liked adn decrement number of like in this post
-                transition.update(currentPost, FIELD_NUMBER_LIKES, decrement)
-                transition.delete(refLikePost)
-            }
-
-        }.addOnFailureListener {
-            isSuccess = false
-        }.await()
-        // * if the operation is success to get post with data updated, else return null
-        return if (isSuccess) transformDocumentPost(currentPost.get().await()) else null
-    }
-
-    suspend fun updateLikes2(post:SimplePost,isLiked: Boolean): Post? {
+    suspend fun updateLikes(post:SimplePost,isLiked: Boolean): Post? {
         val uid:String=post.userPoster?.idUser ?: auth.currentUser!!.uid
         val response = functions.getHttpsCallable("createLikeAndNotify").call(
             mapOf(
@@ -295,27 +252,8 @@ class PostDataSource {
         }
     }
 
-    suspend fun addNewComment(idPost: String, newComment: Comment): String {
-        val increment = FieldValue.increment(1)
-        val currentPost = refPosts.document(idPost)
-        val userNode = refUsers.document(auth.currentUser?.uid!!)
-        // * get ref to saved comment
-        val refCommentPost =
-            refComment.document(idPost).collection(NAME_REF_LIST_COMMENTS).document(newComment.id)
 
-        database.runTransaction { transition ->
-            // * add comment and update field comments to post
-            transition.set(refCommentPost, newComment)
-            transition.update(currentPost, FIELD_NUMBER_COMMENTS, increment)
-            val refComment = refCommentPost.path + newComment.id
-            transition.update(userNode,
-                "listRefComments",
-                FieldValue.arrayUnion(refComment))
-        }.await()
-        return newComment.id
-    }
-
-    suspend fun addNewComment2(post: Post, newComment: String): String {
+    suspend fun addNewComment(post: Post, newComment: String): String {
         val response = functions.getHttpsCallable("createCommentAndNotify").call(
             mapOf(
                 "idPost" to post.id,
