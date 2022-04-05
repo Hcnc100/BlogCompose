@@ -1,6 +1,8 @@
 package com.nullpointer.blogcompose.ui.screens.addPost
 
 import android.widget.Toast
+import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -107,17 +109,17 @@ fun AddBlogScreen(
         ) {
             Column(modifier = Modifier
                 .verticalScroll(rememberScrollState())) {
-                ImageNewBlog(
-                    fileImg = addBlogVM.fileImg,
-                    isCompress = addBlogVM.isCompress.value,
-                    errorImage = addBlogVM.errorImage,
-                    // * clear focus when launch bottom sheet
-                    actionEditImg = {
-                        focusManager.clearFocus()
-                        scope.launch {
-                            modalState.show()
-                        }
-                    })
+                    ImageNewBlog(
+                        fileImg = addBlogVM.fileImg,
+                        isCompress = addBlogVM.isCompress.value,
+                        errorImage = addBlogVM.errorImage,
+                        // * clear focus when launch bottom sheet
+                        actionEditImg = {
+                            focusManager.clearFocus()
+                            scope.launch {
+                                modalState.show()
+                            }
+                        })
                 Spacer(modifier = Modifier.height(10.dp))
                 DescriptionNewBlog(
                     descriptionBlog = addBlogVM.description,
@@ -195,8 +197,7 @@ fun ImageNewBlog(
                     showProgress = true,
                     modifier = Modifier
                         .fillMaxWidth(0.9f)
-                        .aspectRatio(1f)
-                )
+                        .aspectRatio(1f))
                 // * progress indicate compress
                 if (isCompress) CircularProgressIndicator()
                 // * button edit imagen select

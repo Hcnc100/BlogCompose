@@ -52,30 +52,6 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                val info = packageManager.getPackageInfo("com.nullpointer.blogcompose",
-                    PackageManager.GET_SIGNING_CERTIFICATES)
-                for (signature in info.signingInfo.apkContentsSigners) {
-                    val md =
-                        MessageDigest.getInstance("SHA"); md.update(signature.toByteArray());
-                    Timber.d(
-                        "API >= 28 KeyHash: ${Base64.encodeToString(md.digest(), Base64.DEFAULT)}",
-                        );
-                }
-            } else {
-                val info = packageManager.getPackageInfo("com.nullpointer.blogcompose",
-                    PackageManager.GET_SIGNATURES); for (signature in info.signatures) {
-                    val md =
-                        MessageDigest.getInstance("SHA"); md.update(signature.toByteArray());
-                    Timber.d(
-                        "API < 28 KeyHash: ${Base64.encodeToString(md.digest(), Base64.DEFAULT)}",
-                        );
-                }
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
         var loading = true
         val splash = installSplashScreen()
         splash.setKeepOnScreenCondition { loading }

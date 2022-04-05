@@ -137,7 +137,7 @@ fun ImageCirculateUser(
         Box(modifier = Modifier
             .fillMaxWidth()
             .fillMaxHeight(.5f)
-            .background(MaterialTheme.colors.error))
+            .background(MaterialTheme.colors.primary))
         // * image and button edit
         Box(contentAlignment = Alignment.Center,
             modifier = Modifier.align(Alignment.Center)) {

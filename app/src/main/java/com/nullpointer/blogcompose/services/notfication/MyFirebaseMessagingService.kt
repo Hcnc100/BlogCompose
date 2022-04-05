@@ -63,8 +63,6 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
     override fun onMessageReceived(message: RemoteMessage) {
         super.onMessageReceived(message)
-
-
         CoroutineScope(job).launch {
             try {
                 val notify = gson.fromJson(message.data["notify"], Notify::class.java)

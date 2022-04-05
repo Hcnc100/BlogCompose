@@ -1,11 +1,16 @@
 package com.nullpointer.blogcompose.ui.share
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -43,9 +48,11 @@ fun ImageProfile(
     }
     val state = painter.state
     Box(contentAlignment = Alignment.Center,
-        modifier = modifier.padding(
-            if (state !is ImagePainter.State.Success || fileImg == null && urlImgProfile.isEmpty())
-                paddingLoading else 0.dp)) {
+        modifier = modifier.clip(CircleShape)
+            .background(if (isSystemInDarkTheme()) Color.DarkGray else Color.LightGray)
+            .padding(
+                if (state !is ImagePainter.State.Success || fileImg == null && urlImgProfile.isEmpty())
+                    paddingLoading else 0.dp)) {
         Image(
             painter = when (state) {
                 is ImagePainter.State.Error -> painterResource(id = R.drawable.ic_broken_image)
@@ -83,9 +90,11 @@ fun ImagePost(
     }
     val state = painter.state
     Box(contentAlignment = Alignment.Center,
-        modifier = modifier.padding(
-            if (state !is ImagePainter.State.Success || fileImg == null && urlImgPost.isNullOrEmpty())
-                paddingLoading else 0.dp)) {
+        modifier = modifier
+            .background(if (isSystemInDarkTheme()) Color.DarkGray else Color.LightGray)
+            .padding(
+                if (state !is ImagePainter.State.Success || fileImg == null && urlImgPost.isNullOrEmpty())
+                    paddingLoading else 0.dp)) {
         Image(
             painter = when (state) {
                 is ImagePainter.State.Error -> painterResource(id = R.drawable.ic_broken_image)
