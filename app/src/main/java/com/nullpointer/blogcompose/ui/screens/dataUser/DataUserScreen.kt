@@ -1,6 +1,7 @@
 package com.nullpointer.blogcompose.ui.screens.dataUser
 
 import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -106,11 +107,13 @@ fun DataUserScreen(
                     }
                 )
                 TextInputName(
+                    isEnable = !isDataComplete,
                     nameUser = registryViewModel.nameUser,
                     changeNameUser = registryViewModel::changeNameUserTemp,
                     errorMessage = registryViewModel.errorName,
                     maxLength = 150,
                     modifier = Modifier.weight(4f))
+
 
                 // * spacer to center edit text
                 Spacer(modifier = Modifier.weight(2f))
@@ -178,6 +181,7 @@ fun TextInputName(
     changeNameUser: (String) -> Unit,
     errorMessage: Int,
     maxLength: Int,
+    isEnable: Boolean,
 ) {
     Column(modifier = modifier
         .fillMaxWidth(.8f),
@@ -185,7 +189,7 @@ fun TextInputName(
         horizontalAlignment = Alignment.End
     ) {
         // * input text name myUser
-        OutlinedTextField(
+        OutlinedTextField(enabled = isEnable,
             value = nameUser,
             singleLine = true,
             onValueChange = changeNameUser,
@@ -197,6 +201,16 @@ fun TextInputName(
             style = MaterialTheme.typography.caption,
             color = if (errorMessage != 0) MaterialTheme.colors.error else Color.Unspecified,
             modifier = Modifier.padding(end = 10.dp))
+
+        Row(modifier = Modifier
+            .padding(horizontal = 10.dp, vertical = 15.dp)
+            .align(Alignment.Start), verticalAlignment = Alignment.CenterVertically) {
+            Image(painter = painterResource(id = R.drawable.ic_help), contentDescription = "")
+            Spacer(modifier = Modifier.width(10.dp))
+            Text(if (!isEnable) "El nombre no puede ser cambiado" else "Una vez seleccionado el nombre, este no podra ser cambiado",
+                style = MaterialTheme.typography.caption)
+        }
+
 
     }
 

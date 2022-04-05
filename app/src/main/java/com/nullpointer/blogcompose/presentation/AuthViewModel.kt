@@ -46,7 +46,7 @@ class AuthViewModel @Inject constructor(
             val state = if (user.idUser.isEmpty()) {
                 LoginStatus.Unauthenticated
             } else {
-                if (user.nameUser.isEmpty() || user.idUser.isEmpty()) {
+                if (user.nameUser.isEmpty() || user.idUser.isEmpty() || user.urlImg.isEmpty()) {
                     LoginStatus.Authenticated.CompletingData
                 } else {
                     LoginStatus.Authenticated.CompleteData

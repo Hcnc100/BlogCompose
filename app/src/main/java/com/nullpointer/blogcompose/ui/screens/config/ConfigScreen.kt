@@ -43,7 +43,7 @@ fun ConfigScreen(
                         modifier = Modifier.size(30.dp)
                     )
                 }
-                ButtonCard(text = "Cambiar nombre o foto", actionClick = {
+                ButtonCard(text = "Cambiar foto del usuario", actionClick = {
                     navigator.navigate(DataUserScreenDestination)
                 })
             }
