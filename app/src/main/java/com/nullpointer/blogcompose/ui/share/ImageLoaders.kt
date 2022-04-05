@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.Card
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -47,22 +48,19 @@ fun ImageProfile(
         crossfade(true)
     }
     val state = painter.state
-    Box(contentAlignment = Alignment.Center,
-        modifier = modifier.clip(CircleShape)
-            .background(if (isSystemInDarkTheme()) Color.DarkGray else Color.LightGray)
-            .padding(
-                if (state !is ImagePainter.State.Success || fileImg == null && urlImgProfile.isEmpty())
-                    paddingLoading else 0.dp)) {
+    Card(backgroundColor = if (isSystemInDarkTheme()) Color.DarkGray else Color.LightGray,shape=CircleShape,
+        modifier = modifier.aspectRatio(1f)){
         Image(
             painter = when (state) {
                 is ImagePainter.State.Error -> painterResource(id = R.drawable.ic_broken_image)
                 else -> painter
             },
             contentDescription = "",
-            modifier = Modifier
-                .fillMaxSize(),
+            modifier = Modifier.padding(
+                (if (state !is ImagePainter.State.Success || fileImg == null && urlImgProfile.isEmpty())
+                    paddingLoading else 0.dp))
         )
-        if (state is ImagePainter.State.Loading && showProgress) CircularProgressIndicator()
+        if (state is ImagePainter.State.Loading && showProgress)  CircularProgressIndicator(modifier=Modifier.padding(paddingLoading))
     }
 }
 
@@ -75,6 +73,8 @@ fun ImagePost(
     fileImg: File? = null,
     showProgress: Boolean = false,
 ) {
+
+
     val painter = rememberImagePainter(
         // * if pass file img so ,load first,
         // * else load urlImg if this is not empty
@@ -91,7 +91,6 @@ fun ImagePost(
     val state = painter.state
     Box(contentAlignment = Alignment.Center,
         modifier = modifier
-            .background(if (isSystemInDarkTheme()) Color.DarkGray else Color.LightGray)
             .padding(
                 if (state !is ImagePainter.State.Success || fileImg == null && urlImgPost.isNullOrEmpty())
                     paddingLoading else 0.dp)) {
