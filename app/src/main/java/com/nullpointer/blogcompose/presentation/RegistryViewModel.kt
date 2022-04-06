@@ -69,8 +69,6 @@ class RegistryViewModel @Inject constructor(
     private val _stateCompressImage = MutableStateFlow<Resource<Unit>>(Resource.Success(Unit))
     val stateCompressImg = _stateCompressImage.asStateFlow()
 
-    private var oldName: String = ""
-
     init {
         Timber.d("Se inicio el registry view model")
         viewModelScope.launch {
@@ -79,9 +77,6 @@ class RegistryViewModel @Inject constructor(
                 val currentUser = with(Dispatchers.IO) { authRepoImpl.myUser.first() }
                 nameUser = currentUser.nameUser
                 photoUser = currentUser.urlImg
-
-                // * change var to know when name is change or no
-                oldName = nameUser
             } catch (e: Exception) {
                 if (e is CancellationException) throw e
                 else Timber.e("Error al obtener los datos del usuario $e")
@@ -106,7 +101,7 @@ class RegistryViewModel @Inject constructor(
             nameUser.trim().isEmpty() || (photoUser.trim().isEmpty() && fileImg == null) -> _registryMessage.send(
                 "Varifique sus datos")
             // * when data no is change send error message
-            fileImg == null && oldName == nameUser.trim() -> _registryMessage.send("Sin cambios")
+            fileImg == null -> _registryMessage.send("Sin cambios")
             // * else update
             else -> updateUser(context)
         }
@@ -120,19 +115,18 @@ class RegistryViewModel @Inject constructor(
             val urlImg = fileImg?.toUri()?.let { updateImageUser(context, it) }
             // * update image myUser if no is null and name if is different from name saved
             val nameFormat=nameUser.trim()
-            authRepoImpl.uploadDataUser(urlImg, if (oldName != nameFormat) nameFormat else null)
+            authRepoImpl.uploadDataUser(urlImg!!,nameFormat)
             // * if is success update state
             _stateUpdateUser.value = Resource.Success(Unit)
-            // * change var to know when name is change or no
-            oldName = nameFormat
             // * notify to myUser
             _registryMessage.send("Cambios guardados")
+            fileImg=null
         } catch (exception: Exception) {
             // * show error message if has exception
             when (exception) {
                 is CancellationException -> throw exception
                 is NetworkException -> _registryMessage.send("Se necesita internet para actulizar sus datos")
-                is ImgProfileInvalid -> _registryMessage.send("La imagen de permifl no es una imagen valida")
+                is ImgProfileInvalid -> _registryMessage.send("La imagen de perfil no es una imagen valida")
                 else -> {
                     Timber.e("Error al actulizar datos $exception")
                     _registryMessage.send("Error desconocido")

@@ -19,7 +19,7 @@ class ImagesDataSource {
     private val refStorage = Firebase.storage.getReference("imgPost")
     private val refImgTemp = Firebase.storage.getReference("temp")
     private val refImgUser = Firebase.storage.getReference("imgUsers")
-    private val idUser = Firebase.auth.currentUser?.uid ?: "NoAuth"
+    private val idUser get() = Firebase.auth.currentUser?.uid ?: "NoAuth"
     private val functions = Firebase.functions
 
 
