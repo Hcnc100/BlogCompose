@@ -1,4 +1,4 @@
-package com.nullpointer.blogcompose.ui.customs
+package com.nullpointer.blogcompose.ui.share
 
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton

@@ -97,7 +97,7 @@ fun ListInfinitePost(
     staticInfo: Pair<String, String>? = null,
 ) {
 
-    LazyColumn(state = listState, modifier = Modifier) {
+    LazyColumn(state = listState, modifier = modifier) {
         // * if pass header, so add this
         header?.let {
             item { it() }

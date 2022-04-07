@@ -2,6 +2,7 @@ package com.nullpointer.blogcompose.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.utils.NetworkException
 import com.nullpointer.blogcompose.domain.post.PostRepoImpl
 import com.nullpointer.blogcompose.models.posts.SimplePost
@@ -21,7 +22,7 @@ class LikeViewModel @Inject constructor(
     private val postRepo: PostRepoImpl,
 ) : ViewModel() {
 
-    private val _messageLike = Channel<String>()
+    private val _messageLike = Channel<Int>()
     val messageLike = _messageLike.receiveAsFlow()
 
     // * var to save job, to like
@@ -38,10 +39,10 @@ class LikeViewModel @Inject constructor(
             } catch (e: Exception) {
                 when (e) {
                     is CancellationException -> throw e
-                    is NetworkException -> _messageLike.send("Necesita conexion para esto")
+                    is NetworkException -> _messageLike.send(R.string.message_error_like)
                     else -> {
-                        Timber.e("Erro al dar like $e")
-                        _messageLike.send("Error desconocido")
+                        Timber.e("Error al dar like $e")
+                        _messageLike.send(R.string.message_error_unknown)
                     }
                 }
             }

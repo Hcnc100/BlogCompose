@@ -14,6 +14,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.nullpointer.blogcompose.R
 
@@ -31,9 +32,9 @@ fun TextInputComment(focusRequester: FocusRequester, actionSendComment: (String)
             value = text,
             onValueChange = changeText,
             singleLine = true,
-            label = { Text("Comentario") },
+            label = { Text(stringResource(R.string.message_comment)) },
             shape = RoundedCornerShape(20.dp),
-            placeholder = { Text("Escribe algo ...") },
+            placeholder = { Text(stringResource(R.string.message_label_comment)) },
             // * button to send action
             // * this trigger action and clear box text
             // * this action only is trigger if the comment is not empty
@@ -46,7 +47,7 @@ fun TextInputComment(focusRequester: FocusRequester, actionSendComment: (String)
                 }) {
                     // * icon that change if comment is valid (if no is empty)
                     Icon(painterResource(id = R.drawable.ic_send),
-                        contentDescription = "",
+                        contentDescription = stringResource(R.string.description_send_comment),
                         tint = if (text.isEmpty()) Color.Gray else MaterialTheme.colors.primary)
                 }
             }

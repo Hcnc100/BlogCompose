@@ -1,10 +1,6 @@
 package com.nullpointer.blogcompose.ui.activitys
 
-import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
-import android.util.Base64
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -18,6 +14,7 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import androidx.navigation.NavController
@@ -32,7 +29,6 @@ import com.nullpointer.blogcompose.presentation.AuthViewModel
 import com.nullpointer.blogcompose.ui.navigation.HomeDestinations
 import com.nullpointer.blogcompose.ui.screens.NavGraphs
 import com.nullpointer.blogcompose.ui.screens.destinations.AuthScreenDestination
-import com.nullpointer.blogcompose.ui.screens.destinations.ConfigScreenDestination
 import com.nullpointer.blogcompose.ui.screens.destinations.DataUserScreenDestination
 import com.nullpointer.blogcompose.ui.screens.navDestination
 import com.nullpointer.blogcompose.ui.screens.startDestination
@@ -40,11 +36,7 @@ import com.nullpointer.blogcompose.ui.theme.BlogComposeTheme
 import com.ramcosta.composedestinations.DestinationsNavHost
 import com.ramcosta.composedestinations.navigation.dependency
 import com.ramcosta.composedestinations.navigation.navigateTo
-import com.ramcosta.composedestinations.spec.Route
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.first
-import timber.log.Timber
-import java.security.MessageDigest
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -94,9 +86,6 @@ class MainActivity : ComponentActivity() {
 
                         if (destination != null) {
                             loading = false
-
-
-
                             Box(modifier = Modifier.padding(innerPadding)) {
                                 DestinationsNavHost(
                                     navController = navController,
@@ -142,7 +131,7 @@ fun ButtonNavigation(
                     }
                 },
                 icon = { Icon(painterResource(id = destination.icon), "") },
-                label = { Text(destination.title) },
+                label = { Text(stringResource(id = destination.title)) },
             )
         }
     }

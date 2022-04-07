@@ -4,6 +4,8 @@ import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.states.Resource
@@ -14,7 +16,6 @@ import com.nullpointer.blogcompose.ui.screens.destinations.PostDetailsDestinatio
 import com.nullpointer.blogcompose.ui.screens.swipePosts.ScreenSwiperPost
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import kotlinx.coroutines.flow.collect
 
 @Destination(navGraph = "homeDestinations", start = true)
 @Composable
@@ -30,16 +31,21 @@ fun BlogScreen(
 
     val postMessage = postVM.messagePost
     val likeMessage = likeVM.messageLike
+    val context=LocalContext.current
 
     LaunchedEffect(postMessage) {
         postMessage.collect {
-            scaffoldState.snackbarHostState.showSnackbar(it)
+            scaffoldState.snackbarHostState.showSnackbar(
+                context.getString(it)
+            )
         }
     }
 
     LaunchedEffect(likeMessage) {
         likeMessage.collect {
-            scaffoldState.snackbarHostState.showSnackbar(it)
+            scaffoldState.snackbarHostState.showSnackbar(
+                context.getString(it)
+            )
         }
     }
 
@@ -55,7 +61,7 @@ fun BlogScreen(
             navigator.navigate(PostDetailsDestination(idPost, goToBottom))
         },
         emptyResRaw = R.raw.empty2,
-        emptyString = "No hay post, deberias hacer uno"
+        emptyString = stringResource(R.string.message_empty_post)
     )
 }
 

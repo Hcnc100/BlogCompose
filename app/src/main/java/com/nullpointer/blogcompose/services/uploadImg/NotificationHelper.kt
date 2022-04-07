@@ -1,28 +1,17 @@
 package com.nullpointer.blogcompose.services.uploadImg
 
-import android.app.*
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Context
-import android.content.ContextWrapper
-import android.content.Intent
-import android.graphics.Bitmap
 import android.os.Build
-import android.widget.RemoteViews
-import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
-import androidx.core.net.toUri
 import com.nullpointer.blogcompose.R
-import com.nullpointer.blogcompose.core.utils.toFormat
-import com.nullpointer.blogcompose.models.notify.TypeNotify
-import com.nullpointer.blogcompose.models.notify.TypeNotify.*
-import com.nullpointer.blogcompose.ui.activitys.MainActivity
-import kotlin.random.Random
 
 object NotificationChannelHelper {
 
      const val ID_CHANNEL_UPLOAD_POST = "ID_CHANNEL_UPLOAD_POST_BLOG_COMPOSE"
-     const val NAME_UPLOAD_POST_CHANNEL = "Estado de subida del post"
+     const val NAME_UPLOAD_POST_CHANNEL = R.string.name_channel_upload_post
      const val ID_CHANNEL_POST_NOTIFY = "ID_CHANNEL_POST_NOTIFY_BLOG_COMPOSE"
-     const val NAME_CHANNEL_LIKE = "Notificaciones de los post"
+     const val NAME_CHANNEL_LIKE = R.string.name_channel_notify_post
     const val ID_NOTIFY_UPLOAD=123456
 
     fun createChannelNotification(

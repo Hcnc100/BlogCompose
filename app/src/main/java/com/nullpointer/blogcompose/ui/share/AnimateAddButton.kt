@@ -6,6 +6,7 @@ import androidx.compose.material.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import com.nullpointer.blogcompose.R
 
 @OptIn(ExperimentalAnimationApi::class)
@@ -21,9 +22,9 @@ fun ButtonAdd(
         enter = scaleIn() + fadeIn(),
         exit = scaleOut() + fadeOut()
     ) {
-        FloatingActionButton(onClick = { action() }) {
+        FloatingActionButton(onClick = action) {
             Icon(painterResource(id = R.drawable.ic_add),
-                contentDescription = "")
+                contentDescription = stringResource(R.string.description_add_new_post))
         }
     }
 }

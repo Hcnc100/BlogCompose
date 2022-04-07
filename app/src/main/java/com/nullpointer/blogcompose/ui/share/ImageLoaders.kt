@@ -1,16 +1,17 @@
 package com.nullpointer.blogcompose.ui.share
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Card
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
@@ -18,7 +19,6 @@ import androidx.compose.ui.unit.dp
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.ImagePainter
 import coil.compose.rememberImagePainter
-import coil.size.OriginalSize
 import coil.transform.CircleCropTransformation
 import com.nullpointer.blogcompose.R
 import java.io.File
@@ -29,6 +29,7 @@ import java.io.File
 fun ImageProfile(
     urlImgProfile: String,
     paddingLoading: Dp,
+    contentDescription:String,
     modifier: Modifier = Modifier,
     fileImg: File? = null,
     showProgress: Boolean = false,
@@ -55,7 +56,7 @@ fun ImageProfile(
                 is ImagePainter.State.Error -> painterResource(id = R.drawable.ic_broken_image)
                 else -> painter
             },
-            contentDescription = "",
+            contentDescription = contentDescription,
             modifier = Modifier.padding(
                 (if (state !is ImagePainter.State.Success || fileImg == null && urlImgProfile.isEmpty())
                     paddingLoading else 0.dp))
@@ -68,6 +69,7 @@ fun ImageProfile(
 @Composable
 fun ImagePost(
     paddingLoading: Dp,
+    contentDescription:String,
     modifier: Modifier = Modifier,
     urlImgPost: String? = null,
     fileImg: File? = null,
@@ -99,7 +101,7 @@ fun ImagePost(
                 is ImagePainter.State.Error -> painterResource(id = R.drawable.ic_broken_image)
                 else -> painter
             },
-            contentDescription = "",
+            contentDescription = contentDescription,
             modifier = Modifier.fillMaxSize(),
         )
         if (state is ImagePainter.State.Loading && showProgress) CircularProgressIndicator()

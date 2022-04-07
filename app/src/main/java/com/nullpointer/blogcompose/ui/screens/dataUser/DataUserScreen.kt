@@ -24,8 +24,8 @@ import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.presentation.AuthViewModel
 import com.nullpointer.blogcompose.presentation.RegistryViewModel
-import com.nullpointer.blogcompose.ui.customs.ToolbarBack
-import com.nullpointer.blogcompose.ui.screens.addPost.components.ButtonSheetContent
+import com.nullpointer.blogcompose.ui.share.ToolbarBack
+import com.nullpointer.blogcompose.ui.share.ButtonSheetContent
 import com.nullpointer.blogcompose.ui.share.ImageProfile
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -52,8 +52,8 @@ fun DataUserScreen(
 
     LaunchedEffect(key1 = Unit) {
         registryViewModel.registryMessage.collect {
-            scaffoldState.snackbarHostState.showSnackbar(message = it,
-                duration = SnackbarDuration.Short)
+            scaffoldState.snackbarHostState.showSnackbar(
+                context.getString(it))
         }
     }
 
@@ -76,11 +76,11 @@ fun DataUserScreen(
                 if (isDataComplete) {
                     // * if data is complete , show data saved
                     ToolbarBack(
-                        title = "Información de perfil",
+                        title = stringResource(R.string.title_profile),
                         actionBack = navigator::popBackStack)
                 } else {
                     // ? if data is no complete no show nothing
-                    ToolbarBack(title = "Completa tu cuenta")
+                    ToolbarBack(title = stringResource(R.string.title_registry))
                 }
             },
             floatingActionButton = {
@@ -148,7 +148,8 @@ fun ImageCirculateUser(
                     paddingLoading = 20.dp,
                     modifier = Modifier.size(150.dp),
                     showProgress = true,
-                    fileImg = fileTemp
+                    fileImg = fileTemp,
+                    contentDescription = stringResource(R.string.description_img_select)
                 )
             }
 
@@ -164,14 +165,11 @@ fun ImageCirculateUser(
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_edit),
-                    contentDescription = "",
+                    contentDescription = stringResource(R.string.description_change_photo_user),
                 )
             }
         }
-
     }
-
-
 }
 
 @Composable
@@ -193,7 +191,7 @@ fun TextInputName(
             value = nameUser,
             singleLine = true,
             onValueChange = changeNameUser,
-            label = { Text("Nombre de usuario") },
+            label = { Text(stringResource(R.string.text_label_name_user)) },
             isError = errorMessage != 0
         )
         // * text error message
@@ -205,16 +203,13 @@ fun TextInputName(
         Row(modifier = Modifier
             .padding(horizontal = 10.dp, vertical = 15.dp)
             .align(Alignment.Start), verticalAlignment = Alignment.CenterVertically) {
-            Image(painter = painterResource(id = R.drawable.ic_help), contentDescription = "")
+            Image(painter = painterResource(id = R.drawable.ic_help),
+                contentDescription = stringResource(R.string.description_info_icon))
             Spacer(modifier = Modifier.width(10.dp))
-            Text(if (!isEnable) "El nombre no puede ser cambiado" else "Una vez seleccionado el nombre, este no podra ser cambiado",
+            Text(if (!isEnable) stringResource(R.string.text_name_no_change) else stringResource(R.string.text_select_name),
                 style = MaterialTheme.typography.caption)
         }
-
-
     }
-
-
 }
 
 @Composable
@@ -234,14 +229,15 @@ fun ButtonRegistryStatus(
         when (statusChange) {
             is Resource.Failure -> Icon(
                 painter = painterResource(id = R.drawable.ic_clear),
-                contentDescription = "")
+                contentDescription = stringResource(R.string.description_icon_error))
             is Resource.Loading -> CircularProgressIndicator()
             is Resource.Success -> Icon(
                 painter = painterResource(id = R.drawable.ic_ckeck),
-                contentDescription = "")
+                contentDescription = stringResource(R.string.description_icon_sucess))
             null -> {
-                val text = if (isRegistry) "Actulizar" else "Registrarse"
-                Text(text, modifier = Modifier.padding(horizontal = 20.dp))
+                Text(if (isRegistry) stringResource(R.string.text_button_update) else stringResource(
+                    R.string.text_button_registry),
+                    modifier = Modifier.padding(horizontal = 20.dp))
             }
         }
     }

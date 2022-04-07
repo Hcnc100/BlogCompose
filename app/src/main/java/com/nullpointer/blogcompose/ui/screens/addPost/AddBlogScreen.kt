@@ -25,8 +25,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.annotation.ExperimentalCoilApi
 import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.services.uploadImg.UploadPostServices
-import com.nullpointer.blogcompose.ui.customs.ToolbarBack
-import com.nullpointer.blogcompose.ui.screens.addPost.components.ButtonSheetContent
+import com.nullpointer.blogcompose.ui.share.ToolbarBack
+import com.nullpointer.blogcompose.ui.share.ButtonSheetContent
 import com.nullpointer.blogcompose.ui.screens.addPost.viewModel.AddBlogViewModel
 import com.nullpointer.blogcompose.ui.share.BackHandler
 import com.nullpointer.blogcompose.ui.share.ImagePost
@@ -84,7 +84,7 @@ fun AddBlogScreen(
         sheetBackgroundColor = if (modalState.isVisible) MaterialTheme.colors.surface else Color.Transparent) {
         Scaffold(
             topBar = {
-                ToolbarBack("Nuevo Post") {
+                ToolbarBack(stringResource(R.string.title_toolbar_add_blog)) {
                     changeButtonVisible(false)
                     navigator.popBackStack()
                 }
@@ -99,7 +99,9 @@ fun AddBlogScreen(
                                 description = addBlogVM.description,
                                 fileImage = addBlogVM.fileImg!!
                             )
-                            Toast.makeText(context, "Subiendo post", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context,
+                                context.getString(R.string.text_message_upload_post),
+                                Toast.LENGTH_SHORT).show()
                             changeButtonVisible(false)
                             navigator.popBackStack()
                         }
@@ -138,8 +140,8 @@ fun ButtonPublish(
     actionValidate: () -> Unit,
 ) {
     ExtendedFloatingActionButton(
-        icon = { Icon(painterResource(id = R.drawable.ic_publish), "") },
-        text = { Text("Publicar") },
+        icon = { Icon(painterResource(id = R.drawable.ic_publish), stringResource(R.string.description_icon_upload)) },
+        text = { Text(stringResource(R.string.text_message_public_post)) },
         onClick = actionValidate,
     )
 }
@@ -160,11 +162,12 @@ fun DescriptionNewBlog(
                 .height(150.dp),
             value = descriptionBlog,
             onValueChange = changeDescriptionBlog,
-            label = { Text("Descirpcion") },
-            placeholder = { Text("Descripcion del blog") },
+            label = { Text(stringResource(R.string.text_label_description_post)) },
+            placeholder = { Text(stringResource(R.string.text_place_holder_description)) },
             shape = RoundedCornerShape(20.dp),
             isError = errorDescription != 0
         )
+        // * show counter character or show message error
         Text(modifier = Modifier
             .align(Alignment.End)
             .padding(horizontal = 10.dp, vertical = 5.dp),
@@ -202,10 +205,12 @@ fun ImageNewBlog(
                             fileImg != null -> Color.Transparent
                             isSystemInDarkTheme() -> Color.DarkGray
                             else -> Color.LightGray
-                        }))
+                        }),
+                    contentDescription = stringResource(R.string.description_img_new_post)
+                )
                 // * progress indicate compress
                 if (isCompress) CircularProgressIndicator()
-                // * button edit imagen select
+                // * button edit image select
                 FloatingActionButton(
                     onClick = { actionEditImg() },
                     modifier = Modifier
@@ -213,7 +218,7 @@ fun ImageNewBlog(
                         .size(40.dp)
                         .align(Alignment.BottomEnd)
                 ) {
-                    Icon(painterResource(id = R.drawable.ic_edit), "")
+                    Icon(painterResource(id = R.drawable.ic_edit), stringResource(R.string.description_edit_img_post))
                 }
             }
         }

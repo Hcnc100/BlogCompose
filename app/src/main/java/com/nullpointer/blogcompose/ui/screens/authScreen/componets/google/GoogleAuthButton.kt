@@ -1,8 +1,7 @@
-package com.nullpointer.blogcompose.ui.screens.authScreen.componets
+package com.nullpointer.blogcompose.ui.screens.authScreen.componets.google
 
 import android.content.Context
 import android.widget.Toast
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.size
@@ -14,18 +13,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.facebook.CallbackManager
-import com.facebook.FacebookCallback
-import com.facebook.FacebookException
-import com.facebook.login.LoginManager
-import com.facebook.login.LoginResult
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.AuthCredential
-import com.google.firebase.auth.FacebookAuthProvider
 import com.google.firebase.auth.GoogleAuthProvider
 import com.nullpointer.blogcompose.R
 import timber.log.Timber
@@ -58,8 +52,10 @@ fun ButtonAuthGoogle(
             val account = task.getResult(ApiException::class.java)!!
             actionBeforeAuth(GoogleAuthProvider.getCredential(account.idToken, null))
         } catch (e: ApiException) {
-            Toast.makeText(context, "Error al ingresar", Toast.LENGTH_SHORT).show()
-            Timber.d("Google sign in failed $e")
+            Toast.makeText(context,
+                context.getString(R.string.text_error_login_google),
+                Toast.LENGTH_SHORT).show()
+            Timber.e("Google sign in failed $e")
         }
     }
 
@@ -67,10 +63,10 @@ fun ButtonAuthGoogle(
         modifier = modifier,
         onClick = { launcher.launch(googleSignInClient.signInIntent) },
         backgroundColor = Color.White,
-        text = { Text("Ingresa con Google") },
+        text = { Text(stringResource(R.string.text_login_google)) },
         icon = {
             Icon(painterResource(id = R.drawable.ic_google),
-                contentDescription = "",
+                contentDescription = stringResource(R.string.description_icon_google),
                 modifier = Modifier.size(24.dp), tint = Color.Unspecified)
         }
     )

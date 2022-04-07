@@ -2,6 +2,7 @@ package com.nullpointer.blogcompose.domain.post
 
 import android.content.Context
 import android.widget.Toast
+import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.utils.InternetCheck
 import com.nullpointer.blogcompose.core.utils.NetworkException
 import com.nullpointer.blogcompose.data.local.cache.CommentsDAO
@@ -198,7 +199,7 @@ class PostRepoImpl(
 
     override suspend fun addNewPost(post: Post, context: Context) {
         val idPost = postDataSource.addNewPost(post)
-        Toast.makeText(context, "Post subido con exito", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, context.getString(R.string.post_upload_sucess), Toast.LENGTH_SHORT).show()
         requestLastPostInitWith(idPost)
     }
 

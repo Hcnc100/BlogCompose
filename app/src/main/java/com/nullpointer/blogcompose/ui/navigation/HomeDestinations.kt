@@ -8,24 +8,24 @@ import com.ramcosta.composedestinations.spec.DirectionDestinationSpec
 
 enum class HomeDestinations(
     val direction: DirectionDestinationSpec,
-    val title: String,
+    val title: Int,
     val icon: Int,
 ) {
     BlogScreen(
         direction = BlogScreenDestination,
-        title = "Blogs",
+        title = R.string.title_nav_post,
         icon = R.drawable.ic_home
     ),
 
     NotifyScreen(
         direction = NotifyScreenDestination,
-        title = "Notificaciones",
+        title = R.string.title_nav_notify,
         icon = R.drawable.ic_notify
     ),
 
     ProfileScreen(
         direction = ProfileScreenDestination,
-        title = "Perfil",
+        title = R.string.title_nav_profile,
         icon = R.drawable.ic_account
     );
 

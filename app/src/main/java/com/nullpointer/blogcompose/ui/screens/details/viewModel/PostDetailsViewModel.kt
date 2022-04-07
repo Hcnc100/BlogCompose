@@ -3,26 +3,26 @@ package com.nullpointer.blogcompose.ui.screens.details.viewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.delegates.SavableProperty
 import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.core.utils.NetworkException
 import com.nullpointer.blogcompose.domain.post.PostRepoImpl
-import com.nullpointer.blogcompose.domain.preferences.PreferencesRepoImpl
 import com.nullpointer.blogcompose.models.Comment
 import com.nullpointer.blogcompose.models.posts.Post
-import com.nullpointer.blogcompose.models.users.InnerUser
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import timber.log.Timber
-import java.lang.Exception
 import javax.inject.Inject
 
 @HiltViewModel
 class PostDetailsViewModel @Inject constructor(
     private val postRepoImpl: PostRepoImpl,
-    private val preferencesRepoImpl: PreferencesRepoImpl,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
@@ -39,7 +39,7 @@ class PostDetailsViewModel @Inject constructor(
     val stateConcatenate = _stateConcatenate.asStateFlow()
 
     // * this var is for send any messaging
-    private val _messageDetails = Channel<String>()
+    private val _messageDetails = Channel<Int>()
     val messageDetails = _messageDetails.receiveAsFlow()
 
     // * this var is for update post selected
@@ -87,8 +87,8 @@ class PostDetailsViewModel @Inject constructor(
         }
     }.flowOn(Dispatchers.IO).catch {
         Timber.d("Error con el post $it")
-        _messageDetails.send("Error al cargar el post")
-        emit(Resource.Failure<Post>(Exception(it)))
+        _messageDetails.send(R.string.message_error_load_post)
+        emit(Resource.Failure(Exception(it)))
     }.stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(5000),
@@ -103,7 +103,7 @@ class PostDetailsViewModel @Inject constructor(
         }
     }.catch {
         Timber.d("Error al cargar los comentarios del post $it")
-        _messageDetails.send("No se pudieron cargar los comentarios")
+        _messageDetails.send(R.string.error_load_comments)
         emit(Resource.Failure(Exception(it)))
     }.flowOn(Dispatchers.IO).stateIn(
         viewModelScope,
@@ -129,9 +129,9 @@ class PostDetailsViewModel @Inject constructor(
             } catch (e: Exception) {
                 when (e) {
                     is CancellationException -> throw e
-                    is NetworkException -> _messageDetails.send("No hay conexion a intenet")
+                    is NetworkException -> _messageDetails.send(R.string.message_error_internet_checker)
                     else -> {
-                        _messageDetails.send("Error desconocido")
+                        _messageDetails.send(R.string.message_error_unknown)
                         Timber.d("Error al concatenar los post ${_idPost.value} : $e")
                     }
                 }
@@ -145,19 +145,10 @@ class PostDetailsViewModel @Inject constructor(
         try {
             // * change number of comments
             // ! this for no show any for "hasNewComments"
-            val lastUser = preferencesRepoImpl.getCurrentUser().first()
             numberComments++
-//            postRepoImpl.addNewComment(idPost, Comment(
-//                comment = comment,
-//                userComment = InnerUser(
-//                    idUser = lastUser.idUser,
-//                    nameUser = lastUser.nameUser,
-//                    urlImg = lastUser.urlImg
-//                )
-//            ))
             post?.let { postRepoImpl.addNewComment(it, comment) }
         } catch (e: Exception) {
-            _messageDetails.send("No se puedo agregar el comentario")
+            _messageDetails.send(R.string.message_error_add_comment)
             Timber.e("Error al agregar un commet $e")
         }
     }
@@ -176,9 +167,9 @@ class PostDetailsViewModel @Inject constructor(
             } catch (e: Exception) {
                 when (e) {
                     is CancellationException -> throw e
-                    is NetworkException -> _messageDetails.send("No hay conexion a internet")
+                    is NetworkException -> _messageDetails.send(R.string.message_error_internet_checker)
                     else -> {
-                        _messageDetails.send("Error al cargar los comentarios")
+                        _messageDetails.send(R.string.message_error_load_comments)
                         Timber.e("Error al recargar comentarios ${_idPost.value} : $e")
                     }
                 }

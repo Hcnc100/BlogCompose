@@ -7,7 +7,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -47,16 +49,21 @@ fun ProfileScreen(
     val likeMessage = likeViewModel.messageLike
     val postMessage = myPostViewModel.messageMyPosts
     val scaffoldState = rememberScaffoldState()
+    val context=LocalContext.current
 
     LaunchedEffect(postMessage) {
         postMessage.collect {
-            scaffoldState.snackbarHostState.showSnackbar(it)
+            scaffoldState.snackbarHostState.showSnackbar(
+                context.getString(it)
+            )
         }
     }
 
     LaunchedEffect(likeMessage) {
         likeMessage.collect {
-            scaffoldState.snackbarHostState.showSnackbar(it)
+            scaffoldState.snackbarHostState.showSnackbar(
+                context.getString(it)
+            )
         }
     }
 
@@ -73,7 +80,7 @@ fun ProfileScreen(
             navigator.navigate(PostDetailsDestination(idPost, goToBottom))
         },
         emptyResRaw = R.raw.empty1,
-        emptyString = "No has hecho ningun post"
+        emptyString = stringResource(R.string.message_empty_my_post)
     ) {
         // * add header for the swipe list
         // ! only function composable
@@ -97,7 +104,8 @@ fun HeaderProfile(
         IconButton(onClick = { actionLogOut() }, modifier = Modifier
             .align(Alignment.TopEnd)
             .padding(10.dp)) {
-            Icon(painterResource(id = R.drawable.ic_settings), "")
+            Icon(painterResource(id = R.drawable.ic_settings),
+                stringResource(R.string.description_go_to_config))
         }
     }
 }
@@ -117,7 +125,8 @@ fun InfoProfile(
 
             ImageProfile(urlImgProfile = urlImgProfile,
                 paddingLoading = 30.dp,
-                modifier = Modifier.size(120.dp))
+                modifier = Modifier.size(120.dp),
+                contentDescription = stringResource(id = R.string.description_image_profile))
 
             Spacer(modifier = Modifier.height(20.dp))
 

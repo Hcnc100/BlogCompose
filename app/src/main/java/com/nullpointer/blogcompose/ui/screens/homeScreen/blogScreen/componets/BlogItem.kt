@@ -13,11 +13,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.annotation.ExperimentalCoilApi
+import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.utils.TimeUtils
 import com.nullpointer.blogcompose.models.posts.SimplePost
 import com.nullpointer.blogcompose.ui.share.ImagePost
@@ -55,6 +57,7 @@ fun BlogItem(
                 urlImgPost = post.urlImage,
                 paddingLoading = 70.dp,
                 showProgress = true,
+                contentDescription = stringResource(id = R.string.description_img_post),
                 modifier = Modifier
                     .fillMaxWidth()
                     .aspectRatio(1f)
@@ -84,7 +87,8 @@ fun sharePost(idPost: String, context: Context) {
     val intent = Intent(Intent.ACTION_SEND)
         .putExtra(Intent.EXTRA_TEXT, "https://www.blog-compose.com/post/$idPost")
         .setType("text/plain")
-    context.startActivity(Intent.createChooser(intent, "Compartir post"))
+    context.startActivity(Intent.createChooser(intent,
+        context.getString(R.string.title_share_post)))
 }
 
 @Composable
@@ -116,16 +120,16 @@ fun DescriptionBlog(
 fun TextLikes(numberLikes: Int, numberComments: Int) {
     Row(modifier = Modifier
         .fillMaxWidth()
-        .padding(horizontal = 5.dp)
-        .clickable { },
+        .padding(horizontal = 5.dp),
+//        .clickable { },
         horizontalArrangement = Arrangement.SpaceBetween) {
-        Text(text = "$numberLikes Me gusta",
+        Text(text = stringResource(id = R.string.text_count_likes, numberLikes),
             modifier = Modifier.padding(vertical = 5.dp),
             style = MaterialTheme.typography.caption,
             fontWeight = FontWeight.W400,
             fontSize = 14.sp
         )
-        Text(text = "$numberComments Comentarios",
+        Text(text = stringResource(id = R.string.text_count_comments, numberComments),
             modifier = Modifier.padding(vertical = 5.dp),
             style = MaterialTheme.typography.caption,
             fontWeight = FontWeight.W400,

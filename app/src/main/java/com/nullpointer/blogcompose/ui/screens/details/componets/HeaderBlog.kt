@@ -12,6 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.nullpointer.blogcompose.R
@@ -60,7 +61,7 @@ fun HeaderBlog(
         Row(verticalAlignment = Alignment.CenterVertically) {
             ImageProfile(urlImgProfile = post.userPoster?.urlImg.toString(),
                 paddingLoading = 5.dp,
-                modifier = Modifier.size(30.dp))
+                modifier = Modifier.size(30.dp), contentDescription = stringResource(R.string.description_img_owner_post))
             Spacer(modifier = Modifier.width(15.dp))
             Text(post.userPoster?.nameUser.toString(),
                 style = MaterialTheme.typography.body1,
@@ -72,7 +73,8 @@ fun HeaderBlog(
             urlImgPost = post.urlImage,
             paddingLoading = 70.dp,
             showProgress = true,
-            modifier = modifier
+            modifier = modifier,
+            contentDescription = stringResource(R.string.description_img_post)
         )
         InfoPost(post = post, actionLike)
     }
@@ -100,12 +102,12 @@ fun InfoPost(post: Post, actionLike: (Boolean) -> Unit) {
             }) {
                 Icon(painterResource(
                     id = if (likeState) R.drawable.ic_fav else R.drawable.ic_unfav),
-                    contentDescription = "")
+                    contentDescription = stringResource(R.string.description_like_button))
                 Spacer(modifier = Modifier.width(10.dp))
-                Text("$numberLike likes")
+                Text(stringResource(id = R.string.text_count_likes, numberLike))
             }
         }
         // * info comments
-        Text("${post.numberComments} comentarios")
+        Text(stringResource(id = R.string.text_count_comments, post.numberComments))
     }
 }

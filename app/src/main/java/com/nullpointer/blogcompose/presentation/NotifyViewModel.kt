@@ -3,7 +3,7 @@ package com.nullpointer.blogcompose.presentation
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.nullpointer.blogcompose.core.delegates.SavableComposeState
+import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.delegates.SavableProperty
 import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.core.utils.NetworkException
@@ -16,8 +16,6 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import java.lang.Exception
-import java.lang.NullPointerException
 import java.util.concurrent.CancellationException
 import javax.inject.Inject
 
@@ -47,13 +45,13 @@ class NotifyViewModel @Inject constructor(
     val stateRequest = _stateRequestData.asStateFlow()
 
     // * message to show about any state
-    private val _messageNotify = Channel<String>()
+    private val _messageNotify = Channel<Int>()
     val messageNotify = _messageNotify.receiveAsFlow()
 
     // * show notification from database
     val listNotify = notifyRepoImpl.listNotify.catch { e ->
         Timber.e("Error al obtener las notificaciones de la base de datos $e")
-        _messageNotify.trySend("Error desconocido")
+        _messageNotify.trySend(R.string.message_error_unknown)
     }.flowOn(Dispatchers.IO).stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(5_000),
@@ -84,9 +82,9 @@ class NotifyViewModel @Inject constructor(
                     _stateConcatenateData.value = Resource.Failure(e)
                     when (e) {
                         is CancellationException -> throw e
-                        is NetworkException -> _messageNotify.trySend("Verifique su conexion a internet")
+                        is NetworkException -> _messageNotify.trySend(R.string.message_error_internet_checker)
                         else -> {
-                            _messageNotify.trySend("Error desconocido")
+                            _messageNotify.trySend(R.string.message_error_unknown)
                             Timber.e("Error en el concatenate $e")
                         }
                     }
@@ -111,10 +109,10 @@ class NotifyViewModel @Inject constructor(
                 _stateRequestData.value = Resource.Failure(e)
                 when (e) {
                     is CancellationException -> throw e
-                    is NetworkException -> _messageNotify.trySend("Verifique su conexion a internet")
+                    is NetworkException -> _messageNotify.trySend(R.string.message_error_internet_checker)
                     is NullPointerException -> Timber.e(" Error al obtener ultimas notificaciones El usuario posiblemente es nulo")
                     else -> {
-                        _messageNotify.trySend("Error desconocido")
+                        _messageNotify.trySend(R.string.message_error_unknown)
                         Timber.e("Error al obtener ultimas notificaciones $e")
                     }
                 }

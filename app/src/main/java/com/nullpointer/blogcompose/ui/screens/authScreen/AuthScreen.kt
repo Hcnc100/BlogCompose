@@ -13,6 +13,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberImagePainter
@@ -20,7 +22,7 @@ import com.google.firebase.auth.AuthCredential
 import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.presentation.AuthViewModel
-import com.nullpointer.blogcompose.ui.screens.authScreen.componets.ButtonAuthGoogle
+import com.nullpointer.blogcompose.ui.screens.authScreen.componets.google.ButtonAuthGoogle
 import com.nullpointer.blogcompose.ui.screens.authScreen.componets.facebook.ButtonAuthFacebook
 import com.ramcosta.composedestinations.annotation.Destination
 
@@ -35,9 +37,12 @@ fun AuthScreen(
 
     // * messages auth
     val messageError = authViewModel.messageAuth
+    val context= LocalContext.current
     LaunchedEffect(messageError) {
         messageError.collect {
-            scaffoldState.snackbarHostState.showSnackbar(it)
+            scaffoldState.snackbarHostState.showSnackbar(
+                context.getString(it)
+            )
         }
     }
 
@@ -77,7 +82,8 @@ fun ContainerLogo() {
             shape = CircleShape,
             elevation = 10.dp
         ) {
-            Image(painter = rememberImagePainter(data = R.mipmap.ic_launcher), "",
+            Image(painter = rememberImagePainter(data = R.mipmap.ic_launcher),
+                contentDescription = stringResource(R.string.description_logo_app),
                 modifier = Modifier
                     .size(150.dp)
                     .padding(3.dp))
@@ -117,7 +123,7 @@ fun ButtonsAuth(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // * text disclaimer
-            Text("Al hacer click en iniciar session aceptas los terminos y condiciones",
+            Text(stringResource(R.string.text_disclaimer),
                 style = MaterialTheme.typography.caption,
                 textAlign = TextAlign.Center,
                 color = Color.White,

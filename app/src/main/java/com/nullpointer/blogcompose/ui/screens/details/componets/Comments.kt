@@ -71,7 +71,8 @@ fun ImageComment(
             paddingLoading = 5.dp,
             modifier = Modifier
                 .padding(start = 10.dp, top = 10.dp)
-                .size(40.dp))
+                .size(40.dp),
+            contentDescription = "Imagen del usuario que hizo el comentario")
     } else {
         Box(modifier = Modifier
             .padding(start = 10.dp, top = 10.dp)

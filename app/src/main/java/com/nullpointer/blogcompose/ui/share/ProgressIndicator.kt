@@ -30,7 +30,6 @@ fun CircularProgressAnimation(
             Card(shape = CircleShape) {
                 CircularProgressIndicator(modifier = Modifier.padding(5.dp))
             }
-
         }
     }
 }

@@ -65,8 +65,8 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             } catch (e: Exception) {
                 when (e) {
                     is CancellationException -> throw e
-                    is NullPointerException -> Timber.d("Error al actualizar el toke, el usuario es nulo")
-                    else -> Timber.d("Error desconocido al actializar token $e")
+                    is NullPointerException -> Timber.e("Error al actualizar el toke, el usuario es nulo")
+                    else -> Timber.e("Error desconocido al actializar token $e")
                 }
             }
         }
@@ -134,36 +134,37 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             get() = this@MyFirebaseMessagingService
 
         private fun getBaseNotification(typeNotify: TypeNotify) =
-            when(typeNotify){
+            when (typeNotify) {
                 LIKE -> NotificationCompat.Builder(context,
                     ID_CHANNEL_POST_NOTIFY)
                     .setAutoCancel(true)
                     .setOngoing(false)
                     .setSmallIcon(R.drawable.ic_fav)
-                    .setContentTitle("Like en un post")
+                    .setContentTitle(context.getString(R.string.text_content_notify_like))
                 COMMENT -> NotificationCompat.Builder(context,
                     ID_CHANNEL_POST_NOTIFY)
                     .setAutoCancel(true)
                     .setOngoing(false)
                     .setSmallIcon(R.drawable.ic_comment)
-                    .setContentTitle("Comentario en un post")
+                    .setContentTitle(context.getString(R.string.text_content_notify_comment))
             }
 
 
         private fun getPendingIntentCompose(idPost: String): PendingIntent {
             // * create deep link
             // * this go to post for notification
-            val deepLinkIntent =Intent(Intent.ACTION_VIEW,
+            val deepLinkIntent = Intent(Intent.ACTION_VIEW,
                 "https://www.blog-compose.com/post/$idPost".toUri(),
                 context,
                 MainActivity::class.java)
             // * create pending intent compose
-            val deepLinkPendingIntent=TaskStackBuilder.create(context).run {
+            val deepLinkPendingIntent = TaskStackBuilder.create(context).run {
                 addNextIntentWithParentStack(deepLinkIntent)
                 getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT)
             }
             return deepLinkPendingIntent
         }
+
         private fun createCustomNotification(
             bitmapUser: Bitmap,
             bitmapPost: Bitmap,
@@ -171,8 +172,12 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             typeNotify: TypeNotify,
         ): RemoteViews {
             val (title, body) = when (typeNotify) {
-                LIKE -> Pair("Recibiste un like", "A $nameUserLiked le gusta tu post")
-                COMMENT -> Pair("Recibiste un comentario", "$nameUserLiked comento tu post")
+                LIKE -> Pair(
+                    context.getString(R.string.text_title_notify_like),
+                    context.getString(R.string.message_notify_liked, nameUserLiked))
+                COMMENT -> Pair(
+                    context.getString(R.string.text_title_notify_comment),
+                    context.getString(R.string.message_notify_comment, nameUserLiked))
             }
             return RemoteViews(context.packageName, R.layout.notify_liked).apply {
                 setImageViewBitmap(R.id.img_user_liked, bitmapUser)
@@ -194,7 +199,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             // * create notification channel amd get notification manager
             val notificationManager = NotificationChannelHelper.createChannelNotification(
                 idNotificationChannel = ID_CHANNEL_POST_NOTIFY,
-                nameNotificationChanel = NAME_CHANNEL_LIKE,
+                nameNotificationChanel = context.getString(NAME_CHANNEL_LIKE),
                 importance = NotificationManagerCompat.IMPORTANCE_HIGH,
                 context = context
             )
@@ -204,7 +209,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             val deepLinkPendingIntent = getPendingIntentCompose(idPost)
             // * create custom notification
             baseNotify.setContentIntent(deepLinkPendingIntent).also {
-                val customNotify=createCustomNotification(
+                val customNotify = createCustomNotification(
                     bitmapUser = bitmapUser,
                     bitmapPost = bitmapPost,
                     nameUserLiked = nameUserLiked,

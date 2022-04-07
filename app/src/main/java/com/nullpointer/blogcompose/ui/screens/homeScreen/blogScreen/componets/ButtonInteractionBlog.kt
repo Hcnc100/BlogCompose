@@ -10,6 +10,7 @@ import androidx.compose.material.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import com.nullpointer.blogcompose.R
 
 @OptIn(ExperimentalAnimationApi::class)
@@ -31,12 +32,13 @@ fun ButtonsInteractionBlog(
                 AnimatedContent(targetState = ownerLike) {
                     Icon(painterResource(
                         id = if (ownerLike) R.drawable.ic_fav else R.drawable.ic_unfav),
-                        contentDescription = "")
+                        contentDescription = stringResource(id = R.string.description_like_button))
                 }
             }
             // * when click in this, show keyboard
             IconButton(onClick = { actionComments() }) {
-                Icon(painterResource(id = R.drawable.ic_comment), "")
+                Icon(painterResource(id = R.drawable.ic_comment),
+                    stringResource(R.string.description_to_to_comment))
             }
         }
         Row {
@@ -49,7 +51,8 @@ fun ButtonsInteractionBlog(
 //            }
             // * share post
             IconButton(onClick = { actionShare() }) {
-                Icon(painterResource(id = R.drawable.ic_share), "")
+                Icon(painterResource(id = R.drawable.ic_share),
+                    stringResource(R.string.description_share_post))
             }
         }
     }

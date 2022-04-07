@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Blog Compose</string>
+
+    <!-- title bottom bar -->
+    <string name="title_nav_post">Posts</string>
+    <string name="title_nav_notify">Notificaciones</string>
+    <string name="title_nav_profile">Perfil</string>
+
+    <!-- text time -->
+    <string name="text_time_future">En el futuro</string>
+    <string name="text_time_just_now">Justo Ahora</string>
+    <string name="text_time_one_minute_ago">Un minuto atrás</string>
+    <string name="text_time_more_minutes_ago">%d minutos atrás</string>
+    <string name="text_time_one_hour_ago">Una hora atrás</string>
+    <string name="text_time_more_hour_ago">%d horas atrás</string>
+    <string name="text_time_yesterday">Ayer</string>
+    <string name="text_time_days_Ago">%d días atrás</string>
+
+    <!-- select imager picker -->
+    <string name="text_select_option">Seleccione una opción</string>
+    <string name="option_img_camera">Cámara</string>
+    <string name="description_img_camera">Tomar una foto</string>
+    <string name="option_img_gallery">Galería</string>
+    <string name="description_img_gallery">Selecciona una foto de la galería</string>
+
+    <!-- notifications -->
+    <string name="text_content_notify_like">Like en un post</string>
+    <string name="text_content_notify_comment">Comentario en un post</string>
+    <string name="text_title_notify_like">Recibiste un like</string>
+    <string name="text_title_notify_comment">Recibiste un comentario</string>
+
+    <!-- screen add post -->
+    <string name="description_img_blog">Imagen del blog actual</string>
+    <string name="error_length_description">La descripción no puede ser muy larga</string>
+    <string name="error_empty_description">El blog necesita una descripción</string>
+    <string name="error_empty_image">Se necesita una imagen para el blog</string>
+    <string name="error_empty_name">Se necesita un nombre de usuario</string>
+    <string name="error_length_name">El nombre de usuario no puede ser tan largo</string>
+    <string name="title_toolbar_add_blog">Nuevo Post</string>
+    <string name="text_message_upload_post">Subiendo post</string>
+    <string name="text_message_public_post">Publicar</string>
+    <string name="text_label_description_post">Descripción</string>
+    <string name="text_place_holder_description">Descripción del blog</string>
+    <string name="description_icon_upload">Icono que representa la acción de subir un post</string>
+    <string name="description_edit_img_post">Icono que representa la acción de editar la imagen del post</string>
+
+    <!-- screen auth -->
+    <string name="text_error_login_face">Error al ingresar con Facebook</string>
+    <string name="text_login_face">Ingresa con Facebook</string>
+    <string name="description_icon_face">Icono de Facebook</string>
+    <string name="text_error_login_google">Error al ingresar con Google</string>
+    <string name="text_login_google">Ingresa con Google</string>
+    <string name="description_icon_google">Icono de Google</string>
+    <string name="text_disclaimer">Al iniciar sesión aceptas los términos y condiciones</string>
+    <string name="description_logo_app">Logo de la aplicación</string>
+
+    <!-- screen config -->
+    <string name="title_config">Configuración</string>
+    <string name="change_image_user">Cambiar foto del usuario</string>
+    <string name="close_session">Cerrar sesión</string>
+    <string name="description_close_session">Icono de cerrar sesión</string>
+
+
+    <!-- screen data user -->
+    <string name="title_profile">Información de perfil</string>
+    <string name="title_registry">Completa tu cuenta</string>
+    <string name="description_change_photo_user">Cambia la foto de perfil</string>
+    <string name="text_label_name_user">Nombre de usuario</string>
+    <string name="text_name_no_change">El nombre no puede ser cambiado</string>
+    <string name="text_select_name">Una vez seleccionado el nombre, este no podrá ser cambiado</string>
+    <string name="description_info_icon">Icono de información</string>
+    <string name="description_icon_error">Acción fallida</string>
+    <string name="description_icon_sucess">Acción exitosa</string>
+    <string name="text_button_update">Actualizar</string>
+    <string name="text_button_registry">Registrarse</string>
+
+    <!-- screen details -->
+    <string name="message_has_new_comments">Hay nuevos comentarios</string>
+    <string name="description_like_button">Like al post actual</string>
+    <string name="text_count_likes">%s Me gusta</string>
+    <string name="text_count_comments">%s Comentarios</string>
+    <string name="message_comment">Comentario</string>
+    <string name="message_label_comment">Escribe algo …</string>
+    <string name="description_send_comment">Publicar nuevo comentario</string>
+    <string name="title_post">Post</string>
+    <string name="text_load_more_comments">Cargar más comentarios</string>
+
+    <!-- blog screen -->
+    <string name="message_empty_post">No hay post, deberías hacer uno</string>
+    <string name="title_share_post">Compartir post</string>
+    <string name="description_to_to_comment">Ir a los comentarios y publicar uno nuevo</string>
+    <string name="description_share_post">Compartir el post actual</string>
+
+    <!-- notify screen -->
+    <string name="message_empty_notify">No tiene notificaciones</string>
+    <string name="description_icon_notify_indicate">Icono de la notificación</string>
+    <string name="message_notify_liked">A %s le gusta tu post</string>
+    <string name="message_notify_comment">%s ha comentado tu post</string>
+    <string name="name_channel_upload_post">Estado de subida del post</string>
+    <string name="name_channel_notify_post">Notificaciones de los post</string>
+
+    <!-- profile screen -->
+    <string name="message_empty_my_post">No has hecho ningún post</string>
+    <string name="description_go_to_config">Ir a la pantalla de configuración</string>
+    <string name="description_add_new_post">Ir a la pantalla de nuevo post</string>
+
+
+    <!-- loaders descriptions -->
+    <string name="description_img_new_post">Imagen del nuevo post</string>
+    <string name="description_image_profile">Imagen de perfil actual</string>
+    <string name="description_img_select">Imagen de perfil seleccionada</string>
+    <string name="description_img_post">Imagen del post actual</string>
+    <string name="description_img_owner_post">Imagen del creador del post</string>
+    <string name="description_user_notify">Imagen del usuario de la notificación</string>
+    <string name="description_post_img_notify">Imagen del post de la notificación</string>
+
+    <!-- message in view model -->
+    <string name="message_error_load_post">Error al cargar el post</string>
+    <string name="error_load_comments">No se pudieron cargar los comentarios</string>
+    <string name="message_error_internet_checker">Verifique su conexión a internet</string>
+    <string name="message_error_unknown">Error desconocido</string>
+    <string name="message_error_add_comment">No se pudo agregar el comentario</string>
+    <string name="message_error_load_comments">Error al cargar los comentarios</string>
+    <string name="message_error_auth">Error al autenticar</string>
+    <string name="message_error_like">Necesita conexión para esto</string>
+    <string name="message_error_change_data">Sin cambios</string>
+    <string name="message_verify_data">Verifique sus datos</string>
+    <string name="message_data_saved">Cambios guardados</string>
+    <string name="message_error_internet_data">Se necesita internet para actualizar sus datos</string>
+    <string name="message_error_validate_img">La imagen de perfil no es una imagen válida</string>
+    <string name="message_error_compress_img">No se pudo obtener la imagen, reintente</string>
+    <string name="post_upload_sucess">Post subido con éxito</string>
+</resources>

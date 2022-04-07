@@ -59,7 +59,7 @@ class RegistryViewModel @Inject constructor(
     val stateUpdateUser = _stateUpdateUser.asStateFlow()
 
     // * var to show messages
-    private val _registryMessage = Channel<String>()
+    private val _registryMessage = Channel<Int>()
     val registryMessage = _registryMessage.receiveAsFlow()
 
     // * var to save job compress img
@@ -99,9 +99,9 @@ class RegistryViewModel @Inject constructor(
         when {
             // * when no has data myUser send error message
             nameUser.trim().isEmpty() || (photoUser.trim().isEmpty() && fileImg == null) -> _registryMessage.send(
-                "Varifique sus datos")
+               R.string.message_verify_data)
             // * when data no is change send error message
-            fileImg == null -> _registryMessage.send("Sin cambios")
+            fileImg == null -> _registryMessage.send(R.string.message_error_change_data)
             // * else update
             else -> updateUser(context)
         }
@@ -119,17 +119,17 @@ class RegistryViewModel @Inject constructor(
             // * if is success update state
             _stateUpdateUser.value = Resource.Success(Unit)
             // * notify to myUser
-            _registryMessage.send("Cambios guardados")
+            _registryMessage.send(R.string.message_data_saved)
             fileImg=null
         } catch (exception: Exception) {
             // * show error message if has exception
             when (exception) {
                 is CancellationException -> throw exception
-                is NetworkException -> _registryMessage.send("Se necesita internet para actulizar sus datos")
-                is ImgProfileInvalid -> _registryMessage.send("La imagen de perfil no es una imagen valida")
+                is NetworkException -> _registryMessage.send(R.string.message_error_internet_data)
+                is ImgProfileInvalid -> _registryMessage.send(R.string.message_error_validate_img)
                 else -> {
                     Timber.e("Error al actulizar datos $exception")
-                    _registryMessage.send("Error desconocido")
+                    _registryMessage.send(R.string.message_error_unknown)
                     _stateUpdateUser.value = Resource.Failure(exception)
                 }
             }
@@ -179,7 +179,7 @@ class RegistryViewModel @Inject constructor(
                     is CancellationException -> throw e
                     else -> {
                         Timber.e("Error al comprimir imagen $e")
-                        _registryMessage.send("No se pudo obtener la imagen, reintente")
+                        _registryMessage.send(R.string.message_error_compress_img)
                     }
                 }
                 Resource.Failure(e)

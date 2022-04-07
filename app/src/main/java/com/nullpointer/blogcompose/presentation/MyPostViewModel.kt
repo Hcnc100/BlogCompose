@@ -3,6 +3,7 @@ package com.nullpointer.blogcompose.presentation
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.delegates.SavableProperty
 import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.core.utils.NetworkException
@@ -30,7 +31,7 @@ class MyPostViewModel @Inject constructor(
     private var isConcatenateEnable by SavableProperty(savedStateHandle,
         KEY_CONCATENATE_ENABLE,true)
 
-    private val _messageMyPosts = Channel<String>()
+    private val _messageMyPosts = Channel<Int>()
     val messageMyPosts = _messageMyPosts.receiveAsFlow()
 
     private var jobRequestNew: Job? = null
@@ -44,7 +45,7 @@ class MyPostViewModel @Inject constructor(
 
     val listMyPost = postRepo.listMyLastPost.catch {
         Timber.e("Error al obtener my post de la base de datos $it")
-        _messageMyPosts.trySend("Error deconocido")
+        _messageMyPosts.trySend(R.string.message_error_unknown)
     }.flowOn(Dispatchers.IO).stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(5_000),
@@ -71,10 +72,10 @@ class MyPostViewModel @Inject constructor(
                 _stateLoadData.value = Resource.Failure(e)
                 when (e) {
                     is CancellationException -> throw e
-                    is NetworkException -> _messageMyPosts.trySend("Verifique su conexion a internet")
+                    is NetworkException -> _messageMyPosts.trySend(R.string.message_error_internet_checker)
                     is NullPointerException -> Timber.e(" Error al obtener ultimas notificaciones El usuario posiblemente es nulo")
                     else -> {
-                        _messageMyPosts.trySend("Error desconocido")
+                        _messageMyPosts.trySend(R.string.message_error_unknown)
                         Timber.e("Error en el request 'myPost' $e")
                     }
                 }
@@ -98,9 +99,9 @@ class MyPostViewModel @Inject constructor(
                     _stateConcatenateData.value = Resource.Failure(e)
                     when (e) {
                         is CancellationException -> throw e
-                        is NetworkException -> _messageMyPosts.trySend("Verifique su conexion a internet")
+                        is NetworkException -> _messageMyPosts.trySend(R.string.message_error_internet_checker)
                         else -> {
-                            _messageMyPosts.trySend("Error desconocido")
+                            _messageMyPosts.trySend(R.string.message_error_unknown)
                             Timber.e("Error en el request  de mis post $e")
                         }
                     }

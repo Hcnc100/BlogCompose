@@ -3,6 +3,7 @@ package com.nullpointer.blogcompose.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.AuthCredential
+import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.states.LoginStatus
 import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.domain.auth.AuthRepoImpl
@@ -35,7 +36,7 @@ class AuthViewModel @Inject constructor(
         null
     )
 
-    private val _messageAuth = Channel<String>()
+    private val _messageAuth = Channel<Int>()
     val messageAuth = _messageAuth.receiveAsFlow()
 
     val isDataComplete: Boolean
@@ -80,7 +81,7 @@ class AuthViewModel @Inject constructor(
                 else -> {
                     _stateAuthentication.value = Resource.Failure(e)
                     Timber.e("Error al auth $e")
-                    _messageAuth.trySend("Error al autenticar")
+                    _messageAuth.trySend(R.string.message_error_auth)
                 }
             }
         }

@@ -10,13 +10,16 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.models.Comment
 import com.nullpointer.blogcompose.models.posts.Post
 import com.nullpointer.blogcompose.presentation.LikeViewModel
-import com.nullpointer.blogcompose.ui.customs.ToolbarBack
+import com.nullpointer.blogcompose.ui.share.ToolbarBack
 import com.nullpointer.blogcompose.ui.screens.details.componets.ButtonHasNewComment
 import com.nullpointer.blogcompose.ui.screens.details.componets.Comments
 import com.nullpointer.blogcompose.ui.screens.details.componets.DataPost
@@ -52,6 +55,7 @@ fun PostDetails(
     val detailsMessage = postDetailsViewModel.messageDetails
     val likeMessage = likeViewModel.messageLike
     val scaffoldState = rememberScaffoldState()
+    val context= LocalContext.current
 
     // * init post loading (likes and comments)
     LaunchedEffect(Unit) {
@@ -60,13 +64,17 @@ fun PostDetails(
 
     LaunchedEffect(detailsMessage) {
         detailsMessage.collect {
-            scaffoldState.snackbarHostState.showSnackbar(it)
+            scaffoldState.snackbarHostState.showSnackbar(
+                context.getString(R.string.message_error_internet_checker)
+            )
         }
     }
 
     LaunchedEffect(likeMessage) {
         likeMessage.collect {
-            scaffoldState.snackbarHostState.showSnackbar(it)
+            scaffoldState.snackbarHostState.showSnackbar(
+                context.getString(it)
+            )
         }
     }
 
@@ -80,9 +88,12 @@ fun PostDetails(
         totalComments = postDetailsViewModel.numberComments,
         reloadNewComment = postDetailsViewModel::reloadNewComment,
         actionBack = navigator::popBackStack,
-        actionLike = { postDetailsViewModel.post?.let {
-                it1 -> likeViewModel.likePost(it1, it)
-        } },
+        actionLike = {
+            postDetailsViewModel.post?.let { post ->
+                likeViewModel.likePost(post,
+                    it)
+            }
+        },
         addComment = { postDetailsViewModel.addComment(it) }
     )
 
@@ -117,7 +128,10 @@ fun PostReal(
 
     Scaffold(
         scaffoldState = scaffoldState,
-        topBar = { ToolbarBack(title = "Post", actionBack = actionBack) },
+        topBar = {
+            ToolbarBack(title = stringResource(R.string.title_post),
+                actionBack = actionBack)
+        },
         bottomBar = {
             // * input comment
             TextInputComment(
@@ -164,12 +178,12 @@ fun PostReal(
             }
             // * floating button "has new comments"
             // ? only show when has new comments xd
-            if(hasNewComment)
-            ButtonHasNewComment(
-                actionReload = reloadNewComment,
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 35.dp))
+            if (hasNewComment)
+                ButtonHasNewComment(
+                    actionReload = reloadNewComment,
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 35.dp))
 
         }
     }
@@ -210,7 +224,7 @@ fun listComments(
                             .fillMaxWidth()
                             .clickable { actionConcatenate() }
                             .padding(vertical = 10.dp)) {
-                            Text(text = "Cargar mas comentarios")
+                            Text(text = stringResource(R.string.text_load_more_comments))
                         }
                     }
                 }

@@ -1,20 +1,15 @@
 package com.nullpointer.blogcompose.ui.screens.homeScreen.blogScreen.componets
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import coil.compose.rememberImagePainter
-import coil.transform.CircleCropTransformation
 import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.ui.share.ImageProfile
 
@@ -30,7 +25,8 @@ fun HeaderBlog(
     ) {
         ImageProfile(urlImgProfile = urlImgOwnerPost,
             paddingLoading = 5.dp,
-            modifier = Modifier.size(40.dp))
+            modifier = Modifier.size(40.dp),
+        contentDescription = stringResource(id = R.string.description_img_owner_post))
         Spacer(modifier = Modifier.width(15.dp))
         Text(text = nameOwnerPost,
             maxLines = 1,

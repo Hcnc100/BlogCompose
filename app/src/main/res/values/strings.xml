@@ -1,26 +1,134 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Blog Compose</string>
-    <string name="description_img_blog">Imagen del blog actual</string>
-    <string name="text_time_future">En el futuro</string>
-    <string name="text_time_just_now">Justo Ahora</string>
-    <string name="text_time_one_minute_ago">Un minuto atras</string>
-    <string name="text_time_more_minutes_ago">%d minutos atras</string>
-    <string name="text_time_one_hour_ago">una hora atras</string>
-    <string name="text_time_more_hour_ago">%d horas atras</string>
-    <string name="text_time_yesterday">ayer</string>
-    <string name="text_time_days_Ago">%d dias atras</string>
 
-    <string name="text_select_option">Seleccione una opción</string>
-    <string name="option_img_camera">Camara</string>
-    <string name="description_img_camera">Toma una foto </string>
-    <string name="option_img_gallery">Galeria</string>
-    <string name="description_img_gallery">Selecciona una foto de la galeria</string>
-    <string name="error_length_description">La descripcion no puede ser muy larga</string>
-    <string name="error_empty_description">El blog necesita una descripcion</string>
-    <string name="error_empty_image">Se necesita una imagen para le blog</string>
-    <string name="error_empty_name">Se necesita un nombre de usuario</string>
-    <string name="error_length_name">El nombre de usuario no puede ser tan largo</string>
+    <!-- title bottom bar -->
+    <string name="title_nav_post">Posts</string>
+    <string name="title_nav_notify">Notifications</string>
+    <string name="title_nav_profile">Profile</string>
+
+    <!-- text time -->
+    <string name="text_time_future">In the future</string>
+    <string name="text_time_just_now">Right now</string>
+    <string name="text_time_one_minute_ago">A minute ago</string>
+    <string name="text_time_more_minutes_ago">%d minutes ago</string>
+    <string name="text_time_one_hour_ago">One hour ago</string>
+    <string name="text_time_more_hour_ago">%d hours ago</string>
+    <string name="text_time_yesterday">Yesterday</string>
+    <string name="text_time_days_Ago">%d days ago</string>
+
+    <!-- select imager picker -->
+    <string name="text_select_option">Select an option</string>
+    <string name="option_img_camera">Camera</string>
+    <string name="description_img_camera">Take a photo</string>
+    <string name="option_img_gallery">Gallery</string>
+    <string name="description_img_gallery">Select a photo from the gallery</string>
+
+    <!-- notifications -->
+    <string name="text_content_notify_like">Like on a post</string>
+    <string name="text_content_notify_comment">Comment on a post</string>
+    <string name="text_title_notify_like">You got a like</string>
+    <string name="text_title_notify_comment">You got a comment</string>
+
+    <!-- screen add post -->
+    <string name="description_img_blog">Current blog image</string>
+    <string name="error_length_description">The description cannot be too long</string>
+    <string name="error_empty_description">The blog needs a description</string>
+    <string name="error_empty_image">An image is needed for the blog</string>
+    <string name="error_empty_name">A username is required</string>
+    <string name="error_length_name">Username cannot be that long</string>
+    <string name="title_toolbar_add_blog">New post</string>
+    <string name="text_message_upload_post">Uploading post</string>
+    <string name="text_message_public_post">To post</string>
+    <string name="text_label_description_post">Description</string>
+    <string name="text_place_holder_description">Blog description</string>
+    <string name="description_icon_upload">Icon that represents the action of uploading a post</string>
+    <string name="description_edit_img_post">Icon that represents the action of editing the image of the post</string>
+
+    <!-- screen auth -->
+    <string name="text_error_login_face">Error logging in with Facebook</string>
+    <string name="text_login_face">Sign in with Facebook</string>
+    <string name="description_icon_face">Facebook icon</string>
+    <string name="text_error_login_google">Error signing in with Google</string>
+    <string name="text_login_google">Sign in with Google</string>
+    <string name="description_icon_google">Google icon</string>
+    <string name="text_disclaimer">By logging in you accept the terms and conditions</string>
+    <string name="description_logo_app">App logo</string>
+
+    <!-- screen config -->
+    <string name="title_config">Setting</string>
+    <string name="change_image_user">Change user photo</string>
+    <string name="close_session">Sign out</string>
+    <string name="description_close_session">Sign out icon</string>
 
 
+    <!-- screen data user -->
+    <string name="title_profile">Profile information</string>
+    <string name="title_registry">Complete your account</string>
+    <string name="description_change_photo_user">Change the profile picture</string>
+    <string name="text_label_name_user">Username</string>
+    <string name="text_name_no_change">The name cannot be changed</string>
+    <string name="text_select_name">Once the name is selected, it cannot be changed.</string>
+    <string name="description_info_icon">Information icon</string>
+    <string name="description_icon_error">Failed action</string>
+    <string name="description_icon_sucess">Successful action</string>
+    <string name="text_button_update">Update</string>
+    <string name="text_button_registry">Sign in</string>
+
+    <!-- screen details -->
+    <string name="message_has_new_comments">There are new comments</string>
+    <string name="description_like_button">Like the current post</string>
+    <string name="text_count_likes">%s Likes</string>
+    <string name="text_count_comments">%s Comments</string>
+    <string name="message_comment">Comment</string>
+    <string name="message_label_comment">Write something …</string>
+    <string name="description_send_comment">Post new comment</string>
+    <string name="title_post">Post</string>
+    <string name="text_load_more_comments">Load more comments</string>
+
+    <!-- blog screen -->
+    <string name="message_empty_post">There is no post, you should make one</string>
+    <string name="title_share_post">Share post</string>
+    <string name="description_to_to_comment">Go to comments and post a new one</string>
+    <string name="description_share_post">Share the current post</string>
+
+    <!-- notify screen -->
+    <string name="message_empty_notify">You don\'t have notifications</string>
+    <string name="description_icon_notify_indicate">Notification icon</string>
+    <string name="message_notify_liked">%s likes your post</string>
+    <string name="message_notify_comment">%s has commented on your post</string>
+    <string name="name_channel_upload_post">Post upload status</string>
+    <string name="name_channel_notify_post">Post notifications</string>
+
+    <!-- profile screen -->
+    <string name="message_empty_my_post">You have not made any post</string>
+    <string name="description_go_to_config">Go to settings screen</string>
+    <string name="description_add_new_post">Go to the new post screen</string>
+
+
+    <!-- loaders descriptions -->
+    <string name="description_img_new_post">Image of the new post</string>
+    <string name="description_image_profile">Current profile picture</string>
+    <string name="description_img_select">Selected profile picture</string>
+    <string name="description_img_post">Image of the current post</string>
+    <string name="description_img_owner_post">Image of the creator of the post</string>
+    <string name="description_user_notify">Notification user Image</string>
+    <string name="description_post_img_notify">Notification post image</string>
+
+    <!-- message in view model -->
+    <string name="message_error_load_post">Error loading post</string>
+    <string name="error_load_comments">Comments could not be loaded</string>
+    <string name="message_error_internet_checker">Check your internet connection</string>
+    <string name="message_error_unknown">Unknown error</string>
+    <string name="message_error_add_comment">Could not add comment</string>
+    <string name="message_error_load_comments">Error loading comments</string>
+    <string name="message_error_auth">Failed to authenticate</string>
+    <string name="message_error_like">You need connection for this</string>
+    <string name="message_error_change_data">Without changes</string>
+    <string name="message_verify_data">Check your data</string>
+    <string name="message_data_saved">Changes saved</string>
+    <string name="message_error_internet_data">Internet is needed to update your data</string>
+    <string name="message_error_validate_img">The profile image is not a valid image</string>
+    <string name="message_error_compress_img">Failed to get image, try again</string>
+    <string name="post_upload_sucess">Post uploaded successfully</string>
 </resources>

@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -53,9 +54,12 @@ fun NotifyScreen(
     // * messages
     val notifyMessage = notifyVM.messageNotify
     val scaffoldState = rememberScaffoldState()
+    val context= LocalContext.current
     LaunchedEffect(notifyMessage) {
         notifyMessage.collect {
-            scaffoldState.snackbarHostState.showSnackbar(it)
+            scaffoldState.snackbarHostState.showSnackbar(
+                context.getString(it)
+            )
         }
     }
     // * create swipe refresh to force get new data, adn request more content if swipe to end
@@ -88,15 +92,13 @@ fun ListSwipeNotify(
     actionBottomReached: () -> Unit,
     actionClick: (notify: Notify) -> Unit,
 ) {
-
-
     val listState = rememberLazyListState()
 
     if (listNotify != null) {
         // ? show empty screen when no has notifications
         if (listNotify.isEmpty()) {
             EmptyScreen(resourceRaw = R.raw.empty3,
-                emptyText = "No tiene notificaciones")
+                emptyText = stringResource(R.string.message_empty_notify))
         } else {
             // * list to show notifications
 
@@ -110,10 +112,7 @@ fun ListSwipeNotify(
                         actionClick = actionClick
                     )
                 }
-
-
             }
-
             // * when go to the finish list, request more notifications
             if (listState.layoutInfo.visibleItemsInfo.size < listState.layoutInfo.totalItemsCount) {
                 listState.OnBottomReached(0) {
@@ -154,6 +153,7 @@ fun ItemNotify(
                         paddingLoading = 10.dp,
                         modifier = Modifier
                             .fillMaxSize(),
+                        contentDescription = stringResource(R.string.description_user_notify)
                     )
                     Card(
                         backgroundColor = when (notify.type) {
@@ -170,7 +170,7 @@ fun ItemNotify(
                                 LIKE -> R.drawable.ic_fav
                                 COMMENT -> R.drawable.ic_comment
                             }),
-                            contentDescription = "",
+                            contentDescription = stringResource(R.string.description_icon_notify_indicate),
                             modifier = Modifier
                                 .fillMaxSize()
                                 .padding(3.dp)
@@ -189,6 +189,7 @@ fun ItemNotify(
                 ImagePost(
                     urlImgPost = notify.urlImgPost,
                     paddingLoading = 0.dp,
+                    contentDescription = stringResource(R.string.description_post_img_notify),
                     modifier = Modifier
                         .size(60.dp)
                         .weight(2f)
@@ -206,8 +207,8 @@ fun TextNotifyInfo(
     typeNotify: TypeNotify,
 ) {
     val textNotify = when (typeNotify) {
-        LIKE -> "A $nameLiked le gusta tu post"
-        COMMENT -> "$nameLiked a comentado tu post"
+        LIKE -> stringResource(id = R.string.message_notify_liked,nameLiked)
+        COMMENT -> stringResource(id = R.string.message_notify_comment,nameLiked)
     }
     val context = LocalContext.current
     Column(modifier = modifier) {

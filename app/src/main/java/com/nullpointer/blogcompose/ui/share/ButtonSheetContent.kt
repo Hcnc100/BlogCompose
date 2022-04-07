@@ -1,10 +1,8 @@
-package com.nullpointer.blogcompose.ui.screens.addPost.components
+package com.nullpointer.blogcompose.ui.share
 
 import android.content.Context
 
 import android.net.Uri
-import androidx.activity.OnBackPressedCallback
-import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.DrawableRes
@@ -14,21 +12,17 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import coil.compose.rememberImagePainter
 import com.nullpointer.blogcompose.BuildConfig
 import com.nullpointer.blogcompose.R
-import com.nullpointer.blogcompose.ui.share.BackHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 

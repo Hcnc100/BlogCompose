@@ -23,9 +23,6 @@ import com.nullpointer.blogcompose.services.uploadImg.NotificationChannelHelper.
 import com.nullpointer.blogcompose.ui.activitys.MainActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -170,7 +167,7 @@ class UploadPostServices : LifecycleService() {
         fun getNotifyUploadServices(): NotificationCompat.Builder {
             NotificationChannelHelper.createChannelNotification(
                 idNotificationChannel = ID_CHANNEL_UPLOAD_POST,
-                nameNotificationChanel = NAME_UPLOAD_POST_CHANNEL,
+                nameNotificationChanel = context.getString(NAME_UPLOAD_POST_CHANNEL),
                 importance = NotificationManagerCompat.IMPORTANCE_DEFAULT,
                 context = context
             )

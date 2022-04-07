@@ -11,11 +11,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.presentation.AuthViewModel
-import com.nullpointer.blogcompose.ui.customs.ToolbarBack
+import com.nullpointer.blogcompose.ui.share.ToolbarBack
 import com.nullpointer.blogcompose.ui.screens.destinations.DataUserScreenDestination
 import com.nullpointer.blogcompose.ui.share.ImageProfile
 import com.ramcosta.composedestinations.annotation.Destination
@@ -29,7 +30,10 @@ fun ConfigScreen(
 ) {
     val currentUser = authViewModel.currentUser.collectAsState().value
     Scaffold(
-        topBar = { ToolbarBack(title = "Configuración", navigator::popBackStack) }
+        topBar = {
+            ToolbarBack(title = stringResource(R.string.title_config),
+                navigator::popBackStack)
+        }
     ) {
         Column(
             verticalArrangement = Arrangement.SpaceBetween,
@@ -40,20 +44,23 @@ fun ConfigScreen(
                 ButtonCard(text = currentUser?.nameUser.toString()) {
                     ImageProfile(urlImgProfile = currentUser?.urlImg.toString(),
                         paddingLoading = 5.dp,
-                        modifier = Modifier.size(30.dp)
+                        modifier = Modifier.size(30.dp),
+                        contentDescription = stringResource(R.string.description_image_profile)
                     )
                 }
-                ButtonCard(text = "Cambiar foto del usuario", actionClick = {
+                ButtonCard(text = stringResource(R.string.change_image_user),
+                    actionClick = {
                     navigator.navigate(DataUserScreenDestination)
                 })
             }
             // * button log out
-            ButtonCard(text = "Cerrar session", actionClick = {
+            ButtonCard(text = stringResource(R.string.close_session),
+                actionClick = {
                 navigator.popBackStack()
                 authViewModel.logOut()
             }) {
                 Image(painter = painterResource(id = R.drawable.ic_logout),
-                    contentDescription = "")
+                    contentDescription = stringResource(R.string.description_close_session))
             }
         }
 

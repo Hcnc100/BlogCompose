@@ -3,6 +3,7 @@ package com.nullpointer.blogcompose.presentation
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.delegates.SavableProperty
 import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.core.utils.NetworkException
@@ -31,7 +32,7 @@ class PostViewModel @Inject constructor(
         KEY_CONCATENATE_ENABLE,true)
 
     // * state message to show any error or message
-    private val _messagePost = Channel<String>()
+    private val _messagePost = Channel<Int>()
     val messagePost = _messagePost.receiveAsFlow()
 
     // * var to saved the job, to request new data
@@ -48,7 +49,7 @@ class PostViewModel @Inject constructor(
 
     val listPost = postRepo.listLastPost.catch {
         Timber.d("Error al obtener los post de la base de datos $it")
-        _messagePost.trySend("Error desconocido")
+        _messagePost.trySend(R.string.message_error_unknown)
     }.flowOn(Dispatchers.IO).stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(5_000),
@@ -75,10 +76,10 @@ class PostViewModel @Inject constructor(
             } catch (e: Exception) {
                 when (e) {
                     is CancellationException -> throw e
-                    is NetworkException -> _messagePost.trySend("Verifique su conexion a internet")
+                    is NetworkException -> _messagePost.trySend(R.string.message_error_internet_checker)
                     is NullPointerException -> Timber.e(" Error al obtener ultimas notificaciones El usuario posiblemente es nulo")
                     else -> {
-                        _messagePost.trySend("Error desconocido")
+                        _messagePost.trySend(R.string.message_error_unknown)
                         Timber.e("Error en el request de todos los post $e")
                     }
                 }
@@ -105,9 +106,9 @@ class PostViewModel @Inject constructor(
                     _stateConcatenateData.value = Resource.Failure(e)
                     when (e) {
                         is CancellationException -> throw e
-                        is NetworkException -> _messagePost.trySend("Verifique su conexion a internet")
+                        is NetworkException -> _messagePost.trySend(R.string.message_error_internet_checker)
                         else -> {
-                            _messagePost.trySend("Error desconocido")
+                            _messagePost.trySend(R.string.message_error_unknown)
                             Timber.e("Error en el request de todos los post $e")
                         }
                     }
