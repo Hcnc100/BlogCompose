@@ -9,6 +9,10 @@ A Simple Blog App using Jetpack Compose, Flow, Navigation Compose, Room and Fire
 * facebook_login_protocol_scheme
 * facebook_client_token
 
+### Note
+To enable notifications, we chose to use cloud functions, to see my other repository
+[BlogComposeFunctions](https://github.com/Hcnc100/BlogComposeFunctions)
+
 ## Screenshots
 ### Auth
 <p>
