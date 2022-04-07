@@ -2,8 +2,8 @@
 A Simple Blog App using Jetpack Compose, Flow, Navigation Compose, Room and Firebase
 
 ## Instructions
-1.- Download your Firebase configuration file
-2.- Create or register your application in the Facebook developer console to enable authentication with Facebook and add the codes of:
+1. Download your Firebase configuration file
+2. Create or register your application in the Facebook developer console to enable authentication with Facebook and add the codes of:
 
 * facebook_application_id
 * facebook_login_protocol_scheme
