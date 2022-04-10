@@ -6,6 +6,11 @@
     <string name="title_nav_post">Posts</string>
     <string name="title_nav_notify">Notificaciones</string>
     <string name="title_nav_profile">Perfil</string>
+    <string name="description_nav_post">Icono para ir la pantalla de post</string>
+    <string name="description_nav_notify">Icono para ir la pantalla de notificaciones</string>
+    <string name="description_nav_profile">Icono para ir la pantalla de perfil</string>
+
+    <string name="description_arrow_back">Icono para regresar a la pantalla anterior</string>
 
     <!-- text time -->
     <string name="text_time_future">En el futuro</string>

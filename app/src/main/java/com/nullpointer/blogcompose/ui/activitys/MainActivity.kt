@@ -130,7 +130,10 @@ fun ButtonNavigation(
                         restoreState = true
                     }
                 },
-                icon = { Icon(painterResource(id = destination.icon), "") },
+                icon = {
+                    Icon(painterResource(id = destination.icon),
+                        stringResource(id = destination.description))
+                },
                 label = { Text(stringResource(id = destination.title)) },
             )
         }
