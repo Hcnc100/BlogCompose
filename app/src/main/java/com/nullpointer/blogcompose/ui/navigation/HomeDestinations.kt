@@ -10,23 +10,27 @@ enum class HomeDestinations(
     val direction: DirectionDestinationSpec,
     val title: Int,
     val icon: Int,
+    val description:Int
 ) {
     BlogScreen(
         direction = BlogScreenDestination,
         title = R.string.title_nav_post,
-        icon = R.drawable.ic_home
+        icon = R.drawable.ic_home,
+        description = R.string.description_nav_post
     ),
 
     NotifyScreen(
         direction = NotifyScreenDestination,
         title = R.string.title_nav_notify,
-        icon = R.drawable.ic_notify
+        icon = R.drawable.ic_notify,
+        description = R.string.description_nav_notify
     ),
 
     ProfileScreen(
         direction = ProfileScreenDestination,
         title = R.string.title_nav_profile,
-        icon = R.drawable.ic_account
+        icon = R.drawable.ic_account,
+        description = R.string.description_nav_profile
     );
 
     companion object {

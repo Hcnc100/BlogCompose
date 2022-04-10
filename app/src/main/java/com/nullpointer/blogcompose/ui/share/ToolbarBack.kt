@@ -14,7 +14,8 @@ fun ToolbarBack(title: String, actionBack: (() -> Unit)? = null) {
         navigationIcon = {
             actionBack?.let { action ->
                 IconButton(onClick = { action() }) {
-                    Icon(painterResource(id = R.drawable.ic_arrow_back), "")
+                    Icon(painterResource(id = R.drawable.ic_arrow_back),
+                        "")
                 }
             }
         })
