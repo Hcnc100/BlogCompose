@@ -9,8 +9,8 @@ A Simple Blog App using Jetpack Compose, Flow, Navigation Compose, Room and Fire
 * facebook_login_protocol_scheme
 * facebook_client_token
 
-3.- Enable Cloud Vision API in your Google Cloud Platform
-4.- Deploy this cloud functions [BlogComposeFunctions](https://github.com/Hcnc100/BlogComposeFunctions)
+3. Enable Cloud Vision API in your Google Cloud Platform
+4. Deploy this cloud functions [BlogComposeFunctions](https://github.com/Hcnc100/BlogComposeFunctions)
 
 ### Note 1
 To upload the images, a moderation mechanism was chosen using cloud functions, if the profile image is detected as adult content, it will be marked as invalid and will not be established as a profile image, in the case of uploading a post with the image will be uploaded, but if it is detected that it is adult content it will be censored, just as in this case the content of the post is moderated. Note that no optimal mechanism was found to moderate usernames, so usernames are not validated.
