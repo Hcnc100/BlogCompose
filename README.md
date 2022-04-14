@@ -2,15 +2,21 @@
 A Simple Blog App using Jetpack Compose, Flow, Navigation Compose, Room and Firebase
 
 ## Instructions
-1. Download your Firebase configuration file
+1. Download your Firebase configuration file (Enabling authentication and Cloud Firestore)
 2. Create or register your application in the Facebook developer console to enable authentication with Facebook and add the codes of:
 
 * facebook_application_id
 * facebook_login_protocol_scheme
 * facebook_client_token
 
-### Note
-To enable notifications, we chose to use cloud functions, to see my other repository
+3.- Enable Cloud Vision API in your Google Cloud Platform
+4.- Deploy this cloud functions [BlogComposeFunctions](https://github.com/Hcnc100/BlogComposeFunctions)
+
+### Note 1
+To upload the images, a moderation mechanism was chosen using cloud functions, if the profile image is detected as adult content, it will be marked as invalid and will not be established as a profile image, in the case of uploading a post with the image will be uploaded, but if it is detected that it is adult content it will be censored, just as in this case the content of the post is moderated. Note that no optimal mechanism was found to moderate usernames, so usernames are not validated.
+
+### Note 2
+Notifications use cloud Functions
 [BlogComposeFunctions](https://github.com/Hcnc100/BlogComposeFunctions)
 
 ## Screenshots
