@@ -1,9 +1,11 @@
 package com.nullpointer.blogcompose.presentation
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.AuthCredential
 import com.nullpointer.blogcompose.R
+import com.nullpointer.blogcompose.core.delegates.SavableComposeState
 import com.nullpointer.blogcompose.core.states.LoginStatus
 import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.domain.auth.AuthRepoImpl
@@ -24,6 +26,7 @@ class AuthViewModel @Inject constructor(
     private val authRepoImpl: AuthRepoImpl,
     private val notifyRepoImpl: NotifyRepoImpl,
     private val postRepoImpl: PostRepoImpl,
+    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
     init {
@@ -67,19 +70,19 @@ class AuthViewModel @Inject constructor(
     )
 
 
-    private val _stateAuthentication = MutableStateFlow<Resource<Unit>?>(null)
-    val stateAuthentication = _stateAuthentication.asStateFlow()
+    var isLoading by SavableComposeState(savedStateHandle,"",false)
+    private set
 
-    fun authWithCredential(authCredential: AuthCredential) = viewModelScope.launch {
-        _stateAuthentication.value = Resource.Loading()
+    fun authWithCredential(
+        authCredential: AuthCredential
+    ) = viewModelScope.launch(Dispatchers.IO) {
         try {
+            isLoading=true
             authRepoImpl.authWithCredential(authCredential)
-            _stateAuthentication.value = Resource.Success(Unit)
         } catch (e: Exception) {
             when (e) {
                 is CancellationException -> throw e
                 else -> {
-                    _stateAuthentication.value = Resource.Failure(e)
                     Timber.e("Error al auth $e")
                     _messageAuth.trySend(R.string.message_error_auth)
                 }

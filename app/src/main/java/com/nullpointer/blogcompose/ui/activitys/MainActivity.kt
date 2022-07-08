@@ -27,9 +27,9 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        var loading = true
-        val splash = installSplashScreen()
-        splash.setKeepOnScreenCondition { loading }
+//        var loading = true
+//        val splash = installSplashScreen()
+//        splash.setKeepOnScreenCondition { loading }
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setContent {
             BlogComposeTheme {
@@ -46,7 +46,7 @@ class MainActivity : ComponentActivity() {
                     }
 
                     DestinationsNavHost(
-                        startRoute = destination!!,
+                        startRoute = AuthScreenDestination,
                         navGraph = NavGraphs.root,
                         navController = rootAppState.navController,
                         dependenciesContainerBuilder = {

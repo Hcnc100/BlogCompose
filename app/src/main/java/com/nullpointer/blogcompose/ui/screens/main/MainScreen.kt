@@ -11,6 +11,7 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.nullpointer.blogcompose.presentation.AuthViewModel
+import com.nullpointer.blogcompose.ui.interfaces.ActionRootDestinations
 import com.nullpointer.blogcompose.ui.navigation.HomeDestinations
 import com.nullpointer.blogcompose.ui.navigation.RootNavGraph
 import com.nullpointer.blogcompose.ui.screens.NavGraphs
@@ -26,6 +27,7 @@ import com.ramcosta.composedestinations.navigation.navigate
 @Composable
 fun MainScreen(
     authViewModel: AuthViewModel,
+    actionsRootDestinations: ActionRootDestinations,
     mainScreenState: MainScreenState = rememberMainScreenState()
 ) {
     Scaffold(
@@ -40,6 +42,7 @@ fun MainScreen(
             startRoute = NavGraphs.root.startRoute,
             dependenciesContainerBuilder = {
                 dependency(authViewModel)
+                dependency(actionsRootDestinations)
             }
         )
 
