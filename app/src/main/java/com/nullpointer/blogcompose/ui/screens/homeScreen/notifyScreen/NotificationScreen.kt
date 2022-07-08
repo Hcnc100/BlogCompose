@@ -32,6 +32,7 @@ import com.nullpointer.blogcompose.models.notify.TypeNotify.COMMENT
 import com.nullpointer.blogcompose.models.notify.TypeNotify.LIKE
 import com.nullpointer.blogcompose.presentation.NotifyViewModel
 import com.nullpointer.blogcompose.ui.navigation.HomeNavGraph
+import com.nullpointer.blogcompose.ui.navigation.MainTransitions
 import com.nullpointer.blogcompose.ui.screens.emptyScreen.EmptyScreen
 import com.nullpointer.blogcompose.ui.share.CircularProgressAnimation
 import com.nullpointer.blogcompose.ui.share.ImagePost
@@ -42,7 +43,7 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
 
 @HomeNavGraph
-@Destination
+@Destination(style = MainTransitions::class)
 @Composable
 fun NotifyScreen(
     notifyVM: NotifyViewModel = hiltViewModel(),

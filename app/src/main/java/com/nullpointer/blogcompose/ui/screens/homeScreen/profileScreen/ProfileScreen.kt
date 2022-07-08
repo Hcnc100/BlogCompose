@@ -20,13 +20,14 @@ import com.nullpointer.blogcompose.presentation.AuthViewModel
 import com.nullpointer.blogcompose.presentation.LikeViewModel
 import com.nullpointer.blogcompose.presentation.MyPostViewModel
 import com.nullpointer.blogcompose.ui.navigation.HomeNavGraph
+import com.nullpointer.blogcompose.ui.navigation.MainTransitions
 import com.nullpointer.blogcompose.ui.screens.swipePosts.ScreenSwiperPost
 import com.nullpointer.blogcompose.ui.share.ImageProfile
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
 @HomeNavGraph
-@Destination
+@Destination(style = MainTransitions::class)
 @Composable
 fun ProfileScreen(
     authViewModel: AuthViewModel,

@@ -3,6 +3,7 @@ package com.nullpointer.blogcompose.ui.screens.main
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.internal.enableLiveLiterals
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -13,6 +14,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.nullpointer.blogcompose.presentation.AuthViewModel
 import com.nullpointer.blogcompose.ui.interfaces.ActionRootDestinations
 import com.nullpointer.blogcompose.ui.navigation.HomeDestinations
+import com.nullpointer.blogcompose.ui.navigation.MainTransitions
 import com.nullpointer.blogcompose.ui.navigation.RootNavGraph
 import com.nullpointer.blogcompose.ui.screens.NavGraphs
 import com.nullpointer.blogcompose.ui.screens.states.MainScreenState
@@ -23,7 +25,7 @@ import com.ramcosta.composedestinations.navigation.dependency
 import com.ramcosta.composedestinations.navigation.navigate
 
 @RootNavGraph
-@Destination
+@Destination(style = MainTransitions::class)
 @Composable
 fun MainScreen(
     authViewModel: AuthViewModel,
@@ -38,8 +40,9 @@ fun MainScreen(
         DestinationsNavHost(
             modifier = Modifier.padding(innerPadding),
             navController = mainScreenState.navController,
-            navGraph = NavGraphs.root,
-            startRoute = NavGraphs.root.startRoute,
+            engine = mainScreenState.navHostEngine,
+            navGraph = NavGraphs.home,
+            startRoute = NavGraphs.home.startRoute,
             dependenciesContainerBuilder = {
                 dependency(authViewModel)
                 dependency(actionsRootDestinations)

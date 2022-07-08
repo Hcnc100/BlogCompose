@@ -12,12 +12,13 @@ import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.presentation.LikeViewModel
 import com.nullpointer.blogcompose.presentation.PostViewModel
 import com.nullpointer.blogcompose.ui.navigation.HomeNavGraph
+import com.nullpointer.blogcompose.ui.navigation.MainTransitions
 import com.nullpointer.blogcompose.ui.screens.swipePosts.ScreenSwiperPost
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
 @HomeNavGraph(start = true)
-@Destination
+@Destination(style = MainTransitions::class)
 @Composable
 fun BlogScreen(
     postVM: PostViewModel = hiltViewModel(),
