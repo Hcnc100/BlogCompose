@@ -4,10 +4,12 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.core.view.WindowCompat
-import com.google.accompanist.insets.ProvideWindowInsets
 import com.nullpointer.blogcompose.core.states.LoginStatus
 import com.nullpointer.blogcompose.presentation.AuthViewModel
 import com.nullpointer.blogcompose.ui.screens.NavGraphs
@@ -26,46 +28,40 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-//        var loading = true
-//        val splash = installSplashScreen()
-//        splash.setKeepOnScreenCondition { loading }
+        var loading = true
+        val splash = installSplashScreen()
+        splash.setKeepOnScreenCondition { loading }
 //        WindowCompat.setDecorFitsSystemWindows(window, false)
         setContent {
             BlogComposeTheme {
 //                ProvideWindowInsets(windowInsetsAnimationsEnabled = true) {
 
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = MaterialTheme.colors.background
+                ) {
                     val stateAuth = authViewModel.stateAuthUser.collectAsState()
                     val rootAppState = rememberRootAppState()
 
-//                    when (stateAuth.value) {
-//                        LoginStatus.Authenticated.CompleteData -> MainScreenDestination
-//                        LoginStatus.Authenticated.CompletingData -> DataUserScreenDestination
-//                        LoginStatus.Authenticating -> null
-//                        LoginStatus.Unauthenticated -> AuthScreenDestination
-//                    }?.let { startDestination ->
-//                        loading=false
-//                        DestinationsNavHost(
-//                            startRoute = startDestination,
-//                            navGraph = NavGraphs.root,
-//                            navController = rootAppState.navController,
-//                            dependenciesContainerBuilder = {
-//                                dependency(authViewModel)
-//                                dependency(rootAppState.rootActions)
-//                            }
-//                        )
-//                    }
-
-                    DestinationsNavHost(
-                        startRoute = MainScreenDestination,
-                        navGraph = NavGraphs.root,
-                        engine = rootAppState.navHostEngine,
-                        navController = rootAppState.navController,
-                        dependenciesContainerBuilder = {
-                            dependency(authViewModel)
-                            dependency(rootAppState.rootActions)
-                        }
-                    )
-
+                    when (stateAuth.value) {
+                        LoginStatus.Authenticated.CompleteData -> MainScreenDestination
+                        LoginStatus.Authenticated.CompletingData -> DataUserScreenDestination
+                        LoginStatus.Authenticating -> null
+                        LoginStatus.Unauthenticated -> AuthScreenDestination
+                    }?.let { startDestination ->
+                        loading=false
+                        DestinationsNavHost(
+                            startRoute = startDestination,
+                            navGraph = NavGraphs.root,
+                            navController = rootAppState.navController,
+                            engine = rootAppState.navHostEngine,
+                            dependenciesContainerBuilder = {
+                                dependency(authViewModel)
+                                dependency(rootAppState.rootActions)
+                            }
+                        )
+                    }
+                }
             }
         }
     }

@@ -11,11 +11,13 @@ import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.presentation.LikeViewModel
 import com.nullpointer.blogcompose.presentation.PostViewModel
+import com.nullpointer.blogcompose.ui.interfaces.ActionRootDestinations
 import com.nullpointer.blogcompose.ui.navigation.HomeNavGraph
 import com.nullpointer.blogcompose.ui.navigation.MainTransitions
+import com.nullpointer.blogcompose.ui.screens.destinations.AddBlogScreenDestination
+import com.nullpointer.blogcompose.ui.screens.destinations.PostDetailsDestination
 import com.nullpointer.blogcompose.ui.screens.swipePosts.ScreenSwiperPost
 import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
 @HomeNavGraph(start = true)
 @Destination(style = MainTransitions::class)
@@ -23,7 +25,7 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 fun BlogScreen(
     postVM: PostViewModel = hiltViewModel(),
     likeVM: LikeViewModel = hiltViewModel(),
-    navigator: DestinationsNavigator,
+    actionRootDestinations: ActionRootDestinations
 ) {
     val resultGetPost = postVM.listPost.collectAsState()
     val stateLoading = postVM.stateLoad.collectAsState()
@@ -32,7 +34,7 @@ fun BlogScreen(
 
     val postMessage = postVM.messagePost
     val likeMessage = likeVM.messageLike
-    val context=LocalContext.current
+    val context = LocalContext.current
 
     LaunchedEffect(postMessage) {
         postMessage.collect {
@@ -50,18 +52,17 @@ fun BlogScreen(
         }
     }
 
-    ScreenSwiperPost(resultListPost = resultGetPost.value,
+    ScreenSwiperPost(
+        resultListPost = resultGetPost.value,
         scaffoldState = scaffoldState,
         updateListPost = { postVM.requestNewPost(true) },
         actionBottomReached = postVM::concatenatePost,
-        actionButtonAdd = {
-//            navigator.navigate(AddBlogScreenDestination)
-                          },
+        actionButtonAdd = { actionRootDestinations.changeRoot(AddBlogScreenDestination) },
         actionChangePost = likeVM::likePost,
         isLoadNewData = stateLoading.value is Resource.Loading,
         isConcatenateData = stateConcatenate.value is Resource.Loading,
         actionDetails = { idPost, goToBottom ->
-//            navigator.navigate(PostDetailsDestination(idPost, goToBottom))
+            actionRootDestinations.changeRoot(PostDetailsDestination(idPost,goToBottom))
         },
         emptyResRaw = R.raw.empty2,
         emptyString = stringResource(R.string.message_empty_post)

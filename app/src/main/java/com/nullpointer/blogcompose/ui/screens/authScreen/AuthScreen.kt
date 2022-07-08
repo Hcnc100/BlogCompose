@@ -50,7 +50,7 @@ fun AuthScreen(
                 contentAlignment = Alignment.Center
             ) {
                 if(authViewModel.isLoading){
-                    CircularProgressIndicator()
+                    CircularProgressIndicator(color = MaterialTheme.colors.onPrimary)
                 }else{
                     ButtonsAuth(
                         modifier = Modifier.fillMaxSize(),

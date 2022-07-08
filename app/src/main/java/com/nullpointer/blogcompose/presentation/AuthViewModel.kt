@@ -87,6 +87,8 @@ class AuthViewModel @Inject constructor(
                     _messageAuth.trySend(R.string.message_error_auth)
                 }
             }
+        }finally {
+            isLoading=false
         }
     }
 
