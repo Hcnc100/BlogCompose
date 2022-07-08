@@ -16,12 +16,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.presentation.AuthViewModel
+import com.nullpointer.blogcompose.ui.navigation.RootNavGraph
 import com.nullpointer.blogcompose.ui.share.ToolbarBack
-import com.nullpointer.blogcompose.ui.screens.destinations.DataUserScreenDestination
 import com.nullpointer.blogcompose.ui.share.ImageProfile
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
+@RootNavGraph
 @Composable
 @Destination
 fun ConfigScreen(
@@ -50,7 +51,7 @@ fun ConfigScreen(
                 }
                 ButtonCard(text = stringResource(R.string.change_image_user),
                     actionClick = {
-                    navigator.navigate(DataUserScreenDestination)
+//                    navigator.navigate(DataUserScreenDestination)
                 })
             }
             // * button log out

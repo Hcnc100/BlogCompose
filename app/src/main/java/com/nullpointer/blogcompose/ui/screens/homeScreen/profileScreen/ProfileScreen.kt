@@ -19,16 +19,15 @@ import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.presentation.AuthViewModel
 import com.nullpointer.blogcompose.presentation.LikeViewModel
 import com.nullpointer.blogcompose.presentation.MyPostViewModel
-import com.nullpointer.blogcompose.ui.screens.destinations.AddBlogScreenDestination
-import com.nullpointer.blogcompose.ui.screens.destinations.ConfigScreenDestination
-import com.nullpointer.blogcompose.ui.screens.destinations.PostDetailsDestination
+import com.nullpointer.blogcompose.ui.navigation.HomeNavGraph
 import com.nullpointer.blogcompose.ui.screens.swipePosts.ScreenSwiperPost
 import com.nullpointer.blogcompose.ui.share.ImageProfile
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
+@HomeNavGraph
+@Destination
 @Composable
-@Destination(navGraph = "homeDestinations")
 fun ProfileScreen(
     authViewModel: AuthViewModel,
     myPostViewModel: MyPostViewModel = hiltViewModel(),
@@ -71,13 +70,15 @@ fun ProfileScreen(
         scaffoldState = scaffoldState,
         updateListPost = { myPostViewModel.requestNewPost(true) },
         actionBottomReached = myPostViewModel::concatenatePost,
-        actionButtonAdd = { navigator.navigate(AddBlogScreenDestination) },
+        actionButtonAdd = {
+//            navigator.navigate(AddBlogScreenDestination)
+                          },
         actionChangePost = likeViewModel::likePost,
         staticInfo = Pair(photoUser, name),
         isLoadNewData = stateLoading.value is Resource.Loading,
         isConcatenateData = stateConcatenate.value is Resource.Loading,
         actionDetails = { idPost, goToBottom ->
-            navigator.navigate(PostDetailsDestination(idPost, goToBottom))
+//            navigator.navigate(PostDetailsDestination(idPost, goToBottom))
         },
         emptyResRaw = R.raw.empty1,
         emptyString = stringResource(R.string.message_empty_my_post)
@@ -87,7 +88,9 @@ fun ProfileScreen(
         HeaderProfile(
             urlImgProfile = photoUser,
             nameProfile = name,
-            actionLogOut = { navigator.navigate(ConfigScreenDestination) }
+            actionLogOut = {
+//                navigator.navigate(ConfigScreenDestination)
+            }
         )
     }
 }

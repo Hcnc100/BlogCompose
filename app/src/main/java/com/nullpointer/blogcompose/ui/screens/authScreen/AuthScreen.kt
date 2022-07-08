@@ -22,12 +22,14 @@ import com.google.firebase.auth.AuthCredential
 import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.presentation.AuthViewModel
+import com.nullpointer.blogcompose.ui.navigation.RootNavGraph
 import com.nullpointer.blogcompose.ui.screens.authScreen.componets.google.ButtonAuthGoogle
 import com.nullpointer.blogcompose.ui.screens.authScreen.componets.facebook.ButtonAuthFacebook
 import com.ramcosta.composedestinations.annotation.Destination
 
+@RootNavGraph(start = true)
+@Destination
 @Composable
-@Destination(start = true)
 fun AuthScreen(
     authViewModel: AuthViewModel,
 ) {

@@ -34,35 +34,35 @@ fun ImageProfile(
     fileImg: File? = null,
     showProgress: Boolean = false,
 ) {
-    val painter = rememberImagePainter(
-        // * if pass file img so ,load first,
-        // * else load urlImg if this is not empty
-        // * else load default
-        data = when {
-            fileImg != null -> fileImg
-            urlImgProfile.isNotEmpty() -> urlImgProfile
-            else -> R.drawable.ic_person
-        }
-    ) {
-        transformations(CircleCropTransformation())
-        placeholder(R.drawable.ic_person)
-        crossfade(true)
-    }
-    val state = painter.state
-    Card(backgroundColor = if (isSystemInDarkTheme()) Color.DarkGray else Color.LightGray,shape=CircleShape,
-        modifier = modifier.aspectRatio(1f)){
-        Image(
-            painter = when (state) {
-                is ImagePainter.State.Error -> painterResource(id = R.drawable.ic_broken_image)
-                else -> painter
-            },
-            contentDescription = contentDescription,
-            modifier = Modifier.padding(
-                (if (state !is ImagePainter.State.Success || fileImg == null && urlImgProfile.isEmpty())
-                    paddingLoading else 0.dp))
-        )
-        if (state is ImagePainter.State.Loading && showProgress)  CircularProgressIndicator(modifier=Modifier.padding(paddingLoading))
-    }
+//    val painter = rememberImagePainter(
+//        // * if pass file img so ,load first,
+//        // * else load urlImg if this is not empty
+//        // * else load default
+//        data = when {
+//            fileImg != null -> fileImg
+//            urlImgProfile.isNotEmpty() -> urlImgProfile
+//            else -> R.drawable.ic_person
+//        }
+//    ) {
+//        transformations(CircleCropTransformation())
+//        placeholder(R.drawable.ic_person)
+//        crossfade(true)
+//    }
+//    val state = painter.state
+//    Card(backgroundColor = if (isSystemInDarkTheme()) Color.DarkGray else Color.LightGray,shape=CircleShape,
+//        modifier = modifier.aspectRatio(1f)){
+//        Image(
+//            painter = when (state) {
+//                is ImagePainter.State.Error -> painterResource(id = R.drawable.ic_broken_image)
+//                else -> painter
+//            },
+//            contentDescription = contentDescription,
+//            modifier = Modifier.padding(
+//                (if (state !is ImagePainter.State.Success || fileImg == null && urlImgProfile.isEmpty())
+//                    paddingLoading else 0.dp))
+//        )
+//        if (state is ImagePainter.State.Loading && showProgress)  CircularProgressIndicator(modifier=Modifier.padding(paddingLoading))
+//    }
 }
 
 @OptIn(ExperimentalCoilApi::class)
@@ -76,34 +76,34 @@ fun ImagePost(
     showProgress: Boolean = false,
 ) {
 
-
-    val painter = rememberImagePainter(
-        // * if pass file img so ,load first,
-        // * else load urlImg if this is not empty
-        // * else load default
-        data = when {
-            fileImg != null -> fileImg
-            !urlImgPost.isNullOrEmpty() -> urlImgPost
-            else -> R.drawable.ic_image
-        }
-    ) {
-        placeholder(R.drawable.ic_image)
-        crossfade(true)
-    }
-    val state = painter.state
-    Box(contentAlignment = Alignment.Center,
-        modifier = modifier
-            .padding(
-                if (state !is ImagePainter.State.Success || fileImg == null && urlImgPost.isNullOrEmpty())
-                    paddingLoading else 0.dp)) {
-        Image(
-            painter = when (state) {
-                is ImagePainter.State.Error -> painterResource(id = R.drawable.ic_broken_image)
-                else -> painter
-            },
-            contentDescription = contentDescription,
-            modifier = Modifier.fillMaxSize(),
-        )
-        if (state is ImagePainter.State.Loading && showProgress) CircularProgressIndicator()
-    }
+//
+//    val painter = rememberImagePainter(
+//        // * if pass file img so ,load first,
+//        // * else load urlImg if this is not empty
+//        // * else load default
+//        data = when {
+//            fileImg != null -> fileImg
+//            !urlImgPost.isNullOrEmpty() -> urlImgPost
+//            else -> R.drawable.ic_image
+//        }
+//    ) {
+//        placeholder(R.drawable.ic_image)
+//        crossfade(true)
+//    }
+//    val state = painter.state
+//    Box(contentAlignment = Alignment.Center,
+//        modifier = modifier
+//            .padding(
+//                if (state !is ImagePainter.State.Success || fileImg == null && urlImgPost.isNullOrEmpty())
+//                    paddingLoading else 0.dp)) {
+//        Image(
+//            painter = when (state) {
+//                is ImagePainter.State.Error -> painterResource(id = R.drawable.ic_broken_image)
+//                else -> painter
+//            },
+//            contentDescription = contentDescription,
+//            modifier = Modifier.fillMaxSize(),
+//        )
+//        if (state is ImagePainter.State.Loading && showProgress) CircularProgressIndicator()
+//    }
 }

@@ -25,6 +25,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.annotation.ExperimentalCoilApi
 import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.services.uploadImg.UploadPostServices
+import com.nullpointer.blogcompose.ui.navigation.RootNavGraph
 import com.nullpointer.blogcompose.ui.share.ToolbarBack
 import com.nullpointer.blogcompose.ui.share.ButtonSheetContent
 import com.nullpointer.blogcompose.ui.screens.addPost.viewModel.AddBlogViewModel
@@ -37,6 +38,7 @@ import kotlinx.coroutines.launch
 import java.io.File
 
 @OptIn(ExperimentalMaterialApi::class)
+@RootNavGraph
 @Destination
 @Composable
 fun AddBlogScreen(

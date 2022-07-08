@@ -31,7 +31,7 @@ import com.nullpointer.blogcompose.models.notify.TypeNotify
 import com.nullpointer.blogcompose.models.notify.TypeNotify.COMMENT
 import com.nullpointer.blogcompose.models.notify.TypeNotify.LIKE
 import com.nullpointer.blogcompose.presentation.NotifyViewModel
-import com.nullpointer.blogcompose.ui.screens.destinations.PostDetailsDestination
+import com.nullpointer.blogcompose.ui.navigation.HomeNavGraph
 import com.nullpointer.blogcompose.ui.screens.emptyScreen.EmptyScreen
 import com.nullpointer.blogcompose.ui.share.CircularProgressAnimation
 import com.nullpointer.blogcompose.ui.share.ImagePost
@@ -41,8 +41,9 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
 
+@HomeNavGraph
+@Destination
 @Composable
-@Destination(navGraph = "homeDestinations")
 fun NotifyScreen(
     notifyVM: NotifyViewModel = hiltViewModel(),
     navigator: DestinationsNavigator,
@@ -78,7 +79,7 @@ fun NotifyScreen(
             ) { notify ->
                 // * when click in notification so, update inner database and
                 // * remote database, and send to post details
-                navigator.navigate(PostDetailsDestination(notify.idPost, false))
+//                navigator.navigate(PostDetailsDestination(notify.idPost, false))
                 if (!notify.isOpen) notifyVM.openNotifications(notify)
             }
         }

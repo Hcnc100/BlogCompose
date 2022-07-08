@@ -24,6 +24,7 @@ import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.presentation.AuthViewModel
 import com.nullpointer.blogcompose.presentation.RegistryViewModel
+import com.nullpointer.blogcompose.ui.navigation.RootNavGraph
 import com.nullpointer.blogcompose.ui.share.ToolbarBack
 import com.nullpointer.blogcompose.ui.share.ButtonSheetContent
 import com.nullpointer.blogcompose.ui.share.ImageProfile
@@ -33,6 +34,7 @@ import kotlinx.coroutines.launch
 import java.io.File
 
 @OptIn(ExperimentalMaterialApi::class)
+@RootNavGraph
 @Destination
 @Composable
 fun DataUserScreen(

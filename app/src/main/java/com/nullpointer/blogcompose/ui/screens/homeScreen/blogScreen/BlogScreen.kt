@@ -11,13 +11,13 @@ import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.presentation.LikeViewModel
 import com.nullpointer.blogcompose.presentation.PostViewModel
-import com.nullpointer.blogcompose.ui.screens.destinations.AddBlogScreenDestination
-import com.nullpointer.blogcompose.ui.screens.destinations.PostDetailsDestination
+import com.nullpointer.blogcompose.ui.navigation.HomeNavGraph
 import com.nullpointer.blogcompose.ui.screens.swipePosts.ScreenSwiperPost
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
-@Destination(navGraph = "homeDestinations", start = true)
+@HomeNavGraph(start = true)
+@Destination
 @Composable
 fun BlogScreen(
     postVM: PostViewModel = hiltViewModel(),
@@ -53,12 +53,14 @@ fun BlogScreen(
         scaffoldState = scaffoldState,
         updateListPost = { postVM.requestNewPost(true) },
         actionBottomReached = postVM::concatenatePost,
-        actionButtonAdd = { navigator.navigate(AddBlogScreenDestination) },
+        actionButtonAdd = {
+//            navigator.navigate(AddBlogScreenDestination)
+                          },
         actionChangePost = likeVM::likePost,
         isLoadNewData = stateLoading.value is Resource.Loading,
         isConcatenateData = stateConcatenate.value is Resource.Loading,
         actionDetails = { idPost, goToBottom ->
-            navigator.navigate(PostDetailsDestination(idPost, goToBottom))
+//            navigator.navigate(PostDetailsDestination(idPost, goToBottom))
         },
         emptyResRaw = R.raw.empty2,
         emptyString = stringResource(R.string.message_empty_post)

@@ -149,7 +149,7 @@ class RegistryViewModel @Inject constructor(
             is StorageUploadTaskResult.Complete.Success -> {
                 // ! this very important for reload img myUser, with same url
                 // * without this, only update img myUser because load img from cache
-                context.imageLoader.memoryCache.clear()
+                context.imageLoader.memoryCache?.clear()
                 result.urlFile
             }
             else -> null

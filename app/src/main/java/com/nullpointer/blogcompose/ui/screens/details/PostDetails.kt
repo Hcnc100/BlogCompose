@@ -19,6 +19,7 @@ import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.models.Comment
 import com.nullpointer.blogcompose.models.posts.Post
 import com.nullpointer.blogcompose.presentation.LikeViewModel
+import com.nullpointer.blogcompose.ui.navigation.RootNavGraph
 import com.nullpointer.blogcompose.ui.share.ToolbarBack
 import com.nullpointer.blogcompose.ui.screens.details.componets.ButtonHasNewComment
 import com.nullpointer.blogcompose.ui.screens.details.componets.Comments
@@ -31,6 +32,7 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+@RootNavGraph
 @Destination(
     deepLinks = [
         DeepLink(
