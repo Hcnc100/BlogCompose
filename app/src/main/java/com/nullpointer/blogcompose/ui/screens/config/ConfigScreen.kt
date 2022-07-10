@@ -16,24 +16,27 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.presentation.AuthViewModel
+import com.nullpointer.blogcompose.ui.interfaces.ActionRootDestinations
 import com.nullpointer.blogcompose.ui.navigation.RootNavGraph
-import com.nullpointer.blogcompose.ui.share.ToolbarBack
+import com.nullpointer.blogcompose.ui.screens.destinations.DataUserScreenDestination
 import com.nullpointer.blogcompose.ui.share.ImageProfile
+import com.nullpointer.blogcompose.ui.share.ToolbarBack
 import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
 @RootNavGraph
 @Composable
 @Destination
 fun ConfigScreen(
     authViewModel: AuthViewModel,
-    navigator: DestinationsNavigator,
+    actionRootDestinations: ActionRootDestinations
 ) {
     val currentUser = authViewModel.currentUser.collectAsState().value
     Scaffold(
         topBar = {
-            ToolbarBack(title = stringResource(R.string.title_config),
-                navigator::popBackStack)
+            ToolbarBack(
+                title = stringResource(R.string.title_config),
+                actionRootDestinations::backDestination
+            )
         }
     ) {
         Column(
@@ -42,8 +45,9 @@ fun ConfigScreen(
         ) {
             // * main buttons
             Column {
-                ButtonCard(text = currentUser?.nameUser.toString()) {
-                    ImageProfile(urlImgProfile = currentUser?.urlImg.toString(),
+                ButtonCard(text = currentUser?.name.toString()) {
+                    ImageProfile(
+                        urlImgProfile = currentUser?.urlImg.toString(),
                         paddingLoading = 5.dp,
                         modifier = Modifier.size(30.dp),
                         contentDescription = stringResource(R.string.description_image_profile)
@@ -51,17 +55,18 @@ fun ConfigScreen(
                 }
                 ButtonCard(text = stringResource(R.string.change_image_user),
                     actionClick = {
-//                    navigator.navigate(DataUserScreenDestination)
-                })
+                        actionRootDestinations.changeRoot(DataUserScreenDestination)
+                    })
             }
             // * button log out
             ButtonCard(text = stringResource(R.string.close_session),
                 actionClick = {
-                navigator.popBackStack()
-                authViewModel.logOut()
-            }) {
-                Image(painter = painterResource(id = R.drawable.ic_logout),
-                    contentDescription = stringResource(R.string.description_close_session))
+                    authViewModel.logOut()
+                }) {
+                Image(
+                    painter = painterResource(id = R.drawable.ic_logout),
+                    contentDescription = stringResource(R.string.description_close_session)
+                )
             }
         }
 
@@ -78,7 +83,8 @@ fun ButtonCard(
         .fillMaxWidth()
         .padding(10.dp)
         .clickable { actionClick?.invoke() }) {
-        Row(verticalAlignment = Alignment.CenterVertically,
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
             modifier = Modifier.padding(horizontal = 10.dp, vertical = 12.dp)
         ) {

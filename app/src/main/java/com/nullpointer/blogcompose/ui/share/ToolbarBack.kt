@@ -20,3 +20,8 @@ fun ToolbarBack(title: String, actionBack: (() -> Unit)? = null) {
             }
         })
 }
+
+@Composable
+fun SimpleToolbar(title: String) {
+    TopAppBar(title = { Text(title) })
+}

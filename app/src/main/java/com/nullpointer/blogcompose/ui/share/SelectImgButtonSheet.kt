@@ -16,7 +16,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
@@ -28,16 +30,13 @@ import kotlinx.coroutines.launch
 
 import java.io.File
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun ButtonSheetContent(
-    scope: CoroutineScope,
-    sheetState: ModalBottomSheetState,
+fun SelectImgButtonSheet(
+    actionHidden:() -> Unit,
+    isVisible: Boolean,
     actionBeforeSelect: (Uri?) -> Unit,
 ) {
-    BackHandler(sheetState.isVisible) {
-        scope.launch { sheetState.hide() }
-    }
+    BackHandler(enabled = isVisible, onBack = actionHidden)
 
     // ! this no work with delegate
     // * this is import for save state
@@ -46,71 +45,93 @@ fun ButtonSheetContent(
     // * this work create a tmp file, and when no select, the tmp file is no null
     // * so, use the argument to know if take the photo or no
     val launcherPhoto = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.TakePicture()) { isCapture ->
+        contract = ActivityResultContracts.TakePicture()
+    ) { isCapture ->
         val response = if (isCapture) tmpUri.value else null
         actionBeforeSelect(response)
     }
     // * this only get uri of select image, is null if not select any image
     val launcherImg = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()) { uri ->
+        contract = ActivityResultContracts.GetContent()
+    ) { uri ->
         actionBeforeSelect(uri)
     }
     val context = LocalContext.current
 
-    Box(modifier = Modifier
+
+    Column(modifier = Modifier
         .fillMaxWidth()
         .height(160.dp)
         .clip(shape = RoundedCornerShape(10.dp))
         .padding(10.dp)
     ) {
-
-        Column {
-
-            Text(text = stringResource(R.string.text_select_option),
-                modifier = Modifier.padding(10.dp))
-            Spacer(modifier = Modifier.padding(vertical = 5.dp))
-            ItemButtonSheet(
-                iconResource = R.drawable.ic_camera,
-                textOptionRes = R.string.option_img_camera,
-                textDescriptionRes = R.string.description_img_camera
-            ) {
-                tmpUri.value = getTmpFileUri(context)
-                launcherPhoto.launch(tmpUri.value)
-            }
-            ItemButtonSheet(
-                iconResource = R.drawable.ic_image,
-                textOptionRes = R.string.option_img_gallery,
-                textDescriptionRes = R.string.description_img_gallery
-            ) { launcherImg.launch("image/*") }
+        Text(
+            text = stringResource(R.string.text_select_option),
+            modifier = Modifier.padding(10.dp)
+        )
+        Spacer(modifier = Modifier.padding(vertical = 5.dp))
+        ItemCamera {
+            tmpUri.value = getTmpFileUri(context)
+            launcherPhoto.launch(tmpUri.value)
         }
-
+        ItemGallery {
+            launcherImg.launch("image/*")
+        }
     }
 }
 
 
+
+
 @Composable
-fun ItemButtonSheet(
-    @DrawableRes
-    iconResource: Int,
-    @StringRes
-    textOptionRes: Int,
-    @StringRes
-    textDescriptionRes: Int,
+private fun ItemGallery(
+    modifier: Modifier = Modifier,
+    actionLaunch: () -> Unit
+) {
+    ItemButtonSheet(
+        iconResource = painterResource(id = R.drawable.ic_image),
+        textOptionRes = stringResource(id = R.string.option_img_gallery),
+        textDescriptionRes = stringResource(id = R.string.description_img_gallery),
+        actionLaunch = actionLaunch,
+        modifier = modifier
+    )
+}
+
+@Composable
+private fun ItemCamera(
+    modifier: Modifier = Modifier,
     actionLaunch: () -> Unit,
 ) {
-    Row(modifier = Modifier
+    ItemButtonSheet(
+        iconResource = painterResource(id = R.drawable.ic_camera),
+        textOptionRes = stringResource(id = R.string.option_img_camera),
+        textDescriptionRes = stringResource(id = R.string.description_img_camera),
+        actionLaunch = actionLaunch,
+        modifier = modifier
+    )
+}
+
+@Composable
+private fun ItemButtonSheet(
+    iconResource: Painter,
+    textOptionRes: String,
+    textDescriptionRes: String,
+    actionLaunch: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(modifier = modifier
         .fillMaxWidth()
         .clickable {
             actionLaunch()
         }
         .padding(10.dp)) {
         Icon(
-            rememberImagePainter(data = iconResource),
-            contentDescription = stringResource(id = textDescriptionRes),
+            painter = iconResource,
+            contentDescription = textDescriptionRes,
             tint = MaterialTheme.colors.onSurface
         )
         Spacer(modifier = Modifier.padding(horizontal = 8.dp))
-        Text(text = stringResource(id = textOptionRes))
+        Text(text = textOptionRes)
     }
 }
 

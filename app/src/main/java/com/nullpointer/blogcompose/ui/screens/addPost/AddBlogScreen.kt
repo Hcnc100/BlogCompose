@@ -24,10 +24,10 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.annotation.ExperimentalCoilApi
 import com.nullpointer.blogcompose.R
-import com.nullpointer.blogcompose.services.uploadImg.UploadPostServices
+import com.nullpointer.blogcompose.services.uploadImg.UploadDataControl.startServicesUploadPost
+import com.nullpointer.blogcompose.services.uploadImg.UploadDataServices
 import com.nullpointer.blogcompose.ui.navigation.RootNavGraph
 import com.nullpointer.blogcompose.ui.share.ToolbarBack
-import com.nullpointer.blogcompose.ui.share.ButtonSheetContent
 import com.nullpointer.blogcompose.ui.screens.addPost.viewModel.AddBlogViewModel
 import com.nullpointer.blogcompose.ui.share.BackHandler
 import com.nullpointer.blogcompose.ui.share.ImagePost
@@ -65,14 +65,14 @@ fun AddBlogScreen(
         sheetContent = {
             if (modalState.isVisible) {
                 // * bottom sheet really
-                ButtonSheetContent(
-                    scope = scope,
-                    sheetState = modalState,
-                    actionBeforeSelect = { uri ->
-                        scope.launch { modalState.hide() }
-                        uri?.let { addBlogVM.changeFileImg(it, context) }
-                    }
-                )
+//                ButtonSheetContent(
+//                    scope = scope,
+//                    sheetState = modalState,
+//                    actionBeforeSelect = { uri ->
+//                        scope.launch { modalState.hide() }
+//                        uri?.let { addBlogVM.changeFileImg(it, context) }
+//                    }
+//                )
             } else {
                 // * fake bottom sheet
                 //  ! is important for consistency animations
@@ -96,11 +96,11 @@ fun AddBlogScreen(
                 if (buttonVisible) {
                     ButtonPublish {
                         if (addBlogVM.validate()) {
-                            UploadPostServices.startServicesUploadPost(
-                                context = context,
-                                description = addBlogVM.description,
-                                fileImage = addBlogVM.fileImg!!
-                            )
+//                            UploadDataServices.startServicesUploadPost(
+//                                context = context,
+//                                description = addBlogVM.description,
+//                                fileImage = addBlogVM.fileImg!!
+//                            )
                             Toast.makeText(context,
                                 context.getString(R.string.text_message_upload_post),
                                 Toast.LENGTH_SHORT).show()

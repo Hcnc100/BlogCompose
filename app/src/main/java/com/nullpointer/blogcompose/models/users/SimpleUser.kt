@@ -4,7 +4,7 @@ abstract class SimpleUser(
     @Transient
     open var idUser: String = "",
     @Transient
-    open var nameUser: String = "",
+    open var name: String = "",
     @Transient
     open var urlImg: String = "",
 )

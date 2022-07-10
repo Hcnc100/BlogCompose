@@ -137,4 +137,13 @@
     <string name="message_error_validate_img">The profile image is not a valid image</string>
     <string name="message_error_compress_img">Failed to get image, try again</string>
     <string name="post_upload_sucess">Post uploaded successfully</string>
+    <string name="hint_user_name">Escribe un nombre de usuario</string>
+    <string name="message_error_empty_data">Estos datos son necesarios</string>
+
+
+    <string name="title_upload_notify" translatable="false">Subiendo Datos</string>
+    <string name="name_Action_stop" translatable="false">Detener</string>
+    <string name="name_channel_upload" translatable="false">Subida de imagenes</string>
+    <string name="message_cancel_upload_services" translatable="false">Se cancelo la actualizacion</string>
+    <string name="data_user_upload_sucess" translatable="false">INfomacion actualiza con exito</string>
 </resources>

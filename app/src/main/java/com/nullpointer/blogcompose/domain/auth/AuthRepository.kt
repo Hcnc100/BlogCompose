@@ -8,7 +8,7 @@ interface AuthRepository {
     val myUser: Flow<MyUser>
     suspend fun authWithCredential(authCredential: AuthCredential)
     suspend fun updateTokenUser(token:String)
-    suspend fun deleterUser()
     suspend fun uploadDataUser(urlImg: String, name: String)
     suspend fun logOut()
+    suspend fun createNewUser(user: MyUser)
 }

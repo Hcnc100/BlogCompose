@@ -1,246 +1,175 @@
 package com.nullpointer.blogcompose.ui.screens.dataUser
 
-import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
+import android.net.Uri
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import coil.annotation.ExperimentalCoilApi
+import coil.compose.AsyncImagePainter
+import coil.compose.SubcomposeAsyncImage
+import coil.compose.SubcomposeAsyncImageContent
 import com.nullpointer.blogcompose.R
-import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.presentation.AuthViewModel
 import com.nullpointer.blogcompose.presentation.RegistryViewModel
+import com.nullpointer.blogcompose.ui.interfaces.ActionRootDestinations
 import com.nullpointer.blogcompose.ui.navigation.RootNavGraph
+import com.nullpointer.blogcompose.ui.screens.states.DataUserScreenState
+import com.nullpointer.blogcompose.ui.screens.states.rememberDataUserScreenState
+import com.nullpointer.blogcompose.ui.share.EditableTextSavable
+import com.nullpointer.blogcompose.ui.share.SelectImgButtonSheet
+import com.nullpointer.blogcompose.ui.share.SimpleToolbar
 import com.nullpointer.blogcompose.ui.share.ToolbarBack
-import com.nullpointer.blogcompose.ui.share.ButtonSheetContent
-import com.nullpointer.blogcompose.ui.share.ImageProfile
 import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import kotlinx.coroutines.launch
-import java.io.File
 
 @OptIn(ExperimentalMaterialApi::class)
 @RootNavGraph
 @Destination
 @Composable
 fun DataUserScreen(
-    registryViewModel: RegistryViewModel = hiltViewModel(),
     authViewModel: AuthViewModel,
-    navigator: DestinationsNavigator,
+    registryViewModel: RegistryViewModel = hiltViewModel(),
+    dataScreenState: DataUserScreenState = rememberDataUserScreenState()
 ) {
-    // * reload info myUser
-    val statusChange = registryViewModel.stateUpdateUser.collectAsState(null)
-    val stateCompressImg = registryViewModel.stateCompressImg.collectAsState()
-    val scaffoldState = rememberScaffoldState()
-    val sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
-    val scope = rememberCoroutineScope()
-    val focusManager = LocalFocusManager.current
-    val context = LocalContext.current
-    val isDataComplete = authViewModel.isDataComplete
 
     LaunchedEffect(key1 = Unit) {
-        registryViewModel.registryMessage.collect {
-            scaffoldState.snackbarHostState.showSnackbar(
-                context.getString(it))
-        }
+        registryViewModel.registryMessage.collect(dataScreenState::showSnackMessage)
     }
 
     ModalBottomSheetLayout(
-        sheetState = sheetState,
+        sheetState = dataScreenState.modalBottomSheetState,
         sheetContent = {
-            ButtonSheetContent(
-                scope = scope,
-                sheetState = sheetState,
+            SelectImgButtonSheet(
+                isVisible = dataScreenState.isShowModal,
+                actionHidden = dataScreenState::hiddenModal,
                 actionBeforeSelect = { uri ->
-                    uri?.let { registryViewModel.changeImgFileTemp(it, context) }
-                    scope.launch { sheetState.hide() }
+                    uri?.let {
+                        registryViewModel.imageProfile.changeValue(it, dataScreenState.context)
+                    }
+                    dataScreenState.hiddenModal()
                 }
             )
         },
     ) {
         Scaffold(
-            scaffoldState = scaffoldState,
+            scaffoldState = dataScreenState.scaffoldState,
             topBar = {
-                if (isDataComplete) {
-                    // * if data is complete , show data saved
-                    ToolbarBack(
-                        title = stringResource(R.string.title_profile),
-                        actionBack = navigator::popBackStack)
-                } else {
-                    // ? if data is no complete no show nothing
-                    ToolbarBack(title = stringResource(R.string.title_registry))
-                }
+                SimpleToolbar(title = stringResource(id = R.string.title_profile))
             },
+            floatingActionButtonPosition = FabPosition.Center,
             floatingActionButton = {
-                ButtonRegistryStatus(
-                    statusChange = statusChange.value,
-                    isRegistry = isDataComplete,
-                    actionClick = { registryViewModel.updateDataUser(context) }
-                )
+                ButtonRegistryStatus(isEnabled = registryViewModel.isDataValid) {
+                    dataScreenState.hiddenKeyBoard()
+                    registryViewModel.getUpdatedUser()?.let {
+                        authViewModel.createNewUser(it)
+                    }
+                }
             }
         ) {
             Column(
-                horizontalAlignment = Alignment.CenterHorizontally
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(20.dp)
             ) {
-                ImageCirculateUser(fileTemp = registryViewModel.fileImg,
-                    imageProfile = registryViewModel.photoUser,
-                    isCompress = stateCompressImg.value is Resource.Loading,
-                    modifier = Modifier.weight(3f),
-                    actionEdit = {
-                        // * when launch sheet dialog, hide keyboard if is needed
-                        focusManager.clearFocus()
-                        scope.launch {
-                            sheetState.show()
-                        }
-                    }
+                PhotoProfile(
+                    urlImg = registryViewModel.imageProfile.value,
+                    actionChangePhoto = dataScreenState::showModal
                 )
-                TextInputName(
-                    isEnable = !isDataComplete,
-                    nameUser = registryViewModel.nameUser,
-                    changeNameUser = registryViewModel::changeNameUserTemp,
-                    errorMessage = registryViewModel.errorName,
-                    maxLength = 150,
-                    modifier = Modifier.weight(4f))
-
-
-                // * spacer to center edit text
-                Spacer(modifier = Modifier.weight(2f))
+                Spacer(modifier = Modifier.height(40.dp))
+                EditableTextSavable(
+                    valueProperty = registryViewModel.nameUser,
+                )
             }
         }
     }
-
+    if(authViewModel.creatingUser) CreatingDialog()
 }
 
-@OptIn(ExperimentalCoilApi::class)
 @Composable
-fun ImageCirculateUser(
-    fileTemp: File?,
-    imageProfile: String,
+private fun PhotoProfile(
     modifier: Modifier = Modifier,
-    isCompress: Boolean,
-    actionEdit: () -> Unit,
+    urlImg: Uri,
+    actionChangePhoto: () -> Unit
 ) {
-    Box(modifier = modifier) {
-        // * background color
-        Box(modifier = Modifier
-            .fillMaxWidth()
-            .fillMaxHeight(.5f)
-            .background(MaterialTheme.colors.primary))
-        // * image and button edit
-        Box(contentAlignment = Alignment.Center,
-            modifier = Modifier.align(Alignment.Center)) {
-            // * image circular
+    Box(
+        modifier = modifier
+            .fillMaxWidth(),
+        contentAlignment = Alignment.Center
+    ) {
+        Box {
             Card(shape = CircleShape) {
-                ImageProfile(
-                    urlImgProfile = imageProfile,
-                    paddingLoading = 20.dp,
-                    modifier = Modifier.size(150.dp),
-                    showProgress = true,
-                    fileImg = fileTemp,
-                    contentDescription = stringResource(R.string.description_img_select)
-                )
+                SubcomposeAsyncImage(
+                    model = urlImg,
+                    contentDescription = stringResource(id = R.string.description_image_profile),
+                    modifier = Modifier.size(180.dp),
+                    contentScale = ContentScale.Crop
+                ) {
+
+                    when (painter.state) {
+                        is AsyncImagePainter.State.Loading -> {
+                            CircularProgressIndicator(
+                                modifier = Modifier.padding(60.dp),
+                                strokeWidth = 8.dp,
+                                color = MaterialTheme.colors.primary
+                            )
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_person),
+                                contentDescription = "",
+                                modifier = Modifier.padding(40.dp)
+                            )
+                        }
+                        is AsyncImagePainter.State.Success -> SubcomposeAsyncImageContent()
+                        else -> Icon(
+                            painter = painterResource(id = R.drawable.ic_person),
+                            contentDescription = "",
+                            modifier = Modifier.padding(40.dp)
+                        )
+                    }
+                }
             }
-
-            // * progress load when compress
-            if (isCompress) CircularProgressIndicator()
-
-            // * button edit img
             FloatingActionButton(
-                onClick = actionEdit, modifier = Modifier
-                    .padding(10.dp)
-                    .size(35.dp)
+                onClick = actionChangePhoto,
+                modifier = Modifier
                     .align(Alignment.BottomEnd)
+                    .padding(15.dp)
+                    .size(40.dp)
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_edit),
-                    contentDescription = stringResource(R.string.description_change_photo_user),
+                    contentDescription = stringResource(
+                        id = R.string.change_image_user
+                    )
                 )
             }
         }
     }
 }
 
+
+
+
+
 @Composable
-fun TextInputName(
+private fun ButtonRegistryStatus(
+    isEnabled: Boolean,
     modifier: Modifier = Modifier,
-    nameUser: String,
-    changeNameUser: (String) -> Unit,
-    errorMessage: Int,
-    maxLength: Int,
-    isEnable: Boolean,
+    actionClick: () -> Unit
 ) {
-    Column(modifier = modifier
-        .fillMaxWidth(.8f),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.End
+    Button(
+        modifier = modifier,
+        onClick = actionClick,
+        enabled = isEnabled
     ) {
-        // * input text name myUser
-        OutlinedTextField(enabled = isEnable,
-            value = nameUser,
-            singleLine = true,
-            onValueChange = changeNameUser,
-            label = { Text(stringResource(R.string.text_label_name_user)) },
-            isError = errorMessage != 0
+        Text(
+           stringResource(R.string.text_button_registry),
+            modifier = Modifier.padding(horizontal = 20.dp)
         )
-        // * text error message
-        Text(if (errorMessage != 0) stringResource(id = errorMessage) else "${nameUser.length}/$maxLength",
-            style = MaterialTheme.typography.caption,
-            color = if (errorMessage != 0) MaterialTheme.colors.error else Color.Unspecified,
-            modifier = Modifier.padding(end = 10.dp))
-
-        Row(modifier = Modifier
-            .padding(horizontal = 10.dp, vertical = 15.dp)
-            .align(Alignment.Start), verticalAlignment = Alignment.CenterVertically) {
-            Image(painter = painterResource(id = R.drawable.ic_help),
-                contentDescription = stringResource(R.string.description_info_icon))
-            Spacer(modifier = Modifier.width(10.dp))
-            Text(if (!isEnable) stringResource(R.string.text_name_no_change) else stringResource(R.string.text_select_name),
-                style = MaterialTheme.typography.caption)
-        }
-    }
-}
-
-@Composable
-fun ButtonRegistryStatus(
-    statusChange: Resource<Unit>?,
-    isRegistry: Boolean,
-    actionClick: () -> Unit,
-) {
-    FloatingActionButton(onClick = { if (statusChange == null) actionClick() },
-        modifier = Modifier
-            .animateContentSize(), backgroundColor = when (statusChange) {
-            is Resource.Failure -> Color(0xffcc0000)
-            is Resource.Loading -> Color.LightGray
-            is Resource.Success -> Color(0xff00cc00)
-            null -> MaterialTheme.colors.secondary
-        }) {
-        when (statusChange) {
-            is Resource.Failure -> Icon(
-                painter = painterResource(id = R.drawable.ic_clear),
-                contentDescription = stringResource(R.string.description_icon_error))
-            is Resource.Loading -> CircularProgressIndicator()
-            is Resource.Success -> Icon(
-                painter = painterResource(id = R.drawable.ic_ckeck),
-                contentDescription = stringResource(R.string.description_icon_sucess))
-            null -> {
-                Text(if (isRegistry) stringResource(R.string.text_button_update) else stringResource(
-                    R.string.text_button_registry),
-                    modifier = Modifier.padding(horizontal = 20.dp))
-            }
-        }
     }
 }

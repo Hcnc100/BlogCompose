@@ -22,13 +22,16 @@ import com.nullpointer.blogcompose.presentation.MyPostViewModel
 import com.nullpointer.blogcompose.ui.interfaces.ActionRootDestinations
 import com.nullpointer.blogcompose.ui.navigation.HomeNavGraph
 import com.nullpointer.blogcompose.ui.navigation.MainTransitions
-import com.nullpointer.blogcompose.ui.screens.destinations.AddBlogScreenDestination
 import com.nullpointer.blogcompose.ui.screens.destinations.ConfigScreenDestination
 import com.nullpointer.blogcompose.ui.screens.destinations.PostDetailsDestination
+import com.nullpointer.blogcompose.ui.screens.states.DataUserScreenState
+import com.nullpointer.blogcompose.ui.screens.states.rememberDataUserScreenState
 import com.nullpointer.blogcompose.ui.screens.swipePosts.ScreenSwiperPost
 import com.nullpointer.blogcompose.ui.share.ImageProfile
+import com.nullpointer.blogcompose.ui.share.SelectImgButtonSheet
 import com.ramcosta.composedestinations.annotation.Destination
 
+@OptIn(ExperimentalMaterialApi::class)
 @HomeNavGraph
 @Destination(style = MainTransitions::class)
 @Composable
@@ -36,7 +39,8 @@ fun ProfileScreen(
     authViewModel: AuthViewModel,
     myPostViewModel: MyPostViewModel = hiltViewModel(),
     likeViewModel: LikeViewModel = hiltViewModel(),
-    actionRootDestinations: ActionRootDestinations
+    actionRootDestinations: ActionRootDestinations,
+    dataScreenState: DataUserScreenState = rememberDataUserScreenState()
 ) {
     // * states
     val stateListPost = myPostViewModel.listMyPost.collectAsState()
@@ -46,7 +50,7 @@ fun ProfileScreen(
 
     // * data myUser
     val photoUser = currentUser.value?.urlImg ?: ""
-    val name = currentUser.value?.nameUser ?: ""
+    val name = currentUser.value?.name ?: ""
 
     // * messages
     val likeMessage = likeViewModel.messageLike
@@ -70,34 +74,59 @@ fun ProfileScreen(
         }
     }
 
-    ScreenSwiperPost(
-        resultListPost = stateListPost.value,
-        scaffoldState = scaffoldState,
-        updateListPost = { myPostViewModel.requestNewPost(true) },
-        actionBottomReached = myPostViewModel::concatenatePost,
-        actionButtonAdd = {
-            actionRootDestinations.changeRoot(AddBlogScreenDestination)
-        },
-        actionChangePost = likeViewModel::likePost,
-        staticInfo = Pair(photoUser, name),
-        isLoadNewData = stateLoading.value is Resource.Loading,
-        isConcatenateData = stateConcatenate.value is Resource.Loading,
-        actionDetails = { idPost, goToBottom ->
-            actionRootDestinations.changeRoot(PostDetailsDestination(idPost, goToBottom))
-        },
-        emptyResRaw = R.raw.empty1,
-        emptyString = stringResource(R.string.message_empty_my_post)
-    ) {
-        // * add header for the swipe list
-        // ! only function composable
-        HeaderProfile(
-            urlImgProfile = photoUser,
-            nameProfile = name,
-            actionLogOut = {
-                actionRootDestinations.changeRoot(ConfigScreenDestination)
-            }
-        )
+
+    LaunchedEffect(key1 = Unit){
+        dataScreenState.hiddenModal()
     }
+
+    ModalBottomSheetLayout(
+        sheetState = dataScreenState.modalBottomSheetState,
+        sheetContent = {
+            SelectImgButtonSheet(
+                isVisible = dataScreenState.isShowModal,
+                actionHidden = dataScreenState::hiddenModal,
+                actionBeforeSelect = { uri ->
+//                    uri?.let {
+//                        registryViewModel.imageProfile.changeValue(it, dataScreenState.context)
+//                    }
+                    dataScreenState.hiddenModal()
+                }
+            )
+        },
+    ) {
+        ScreenSwiperPost(
+            resultListPost = stateListPost.value,
+            scaffoldState = scaffoldState,
+            updateListPost = { myPostViewModel.requestNewPost(true) },
+            actionBottomReached = myPostViewModel::concatenatePost,
+            actionButtonAdd = {
+                dataScreenState.showModal()
+
+            },
+            actionChangePost = likeViewModel::likePost,
+            staticInfo = Pair(photoUser, name),
+            isLoadNewData = stateLoading.value is Resource.Loading,
+            isConcatenateData = stateConcatenate.value is Resource.Loading,
+            actionDetails = { idPost, goToBottom ->
+                actionRootDestinations.changeRoot(PostDetailsDestination(idPost, goToBottom))
+            },
+            emptyResRaw = R.raw.empty1,
+            emptyString = stringResource(R.string.message_empty_my_post)
+        ) {
+            // * add header for the swipe list
+            // ! only function composable
+            HeaderProfile(
+                urlImgProfile = photoUser,
+                nameProfile = name,
+                actionLogOut = {
+                    actionRootDestinations.changeRoot(ConfigScreenDestination)
+                }
+            )
+        }
+
+    }
+
+
 }
 
 @Composable

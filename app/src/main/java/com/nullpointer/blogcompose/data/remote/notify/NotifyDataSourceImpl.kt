@@ -1,16 +1,15 @@
-package com.nullpointer.blogcompose.data.remote
+package com.nullpointer.blogcompose.data.remote.notify
 
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.Query
-import com.google.firebase.firestore.Source
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.nullpointer.blogcompose.models.notify.Notify
 import kotlinx.coroutines.tasks.await
 import java.util.*
 
-class NotifyDataSource {
+class NotifyDataSourceImpl:NotifyDataSource{
     companion object {
         private const val TIMESTAMP = "timestamp"
         private const val NOTIFICATIONS = "notifications"
@@ -21,10 +20,10 @@ class NotifyDataSource {
     private val auth = Firebase.auth
     private val nodeNotify = Firebase.firestore.collection(NOTIFICATIONS)
 
-    suspend fun getLastNotifications(
-        startWith: String? = null,
-        endWith: String? = null,
-        numberRequest: Int = Integer.MAX_VALUE,
+    override suspend fun getLastNotifications(
+        startWith: String?,
+        endWith: String?,
+        numberRequest: Int,
     ): List<Notify> {
         // * get last notify consideration the id passed from parameter, this for no reload all
         // * else just return the request number of notify, this is "pagination"
@@ -50,7 +49,7 @@ class NotifyDataSource {
         }
     }
 
-    suspend fun getLastNotifyDate(numberRequest: Int, date: Date?): List<Notify> {
+    override suspend fun getLastNotifyDate(numberRequest: Int, date: Date?): List<Notify> {
         // * node of notifications
         val nodeUserNotify = nodeNotify.document(auth.currentUser?.uid!!).collection(LIST_NOTIFY)
         // * order for timestamp
@@ -71,12 +70,13 @@ class NotifyDataSource {
         return document.toObject(Notify::class.java)?.apply {
             id = document.id
             timestamp = document
-                .getTimestamp(TIMESTAMP, DocumentSnapshot.ServerTimestampBehavior.ESTIMATE
+                .getTimestamp(
+                    TIMESTAMP, DocumentSnapshot.ServerTimestampBehavior.ESTIMATE
                 )?.toDate()
         }
     }
 
-    fun updateOpenNotify(idNotify: String) {
+    override fun updateOpenNotify(idNotify: String) {
         val nodeUserNotify = nodeNotify.document(auth.currentUser?.uid!!).collection(LIST_NOTIFY)
         nodeUserNotify.document(idNotify).update(FIELD_IS_OPEN, true)
     }

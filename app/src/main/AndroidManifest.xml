@@ -61,7 +61,7 @@
         </service>
 
         <service
-            android:name=".services.uploadImg.UploadPostServices"
+            android:name=".services.uploadImg.UploadDataServices"
             android:foregroundServiceType="dataSync" />
 
         <meta-data

@@ -5,7 +5,10 @@ import androidx.room.Room
 import com.nullpointer.blogcompose.data.local.PreferencesDataSource
 import com.nullpointer.blogcompose.data.local.cache.*
 import com.nullpointer.blogcompose.data.local.cache.BlogDataBase.Companion.BLOG_DATABASE
-import com.nullpointer.blogcompose.data.remote.*
+import com.nullpointer.blogcompose.data.remote.auth.AuthDataSourceImpl
+import com.nullpointer.blogcompose.data.remote.image.ImagesDataSourceImpl
+import com.nullpointer.blogcompose.data.remote.notify.NotifyDataSourceImpl
+import com.nullpointer.blogcompose.data.remote.post.PostDataSourceImpl
 import com.nullpointer.blogcompose.domain.auth.AuthRepoImpl
 import com.nullpointer.blogcompose.domain.images.ImagesRepoImpl
 import com.nullpointer.blogcompose.domain.notify.NotifyRepoImpl
@@ -23,13 +26,13 @@ import javax.inject.Singleton
 object AppModule {
     @Provides
     @Singleton
-    fun getPostDataSource(): PostDataSource =
-        PostDataSource()
+    fun getPostDataSource(): PostDataSourceImpl =
+        PostDataSourceImpl()
 
     @Provides
     @Singleton
     fun getPostRepository(
-        postDataSource: PostDataSource,
+        postDataSource: PostDataSourceImpl,
         postDAO: PostDAO,
         myPostDAO: MyPostDAO,
         commentsDAO: CommentsDAO,
@@ -38,26 +41,26 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun getImagesDataSource(): ImagesDataSource =
-        ImagesDataSource()
+    fun getImagesDataSource(): ImagesDataSourceImpl =
+        ImagesDataSourceImpl()
 
     @Provides
     @Singleton
     fun getImagesRepository(
-        imagesDataSource: ImagesDataSource,
+        imagesDataSource: ImagesDataSourceImpl,
     ): ImagesRepoImpl = ImagesRepoImpl(imagesDataSource)
 
     @Provides
     @Singleton
-    fun provideAuthDataSource(): AuthDataSource =
-        AuthDataSource()
+    fun provideAuthDataSource(): AuthDataSourceImpl =
+        AuthDataSourceImpl()
 
     @Provides
     @Singleton
     fun provideAuthRepository(
-        authDataSource: AuthDataSource,
+        authDataSource: AuthDataSourceImpl,
         preferencesDataSource: PreferencesDataSource,
-        imagesDataSource: ImagesDataSource
+        imagesDataSource: ImagesDataSourceImpl
     ): AuthRepoImpl = AuthRepoImpl(authDataSource, preferencesDataSource, imagesDataSource)
 
 
@@ -77,13 +80,13 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideNotifyDatSource(): NotifyDataSource =
-        NotifyDataSource()
+    fun provideNotifyDatSource(): NotifyDataSourceImpl =
+        NotifyDataSourceImpl()
 
     @Provides
     @Singleton
     fun provideNotifyRepo(
-        notifyDataSource: NotifyDataSource,
+        notifyDataSource: NotifyDataSourceImpl,
         notifyDAO: NotifyDAO,
     ): NotifyRepoImpl = NotifyRepoImpl(notifyDataSource, notifyDAO)
 

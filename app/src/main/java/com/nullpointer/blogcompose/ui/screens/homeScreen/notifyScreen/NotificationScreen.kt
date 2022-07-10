@@ -41,7 +41,6 @@ import com.nullpointer.blogcompose.ui.share.ImagePost
 import com.nullpointer.blogcompose.ui.share.ImageProfile
 import com.nullpointer.blogcompose.ui.share.OnBottomReached
 import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
 
 @HomeNavGraph
@@ -186,7 +185,7 @@ fun ItemNotify(
                 Spacer(modifier = Modifier.width(10.dp))
 
                 TextNotifyInfo(modifier = Modifier.weight(5f),
-                    nameLiked = notify.userInNotify?.nameUser.toString(),
+                    nameLiked = notify.userInNotify?.name.toString(),
                     timeStamp = notify.timestamp?.time ?: 0,
                     typeNotify = notify.type)
 

@@ -1,14 +1,11 @@
 package com.nullpointer.blogcompose.domain.post
 
-import android.content.Context
-import android.widget.Toast
-import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.utils.InternetCheck
 import com.nullpointer.blogcompose.core.utils.NetworkException
 import com.nullpointer.blogcompose.data.local.cache.CommentsDAO
 import com.nullpointer.blogcompose.data.local.cache.MyPostDAO
 import com.nullpointer.blogcompose.data.local.cache.PostDAO
-import com.nullpointer.blogcompose.data.remote.PostDataSource
+import com.nullpointer.blogcompose.data.remote.post.PostDataSourceImpl
 import com.nullpointer.blogcompose.models.Comment
 import com.nullpointer.blogcompose.models.posts.MyPost
 import com.nullpointer.blogcompose.models.posts.Post
@@ -17,7 +14,7 @@ import kotlinx.coroutines.flow.Flow
 import timber.log.Timber
 
 class PostRepoImpl(
-    private val postDataSource: PostDataSource,
+    private val postDataSource: PostDataSourceImpl,
     private val postDAO: PostDAO,
     private val myPostDAO: MyPostDAO,
     private val commentsDAO: CommentsDAO,
@@ -197,9 +194,8 @@ class PostRepoImpl(
     }
 
 
-    override suspend fun addNewPost(post: Post, context: Context) {
+    override suspend fun addNewPost(post: Post) {
         val idPost = postDataSource.addNewPost(post)
-        Toast.makeText(context, context.getString(R.string.post_upload_sucess), Toast.LENGTH_SHORT).show()
         requestLastPostInitWith(idPost)
     }
 

@@ -18,7 +18,7 @@ class PreferencesDataSource(
     suspend fun saveUser(myUser: MyUser) {
         context.userProtoDataStore.updateData { currentUserData ->
             currentUserData.toBuilder()
-                .setName(myUser.nameUser)
+                .setName(myUser.name)
                 .setUuid(myUser.idUser)
                 .setUrlImg(myUser.urlImg)
                 .build()
@@ -40,7 +40,7 @@ class PreferencesDataSource(
         context.userProtoDataStore.data.map { user ->
             MyUser(
                 idUser = user.uuid,
-                nameUser = user.name,
+                name = user.name,
                 urlImg = user.urlImg,
             )
         }

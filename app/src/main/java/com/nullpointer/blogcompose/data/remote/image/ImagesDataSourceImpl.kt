@@ -1,4 +1,4 @@
-package com.nullpointer.blogcompose.data.remote
+package com.nullpointer.blogcompose.data.remote.image
 
 import android.net.Uri
 import com.google.firebase.auth.ktx.auth
@@ -15,18 +15,20 @@ import kotlinx.coroutines.tasks.await
 import timber.log.Timber
 import kotlin.math.absoluteValue
 
-class ImagesDataSource {
+class ImagesDataSourceImpl:ImageDataSource {
     private val refStorage = Firebase.storage.getReference("imgPost")
-    private val refImgTemp = Firebase.storage.getReference("temp")
     private val refImgUser = Firebase.storage.getReference("imgUsers")
     private val idUser get() = Firebase.auth.currentUser?.uid ?: "NoAuth"
-    private val functions = Firebase.functions
+
+    override suspend fun uploadImageUserWithOutState(uriImg: Uri): Uri {
+        val result=refImgUser.child(idUser).putFile(uriImg).await()
+        return result.storage.downloadUrl.await()
+    }
 
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    fun uploadImageUser(uriImg: Uri): Flow<StorageUploadTaskResult> =
+    override fun uploadImageUserWithState(uriImg: Uri): Flow<StorageUploadTaskResult> =
         callbackFlow {
-            refImgTemp.child(idUser).putFile(uriImg).addOnSuccessListener { task ->
+            refImgUser.child(idUser).putFile(uriImg).addOnSuccessListener { task ->
                 task.storage.downloadUrl.addOnSuccessListener {
                     trySend(StorageUploadTaskResult.Complete.Success(it.toString()))
                     close()
@@ -55,8 +57,9 @@ class ImagesDataSource {
             awaitClose()
         }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    fun uploadImagePost(uriImg: Uri, name: String): Flow<StorageUploadTaskResult> =
+
+
+    override fun uploadImagePostWithState(uriImg: Uri, name: String): Flow<StorageUploadTaskResult> =
         callbackFlow {
             refStorage.child(idUser).child(name).putFile(uriImg).addOnSuccessListener { task ->
                 task.storage.downloadUrl.addOnSuccessListener {
@@ -87,18 +90,5 @@ class ImagesDataSource {
             awaitClose()
         }
 
-    suspend fun getImageUser(): Uri? {
-        return refImgUser.child(idUser).child("imgProfile").downloadUrl.await()
-    }
 
-    suspend fun invalidPhotoUser(): Boolean {
-        val response =
-            functions.getHttpsCallable("validateImageProfile").call().continueWith { task ->
-                val reponse = task.result.data as (Map<String, Object>)
-                reponse["isPhotoInvalidate"] as Boolean
-
-            }.await()
-        Timber.d("response ${response}")
-        return response
-    }
 }

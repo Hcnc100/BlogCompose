@@ -49,7 +49,7 @@ fun BlogItem(
             } else {
                 HeaderBlog(
                     urlImgOwnerPost = post.userPoster?.urlImg.toString(),
-                    nameOwnerPost = post.userPoster?.nameUser.toString(),
+                    nameOwnerPost = post.userPoster?.name.toString(),
                 )
             }
             // * image

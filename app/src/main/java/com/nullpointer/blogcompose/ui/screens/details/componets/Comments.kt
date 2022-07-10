@@ -43,7 +43,7 @@ fun ContentComment(
     Card(shape = RoundedCornerShape(10.dp),
         modifier = modifierComment.padding(horizontal = 10.dp)) {
         Column(modifier = Modifier.padding(10.dp)) {
-            Text(comment?.userComment?.nameUser.toString(),
+            Text(comment?.userComment?.name.toString(),
                 style = MaterialTheme.typography.subtitle2,
                 fontWeight = FontWeight.W600)
             Spacer(modifier = Modifier.height(5.dp))

@@ -63,7 +63,7 @@ fun HeaderBlog(
                 paddingLoading = 5.dp,
                 modifier = Modifier.size(30.dp), contentDescription = stringResource(R.string.description_img_owner_post))
             Spacer(modifier = Modifier.width(15.dp))
-            Text(post.userPoster?.nameUser.toString(),
+            Text(post.userPoster?.name.toString(),
                 style = MaterialTheme.typography.body1,
                 fontWeight = FontWeight.W600)
         }

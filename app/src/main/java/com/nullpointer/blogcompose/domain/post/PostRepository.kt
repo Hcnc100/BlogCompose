@@ -17,7 +17,7 @@ interface PostRepository {
     suspend fun requestLastPostInitWith(idPost: String)
     suspend fun concatenatePost(): Int
     suspend fun concatenateMyPost(): Int
-    suspend fun addNewPost(post: Post, context: Context)
+    suspend fun addNewPost(post: Post)
     suspend fun deleterPost(post: Post)
     suspend fun updateInnerPost(post: Post)
     suspend fun getPost(idPost: String): Post?

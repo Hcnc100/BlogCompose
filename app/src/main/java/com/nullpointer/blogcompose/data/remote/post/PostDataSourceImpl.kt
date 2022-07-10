@@ -1,8 +1,7 @@
-package com.nullpointer.blogcompose.data.remote
+package com.nullpointer.blogcompose.data.remote.post
 
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.DocumentSnapshot
-import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.Source
 import com.google.firebase.firestore.ktx.firestore
@@ -19,7 +18,7 @@ import kotlinx.coroutines.tasks.await
 import timber.log.Timber
 import java.util.*
 
-class PostDataSource {
+class PostDataSourceImpl {
 
     companion object {
         private const val NAME_REF_POST = "posts"
@@ -146,7 +145,6 @@ class PostDataSource {
         )
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     fun getRealTimePost(idPost: String) = callbackFlow {
         // * listener changes to post
         val refPost = refPosts.document(idPost)
@@ -167,7 +165,8 @@ class PostDataSource {
         if (documentSnapshot == null) return null
         return documentSnapshot.toObject(Post::class.java)?.let { post ->
             post.apply {
-                timestamp = documentSnapshot.getTimestamp(TIMESTAMP,
+                timestamp = documentSnapshot.getTimestamp(
+                    TIMESTAMP,
                     DocumentSnapshot.ServerTimestampBehavior.ESTIMATE
                 )?.toDate()
                 ownerLike = isPostLiked(documentSnapshot.id)

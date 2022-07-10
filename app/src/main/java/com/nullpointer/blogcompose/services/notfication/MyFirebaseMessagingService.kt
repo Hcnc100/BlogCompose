@@ -6,7 +6,6 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.net.toUri
 import coil.ImageLoader
@@ -26,15 +25,11 @@ import com.nullpointer.blogcompose.models.notify.NotifyDeserializer
 import com.nullpointer.blogcompose.models.notify.TypeNotify
 import com.nullpointer.blogcompose.models.notify.TypeNotify.COMMENT
 import com.nullpointer.blogcompose.models.notify.TypeNotify.LIKE
-import com.nullpointer.blogcompose.services.uploadImg.NotificationChannelHelper
-import com.nullpointer.blogcompose.services.uploadImg.NotificationChannelHelper.ID_CHANNEL_POST_NOTIFY
-import com.nullpointer.blogcompose.services.uploadImg.NotificationChannelHelper.NAME_CHANNEL_LIKE
 import com.nullpointer.blogcompose.ui.activitys.MainActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
 import timber.log.Timber
 import javax.inject.Inject
-import kotlin.random.Random
 
 
 @AndroidEntryPoint
@@ -101,7 +96,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             notifyHelper.launchNotifyPost(
                 bitmapPost = bitmapPost.await()!!,
                 bitmapUser = bitmapUser.await()!!,
-                nameUserLiked = notify.userInNotify?.nameUser.toString(),
+                nameUserLiked = notify.userInNotify?.name.toString(),
                 idPost = notify.idPost,
                 typeNotify = notify.type
             )
@@ -136,13 +131,13 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         private fun getBaseNotification(typeNotify: TypeNotify) =
             when (typeNotify) {
                 LIKE -> NotificationCompat.Builder(context,
-                    ID_CHANNEL_POST_NOTIFY)
+                    "")
                     .setAutoCancel(true)
                     .setOngoing(false)
                     .setSmallIcon(R.drawable.ic_fav)
                     .setContentTitle(context.getString(R.string.text_content_notify_like))
                 COMMENT -> NotificationCompat.Builder(context,
-                    ID_CHANNEL_POST_NOTIFY)
+                   "")
                     .setAutoCancel(true)
                     .setOngoing(false)
                     .setSmallIcon(R.drawable.ic_comment)
@@ -196,13 +191,13 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             idPost: String,
             typeNotify: TypeNotify,
         ) {
-            // * create notification channel amd get notification manager
-            val notificationManager = NotificationChannelHelper.createChannelNotification(
-                idNotificationChannel = ID_CHANNEL_POST_NOTIFY,
-                nameNotificationChanel = context.getString(NAME_CHANNEL_LIKE),
-                importance = NotificationManagerCompat.IMPORTANCE_HIGH,
-                context = context
-            )
+//            // * create notification channel amd get notification manager
+//            val notificationManager = NotificationChannelHelper.createChannelNotification(
+//                idNotificationChannel = ID_CHANNEL_POST_NOTIFY,
+//                nameNotificationChanel = context.getString(NAME_CHANNEL_LIKE),
+//                importance = NotificationManagerCompat.IMPORTANCE_HIGH,
+//                context = context
+//            )
             // * get base notify if is like or comment
             val baseNotify = getBaseNotification(typeNotify)
             // * create action to click on notification
@@ -217,7 +212,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
                 it.setCustomContentView(customNotify)
             }
             // * notify with random id
-            notificationManager.notify(Random.nextInt(), baseNotify.build())
+//            notificationManager.notify(Random.nextInt(), baseNotify.build())
         }
     }
 

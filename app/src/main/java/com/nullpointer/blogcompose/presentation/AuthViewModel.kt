@@ -1,5 +1,8 @@
 package com.nullpointer.blogcompose.presentation
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -7,10 +10,10 @@ import com.google.firebase.auth.AuthCredential
 import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.delegates.SavableComposeState
 import com.nullpointer.blogcompose.core.states.LoginStatus
-import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.domain.auth.AuthRepoImpl
 import com.nullpointer.blogcompose.domain.notify.NotifyRepoImpl
 import com.nullpointer.blogcompose.domain.post.PostRepoImpl
+import com.nullpointer.blogcompose.models.users.MyUser
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -47,14 +50,12 @@ class AuthViewModel @Inject constructor(
 
     val stateAuthUser = flow {
         authRepoImpl.myUser.collect { user ->
-            val state = if (user.idUser.isEmpty()) {
+            val state = if (!user.isUserAuth) {
                 LoginStatus.Unauthenticated
+            } else if (user.isDataComplete) {
+                LoginStatus.Authenticated.CompleteData
             } else {
-                if (user.nameUser.isEmpty() || user.idUser.isEmpty() || user.urlImg.isEmpty()) {
-                    LoginStatus.Authenticated.CompletingData
-                } else {
-                    LoginStatus.Authenticated.CompleteData
-                }
+                LoginStatus.Authenticated.CompletingData
             }
             emit(state)
         }
@@ -70,14 +71,14 @@ class AuthViewModel @Inject constructor(
     )
 
 
-    var isLoading by SavableComposeState(savedStateHandle,"",false)
-    private set
+    var isLoading by SavableComposeState(savedStateHandle, "", false)
+        private set
 
     fun authWithCredential(
         authCredential: AuthCredential
     ) = viewModelScope.launch(Dispatchers.IO) {
         try {
-            isLoading=true
+            isLoading = true
             authRepoImpl.authWithCredential(authCredential)
         } catch (e: Exception) {
             when (e) {
@@ -87,8 +88,8 @@ class AuthViewModel @Inject constructor(
                     _messageAuth.trySend(R.string.message_error_auth)
                 }
             }
-        }finally {
-            isLoading=false
+        } finally {
+            isLoading = false
         }
     }
 
@@ -96,5 +97,23 @@ class AuthViewModel @Inject constructor(
         authRepoImpl.logOut()
         notifyRepoImpl.deleterAllNotify()
         postRepoImpl.deleterAllPost()
+    }
+
+    fun updateUser(user: MyUser) = viewModelScope.launch(Dispatchers.IO) {
+        authRepoImpl.uploadDataUser(user.name, name = user.name)
+    }
+
+     var creatingUser by mutableStateOf(false)
+        private set
+
+    fun createNewUser(myUser: MyUser) = viewModelScope.launch(Dispatchers.IO) {
+        try {
+            creatingUser = true
+            authRepoImpl.createNewUser(myUser)
+        } catch (e: Exception) {
+
+        } finally {
+            creatingUser = false
+        }
     }
 }

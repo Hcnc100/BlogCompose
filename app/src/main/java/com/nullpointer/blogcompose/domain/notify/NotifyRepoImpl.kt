@@ -3,12 +3,12 @@ package com.nullpointer.blogcompose.domain.notify
 import com.nullpointer.blogcompose.core.utils.InternetCheck
 import com.nullpointer.blogcompose.core.utils.NetworkException
 import com.nullpointer.blogcompose.data.local.cache.NotifyDAO
-import com.nullpointer.blogcompose.data.remote.NotifyDataSource
+import com.nullpointer.blogcompose.data.remote.notify.NotifyDataSourceImpl
 import com.nullpointer.blogcompose.models.notify.Notify
 import kotlinx.coroutines.flow.Flow
 
 class NotifyRepoImpl(
-    private val notifyDataSource: NotifyDataSource,
+    private val notifyDataSource: NotifyDataSourceImpl,
     private val notifyDAO: NotifyDAO,
 ) : NotifyRepository {
 
