@@ -15,7 +15,7 @@ import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.nullpointer.blogcompose.core.utils.SimpleScreenState
 
 
-class BlogScreenState constructor(
+class SwipeRefreshScreenState constructor(
     scaffoldState: ScaffoldState,
     context: Context,
     focusManager: FocusManager,
@@ -26,7 +26,7 @@ class BlogScreenState constructor(
 }
 
 @Composable
-fun rememberBlogScreenState(
+fun rememberSwipeRefeshScreenState(
     isRefreshing: Boolean,
     scaffoldState: ScaffoldState= rememberScaffoldState(),
     swipeState: SwipeRefreshState= rememberSwipeRefreshState(isRefreshing = isRefreshing),
@@ -34,5 +34,5 @@ fun rememberBlogScreenState(
     context: Context = LocalContext.current,
     focusManager: FocusManager = LocalFocusManager.current
 )= remember(scaffoldState,swipeState,listState) {
-    BlogScreenState(scaffoldState, context, focusManager, swipeState, listState)
+    SwipeRefreshScreenState(scaffoldState, context, focusManager, swipeState, listState)
 }

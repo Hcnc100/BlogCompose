@@ -1,5 +1,8 @@
 package com.nullpointer.blogcompose.presentation
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -15,6 +18,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.util.concurrent.CancellationException
 import javax.inject.Inject
@@ -25,69 +29,72 @@ class NotifyViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    companion object{
-        private const val KEY_CONCATENATE_ENABLE="KEY_CONCATENATE_ENABLE_NOTIFY"
+    companion object {
+        private const val KEY_CONCATENATE_ENABLE = "KEY_CONCATENATE_ENABLE_NOTIFY"
     }
 
-    private var isConcatenateEnable by SavableProperty(savedStateHandle,
-        KEY_CONCATENATE_ENABLE,true)
+    private var isConcatenateEnable by SavableProperty(
+        savedStateHandle,
+        KEY_CONCATENATE_ENABLE, true
+    )
 
     // * job to save coroutine concatenate new post
     // * this for update the ui
     private var jobConcatenateNotify: Job? = null
-    private val _stateConcatenateData = MutableStateFlow<Resource<Unit>?>(null)
-    val stateConcatenate = _stateConcatenateData.asStateFlow()
+    var stateConcatenateNotify by mutableStateOf(false)
 
     // * job to save coroutine request last post
     // * this for update ui
     private var jobRequestNotify: Job? = null
-    private val _stateRequestData = MutableStateFlow<Resource<Unit>>(Resource.Loading)
-    val stateRequest = _stateRequestData.asStateFlow()
+    var stateRequestNotify by mutableStateOf(false)
 
     // * message to show about any state
     private val _messageNotify = Channel<Int>()
     val messageNotify = _messageNotify.receiveAsFlow()
 
     // * show notification from database
-    val listNotify = notifyRepoImpl.listNotify.catch { e ->
-        Timber.e("Error al obtener las notificaciones de la base de datos $e")
+    val listNotify = flow<Resource<List<Notify>>> {
+        notifyRepoImpl.listNotify.collect {
+            emit(Resource.Success(it))
+        }
+    }.catch { e ->
+        Timber.e("Error get notify from database$e")
         _messageNotify.trySend(R.string.message_error_unknown)
+        emit(Resource.Failure)
     }.flowOn(Dispatchers.IO).stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(5_000),
-        null
+        Resource.Loading
     )
 
 
     init {
-        // * always request last notifications
-        Timber.e("Se inicio el notofy view model")
         requestLastNotify()
     }
 
     fun concatenateNotify() {
         // * request notifications and add to databse
         // * stop job if is alive and create new request
-        if(isConcatenateEnable){
+        if (isConcatenateEnable) {
             jobConcatenateNotify?.cancel()
-            jobConcatenateNotify = viewModelScope.launch(Dispatchers.IO) {
-                _stateConcatenateData.value = Resource.Loading
+            jobConcatenateNotify = viewModelScope.launch {
+                stateConcatenateNotify = true
                 try {
-                    notifyRepoImpl.concatenateNotify().let {
-                        Timber.d("numero de notificaciones obtenidas CONCATENATE:$it")
-                        if(it==0) isConcatenateEnable=false
-                    }
-                    _stateConcatenateData.value = Resource.Success(Unit)
+                    val countNotify =
+                        withContext(Dispatchers.IO) { notifyRepoImpl.concatenateNotify() }
+                    Timber.d("notify get with concatenate $countNotify")
+                    if (countNotify == 0) isConcatenateEnable = false
                 } catch (e: Exception) {
-                    _stateConcatenateData.value = Resource.Failure
                     when (e) {
                         is CancellationException -> throw e
                         is NetworkException -> _messageNotify.trySend(R.string.message_error_internet_checker)
                         else -> {
                             _messageNotify.trySend(R.string.message_error_unknown)
-                            Timber.e("Error en el concatenate $e")
+                            Timber.e("Error en el concatenate notify $e")
                         }
                     }
+                } finally {
+                    stateConcatenateNotify = false
                 }
             }
         }
@@ -98,15 +105,13 @@ class NotifyViewModel @Inject constructor(
         // * request las notification, consideration the first notification
         // * order by time in the database, or also force refresh data
         jobRequestNotify?.cancel()
-        jobRequestNotify = viewModelScope.launch(Dispatchers.IO) {
-            _stateRequestData.value = Resource.Loading
+        jobRequestNotify = viewModelScope.launch {
+            stateRequestNotify = true
             try {
-                notifyRepoImpl.requestLastNotify(forceRefresh).let {
-                    Timber.d("numero de notificaciones obtenidas REQUEST:$it")
-                }
-                _stateRequestData.value = Resource.Success(Unit)
+                val countNotify =
+                    withContext(Dispatchers.IO) { notifyRepoImpl.requestLastNotify(forceRefresh) }
+                Timber.d("notify get for request :$countNotify")
             } catch (e: Exception) {
-                _stateRequestData.value = Resource.Failure
                 when (e) {
                     is CancellationException -> throw e
                     is NetworkException -> _messageNotify.trySend(R.string.message_error_internet_checker)
@@ -116,11 +121,15 @@ class NotifyViewModel @Inject constructor(
                         Timber.e("Error al obtener ultimas notificaciones $e")
                     }
                 }
+            } finally {
+                stateRequestNotify = false
             }
         }
     }
 
-    fun openNotifications(notify: Notify)=viewModelScope.launch{
+    fun openNotifications(
+        notify: Notify
+    ) = viewModelScope.launch(Dispatchers.IO) {
         notifyRepoImpl.openNotify(notify)
     }
 

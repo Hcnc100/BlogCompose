@@ -24,12 +24,12 @@ import com.nullpointer.blogcompose.presentation.PostViewModel
 import com.nullpointer.blogcompose.ui.interfaces.ActionRootDestinations
 import com.nullpointer.blogcompose.ui.navigation.HomeNavGraph
 import com.nullpointer.blogcompose.ui.navigation.MainTransitions
-import com.nullpointer.blogcompose.ui.screens.blogScreen.componets.BlogItem
 import com.nullpointer.blogcompose.ui.screens.destinations.AddBlogScreenDestination
 import com.nullpointer.blogcompose.ui.screens.emptyScreen.EmptyScreen
-import com.nullpointer.blogcompose.ui.screens.states.BlogScreenState
-import com.nullpointer.blogcompose.ui.screens.states.rememberBlogScreenState
+import com.nullpointer.blogcompose.ui.screens.states.SwipeRefreshScreenState
+import com.nullpointer.blogcompose.ui.screens.states.rememberSwipeRefeshScreenState
 import com.nullpointer.blogcompose.ui.share.ButtonAdd
+import com.nullpointer.blogcompose.ui.share.CircularProgressAnimation
 import com.ramcosta.composedestinations.annotation.Destination
 
 @HomeNavGraph(start = true)
@@ -38,7 +38,7 @@ import com.ramcosta.composedestinations.annotation.Destination
 fun BlogScreen(
     postVM: PostViewModel = hiltViewModel(),
     likeVM: LikeViewModel = hiltViewModel(),
-    blogScreenState: BlogScreenState = rememberBlogScreenState(postVM.stateLoadData),
+    blogScreenState: SwipeRefreshScreenState = rememberSwipeRefeshScreenState(postVM.stateLoadData),
     actionRootDestinations: ActionRootDestinations
 ) {
     val statePost = postVM.listPost.collectAsState()
@@ -56,6 +56,7 @@ fun BlogScreen(
         state = blogScreenState.swipeState,
         onRefresh = { postVM.requestNewPost(true) }) {
         Scaffold(
+            bottomBar = { CircularProgressAnimation(postVM.stateConcatenateData) },
             floatingActionButton = {
                 ButtonAdd(isScrollInProgress = blogScreenState.isScrollInProgress) {
                     actionRootDestinations.changeRoot(AddBlogScreenDestination)
@@ -79,16 +80,17 @@ fun BlogScreen(
                     } else {
                         ListPost(
                             listPost = statePost.data,
-                            listState = blogScreenState.listState
-                        ) { action, post ->
-                            when (action) {
-                                DETAILS -> TODO()
-                                SHARE -> sharePost(post.id, blogScreenState.context)
-                                LIKE -> TODO()
-                                DOWNLOAD -> TODO()
-                                SAVE -> TODO()
+                            listState = blogScreenState.listState,
+                            actionBlog = { action, post ->
+                                when (action) {
+                                    DETAILS -> TODO()
+                                    SHARE -> sharePost(post.id, blogScreenState.context)
+                                    LIKE -> TODO()
+                                    DOWNLOAD -> TODO()
+                                    SAVE -> TODO()
+                                }
                             }
-                        }
+                        )
                     }
                 }
             }

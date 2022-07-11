@@ -1,4 +1,4 @@
-package com.nullpointer.blogcompose.ui.screens.blogScreen.componets
+package com.nullpointer.blogcompose.ui.screens.blogScreen
 
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.clickable

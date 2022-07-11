@@ -39,7 +39,7 @@ fun LoadingPost() {
 }
 
 @Composable
-fun FakeTextLoading() {
+private fun FakeTextLoading() {
     Column(modifier = Modifier.fillMaxWidth()) {
         repeat((1..3).random()) {
             Card(
