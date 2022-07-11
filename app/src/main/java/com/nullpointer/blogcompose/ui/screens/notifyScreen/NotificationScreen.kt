@@ -1,4 +1,4 @@
-package com.nullpointer.blogcompose.ui.screens.homeScreen.notifyScreen
+package com.nullpointer.blogcompose.ui.screens.notifyScreen
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background

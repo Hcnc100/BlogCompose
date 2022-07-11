@@ -1,82 +1,54 @@
 package com.nullpointer.blogcompose.ui.screens.addPost.viewModel
 
 import android.content.Context
-import android.net.Uri
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nullpointer.blogcompose.R
-import com.nullpointer.blogcompose.core.delegates.SavableComposeState
+import com.nullpointer.blogcompose.core.delegates.PropertySavableImg
+import com.nullpointer.blogcompose.core.delegates.PropertySavableString
+import com.nullpointer.blogcompose.models.posts.Post
+import com.nullpointer.blogcompose.services.uploadImg.UploadDataControl
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
-import me.shouheng.compress.Compress
-import me.shouheng.compress.concrete
-import me.shouheng.compress.strategy.config.ScaleMode
-import timber.log.Timber
-import java.io.File
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.receiveAsFlow
 import javax.inject.Inject
 
 @HiltViewModel
 class AddBlogViewModel @Inject constructor(
     state: SavedStateHandle,
 ) : ViewModel() {
+
     companion object {
-        const val KEY_FILE_IMG = "KEY_FILE_IMG"
-        const val KEY_DESCRIPTION = "KEY_DESCRIPTION"
-        const val KEY_HAS_ERROR_DESC = "KEY_HAS_ERROR_DESC"
-        const val KEY_HAS_ERROR_IMG = "KEY_HAS_ERROR_IMG"
-        const val MAX_LENGTH_DESCRIPTION = 250
+        private const val MAX_SIZE_DESCRIPTION = 250
     }
 
-    var fileImg: File? by SavableComposeState(state, KEY_FILE_IMG, null)
-        private set
+    private val _messageAddBlog = Channel<Int>()
+    val messageAddBlog = _messageAddBlog.receiveAsFlow()
 
-    var errorImage: Int by SavableComposeState(state, KEY_HAS_ERROR_IMG, 0)
-        private set
+    val imageBlog = PropertySavableImg(
+        state = state,
+        errorCompressImg = R.string.message_error_compress_img,
+        scope = viewModelScope,
+        actionSendError = _messageAddBlog::trySend
+    )
 
-    var description: String by SavableComposeState(state, KEY_DESCRIPTION, "")
-        private set
+    val description = PropertySavableString(
+        state = state,
+        label = R.string.text_label_description_post,
+        hint = R.string.text_hint_description,
+        maxLength = MAX_SIZE_DESCRIPTION,
+        emptyError = R.string.error_empty_description,
+        lengthError = R.string.error_length_description
+    )
 
-    var errorDescription: Int by SavableComposeState(state, KEY_HAS_ERROR_DESC, 0)
-        private set
+    val isValidData get() = !imageBlog.isEmpty && !description.hasError
 
-    private var jobCompress: Job? = null
-    var isCompress = mutableStateOf(false)
-        private set
-
-    fun changeDescription(newDescription: String) {
-        errorDescription = when {
-            newDescription.length > MAX_LENGTH_DESCRIPTION -> R.string.error_length_description
-            newDescription.isEmpty() -> R.string.error_empty_description
-            else -> 0
-        }
-        description = newDescription
+    fun getPostValidate(context: Context):Boolean{
+        return if (isValidData){
+            UploadDataControl.startServicesUploadPost(context,description.value,imageBlog.value)
+            true
+        }else false
     }
 
-    fun validate(): Boolean {
-        changeDescription(description)
-        if (fileImg == null) errorImage = R.string.error_empty_image
-        return errorDescription == 0 && errorImage == 0
-    }
-
-    fun changeFileImg(uri: Uri, context: Context) {
-        jobCompress?.cancel()
-        jobCompress = viewModelScope.launch {
-            Timber.d("Init compress")
-            isCompress.value = true
-            val bitmapCompress = Compress.with(context, uri).setQuality(70).concrete {
-                withMaxHeight(500f)
-                withMaxWidth(500f)
-                withScaleMode(ScaleMode.SCALE_SMALLER)
-                withIgnoreIfSmaller(true)
-            }.get(Dispatchers.IO)
-            fileImg = bitmapCompress
-            Timber.d("finish compress")
-            isCompress.value = false
-            errorImage = 0
-        }
-    }
 }

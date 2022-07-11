@@ -20,6 +20,7 @@ import com.nullpointer.blogcompose.core.delegates.PropertySavableString
 fun EditableTextSavable(
     valueProperty: PropertySavableString,
     modifier: Modifier = Modifier,
+    modifierText: Modifier = Modifier,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     isEnabled: Boolean = true
 ) {
@@ -31,7 +32,7 @@ fun EditableTextSavable(
             value = valueProperty.value,
             onValueChange = valueProperty::changeValue,
             isError = valueProperty.hasError,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = modifierText.fillMaxWidth(),
             keyboardOptions = keyboardOptions,
             visualTransformation = if (keyboardOptions.keyboardType != KeyboardType.Password)
                 VisualTransformation.None else PasswordVisualTransformation(),

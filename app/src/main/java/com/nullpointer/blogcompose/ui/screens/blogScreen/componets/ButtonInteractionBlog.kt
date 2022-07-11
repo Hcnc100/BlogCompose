@@ -1,4 +1,4 @@
-package com.nullpointer.blogcompose.ui.screens.homeScreen.blogScreen.componets
+package com.nullpointer.blogcompose.ui.screens.blogScreen.componets
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi

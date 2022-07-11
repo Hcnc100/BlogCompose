@@ -35,7 +35,7 @@ class MyPostViewModel @Inject constructor(
     val messageMyPosts = _messageMyPosts.receiveAsFlow()
 
     private var jobRequestNew: Job? = null
-    private val _stateLoadData = MutableStateFlow<Resource<Unit>>(Resource.Loading())
+    private val _stateLoadData = MutableStateFlow<Resource<Unit>>(Resource.Loading)
     val stateLoad = _stateLoadData.asStateFlow()
 
     private var jobConcatenatePost: Job? = null
@@ -63,13 +63,13 @@ class MyPostViewModel @Inject constructor(
         // * or force refresh with the argument
         jobRequestNew?.cancel()
         jobRequestNew = viewModelScope.launch(Dispatchers.IO) {
-            _stateLoadData.value = Resource.Loading()
+            _stateLoadData.value = Resource.Loading
             try {
                 val sizeNewPost = postRepo.requestMyLastPost(forceRefresh)
                 Timber.d("Se obtuvieron $sizeNewPost post nuevos 'mios'")
                 _stateLoadData.value = Resource.Success(Unit)
             } catch (e: Exception) {
-                _stateLoadData.value = Resource.Failure(e)
+                _stateLoadData.value = Resource.Failure
                 when (e) {
                     is CancellationException -> throw e
                     is NetworkException -> _messageMyPosts.trySend(R.string.message_error_internet_checker)
@@ -88,7 +88,7 @@ class MyPostViewModel @Inject constructor(
         if(isConcatenateEnable){
             jobConcatenatePost?.cancel()
             jobConcatenatePost = viewModelScope.launch(Dispatchers.IO) {
-                _stateConcatenateData.value = Resource.Loading()
+                _stateConcatenateData.value = Resource.Loading
                 try {
                     postRepo.concatenateMyPost().let {
                         Timber.d("My Post concatenados $it")
@@ -96,7 +96,7 @@ class MyPostViewModel @Inject constructor(
                     }
                     _stateConcatenateData.value = Resource.Success(Unit)
                 } catch (e: Exception) {
-                    _stateConcatenateData.value = Resource.Failure(e)
+                    _stateConcatenateData.value = Resource.Failure
                     when (e) {
                         is CancellationException -> throw e
                         is NetworkException -> _messageMyPosts.trySend(R.string.message_error_internet_checker)

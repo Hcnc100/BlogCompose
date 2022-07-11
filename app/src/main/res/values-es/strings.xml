@@ -138,4 +138,5 @@
     <string name="post_upload_sucess">Post subido con éxito</string>
     <string name="hint_user_name">Escribe un nombre de usuario</string>
     <string name="message_error_empty_data">Estos datos son necesarios</string>
+    <string name="text_hint_description">Escribe la descripcion</string>
 </resources>

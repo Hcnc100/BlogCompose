@@ -88,11 +88,11 @@ class PostDetailsViewModel @Inject constructor(
     }.flowOn(Dispatchers.IO).catch {
         Timber.d("Error con el post $it")
         _messageDetails.send(R.string.message_error_load_post)
-        emit(Resource.Failure(Exception(it)))
+        emit(Resource.Failure)
     }.stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(5000),
-        Resource.Loading()
+        Resource.Loading
     )
 
     // * this show commnets saved in database
@@ -104,11 +104,11 @@ class PostDetailsViewModel @Inject constructor(
     }.catch {
         Timber.d("Error al cargar los comentarios del post $it")
         _messageDetails.send(R.string.error_load_comments)
-        emit(Resource.Failure(Exception(it)))
+        emit(Resource.Failure)
     }.flowOn(Dispatchers.IO).stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(5000),
-        Resource.Loading()
+        Resource.Loading
     )
 
     // * set id post and request comments
@@ -121,7 +121,7 @@ class PostDetailsViewModel @Inject constructor(
         // * cancel old job and add new
         jobConcatenate?.cancel()
         jobConcatenate = viewModelScope.launch {
-            _stateConcatenate.value = Resource.Loading()
+            _stateConcatenate.value = Resource.Loading
             _stateConcatenate.value = try {
                 // * request new commnets and concatenate in database
                 postRepoImpl.concatenateComments(_idPost.value)
@@ -135,7 +135,7 @@ class PostDetailsViewModel @Inject constructor(
                         Timber.d("Error al concatenar los post ${_idPost.value} : $e")
                     }
                 }
-                Resource.Failure(e)
+                Resource.Failure
             }
         }
     }

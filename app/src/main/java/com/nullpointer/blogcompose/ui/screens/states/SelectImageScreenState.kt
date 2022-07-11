@@ -12,7 +12,7 @@ import com.nullpointer.blogcompose.core.utils.SimpleScreenState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterialApi::class)
-class DataUserScreenState  constructor(
+class SelectImageScreenState(
     scaffoldState: ScaffoldState,
     context: Context,
     focusManager: FocusManager,
@@ -37,12 +37,12 @@ class DataUserScreenState  constructor(
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun rememberDataUserScreenState(
+fun rememberSelectImageScreenState(
     scaffoldState: ScaffoldState = rememberScaffoldState(),
     context: Context = LocalContext.current,
     focusManager: FocusManager = LocalFocusManager.current,
     scope: CoroutineScope = rememberCoroutineScope(),
     modalBottomSheetState: ModalBottomSheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
 ) = remember(scaffoldState, modalBottomSheetState, scope) {
-    DataUserScreenState(scaffoldState, context, focusManager, modalBottomSheetState, scope)
+    SelectImageScreenState(scaffoldState, context, focusManager, modalBottomSheetState, scope)
 }

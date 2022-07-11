@@ -1,4 +1,4 @@
-package com.nullpointer.blogcompose.ui.screens.homeScreen.blogScreen.componets
+package com.nullpointer.blogcompose.ui.screens.blogScreen.componets
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.MaterialTheme

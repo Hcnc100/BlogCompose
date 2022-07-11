@@ -1,4 +1,4 @@
-package com.nullpointer.blogcompose.ui.screens.homeScreen.profileScreen
+package com.nullpointer.blogcompose.ui.screens.profileScreen
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -24,8 +24,8 @@ import com.nullpointer.blogcompose.ui.navigation.HomeNavGraph
 import com.nullpointer.blogcompose.ui.navigation.MainTransitions
 import com.nullpointer.blogcompose.ui.screens.destinations.ConfigScreenDestination
 import com.nullpointer.blogcompose.ui.screens.destinations.PostDetailsDestination
-import com.nullpointer.blogcompose.ui.screens.states.DataUserScreenState
-import com.nullpointer.blogcompose.ui.screens.states.rememberDataUserScreenState
+import com.nullpointer.blogcompose.ui.screens.states.SelectImageScreenState
+import com.nullpointer.blogcompose.ui.screens.states.rememberSelectImageScreenState
 import com.nullpointer.blogcompose.ui.screens.swipePosts.ScreenSwiperPost
 import com.nullpointer.blogcompose.ui.share.ImageProfile
 import com.nullpointer.blogcompose.ui.share.SelectImgButtonSheet
@@ -40,7 +40,7 @@ fun ProfileScreen(
     myPostViewModel: MyPostViewModel = hiltViewModel(),
     likeViewModel: LikeViewModel = hiltViewModel(),
     actionRootDestinations: ActionRootDestinations,
-    dataScreenState: DataUserScreenState = rememberDataUserScreenState()
+    profileScreenState: SelectImageScreenState = rememberSelectImageScreenState()
 ) {
     // * states
     val stateListPost = myPostViewModel.listMyPost.collectAsState()
@@ -76,20 +76,20 @@ fun ProfileScreen(
 
 
     LaunchedEffect(key1 = Unit){
-        dataScreenState.hiddenModal()
+        profileScreenState.hiddenModal()
     }
 
     ModalBottomSheetLayout(
-        sheetState = dataScreenState.modalBottomSheetState,
+        sheetState = profileScreenState.modalBottomSheetState,
         sheetContent = {
             SelectImgButtonSheet(
-                isVisible = dataScreenState.isShowModal,
-                actionHidden = dataScreenState::hiddenModal,
+                isVisible = profileScreenState.isShowModal,
+                actionHidden = profileScreenState::hiddenModal,
                 actionBeforeSelect = { uri ->
 //                    uri?.let {
 //                        registryViewModel.imageProfile.changeValue(it, dataScreenState.context)
 //                    }
-                    dataScreenState.hiddenModal()
+                    profileScreenState.hiddenModal()
                 }
             )
         },
@@ -100,7 +100,7 @@ fun ProfileScreen(
             updateListPost = { myPostViewModel.requestNewPost(true) },
             actionBottomReached = myPostViewModel::concatenatePost,
             actionButtonAdd = {
-                dataScreenState.showModal()
+                profileScreenState.showModal()
 
             },
             actionChangePost = likeViewModel::likePost,

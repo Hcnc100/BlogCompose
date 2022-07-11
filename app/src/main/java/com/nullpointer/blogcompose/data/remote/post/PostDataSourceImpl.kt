@@ -44,17 +44,8 @@ class PostDataSourceImpl {
 
 
     suspend fun addNewPost(post: Post): String {
-        val response = functions.getHttpsCallable("createPostAndValidate").call(
-            mapOf("idPost" to post.id,
-                "urlImg" to post.urlImage,
-                "description" to post.description)
-        ).continueWith { task ->
-            val reponse = task.result.data as (Map<String, Object>)
-            reponse["idPost"] as String
-        }.await()
-
-        Timber.d("response idPost $response")
-        return response
+        refPosts.document(post.id).set(post).await()
+        return post.id
     }
 
     suspend fun getLastPostByUser(idUser: String, nPost: Int = Integer.MAX_VALUE): List<Post> {

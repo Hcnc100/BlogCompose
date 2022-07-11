@@ -19,14 +19,12 @@ import coil.compose.SubcomposeAsyncImageContent
 import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.presentation.AuthViewModel
 import com.nullpointer.blogcompose.presentation.RegistryViewModel
-import com.nullpointer.blogcompose.ui.interfaces.ActionRootDestinations
 import com.nullpointer.blogcompose.ui.navigation.RootNavGraph
-import com.nullpointer.blogcompose.ui.screens.states.DataUserScreenState
-import com.nullpointer.blogcompose.ui.screens.states.rememberDataUserScreenState
+import com.nullpointer.blogcompose.ui.screens.states.SelectImageScreenState
+import com.nullpointer.blogcompose.ui.screens.states.rememberSelectImageScreenState
 import com.nullpointer.blogcompose.ui.share.EditableTextSavable
 import com.nullpointer.blogcompose.ui.share.SelectImgButtonSheet
 import com.nullpointer.blogcompose.ui.share.SimpleToolbar
-import com.nullpointer.blogcompose.ui.share.ToolbarBack
 import com.ramcosta.composedestinations.annotation.Destination
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -36,7 +34,7 @@ import com.ramcosta.composedestinations.annotation.Destination
 fun DataUserScreen(
     authViewModel: AuthViewModel,
     registryViewModel: RegistryViewModel = hiltViewModel(),
-    dataScreenState: DataUserScreenState = rememberDataUserScreenState()
+    dataScreenState: SelectImageScreenState = rememberSelectImageScreenState()
 ) {
 
     LaunchedEffect(key1 = Unit) {
@@ -80,7 +78,8 @@ fun DataUserScreen(
             ) {
                 PhotoProfile(
                     urlImg = registryViewModel.imageProfile.value,
-                    actionChangePhoto = dataScreenState::showModal
+                    actionChangePhoto = dataScreenState::showModal,
+                    modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(40.dp))
                 EditableTextSavable(
@@ -99,8 +98,7 @@ private fun PhotoProfile(
     actionChangePhoto: () -> Unit
 ) {
     Box(
-        modifier = modifier
-            .fillMaxWidth(),
+        modifier = modifier,
         contentAlignment = Alignment.Center
     ) {
         Box {

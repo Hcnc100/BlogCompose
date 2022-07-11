@@ -32,21 +32,14 @@ class AuthViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    init {
-        Timber.e("Hola este es el auth view model")
-    }
-
     val currentUser = authRepoImpl.myUser.flowOn(Dispatchers.IO).stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(5000),
-        null
+        MyUser()
     )
 
     private val _messageAuth = Channel<Int>()
     val messageAuth = _messageAuth.receiveAsFlow()
-
-    val isDataComplete: Boolean
-        get() = stateAuthUser.value is LoginStatus.Authenticated.CompleteData
 
     val stateAuthUser = flow {
         authRepoImpl.myUser.collect { user ->
@@ -61,7 +54,7 @@ class AuthViewModel @Inject constructor(
         }
     }.catch {
         emit(LoginStatus.Unauthenticated)
-        Timber.e("Error al obtener el usuario del las preferencias $it")
+        Timber.e("Error get user for preferences $it")
     }.flowOn(
         Dispatchers.IO
     ).stateIn(
@@ -97,10 +90,6 @@ class AuthViewModel @Inject constructor(
         authRepoImpl.logOut()
         notifyRepoImpl.deleterAllNotify()
         postRepoImpl.deleterAllPost()
-    }
-
-    fun updateUser(user: MyUser) = viewModelScope.launch(Dispatchers.IO) {
-        authRepoImpl.uploadDataUser(user.name, name = user.name)
     }
 
      var creatingUser by mutableStateOf(false)

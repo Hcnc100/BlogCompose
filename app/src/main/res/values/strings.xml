@@ -146,4 +146,6 @@
     <string name="name_channel_upload" translatable="false">Subida de imagenes</string>
     <string name="message_cancel_upload_services" translatable="false">Se cancelo la actualizacion</string>
     <string name="data_user_upload_sucess" translatable="false">INfomacion actualiza con exito</string>
+    <string name="text_hint_description">Escribe la descripcion</string>
+    <string name="error_upload_service" translatable="false">error al subir el post</string>
 </resources>

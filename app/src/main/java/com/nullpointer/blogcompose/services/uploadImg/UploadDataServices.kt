@@ -19,13 +19,10 @@ import com.nullpointer.blogcompose.services.uploadImg.UploadDataControl.KEY_DESC
 import com.nullpointer.blogcompose.services.uploadImg.UploadDataControl.KEY_IMG_SERVICES
 import com.nullpointer.blogcompose.services.uploadImg.UploadDataControl.KEY_NAME_USER_SERVICES
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.util.*
 import javax.inject.Inject
@@ -56,8 +53,8 @@ class UploadDataServices : LifecycleService() {
         super.onStartCommand(intent, flags, startId)
         intent?.let {
             when (it.action) {
-                ACTION_START_POST -> actionStartCommand(intent, TypeUpdate.POST)
-                ACTION_START_USER -> actionStartCommand(intent, TypeUpdate.USER)
+                ACTION_START_POST -> startUploadData(intent, TypeUpdate.POST)
+                ACTION_START_USER -> startUploadData(intent, TypeUpdate.USER)
                 ACTION_STOP -> actionStopCommand()
                 else -> Timber.e("Command services unknown ${it.action}")
             }
@@ -65,7 +62,7 @@ class UploadDataServices : LifecycleService() {
         return START_STICKY
     }
 
-    private fun actionStartCommand(intent: Intent, typeUpdate: TypeUpdate) {
+    private fun startUploadData(intent: Intent, typeUpdate: TypeUpdate) {
         jobUploadTask = lifecycleScope.launch {
             try {
                 val uriImg = intent.getParcelableExtra<Uri>(KEY_IMG_SERVICES)!!
@@ -78,7 +75,9 @@ class UploadDataServices : LifecycleService() {
                             idImgUpload = uuid,
                             typeUpdate = typeUpdate
                         ) {
-                            postRepoImpl.addNewPost(post = createNewPost(uuid, description, it))
+                            withContext(Dispatchers.IO){
+                                postRepoImpl.addNewPost(post = createNewPost(uuid, description, it))
+                            }
                         }
                         showToastMessage(R.string.post_upload_sucess)
                     }
@@ -88,7 +87,9 @@ class UploadDataServices : LifecycleService() {
                             uriImage = uriImg,
                             typeUpdate = typeUpdate
                         ) {
-                            authRepoImpl.uploadDataUser(urlImg = it, name = name)
+                            withContext(Dispatchers.IO){
+                                authRepoImpl.uploadDataUser(urlImg = it, name = name)
+                            }
                         }
                         showToastMessage(R.string.data_user_upload_sucess)
                     }
@@ -98,10 +99,11 @@ class UploadDataServices : LifecycleService() {
                 when (e) {
                     is CancellationException -> throw e
                     else ->{
-
                         Timber.e("Error server upload service $e")
+                        showToastMessage(R.string.error_upload_service)
                     }
                 }
+                killServices()
             }
         }
     }

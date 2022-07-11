@@ -41,7 +41,7 @@ class NotifyViewModel @Inject constructor(
     // * job to save coroutine request last post
     // * this for update ui
     private var jobRequestNotify: Job? = null
-    private val _stateRequestData = MutableStateFlow<Resource<Unit>>(Resource.Loading())
+    private val _stateRequestData = MutableStateFlow<Resource<Unit>>(Resource.Loading)
     val stateRequest = _stateRequestData.asStateFlow()
 
     // * message to show about any state
@@ -71,7 +71,7 @@ class NotifyViewModel @Inject constructor(
         if(isConcatenateEnable){
             jobConcatenateNotify?.cancel()
             jobConcatenateNotify = viewModelScope.launch(Dispatchers.IO) {
-                _stateConcatenateData.value = Resource.Loading()
+                _stateConcatenateData.value = Resource.Loading
                 try {
                     notifyRepoImpl.concatenateNotify().let {
                         Timber.d("numero de notificaciones obtenidas CONCATENATE:$it")
@@ -79,7 +79,7 @@ class NotifyViewModel @Inject constructor(
                     }
                     _stateConcatenateData.value = Resource.Success(Unit)
                 } catch (e: Exception) {
-                    _stateConcatenateData.value = Resource.Failure(e)
+                    _stateConcatenateData.value = Resource.Failure
                     when (e) {
                         is CancellationException -> throw e
                         is NetworkException -> _messageNotify.trySend(R.string.message_error_internet_checker)
@@ -99,14 +99,14 @@ class NotifyViewModel @Inject constructor(
         // * order by time in the database, or also force refresh data
         jobRequestNotify?.cancel()
         jobRequestNotify = viewModelScope.launch(Dispatchers.IO) {
-            _stateRequestData.value = Resource.Loading()
+            _stateRequestData.value = Resource.Loading
             try {
                 notifyRepoImpl.requestLastNotify(forceRefresh).let {
                     Timber.d("numero de notificaciones obtenidas REQUEST:$it")
                 }
                 _stateRequestData.value = Resource.Success(Unit)
             } catch (e: Exception) {
-                _stateRequestData.value = Resource.Failure(e)
+                _stateRequestData.value = Resource.Failure
                 when (e) {
                     is CancellationException -> throw e
                     is NetworkException -> _messageNotify.trySend(R.string.message_error_internet_checker)
