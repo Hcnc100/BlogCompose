@@ -1,10 +1,9 @@
 package com.nullpointer.blogcompose.ui.screens.notifyScreen
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Card
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -14,8 +13,8 @@ import com.valentinilk.shimmer.shimmer
 
 @Composable
 fun LoadingNotify() {
-    Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-        repeat(10) {
+    LazyColumn {
+        items(10) {
             val widthNameRandom = (50..280).random()
             Card(modifier = Modifier.padding(5.dp)) {
                 Row(
