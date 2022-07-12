@@ -33,15 +33,15 @@ class NotifyViewModel @Inject constructor(
         private const val KEY_CONCATENATE_ENABLE = "KEY_CONCATENATE_ENABLE_NOTIFY"
     }
 
-    private var isConcatenateEnable by SavableProperty(
+    private var isConcatEnable by SavableProperty(
         savedStateHandle,
         KEY_CONCATENATE_ENABLE, true
     )
 
     // * job to save coroutine concatenate new post
     // * this for update the ui
-    private var jobConcatenateNotify: Job? = null
-    var stateConcatenateNotify by mutableStateOf(false)
+    private var jobConcatNotify: Job? = null
+    var stateConcatNotify by mutableStateOf(false)
 
     // * job to save coroutine request last post
     // * this for update ui
@@ -58,7 +58,7 @@ class NotifyViewModel @Inject constructor(
             emit(Resource.Success(it))
         }
     }.catch { e ->
-        Timber.e("Error get notify from database$e")
+        Timber.e("Error get notify from database $e")
         _messageNotify.trySend(R.string.message_error_unknown)
         emit(Resource.Failure)
     }.flowOn(Dispatchers.IO).stateIn(
@@ -75,15 +75,15 @@ class NotifyViewModel @Inject constructor(
     fun concatenateNotify() {
         // * request notifications and add to databse
         // * stop job if is alive and create new request
-        if (isConcatenateEnable) {
-            jobConcatenateNotify?.cancel()
-            jobConcatenateNotify = viewModelScope.launch {
-                stateConcatenateNotify = true
+        if (isConcatEnable) {
+            jobConcatNotify?.cancel()
+            jobConcatNotify = viewModelScope.launch {
+                stateConcatNotify = true
                 try {
                     val countNotify =
                         withContext(Dispatchers.IO) { notifyRepoImpl.concatenateNotify() }
                     Timber.d("notify get with concatenate $countNotify")
-                    if (countNotify == 0) isConcatenateEnable = false
+                    if (countNotify == 0) isConcatEnable = false
                 } catch (e: Exception) {
                     when (e) {
                         is CancellationException -> throw e
@@ -94,7 +94,7 @@ class NotifyViewModel @Inject constructor(
                         }
                     }
                 } finally {
-                    stateConcatenateNotify = false
+                    stateConcatNotify = false
                 }
             }
         }

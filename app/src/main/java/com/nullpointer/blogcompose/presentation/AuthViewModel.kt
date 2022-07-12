@@ -10,6 +10,7 @@ import com.google.firebase.auth.AuthCredential
 import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.delegates.SavableComposeState
 import com.nullpointer.blogcompose.core.states.LoginStatus
+import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.domain.auth.AuthRepoImpl
 import com.nullpointer.blogcompose.domain.notify.NotifyRepoImpl
 import com.nullpointer.blogcompose.domain.post.PostRepoImpl
@@ -92,7 +93,7 @@ class AuthViewModel @Inject constructor(
         postRepoImpl.deleterAllPost()
     }
 
-     var creatingUser by mutableStateOf(false)
+    var creatingUser by mutableStateOf(false)
         private set
 
     fun createNewUser(myUser: MyUser) = viewModelScope.launch(Dispatchers.IO) {

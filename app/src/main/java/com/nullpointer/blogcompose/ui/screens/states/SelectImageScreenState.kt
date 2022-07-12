@@ -20,7 +20,7 @@ class SelectImageScreenState(
     private val scope: CoroutineScope
 ) : SimpleScreenState(scaffoldState, context, focusManager) {
 
-    val isShowModal=modalBottomSheetState.isVisible
+    val isShowModal get() = modalBottomSheetState.isVisible
 
     fun hiddenModal() {
         scope.launch {

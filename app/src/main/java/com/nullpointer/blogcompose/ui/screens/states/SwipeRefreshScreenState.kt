@@ -26,7 +26,7 @@ class SwipeRefreshScreenState constructor(
 }
 
 @Composable
-fun rememberSwipeRefeshScreenState(
+fun rememberSwipeRefreshScreenState(
     isRefreshing: Boolean,
     scaffoldState: ScaffoldState= rememberScaffoldState(),
     swipeState: SwipeRefreshState= rememberSwipeRefreshState(isRefreshing = isRefreshing),

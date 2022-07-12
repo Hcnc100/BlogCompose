@@ -22,6 +22,7 @@ import com.nullpointer.blogcompose.presentation.RegistryViewModel
 import com.nullpointer.blogcompose.ui.navigation.RootNavGraph
 import com.nullpointer.blogcompose.ui.screens.states.SelectImageScreenState
 import com.nullpointer.blogcompose.ui.screens.states.rememberSelectImageScreenState
+import com.nullpointer.blogcompose.ui.share.BackHandler
 import com.nullpointer.blogcompose.ui.share.EditableTextSavable
 import com.nullpointer.blogcompose.ui.share.SelectImgButtonSheet
 import com.nullpointer.blogcompose.ui.share.SimpleToolbar
@@ -39,6 +40,9 @@ fun DataUserScreen(
 
     LaunchedEffect(key1 = Unit) {
         registryViewModel.registryMessage.collect(dataScreenState::showSnackMessage)
+    }
+    BackHandler(dataScreenState.isShowModal) {
+        dataScreenState.hiddenModal()
     }
 
     ModalBottomSheetLayout(

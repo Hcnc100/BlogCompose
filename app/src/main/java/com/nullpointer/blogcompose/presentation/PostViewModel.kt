@@ -29,7 +29,7 @@ class PostViewModel @Inject constructor(
         private const val KEY_CONCATENATE_ENABLE = "KEY_CONCATENATE_ENABLE_POST"
     }
 
-    private var isConcatenateEnable by SavableProperty(state, KEY_CONCATENATE_ENABLE, true)
+    private var isConcatEnable by SavableProperty(state, KEY_CONCATENATE_ENABLE, true)
 
     // * state message to show any error or message
     private val _messagePost = Channel<Int>()
@@ -38,14 +38,14 @@ class PostViewModel @Inject constructor(
     // * var to saved the job, to request new data
     // * this for can cancel this work
     private var jobRequestNew: Job? = null
-    var stateLoadData by mutableStateOf(false)
+    var stateRequestData by mutableStateOf(false)
         private set
 
 
     // * var to save the job, to request post concatenate
     // * this for can cancel this work
-    private var jobConcatenatePost: Job? = null
-    var stateConcatenateData by mutableStateOf(false)
+    private var jobConcatPost: Job? = null
+    var stateConcatData by mutableStateOf(false)
         private set
 
     val listPost = flow<Resource<List<Post>>> {
@@ -73,7 +73,7 @@ class PostViewModel @Inject constructor(
         // * if no there internet launch exception
         jobRequestNew?.cancel()
         jobRequestNew = viewModelScope.launch {
-            stateLoadData = true
+            stateRequestData = true
             try {
                 val sizeNewPost =
                     withContext(Dispatchers.IO) { postRepo.requestLastPost(forceRefresh) }
@@ -88,7 +88,7 @@ class PostViewModel @Inject constructor(
                     }
                 }
             } finally {
-                stateLoadData = false
+                stateRequestData = false
             }
         }
     }
@@ -97,14 +97,14 @@ class PostViewModel @Inject constructor(
         // * this init new data but, consideration las post saved,
         // * this for concatenate new post and no override the database
         // * launch exception if no there internet
-        if (isConcatenateEnable) {
-            jobConcatenatePost?.cancel()
-            jobConcatenatePost = viewModelScope.launch {
-                stateLoadData = true
+        if (isConcatEnable) {
+            jobConcatPost?.cancel()
+            jobConcatPost = viewModelScope.launch {
+                stateRequestData = true
                 try {
                     val sizeConcat = withContext(Dispatchers.IO) { postRepo.concatenatePost() }
                     Timber.d("New post concatenate $sizeConcat")
-                    if (sizeConcat == 0) isConcatenateEnable = false
+                    if (sizeConcat == 0) isConcatEnable = false
 
                 } catch (e: Exception) {
                     when (e) {
@@ -116,7 +116,7 @@ class PostViewModel @Inject constructor(
                         }
                     }
                 } finally {
-                    stateConcatenateData = false
+                    stateConcatData = false
                 }
             }
         }

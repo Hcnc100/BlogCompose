@@ -45,14 +45,14 @@ fun ConfigScreen(
         ) {
             // * main buttons
             Column {
-                ButtonCard(text = currentUser?.name.toString()) {
-                    ImageProfile(
-                        urlImgProfile = currentUser?.urlImg.toString(),
-                        paddingLoading = 5.dp,
-                        modifier = Modifier.size(30.dp),
-                        contentDescription = stringResource(R.string.description_image_profile)
-                    )
-                }
+//                ButtonCard(text = currentUser?.name.toString()) {
+//                    ImageProfile(
+//                        urlImgProfile = currentUser?.urlImg.toString(),
+//                        paddingLoading = 5.dp,
+//                        modifier = Modifier.size(30.dp),
+//                        contentDescription = stringResource(R.string.description_image_profile)
+//                    )
+//                }
                 ButtonCard(text = stringResource(R.string.change_image_user),
                     actionClick = {
                         actionRootDestinations.changeRoot(DataUserScreenDestination)

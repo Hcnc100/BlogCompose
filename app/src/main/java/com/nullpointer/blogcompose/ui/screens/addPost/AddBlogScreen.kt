@@ -21,6 +21,7 @@ import com.nullpointer.blogcompose.ui.navigation.RootNavGraph
 import com.nullpointer.blogcompose.ui.screens.addPost.viewModel.AddBlogViewModel
 import com.nullpointer.blogcompose.ui.screens.states.SelectImageScreenState
 import com.nullpointer.blogcompose.ui.screens.states.rememberSelectImageScreenState
+import com.nullpointer.blogcompose.ui.share.BackHandler
 import com.nullpointer.blogcompose.ui.share.EditableTextSavable
 import com.nullpointer.blogcompose.ui.share.SelectImgButtonSheet
 import com.nullpointer.blogcompose.ui.share.ToolbarBack
@@ -35,6 +36,9 @@ fun AddBlogScreen(
     addBlogState: SelectImageScreenState = rememberSelectImageScreenState(),
     rootDestinations: ActionRootDestinations
 ) {
+    BackHandler(addBlogState.isShowModal) {
+        addBlogState.hiddenModal()
+    }
     ModalBottomSheetLayout(
         sheetState = addBlogState.modalBottomSheetState,
         sheetContent = {

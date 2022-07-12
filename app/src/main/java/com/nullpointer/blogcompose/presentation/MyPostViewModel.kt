@@ -1,5 +1,8 @@
 package com.nullpointer.blogcompose.presentation
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -8,12 +11,14 @@ import com.nullpointer.blogcompose.core.delegates.SavableProperty
 import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.core.utils.NetworkException
 import com.nullpointer.blogcompose.domain.post.PostRepoImpl
+import com.nullpointer.blogcompose.models.posts.MyPost
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 import javax.inject.Inject
 import kotlin.coroutines.cancellation.CancellationException
@@ -24,36 +29,42 @@ class MyPostViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    companion object{
-        private const val KEY_CONCATENATE_ENABLE="KEY_CONCATENATE_ENABLE_MY_POST"
+    companion object {
+        private const val KEY_CONCATENATE_ENABLE = "KEY_CONCATENATE_ENABLE_MY_POST"
     }
 
-    private var isConcatenateEnable by SavableProperty(savedStateHandle,
-        KEY_CONCATENATE_ENABLE,true)
+    private var isConcatenateEnable by SavableProperty(
+        savedStateHandle,
+        KEY_CONCATENATE_ENABLE, true
+    )
 
     private val _messageMyPosts = Channel<Int>()
     val messageMyPosts = _messageMyPosts.receiveAsFlow()
 
     private var jobRequestNew: Job? = null
-    private val _stateLoadData = MutableStateFlow<Resource<Unit>>(Resource.Loading)
-    val stateLoad = _stateLoadData.asStateFlow()
+    var stateRequestMyPost by mutableStateOf(false)
+        private set
 
-    private var jobConcatenatePost: Job? = null
-    private val _stateConcatenateData = MutableStateFlow<Resource<Unit>?>(null)
-    val stateConcatenate = _stateConcatenateData.asStateFlow()
+    private var jobConcatMyPost: Job? = null
+    var stateConcatMyPost by mutableStateOf(false)
+    private set
 
 
-    val listMyPost = postRepo.listMyLastPost.catch {
-        Timber.e("Error al obtener my post de la base de datos $it")
+    val listMyPost = flow<Resource<List<MyPost>>> {
+        postRepo.listMyLastPost.collect {
+            emit(Resource.Success(it))
+        }
+    }.catch {
+        Timber.e("Error get my post $it")
         _messageMyPosts.trySend(R.string.message_error_unknown)
+        emit(Resource.Failure)
     }.flowOn(Dispatchers.IO).stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(5_000),
-        emptyList()
+        Resource.Loading
     )
 
     init {
-        Timber.e("Se inicio el my repo view model")
         requestNewPost()
     }
 
@@ -62,14 +73,13 @@ class MyPostViewModel @Inject constructor(
         // * request last post in cache or if there new post
         // * or force refresh with the argument
         jobRequestNew?.cancel()
-        jobRequestNew = viewModelScope.launch(Dispatchers.IO) {
-            _stateLoadData.value = Resource.Loading
+        jobRequestNew = viewModelScope.launch {
+            stateRequestMyPost = true
             try {
-                val sizeNewPost = postRepo.requestMyLastPost(forceRefresh)
-                Timber.d("Se obtuvieron $sizeNewPost post nuevos 'mios'")
-                _stateLoadData.value = Resource.Success(Unit)
+                val sizeNewPost =
+                    withContext(Dispatchers.IO) { postRepo.requestMyLastPost(forceRefresh) }
+                Timber.d("get $sizeNewPost my post news")
             } catch (e: Exception) {
-                _stateLoadData.value = Resource.Failure
                 when (e) {
                     is CancellationException -> throw e
                     is NetworkException -> _messageMyPosts.trySend(R.string.message_error_internet_checker)
@@ -79,24 +89,25 @@ class MyPostViewModel @Inject constructor(
                         Timber.e("Error en el request 'myPost' $e")
                     }
                 }
+            } finally {
+                stateRequestMyPost = false
             }
         }
     }
 
     fun concatenatePost() {
         // * request post and concatenate and the last post
-        if(isConcatenateEnable){
-            jobConcatenatePost?.cancel()
-            jobConcatenatePost = viewModelScope.launch(Dispatchers.IO) {
-                _stateConcatenateData.value = Resource.Loading
+        if (isConcatenateEnable) {
+            jobConcatMyPost?.cancel()
+            jobConcatMyPost = viewModelScope.launch {
                 try {
-                    postRepo.concatenateMyPost().let {
-                        Timber.d("My Post concatenados $it")
-                        if(it==0) isConcatenateEnable=false
+                    stateConcatMyPost = true
+                    val countPost = withContext(Dispatchers.IO) {
+                        postRepo.concatenateMyPost()
                     }
-                    _stateConcatenateData.value = Resource.Success(Unit)
+                    Timber.d("number concat my post $countPost")
+                    if (countPost == 0) isConcatenateEnable = false
                 } catch (e: Exception) {
-                    _stateConcatenateData.value = Resource.Failure
                     when (e) {
                         is CancellationException -> throw e
                         is NetworkException -> _messageMyPosts.trySend(R.string.message_error_internet_checker)
@@ -105,6 +116,8 @@ class MyPostViewModel @Inject constructor(
                             Timber.e("Error en el request  de mis post $e")
                         }
                     }
+                } finally {
+                    stateRequestMyPost = false
                 }
             }
         }

@@ -6,6 +6,7 @@ import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.swiperefresh.SwipeRefresh
@@ -19,7 +20,7 @@ import com.nullpointer.blogcompose.ui.navigation.MainTransitions
 import com.nullpointer.blogcompose.ui.screens.destinations.PostDetailsDestination
 import com.nullpointer.blogcompose.ui.screens.emptyScreen.EmptyScreen
 import com.nullpointer.blogcompose.ui.screens.states.SwipeRefreshScreenState
-import com.nullpointer.blogcompose.ui.screens.states.rememberSwipeRefeshScreenState
+import com.nullpointer.blogcompose.ui.screens.states.rememberSwipeRefreshScreenState
 import com.nullpointer.blogcompose.ui.share.CircularProgressAnimation
 import com.nullpointer.blogcompose.ui.share.OnBottomReached
 import com.ramcosta.composedestinations.annotation.Destination
@@ -31,10 +32,10 @@ import com.ramcosta.composedestinations.annotation.Destination
 fun NotifyScreen(
     notifyVM: NotifyViewModel = hiltViewModel(),
     actionRootDestinations: ActionRootDestinations,
-    notifyScreenState: SwipeRefreshScreenState = rememberSwipeRefeshScreenState(isRefreshing = notifyVM.stateRequestNotify)
+    notifyScreenState: SwipeRefreshScreenState = rememberSwipeRefreshScreenState(isRefreshing = notifyVM.stateRequestNotify)
 ) {
     // * states
-    val stateListNotify = notifyVM.listNotify.collectAsState()
+    val stateListNotify by notifyVM.listNotify.collectAsState()
 
     LaunchedEffect(key1 = Unit) {
         notifyVM.messageNotify.collect(notifyScreenState::showSnackMessage)
@@ -46,17 +47,19 @@ fun NotifyScreen(
     ) {
         Scaffold(
             scaffoldState = notifyScreenState.scaffoldState,
-            bottomBar = { CircularProgressAnimation(notifyVM.stateConcatenateNotify) }
+            bottomBar = { CircularProgressAnimation(notifyVM.stateConcatNotify) }
         ) {
 
-            when (val listNotify = stateListNotify.value) {
+            when (stateListNotify) {
                 Resource.Loading -> LoadingNotify()
                 Resource.Failure -> EmptyScreen(
                     resourceRaw = R.raw.empty3,
                     emptyText = stringResource(R.string.message_empty_notify)
                 )
                 is Resource.Success -> {
-                    if (listNotify.data.isEmpty()) {
+                    val listNotify = (stateListNotify as Resource.Success<List<Notify>>).data
+
+                    if (listNotify.isEmpty()) {
                         EmptyScreen(
                             resourceRaw = R.raw.empty3,
                             emptyText = stringResource(R.string.message_empty_notify)
@@ -64,7 +67,7 @@ fun NotifyScreen(
                     } else {
                         ListSwipeNotify(
                             listState = notifyScreenState.listState,
-                            listNotify = listNotify.data,
+                            listNotify = listNotify,
                             actionBottomReached = notifyVM::concatenateNotify,
                             actionClick = { notify ->
                                 actionRootDestinations.changeRoot(

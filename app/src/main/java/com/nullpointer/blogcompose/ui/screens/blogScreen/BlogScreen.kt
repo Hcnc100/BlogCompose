@@ -9,6 +9,7 @@ import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -27,7 +28,7 @@ import com.nullpointer.blogcompose.ui.navigation.MainTransitions
 import com.nullpointer.blogcompose.ui.screens.destinations.AddBlogScreenDestination
 import com.nullpointer.blogcompose.ui.screens.emptyScreen.EmptyScreen
 import com.nullpointer.blogcompose.ui.screens.states.SwipeRefreshScreenState
-import com.nullpointer.blogcompose.ui.screens.states.rememberSwipeRefeshScreenState
+import com.nullpointer.blogcompose.ui.screens.states.rememberSwipeRefreshScreenState
 import com.nullpointer.blogcompose.ui.share.ButtonAdd
 import com.nullpointer.blogcompose.ui.share.CircularProgressAnimation
 import com.ramcosta.composedestinations.annotation.Destination
@@ -38,10 +39,10 @@ import com.ramcosta.composedestinations.annotation.Destination
 fun BlogScreen(
     postVM: PostViewModel = hiltViewModel(),
     likeVM: LikeViewModel = hiltViewModel(),
-    blogScreenState: SwipeRefreshScreenState = rememberSwipeRefeshScreenState(postVM.stateLoadData),
+    blogScreenState: SwipeRefreshScreenState = rememberSwipeRefreshScreenState(postVM.stateRequestData),
     actionRootDestinations: ActionRootDestinations
 ) {
-    val statePost = postVM.listPost.collectAsState()
+    val statePost by postVM.listPost.collectAsState()
 
     LaunchedEffect(key1 = Unit) {
         postVM.messagePost.collect(blogScreenState::showSnackMessage)
@@ -56,14 +57,14 @@ fun BlogScreen(
         state = blogScreenState.swipeState,
         onRefresh = { postVM.requestNewPost(true) }) {
         Scaffold(
-            bottomBar = { CircularProgressAnimation(postVM.stateConcatenateData) },
+            bottomBar = { CircularProgressAnimation(postVM.stateConcatData) },
             floatingActionButton = {
                 ButtonAdd(isScrollInProgress = blogScreenState.isScrollInProgress) {
                     actionRootDestinations.changeRoot(AddBlogScreenDestination)
                 }
             }
         ) {
-            when (val statePost = statePost.value) {
+            when (statePost) {
                 Resource.Failure -> EmptyScreen(
                     resourceRaw = R.raw.empty1, emptyText = stringResource(
                         id = R.string.message_empty_post
@@ -71,7 +72,8 @@ fun BlogScreen(
                 )
                 Resource.Loading -> LoadingPost()
                 is Resource.Success -> {
-                    if (statePost.data.isEmpty()) {
+                    val listPost= (statePost as Resource.Success<List<Post>>).data
+                    if (listPost.isEmpty()) {
                         EmptyScreen(
                             resourceRaw = R.raw.empty1, emptyText = stringResource(
                                 id = R.string.message_empty_post
@@ -79,7 +81,7 @@ fun BlogScreen(
                         )
                     } else {
                         ListPost(
-                            listPost = statePost.data,
+                            listPost = listPost,
                             listState = blogScreenState.listState,
                             actionBlog = { action, post ->
                                 when (action) {
