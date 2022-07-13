@@ -33,14 +33,17 @@ class PostDetailsViewModel @Inject constructor(
     // * job to control init comments and emit state
     private var jobInitComments: Job? = null
 
-    // * save job to concatenate comments
-    private var jobConcatenate: Job? = null
-    private val _stateConcatenate = MutableStateFlow<Resource<Unit>?>(null)
-    val stateConcatenate = _stateConcatenate.asStateFlow()
-
     // * this var is for send any messaging
     private val _messageDetails = Channel<Int>()
     val messageDetails = _messageDetails.receiveAsFlow()
+
+    // * save job to concatenate comments
+    private var jobConcatenate: Job? = null
+
+    private val _stateConcatenate = MutableStateFlow<Resource<Unit>?>(null)
+    val stateConcatenate = _stateConcatenate.asStateFlow()
+
+
 
     // * this var is for update post selected
     private val _idPost = MutableStateFlow("")

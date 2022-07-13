@@ -44,7 +44,9 @@ fun BlogItem(
                 name = post.userPoster?.name ?: "Oeoeo sosoos eeefd saefdwedf ",
                 modifier = Modifier.padding(10.dp)
             )
-            ImageBlog(urlImg = post.urlImage)
+            ImageBlog(urlImg = post.urlImage) {
+                actionBlog(ActionsPost.DETAILS, post)
+            }
             ActionsPost(post = post, actionBlog = actionBlog, modifier = Modifier.padding(5.dp))
             TextLikes(
                 numberComments = post.numberComments,
@@ -120,6 +122,7 @@ private fun IconAction(
 @Composable
 private fun ImageBlog(
     urlImg: String,
+    actionClick: () -> Unit
 ) {
     AsyncImage(
         contentScale = ContentScale.Crop,
@@ -128,6 +131,7 @@ private fun ImageBlog(
         modifier = Modifier
             .fillMaxWidth()
             .aspectRatio(1f)
+            .clickable { actionClick() }
     )
 }
 

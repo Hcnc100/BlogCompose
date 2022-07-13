@@ -4,6 +4,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.GridCells
 import androidx.compose.foundation.lazy.GridItemSpan
+import androidx.compose.foundation.lazy.LazyGridState
 import androidx.compose.foundation.lazy.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
@@ -15,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -26,30 +28,32 @@ import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.models.posts.MyPost
 import com.nullpointer.blogcompose.models.users.MyUser
 import com.nullpointer.blogcompose.presentation.AuthViewModel
-import com.nullpointer.blogcompose.presentation.LikeViewModel
 import com.nullpointer.blogcompose.presentation.MyPostViewModel
+import com.nullpointer.blogcompose.services.uploadImg.UploadDataControl
 import com.nullpointer.blogcompose.ui.interfaces.ActionRootDestinations
 import com.nullpointer.blogcompose.ui.navigation.HomeNavGraph
 import com.nullpointer.blogcompose.ui.navigation.MainTransitions
 import com.nullpointer.blogcompose.ui.screens.destinations.AddBlogScreenDestination
+import com.nullpointer.blogcompose.ui.screens.destinations.ConfigScreenDestination
 import com.nullpointer.blogcompose.ui.screens.emptyScreen.EmptyScreen
-import com.nullpointer.blogcompose.ui.screens.states.SelectImageScreenState
-import com.nullpointer.blogcompose.ui.screens.states.rememberSelectImageScreenState
+import com.nullpointer.blogcompose.ui.screens.states.ProfileScreenState
+import com.nullpointer.blogcompose.ui.screens.states.rememberProfileScreenState
 import com.nullpointer.blogcompose.ui.share.BackHandler
 import com.nullpointer.blogcompose.ui.share.ButtonAdd
 import com.nullpointer.blogcompose.ui.share.SelectImgButtonSheet
 import com.ramcosta.composedestinations.annotation.Destination
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
 @HomeNavGraph
 @Destination(style = MainTransitions::class)
 @Composable
 fun ProfileScreen(
     authViewModel: AuthViewModel,
-    myPostViewModel: MyPostViewModel = hiltViewModel(),
-    likeViewModel: LikeViewModel = hiltViewModel(),
     actionRootDestinations: ActionRootDestinations,
-    profileScreenState: SelectImageScreenState = rememberSelectImageScreenState()
+    myPostViewModel: MyPostViewModel = hiltViewModel(),
+    profileScreenState: ProfileScreenState = rememberProfileScreenState(
+        isRefresh = myPostViewModel.stateRequestMyPost
+    )
 ) {
     // * states
     val stateListPost by myPostViewModel.listMyPost.collectAsState()
@@ -71,18 +75,18 @@ fun ProfileScreen(
                 isVisible = profileScreenState.isShowModal,
                 actionHidden = profileScreenState::hiddenModal,
                 actionBeforeSelect = { uri ->
-//                    uri?.let {
-//                        registryViewModel.imageProfile.changeValue(it, dataScreenState.context)
-//                    }
+                    uri?.let {
+                        UploadDataControl.startServicesUploadUser(profileScreenState.context, it)
+                    }
                     profileScreenState.hiddenModal()
                 }
             )
         },
     ) {
         Scaffold(floatingActionButton = {
-//            ButtonAdd(isScrollInProgress = profileScreenState.isScrollInProgress) {
-//                actionRootDestinations.changeRoot(AddBlogScreenDestination)
-//            }
+            ButtonAdd(isScrollInProgress = profileScreenState.isScrollInProgress) {
+                actionRootDestinations.changeRoot(AddBlogScreenDestination)
+            }
         }) {
             when (stateListPost) {
                 Resource.Failure -> EmptyScreen(
@@ -100,8 +104,19 @@ fun ProfileScreen(
                             emptyText = stringResource(id = R.string.message_empty_post)
                         )
                     } else {
-                        GridPost(listPost = listPost) {
-                            HeaderUser(user = currentUser)
+                        GridPost(
+                            listPost = listPost,
+                            gridState = profileScreenState.listState
+                        ) {
+                            HeaderUser(
+                                user = currentUser,
+                                actionEditPhoto = { profileScreenState.showModal() },
+                                actionClickSettings = {
+                                    actionRootDestinations.changeRoot(
+                                        ConfigScreenDestination
+                                    )
+                                }
+                            )
                         }
                     }
                 }
@@ -114,9 +129,11 @@ fun ProfileScreen(
 @Composable
 private fun GridPost(
     listPost: List<MyPost>,
+    gridState: LazyGridState,
     headerProfile: @Composable () -> Unit
 ) {
     LazyVerticalGrid(
+        state = gridState,
         contentPadding = PaddingValues(2.dp),
         cells = GridCells.Adaptive(100.dp)
     ) {
@@ -144,28 +161,74 @@ private fun GridPost(
 
 @Composable
 private fun HeaderUser(
-    user: MyUser
+    user: MyUser,
+    actionClickSettings: (() -> Unit)? = null,
+    actionEditPhoto: (() -> Unit)? = null
 ) {
     Card {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(10.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            AsyncImage(
-                model = ImageRequest
-                    .Builder(LocalContext.current)
-                    .data(user.urlImg)
-                    .transformations(CircleCropTransformation())
-                    .crossfade(true)
-                    .build(),
-                modifier = Modifier.size(150.dp),
-                contentDescription = "",
-                contentScale = ContentScale.Crop
+        Box {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                PhotoProfile(urlImage = user.urlImg, clickEditPhoto = actionEditPhoto)
+                Spacer(modifier = Modifier.height(15.dp))
+                Text(text = user.name)
+            }
+            IconButtonSettings(
+                modifier = Modifier.align(Alignment.TopEnd),
+                actionClickSettings = actionClickSettings
             )
-            Spacer(modifier = Modifier.height(15.dp))
-            Text(text = user.name)
         }
+    }
+}
+
+@Composable
+private fun PhotoProfile(
+    modifier: Modifier = Modifier,
+    urlImage: String,
+    clickEditPhoto: (() -> Unit)? = null
+) {
+    Box(modifier = modifier) {
+        AsyncImage(
+            model = ImageRequest
+                .Builder(LocalContext.current)
+                .data(urlImage)
+                .transformations(CircleCropTransformation())
+                .crossfade(true)
+                .build(),
+            modifier = Modifier.size(150.dp),
+            contentDescription = "",
+            contentScale = ContentScale.Crop
+        )
+        FloatingActionButton(onClick = {
+            clickEditPhoto?.invoke()
+        }, modifier = Modifier
+            .padding(10.dp)
+            .size(35.dp)
+            .align(Alignment.BottomEnd)) {
+            Icon(painter = painterResource(id = R.drawable.ic_edit), contentDescription = "")
+        }
+    }
+
+}
+
+@Composable
+private fun IconButtonSettings(
+    modifier: Modifier = Modifier,
+    actionClickSettings: (() -> Unit)? = null
+) {
+    IconButton(
+        onClick = { actionClickSettings?.invoke() },
+        modifier = modifier
+            .padding(10.dp)
+            .size(40.dp)
+    ) {
+        Icon(
+            painter = painterResource(id = R.drawable.ic_settings),
+            contentDescription = ""
+        )
     }
 }

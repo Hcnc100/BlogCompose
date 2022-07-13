@@ -12,7 +12,7 @@ import com.nullpointer.blogcompose.core.utils.SimpleScreenState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterialApi::class)
-class SelectImageScreenState(
+open class SelectImageScreenState(
     scaffoldState: ScaffoldState,
     context: Context,
     focusManager: FocusManager,

@@ -21,7 +21,7 @@ object UploadDataControl {
         }
     }
 
-    fun startServicesUploadUser(context: Context, nameUser: String, uriImg: Uri) {
+    fun startServicesUploadUser(context: Context, uriImg: Uri, nameUser: String? = null) {
         Intent(context, UploadDataServices::class.java).also {
             it.putExtra(KEY_NAME_USER_SERVICES, nameUser)
             it.putExtra(KEY_IMG_SERVICES, uriImg)

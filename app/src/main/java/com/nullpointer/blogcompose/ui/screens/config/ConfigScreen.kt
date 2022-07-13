@@ -8,6 +8,7 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -18,7 +19,6 @@ import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.presentation.AuthViewModel
 import com.nullpointer.blogcompose.ui.interfaces.ActionRootDestinations
 import com.nullpointer.blogcompose.ui.navigation.RootNavGraph
-import com.nullpointer.blogcompose.ui.screens.destinations.DataUserScreenDestination
 import com.nullpointer.blogcompose.ui.share.ImageProfile
 import com.nullpointer.blogcompose.ui.share.ToolbarBack
 import com.ramcosta.composedestinations.annotation.Destination
@@ -30,7 +30,7 @@ fun ConfigScreen(
     authViewModel: AuthViewModel,
     actionRootDestinations: ActionRootDestinations
 ) {
-    val currentUser = authViewModel.currentUser.collectAsState().value
+    val currentUser by authViewModel.currentUser.collectAsState()
     Scaffold(
         topBar = {
             ToolbarBack(
@@ -45,24 +45,20 @@ fun ConfigScreen(
         ) {
             // * main buttons
             Column {
-//                ButtonCard(text = currentUser?.name.toString()) {
-//                    ImageProfile(
-//                        urlImgProfile = currentUser?.urlImg.toString(),
-//                        paddingLoading = 5.dp,
-//                        modifier = Modifier.size(30.dp),
-//                        contentDescription = stringResource(R.string.description_image_profile)
-//                    )
-//                }
-                ButtonCard(text = stringResource(R.string.change_image_user),
-                    actionClick = {
-                        actionRootDestinations.changeRoot(DataUserScreenDestination)
-                    })
+                ButtonCard(text = currentUser.name) {
+                    ImageProfile(
+                        urlImgProfile = currentUser.urlImg,
+                        paddingLoading = 5.dp,
+                        modifier = Modifier.size(30.dp),
+                        contentDescription = stringResource(R.string.description_image_profile)
+                    )
+                }
             }
             // * button log out
-            ButtonCard(text = stringResource(R.string.close_session),
-                actionClick = {
-                    authViewModel.logOut()
-                }) {
+            ButtonCard(
+                text = stringResource(R.string.close_session),
+                actionClick = authViewModel::logOut
+            ) {
                 Image(
                     painter = painterResource(id = R.drawable.ic_logout),
                     contentDescription = stringResource(R.string.description_close_session)
@@ -74,7 +70,7 @@ fun ConfigScreen(
 }
 
 @Composable
-fun ButtonCard(
+private fun ButtonCard(
     text: String,
     actionClick: (() -> Unit)? = null,
     iconButton: (@Composable () -> Unit)? = null,

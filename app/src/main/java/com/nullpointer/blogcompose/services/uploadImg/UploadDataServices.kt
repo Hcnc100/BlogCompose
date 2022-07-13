@@ -82,7 +82,7 @@ class UploadDataServices : LifecycleService() {
                         showToastMessage(R.string.post_upload_sucess)
                     }
                     TypeUpdate.USER -> {
-                        val name = intent.getStringExtra(KEY_NAME_USER_SERVICES)!!
+                        val name = intent.getStringExtra(KEY_NAME_USER_SERVICES)
                         startUploadImg(
                             uriImage = uriImg,
                             typeUpdate = typeUpdate

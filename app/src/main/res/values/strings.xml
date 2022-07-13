@@ -129,6 +129,7 @@
     <string name="message_error_add_comment">Could not add comment</string>
     <string name="message_error_load_comments">Error loading comments</string>
     <string name="message_error_auth">Failed to authenticate</string>
+    <string name="message_error_login" translatable="false">Failed to login</string>
     <string name="message_error_like">You need connection for this</string>
     <string name="message_error_change_data">Without changes</string>
     <string name="message_verify_data">Check your data</string>
@@ -148,4 +149,5 @@
     <string name="data_user_upload_sucess" translatable="false">INfomacion actualiza con exito</string>
     <string name="text_hint_description">Escribe la descripcion</string>
     <string name="error_upload_service" translatable="false">error al subir el post</string>
+    <string name="error_load_post">El post ya no esta disponible</string>
 </resources>

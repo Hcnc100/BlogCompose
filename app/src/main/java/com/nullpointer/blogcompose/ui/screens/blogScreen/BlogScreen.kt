@@ -26,6 +26,7 @@ import com.nullpointer.blogcompose.ui.interfaces.ActionRootDestinations
 import com.nullpointer.blogcompose.ui.navigation.HomeNavGraph
 import com.nullpointer.blogcompose.ui.navigation.MainTransitions
 import com.nullpointer.blogcompose.ui.screens.destinations.AddBlogScreenDestination
+import com.nullpointer.blogcompose.ui.screens.destinations.PostDetailsDestination
 import com.nullpointer.blogcompose.ui.screens.emptyScreen.EmptyScreen
 import com.nullpointer.blogcompose.ui.screens.states.SwipeRefreshScreenState
 import com.nullpointer.blogcompose.ui.screens.states.rememberSwipeRefreshScreenState
@@ -72,7 +73,7 @@ fun BlogScreen(
                 )
                 Resource.Loading -> LoadingPost()
                 is Resource.Success -> {
-                    val listPost= (statePost as Resource.Success<List<Post>>).data
+                    val listPost = (statePost as Resource.Success<List<Post>>).data
                     if (listPost.isEmpty()) {
                         EmptyScreen(
                             resourceRaw = R.raw.empty1, emptyText = stringResource(
@@ -85,7 +86,14 @@ fun BlogScreen(
                             listState = blogScreenState.listState,
                             actionBlog = { action, post ->
                                 when (action) {
-                                    DETAILS -> TODO()
+                                    DETAILS -> {
+                                        actionRootDestinations.changeRoot(
+                                            PostDetailsDestination(
+                                                post.id,
+                                                false
+                                            )
+                                        )
+                                    }
                                     SHARE -> sharePost(post.id, blogScreenState.context)
                                     LIKE -> TODO()
                                     DOWNLOAD -> TODO()

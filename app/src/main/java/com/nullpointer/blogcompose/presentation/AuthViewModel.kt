@@ -10,7 +10,6 @@ import com.google.firebase.auth.AuthCredential
 import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.delegates.SavableComposeState
 import com.nullpointer.blogcompose.core.states.LoginStatus
-import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.domain.auth.AuthRepoImpl
 import com.nullpointer.blogcompose.domain.notify.NotifyRepoImpl
 import com.nullpointer.blogcompose.domain.post.PostRepoImpl
@@ -65,7 +64,9 @@ class AuthViewModel @Inject constructor(
     )
 
 
-    var isLoading by SavableComposeState(savedStateHandle, "", false)
+    var isLoading by SavableComposeState(savedStateHandle, "KEY_LOADING", false)
+        private set
+    var creatingUser by mutableStateOf(false)
         private set
 
     fun authWithCredential(
@@ -87,21 +88,28 @@ class AuthViewModel @Inject constructor(
         }
     }
 
-    fun logOut() = viewModelScope.launch {
+    fun logOut() = viewModelScope.launch(Dispatchers.IO) {
         authRepoImpl.logOut()
         notifyRepoImpl.deleterAllNotify()
         postRepoImpl.deleterAllPost()
     }
 
-    var creatingUser by mutableStateOf(false)
-        private set
 
-    fun createNewUser(myUser: MyUser) = viewModelScope.launch(Dispatchers.IO) {
+
+    fun createNewUser(
+        myUser: MyUser
+    ) = viewModelScope.launch(Dispatchers.IO) {
         try {
             creatingUser = true
             authRepoImpl.createNewUser(myUser)
         } catch (e: Exception) {
-
+            when (e) {
+                is CancellationException -> throw e
+                else -> {
+                    Timber.e("error to create new user $e")
+                    _messageAuth.trySend(R.string.message_error_login)
+                }
+            }
         } finally {
             creatingUser = false
         }

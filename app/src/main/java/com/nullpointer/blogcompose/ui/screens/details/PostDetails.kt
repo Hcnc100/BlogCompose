@@ -16,19 +16,22 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.states.Resource
+import com.nullpointer.blogcompose.core.utils.SimpleScreenState
+import com.nullpointer.blogcompose.core.utils.rememberSimpleScreenState
 import com.nullpointer.blogcompose.models.Comment
 import com.nullpointer.blogcompose.models.posts.Post
 import com.nullpointer.blogcompose.presentation.LikeViewModel
+import com.nullpointer.blogcompose.ui.interfaces.ActionRootDestinations
 import com.nullpointer.blogcompose.ui.navigation.RootNavGraph
-import com.nullpointer.blogcompose.ui.share.ToolbarBack
 import com.nullpointer.blogcompose.ui.screens.details.componets.ButtonHasNewComment
 import com.nullpointer.blogcompose.ui.screens.details.componets.Comments
 import com.nullpointer.blogcompose.ui.screens.details.componets.DataPost
 import com.nullpointer.blogcompose.ui.screens.details.componets.TextInputComment
 import com.nullpointer.blogcompose.ui.screens.details.viewModel.PostDetailsViewModel
+import com.nullpointer.blogcompose.ui.screens.emptyScreen.EmptyScreen
+import com.nullpointer.blogcompose.ui.share.ToolbarBack
 import com.ramcosta.composedestinations.annotation.DeepLink
 import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -44,12 +47,13 @@ import kotlinx.coroutines.launch
 fun PostDetails(
     idPost: String,
     goToBottom: Boolean = false,
-    navigator: DestinationsNavigator,
     postDetailsViewModel: PostDetailsViewModel = hiltViewModel(),
     likeViewModel: LikeViewModel = hiltViewModel(),
+    postDetailsState: SimpleScreenState = rememberSimpleScreenState(),
+    actionRootDestinations: ActionRootDestinations
 ) {
     // * state
-    val postState = postDetailsViewModel.postState.collectAsState()
+    val postState by postDetailsViewModel.postState.collectAsState()
     val commentsState = postDetailsViewModel.commentState.collectAsState()
     val hasNewComments = postDetailsViewModel.hasNewComments.collectAsState()
     val stateRequestComments = postDetailsViewModel.stateConcatenate.collectAsState()
@@ -57,47 +61,62 @@ fun PostDetails(
     val detailsMessage = postDetailsViewModel.messageDetails
     val likeMessage = likeViewModel.messageLike
     val scaffoldState = rememberScaffoldState()
-    val context= LocalContext.current
+    val context = LocalContext.current
 
     // * init post loading (likes and comments)
-    LaunchedEffect(Unit) {
-        postDetailsViewModel.initIdPost(idPost)
-    }
+//    LaunchedEffect(Unit) {
+//        postDetailsViewModel.initIdPost(idPost)
+//    }
 
     LaunchedEffect(detailsMessage) {
-        detailsMessage.collect {
-            scaffoldState.snackbarHostState.showSnackbar(
-                context.getString(R.string.message_error_internet_checker)
-            )
-        }
+        detailsMessage.collect(postDetailsState::showSnackMessage)
     }
 
     LaunchedEffect(likeMessage) {
-        likeMessage.collect {
-            scaffoldState.snackbarHostState.showSnackbar(
-                context.getString(it)
+        likeMessage.collect(postDetailsState::showSnackMessage)
+    }
+
+    Scaffold(
+        scaffoldState = postDetailsState.scaffoldState,
+        topBar = {
+            ToolbarBack(
+                title = stringResource(R.string.title_post),
+                actionBack = actionRootDestinations::backDestination
             )
+        }
+    ) {
+        when (val statePost = postState) {
+            Resource.Failure -> EmptyScreen(
+                resourceRaw = R.raw.error1, emptyText = stringResource(
+                    id = R.string.error_load_post
+                )
+            )
+            Resource.Loading -> LoadingPost()
+            is Resource.Success -> {}
         }
     }
 
-    PostReal(post = postState.value,
-        list = commentsState.value,
-        scaffoldState = scaffoldState,
-        hasNewComment = hasNewComments.value,
-        goToBottom = goToBottom,
-        stateRequestComments = stateRequestComments.value,
-        concatenate = postDetailsViewModel::concatenateComments,
-        totalComments = postDetailsViewModel.numberComments,
-        reloadNewComment = postDetailsViewModel::reloadNewComment,
-        actionBack = navigator::popBackStack,
-        actionLike = {
-            postDetailsViewModel.post?.let { post ->
-                likeViewModel.likePost(post,
-                    it)
-            }
-        },
-        addComment = { postDetailsViewModel.addComment(it) }
-    )
+
+//    PostReal(post = postState.value,
+//        list = commentsState.value,
+//        scaffoldState = scaffoldState,
+//        hasNewComment = hasNewComments.value,
+//        goToBottom = goToBottom,
+//        stateRequestComments = stateRequestComments.value,
+//        concatenate = postDetailsViewModel::concatenateComments,
+//        totalComments = postDetailsViewModel.numberComments,
+//        reloadNewComment = postDetailsViewModel::reloadNewComment,
+//        actionBack = navigator::popBackStack,
+//        actionLike = {
+//            postDetailsViewModel.post?.let { post ->
+//                likeViewModel.likePost(
+//                    post,
+//                    it
+//                )
+//            }
+//        },
+//        addComment = { postDetailsViewModel.addComment(it) }
+//    )
 
 }
 
@@ -131,8 +150,10 @@ fun PostReal(
     Scaffold(
         scaffoldState = scaffoldState,
         topBar = {
-            ToolbarBack(title = stringResource(R.string.title_post),
-                actionBack = actionBack)
+            ToolbarBack(
+                title = stringResource(R.string.title_post),
+                actionBack = actionBack
+            )
         },
         bottomBar = {
             // * input comment
@@ -153,9 +174,11 @@ fun PostReal(
     ) {
         // * needed a box to positioned button "has new comments"
         // * because this is "floating"
-        Box(modifier = Modifier
-            .fillMaxSize()
-            .padding(it)) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(it)
+        ) {
             LazyColumn(
                 state = stateLazy,
                 modifier = Modifier.fillMaxWidth()
@@ -171,7 +194,8 @@ fun PostReal(
                     )
                 }
                 // * comments list
-                listComments(listState = list,
+                listComments(
+                    listState = list,
                     stateRequestComments = stateRequestComments,
                     totalComments = totalComments,
                     lazyListScope = this,
@@ -185,7 +209,8 @@ fun PostReal(
                     actionReload = reloadNewComment,
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
-                        .padding(bottom = 35.dp))
+                        .padding(bottom = 35.dp)
+                )
 
         }
     }
@@ -218,8 +243,10 @@ fun listComments(
                 item {
                     if (stateRequestComments is Resource.Loading) {
                         Box(modifier = Modifier.fillMaxWidth()) {
-                            CircularProgressIndicator(modifier = Modifier.size(25.dp),
-                                strokeWidth = 4.dp)
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(25.dp),
+                                strokeWidth = 4.dp
+                            )
                         }
                     } else {
                         Box(modifier = Modifier

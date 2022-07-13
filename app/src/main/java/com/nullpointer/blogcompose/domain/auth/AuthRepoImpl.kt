@@ -33,7 +33,7 @@ class AuthRepoImpl(
         prefDataSource.deleterUser()
     }
 
-    override suspend fun uploadDataUser(urlImg: String, name: String) {
+    override suspend fun uploadDataUser(urlImg: String?, name: String?) {
         if (!InternetCheck.isNetworkAvailable()) throw NetworkException()
         val updateUser = authDataSource.updateDataUser(name, urlImg)
         prefDataSource.saveUser(updateUser)
