@@ -13,10 +13,12 @@ import androidx.compose.ui.unit.dp
 import com.valentinilk.shimmer.shimmer
 
 @Composable
-fun LoadingPost() {
+fun LoadingPost(
+    headerLoading: @Composable (() -> Unit)? = null
+) {
     LazyColumn {
         item {
-            HeaderBlogDetails()
+            headerLoading?.invoke() ?: HeaderBlogDetails()
         }
         items(10) {
             val widthRandom = (60..280).random()
@@ -26,8 +28,9 @@ fun LoadingPost() {
     }
 }
 
+
 @Composable
-fun ItemBlog(widthRandom: Int, heightRandom: Int) {
+private fun ItemBlog(widthRandom: Int, heightRandom: Int) {
     Row(modifier = Modifier.padding(10.dp)) {
         Card(
             modifier = Modifier

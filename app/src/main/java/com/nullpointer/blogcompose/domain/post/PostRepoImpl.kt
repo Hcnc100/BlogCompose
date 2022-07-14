@@ -158,11 +158,10 @@ class PostRepoImpl(
         return postDataSource.getRealTimePost(idPost)
     }
 
-    override suspend fun getLastComments(idPost: String) {
+    override suspend fun getLastComments(idPost: String):List<Comment> {
         if (!InternetCheck.isNetworkAvailable()) throw NetworkException()
-        val listComments =
-            postDataSource.getCommentsForPost(nComments = SIZE_COMMENTS, idPost = idPost)
-        commentsDAO.updateAllComments(listComments)
+        return postDataSource.getCommentsForPost(nComments = SIZE_COMMENTS, idPost = idPost)
+
     }
 
 
@@ -184,13 +183,12 @@ class PostRepoImpl(
         commentsDAO.deleterAll()
     }
 
-    suspend fun concatenateComments(idPost: String) {
+    suspend fun concatenateComments(idPost: String): List<Comment> {
         if (!InternetCheck.isNetworkAvailable()) throw NetworkException()
         val idComment = commentsDAO.getLastComment()?.id
-        val list = postDataSource.getCommentsForPost(nComments = SIZE_COMMENTS,
+       return postDataSource.getCommentsForPost(nComments = SIZE_COMMENTS,
             idPost = idPost,
             startWithCommentId = idComment)
-        commentsDAO.insertListComments(list)
     }
 
 
@@ -201,6 +199,11 @@ class PostRepoImpl(
 
     override suspend fun deleterPost(post: Post) =
         postDataSource.deleterPost(post.id)
+
+    suspend fun deleterInvalidPost(id: String){
+        postDAO.deleterPost(id)
+        myPostDAO.deleterPost(id)
+    }
 
     override suspend fun updateInnerPost(post: Post) {
         val oldPost = postDAO.getPostById(post.id)

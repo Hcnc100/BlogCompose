@@ -27,5 +27,5 @@ interface PostRepository {
     suspend fun addNewComment(post: Post,comment: String)
     suspend fun clearComments()
     suspend fun getRealTimePost(idPost: String): Flow<Post?>
-    suspend fun getLastComments(idPost: String)
+    suspend fun getLastComments(idPost: String): List<Comment>
 }

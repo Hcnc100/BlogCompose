@@ -120,6 +120,9 @@ class PostViewModel @Inject constructor(
                 }
             }
         }
+    }
 
+    fun deleterPostInvalid(idPost: String) = viewModelScope.launch(Dispatchers.IO) {
+        postRepo.deleterInvalidPost(idPost)
     }
 }

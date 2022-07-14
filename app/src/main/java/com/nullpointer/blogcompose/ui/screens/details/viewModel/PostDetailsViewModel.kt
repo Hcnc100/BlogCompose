@@ -1,5 +1,8 @@
 package com.nullpointer.blogcompose.ui.screens.details.viewModel
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -11,12 +14,9 @@ import com.nullpointer.blogcompose.domain.post.PostRepoImpl
 import com.nullpointer.blogcompose.models.Comment
 import com.nullpointer.blogcompose.models.posts.Post
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -40,17 +40,15 @@ class PostDetailsViewModel @Inject constructor(
     // * save job to concatenate comments
     private var jobConcatenate: Job? = null
 
-    private val _stateConcatenate = MutableStateFlow<Resource<Unit>?>(null)
-    val stateConcatenate = _stateConcatenate.asStateFlow()
-
+    var stateConcatComment by mutableStateOf(false)
 
 
     // * this var is for update post selected
     private val _idPost = MutableStateFlow("")
 
     // * show that has any comments
-    private val _hasNewComments = MutableStateFlow(false)
-    val hasNewComments = _hasNewComments.asStateFlow()
+    var hasNewComments by mutableStateOf(false)
+        private set
 
     var post: Post? = null
 
@@ -58,39 +56,33 @@ class PostDetailsViewModel @Inject constructor(
     var numberComments by SavableProperty(savedStateHandle, KEY_COMMENTS, -1)
         private set
 
-    init {
-        // * every when lauch this view model deleter comments saved in room
-        viewModelScope.launch {
-            postRepoImpl.clearComments()
-        }
-    }
+    private val _listComments = MutableStateFlow<Resource<List<Comment>>>(Resource.Loading)
+    val listComments = _listComments.asStateFlow()
 
     val postState: StateFlow<Resource<Post>> = flow<Resource<Post>> {
         // * update the comments when idPost is updated and this is not empty
-        _idPost.collect { idPost ->
-            if (idPost.isNotEmpty()) {
-                // ! only listener one document
-                // * and request new comments for demand
-                postRepoImpl.getRealTimePost(idPost).collect {
-
-                    // * if the number of comments is diff and no if for me
-                    // * so, there are more comments
-                    if (it!!.numberComments != numberComments) {
-                        if (numberComments != -1) _hasNewComments.value = true
-                        numberComments = it.numberComments
-                    }
-
-                    // * emit post reciber
-                    emit(Resource.Success(it))
-                    // * update inner post (saved in database)
-                    postRepoImpl.updateInnerPost(it)
-                    post = it
-                }
+        _idPost.transform {
+            if (it.isNotEmpty()) emit(postRepoImpl.getPost(it))
+        }.collect { newPost ->
+            // * if the number of comments is diff and no if for me
+            // * so, there are more comments
+            if (newPost!!.numberComments != numberComments) {
+                if (numberComments != -1) hasNewComments = true
+                numberComments = newPost.numberComments
             }
+
+            // * emit post reciber
+            emit(Resource.Success(newPost))
+            // * update inner post (saved in database)
+            withContext(Dispatchers.IO) {
+                postRepoImpl.updateInnerPost(newPost)
+            }
+            post = newPost
         }
     }.flowOn(Dispatchers.IO).catch {
         Timber.d("Error con el post $it")
         _messageDetails.send(R.string.message_error_load_post)
+        postRepoImpl.deleterInvalidPost(_idPost.value)
         emit(Resource.Failure)
     }.stateIn(
         viewModelScope,
@@ -100,35 +92,35 @@ class PostDetailsViewModel @Inject constructor(
 
     // * this show commnets saved in database
     // * the update is for demand and only update database
-    val commentState: StateFlow<Resource<List<Comment>>> = flow<Resource<List<Comment>>> {
-        postRepoImpl.listComments.collect {
-            emit(Resource.Success(it))
-        }
-    }.catch {
-        Timber.d("Error al cargar los comentarios del post $it")
-        _messageDetails.send(R.string.error_load_comments)
-        emit(Resource.Failure)
-    }.flowOn(Dispatchers.IO).stateIn(
-        viewModelScope,
-        SharingStarted.WhileSubscribed(5000),
-        Resource.Loading
-    )
+
 
     // * set id post and request comments
     fun initIdPost(idPost: String) {
-        _idPost.value = idPost
-        reloadNewComment()
+        if (idPost != _idPost.value) {
+            _idPost.value = idPost
+            requestsComments(idPost)
+        }
     }
+
 
     fun concatenateComments() {
         // * cancel old job and add new
         jobConcatenate?.cancel()
         jobConcatenate = viewModelScope.launch {
-            _stateConcatenate.value = Resource.Loading
-            _stateConcatenate.value = try {
-                // * request new commnets and concatenate in database
-                postRepoImpl.concatenateComments(_idPost.value)
-                Resource.Success(Unit)
+            stateConcatComment = true
+            try {
+                listComments.value.let { stateListComment ->
+                    // * request new comments and concatenate in database
+                    val listNewComments = withContext(Dispatchers.IO) {
+                        postRepoImpl.concatenateComments(_idPost.value)
+                    }
+
+                    if (stateListComment is Resource.Success) {
+                        val newList = stateListComment.data + listNewComments
+                        _listComments.emit(Resource.Success(newList))
+                        Timber.d("New comments concatenate ${listNewComments.size}")
+                    }
+                }
             } catch (e: Exception) {
                 when (e) {
                     is CancellationException -> throw e
@@ -138,7 +130,8 @@ class PostDetailsViewModel @Inject constructor(
                         Timber.d("Error al concatenar los post ${_idPost.value} : $e")
                     }
                 }
-                Resource.Failure
+            } finally {
+                stateConcatComment = false
             }
         }
     }
@@ -149,7 +142,9 @@ class PostDetailsViewModel @Inject constructor(
             // * change number of comments
             // ! this for no show any for "hasNewComments"
             numberComments++
-            post?.let { postRepoImpl.addNewComment(it, comment) }
+            post?.let {
+                postRepoImpl.addNewComment(it, comment)
+            }
         } catch (e: Exception) {
             _messageDetails.send(R.string.message_error_add_comment)
             Timber.e("Error al agregar un commet $e")
@@ -157,17 +152,19 @@ class PostDetailsViewModel @Inject constructor(
     }
 
 
-    fun reloadNewComment() {
+    fun requestsComments(idPost: String) {
         // * this override comments in database and get last comments
         jobInitComments?.cancel()
         jobInitComments = viewModelScope.launch {
             try {
-                if (_idPost.value.isNotEmpty()) {
-                    postRepoImpl.getLastComments(_idPost.value)
-                    _hasNewComments.value = false
-                    Resource.Success(Unit)
+                _listComments.emit(Resource.Loading)
+                val listNewComments = withContext(Dispatchers.IO) {
+                    postRepoImpl.getLastComments(idPost)
                 }
+                hasNewComments = false
+                _listComments.emit(Resource.Success(listNewComments))
             } catch (e: Exception) {
+                _listComments.emit(Resource.Failure)
                 when (e) {
                     is CancellationException -> throw e
                     is NetworkException -> _messageDetails.send(R.string.message_error_internet_checker)
@@ -181,9 +178,10 @@ class PostDetailsViewModel @Inject constructor(
     }
 
     override fun onCleared() {
-        viewModelScope.launch {
-            postRepoImpl.clearComments()
-        }
+        _idPost.value = ""
+        numberComments = -1
+        jobConcatenate?.cancel()
+        jobInitComments?.cancel()
     }
 
 

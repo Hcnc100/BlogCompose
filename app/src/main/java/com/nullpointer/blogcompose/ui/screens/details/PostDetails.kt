@@ -5,15 +5,24 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Scaffold
+import androidx.compose.material.ScaffoldState
+import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
+import coil.transform.CircleCropTransformation
 import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.core.utils.SimpleScreenState
@@ -52,28 +61,18 @@ fun PostDetails(
     postDetailsState: SimpleScreenState = rememberSimpleScreenState(),
     actionRootDestinations: ActionRootDestinations
 ) {
-    // * state
     val postState by postDetailsViewModel.postState.collectAsState()
-    val commentsState = postDetailsViewModel.commentState.collectAsState()
-    val hasNewComments = postDetailsViewModel.hasNewComments.collectAsState()
-    val stateRequestComments = postDetailsViewModel.stateConcatenate.collectAsState()
-    // * messages post
-    val detailsMessage = postDetailsViewModel.messageDetails
-    val likeMessage = likeViewModel.messageLike
-    val scaffoldState = rememberScaffoldState()
-    val context = LocalContext.current
 
-    // * init post loading (likes and comments)
-//    LaunchedEffect(Unit) {
-//        postDetailsViewModel.initIdPost(idPost)
-//    }
-
-    LaunchedEffect(detailsMessage) {
-        detailsMessage.collect(postDetailsState::showSnackMessage)
+    LaunchedEffect(Unit) {
+        postDetailsViewModel.initIdPost(idPost)
     }
 
-    LaunchedEffect(likeMessage) {
-        likeMessage.collect(postDetailsState::showSnackMessage)
+    LaunchedEffect(key1 = Unit) {
+        postDetailsViewModel.messageDetails.collect(postDetailsState::showSnackMessage)
+    }
+
+    LaunchedEffect(key1 = Unit) {
+        likeViewModel.messageLike.collect(postDetailsState::showSnackMessage)
     }
 
     Scaffold(
@@ -86,38 +85,88 @@ fun PostDetails(
         }
     ) {
         when (val statePost = postState) {
-            Resource.Failure -> EmptyScreen(
-                resourceRaw = R.raw.error1, emptyText = stringResource(
-                    id = R.string.error_load_post
+            Resource.Failure -> {
+                EmptyScreen(
+                    resourceRaw = R.raw.error1, emptyText = stringResource(
+                        id = R.string.error_load_post
+                    )
                 )
-            )
+            }
             Resource.Loading -> LoadingPost()
-            is Resource.Success -> {}
+            is Resource.Success -> {
+                val commentsState by postDetailsViewModel.listComments.collectAsState()
+                when (val commentsState = commentsState) {
+                    Resource.Failure -> {
+                        Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                            HeaderBlogDetails(blog = statePost.data)
+                            EmptyScreen(
+                                resourceRaw = R.raw.error1, emptyText = stringResource(
+                                    id = R.string.error_load_comments
+                                )
+                            )
+                        }
+                    }
+                    Resource.Loading -> {
+                        LoadingPost {
+                            HeaderBlogDetails(blog = statePost.data)
+                        }
+                    }
+                    is Resource.Success -> CompleteBlogData(listComment = commentsState.data) {
+                        HeaderBlogDetails(blog = statePost.data)
+                    }
+                }
+            }
         }
     }
+}
 
+@Composable
+fun CompleteBlogData(
+    listComment: List<Comment>,
+    header: @Composable () -> Unit,
+) {
+    LazyColumn {
+        item { header() }
+        items(listComment.size) { index ->
+            ItemComment(comment = listComment[index])
+        }
+    }
+}
 
-//    PostReal(post = postState.value,
-//        list = commentsState.value,
-//        scaffoldState = scaffoldState,
-//        hasNewComment = hasNewComments.value,
-//        goToBottom = goToBottom,
-//        stateRequestComments = stateRequestComments.value,
-//        concatenate = postDetailsViewModel::concatenateComments,
-//        totalComments = postDetailsViewModel.numberComments,
-//        reloadNewComment = postDetailsViewModel::reloadNewComment,
-//        actionBack = navigator::popBackStack,
-//        actionLike = {
-//            postDetailsViewModel.post?.let { post ->
-//                likeViewModel.likePost(
-//                    post,
-//                    it
-//                )
-//            }
-//        },
-//        addComment = { postDetailsViewModel.addComment(it) }
-//    )
-
+@Composable
+private fun HeaderBlogDetails(blog: Post) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(10.dp)
+        ) {
+            AsyncImage(
+                model = ImageRequest
+                    .Builder(LocalContext.current)
+                    .data(blog.userPoster?.urlImg)
+                    .transformations(CircleCropTransformation())
+                    .crossfade(true)
+                    .build(),
+                contentDescription = "",
+                placeholder = painterResource(id = R.drawable.ic_person),
+                error = painterResource(id = R.drawable.ic_person),
+                modifier = Modifier.size(40.dp)
+            )
+            Spacer(modifier = Modifier.width(10.dp))
+            Text(text = blog.userPoster?.name ?: "")
+        }
+        Text(text = blog.description, modifier = Modifier.padding(10.dp))
+        Spacer(modifier = Modifier.height(10.dp))
+        AsyncImage(
+            model = blog.urlImage,
+            contentDescription = "",
+            modifier = Modifier
+                .fillMaxWidth()
+        )
+    }
 }
 
 @Composable
@@ -211,7 +260,6 @@ fun PostReal(
                         .align(Alignment.BottomCenter)
                         .padding(bottom = 35.dp)
                 )
-
         }
     }
 }

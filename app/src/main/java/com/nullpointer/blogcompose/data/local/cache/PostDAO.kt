@@ -36,4 +36,7 @@ interface PostDAO {
 
     @Query("SELECT * FROM table_post ORDER BY timeStamp LIMIT 1")
     suspend fun getLastPost(): Post?
+
+    @Query("DELETE FROM table_post WHERE id = :idPost")
+    suspend fun deleterPost(idPost: String)
 }
