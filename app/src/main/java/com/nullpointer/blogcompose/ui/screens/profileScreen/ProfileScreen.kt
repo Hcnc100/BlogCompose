@@ -35,7 +35,7 @@ import com.nullpointer.blogcompose.ui.navigation.HomeNavGraph
 import com.nullpointer.blogcompose.ui.navigation.MainTransitions
 import com.nullpointer.blogcompose.ui.screens.destinations.AddBlogScreenDestination
 import com.nullpointer.blogcompose.ui.screens.destinations.ConfigScreenDestination
-import com.nullpointer.blogcompose.ui.screens.emptyScreen.EmptyScreen
+import com.nullpointer.blogcompose.ui.screens.emptyScreen.AnimationScreen
 import com.nullpointer.blogcompose.ui.screens.states.ProfileScreenState
 import com.nullpointer.blogcompose.ui.screens.states.rememberProfileScreenState
 import com.nullpointer.blogcompose.ui.share.BackHandler
@@ -89,7 +89,7 @@ fun ProfileScreen(
             }
         }) {
             when (stateListPost) {
-                Resource.Failure -> EmptyScreen(
+                Resource.Failure -> AnimationScreen(
                     resourceRaw = R.raw.empty3,
                     emptyText = stringResource(id = R.string.message_empty_post)
                 )
@@ -99,7 +99,7 @@ fun ProfileScreen(
                 is Resource.Success -> {
                     val listPost = (stateListPost as Resource.Success<List<MyPost>>).data
                     if (listPost.isEmpty()) {
-                        EmptyScreen(
+                        AnimationScreen(
                             resourceRaw = R.raw.empty3,
                             emptyText = stringResource(id = R.string.message_empty_post)
                         )

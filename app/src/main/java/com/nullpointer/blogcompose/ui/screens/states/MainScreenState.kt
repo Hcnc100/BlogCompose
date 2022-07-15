@@ -13,7 +13,6 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.navigation.NavHostController
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.google.accompanist.navigation.material.ExperimentalMaterialNavigationApi
-import com.nullpointer.blogcompose.core.utils.SimpleScreenState
 import com.ramcosta.composedestinations.animations.defaults.RootNavGraphDefaultAnimations
 import com.ramcosta.composedestinations.animations.rememberAnimatedNavHostEngine
 import com.ramcosta.composedestinations.spec.NavHostEngine

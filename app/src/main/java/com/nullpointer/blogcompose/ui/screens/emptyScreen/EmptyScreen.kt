@@ -12,11 +12,12 @@ import androidx.compose.ui.unit.dp
 import com.nullpointer.blogcompose.ui.share.LottieContainer
 
 @Composable
-fun EmptyScreen(
+fun AnimationScreen(
     @RawRes resourceRaw: Int,
     emptyText: String,
+    modifier: Modifier = Modifier
 ) {
-    Column(modifier = Modifier.fillMaxSize()) {
+    Column(modifier = modifier.fillMaxSize()) {
         LottieContainer(
             animation = resourceRaw,
             modifier = Modifier

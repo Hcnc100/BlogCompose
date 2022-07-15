@@ -1,4 +1,4 @@
-package com.nullpointer.blogcompose.ui.screens.details
+package com.nullpointer.blogcompose.ui.screens.details.componets
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -10,27 +10,41 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.nullpointer.blogcompose.models.posts.Post
 import com.valentinilk.shimmer.shimmer
 
+
 @Composable
-fun LoadingPost(
-    headerLoading: @Composable (() -> Unit)? = null
+fun LoadingOnlyComments(
+    post:Post,
+    modifier: Modifier = Modifier,
+    actionLike:()->Unit
 ) {
-    LazyColumn {
+    LoadingFullPostDetails(modifier = modifier) {
+        HeaderBlogDetails(blog = post, actionLike = actionLike)
+    }
+}
+
+@Composable
+fun LoadingFullPostDetails(
+    modifier: Modifier = Modifier,
+    headerLoading: @Composable (() -> Unit)? = null,
+) {
+    LazyColumn(modifier = modifier) {
         item {
-            headerLoading?.invoke() ?: HeaderBlogDetails()
+            headerLoading?.invoke() ?: FakeHeaderBlogDetails()
         }
         items(10) {
             val widthRandom = (60..280).random()
             val heightRandom = (70..100).random()
-            ItemBlog(widthRandom = widthRandom, heightRandom = heightRandom)
+            FakeItemBlog(widthRandom = widthRandom, heightRandom = heightRandom)
         }
     }
 }
 
 
 @Composable
-private fun ItemBlog(widthRandom: Int, heightRandom: Int) {
+private fun FakeItemBlog(widthRandom: Int, heightRandom: Int) {
     Row(modifier = Modifier.padding(10.dp)) {
         Card(
             modifier = Modifier
@@ -51,12 +65,12 @@ private fun ItemBlog(widthRandom: Int, heightRandom: Int) {
 
 
 @Composable
-private fun HeaderBlogDetails() {
+private fun FakeHeaderBlogDetails() {
     Column(
         modifier = Modifier
             .fillMaxWidth(),
     ) {
-        InfoUser()
+        FakeInfoUser()
         Card(
             modifier = Modifier
                 .height(250.dp)
@@ -69,7 +83,7 @@ private fun HeaderBlogDetails() {
 }
 
 @Composable
-private fun InfoUser(modifier: Modifier = Modifier) {
+private fun FakeInfoUser(modifier: Modifier = Modifier) {
     Column(modifier = modifier.padding(10.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Card(

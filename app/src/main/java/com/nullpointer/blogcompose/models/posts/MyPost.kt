@@ -24,24 +24,24 @@ data class MyPost(
     @PrimaryKey
     override var id: String = UUID.randomUUID().toString(),
 ) : SimplePost() {
-        companion object {
-            fun fromPost(post: Post) = MyPost(
-                description = post.description,
-                urlImage = post.urlImage,
-                numberComments = post.numberComments,
-                numberLikes = post.numberLikes,
-                ownerLike = post.ownerLike,
-                timestamp  = post.timestamp,
-                id = post.id
-            )
-        }
+    companion object {
+        fun fromPost(post: Post) = MyPost(
+            description = post.description,
+            urlImage = post.urlImage,
+            numberComments = post.numberComments,
+            numberLikes = post.numberLikes,
+            ownerLike = post.ownerLike,
+            timestamp = post.timestamp,
+            id = post.id
+        )
+    }
 
 
-        fun copyInnerLike(isLiked: Boolean): MyPost {
-        val newCount = if (isLiked) numberLikes + 1 else numberLikes - 1
+    fun toggleLike(): MyPost {
+        val newCount = if (ownerLike) numberLikes - 1 else numberLikes + 1
         return this.copy(
             numberLikes = newCount,
-            ownerLike = isLiked
+            ownerLike = !ownerLike
         )
     }
 }

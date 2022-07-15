@@ -8,9 +8,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
-import com.nullpointer.blogcompose.core.utils.SimpleScreenState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+
 @OptIn(ExperimentalMaterialApi::class)
 open class SelectImageScreenState(
     scaffoldState: ScaffoldState,

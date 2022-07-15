@@ -5,7 +5,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -15,12 +14,12 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.google.firebase.auth.AuthCredential
 import com.nullpointer.blogcompose.R
-import com.nullpointer.blogcompose.core.utils.SimpleScreenState
-import com.nullpointer.blogcompose.core.utils.rememberSimpleScreenState
 import com.nullpointer.blogcompose.presentation.AuthViewModel
 import com.nullpointer.blogcompose.ui.navigation.RootNavGraph
 import com.nullpointer.blogcompose.ui.screens.authScreen.componets.facebook.ButtonAuthFacebook
 import com.nullpointer.blogcompose.ui.screens.authScreen.componets.google.ButtonAuthGoogle
+import com.nullpointer.blogcompose.ui.screens.states.SimpleScreenState
+import com.nullpointer.blogcompose.ui.screens.states.rememberSimpleScreenState
 import com.ramcosta.composedestinations.annotation.Destination
 
 @RootNavGraph(start = true)

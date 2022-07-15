@@ -18,7 +18,7 @@ import com.nullpointer.blogcompose.ui.interfaces.ActionRootDestinations
 import com.nullpointer.blogcompose.ui.navigation.HomeNavGraph
 import com.nullpointer.blogcompose.ui.navigation.MainTransitions
 import com.nullpointer.blogcompose.ui.screens.destinations.PostDetailsDestination
-import com.nullpointer.blogcompose.ui.screens.emptyScreen.EmptyScreen
+import com.nullpointer.blogcompose.ui.screens.emptyScreen.AnimationScreen
 import com.nullpointer.blogcompose.ui.screens.states.SwipeRefreshScreenState
 import com.nullpointer.blogcompose.ui.screens.states.rememberSwipeRefreshScreenState
 import com.nullpointer.blogcompose.ui.share.CircularProgressAnimation
@@ -52,7 +52,7 @@ fun NotifyScreen(
 
             when (stateListNotify) {
                 Resource.Loading -> LoadingNotify()
-                Resource.Failure -> EmptyScreen(
+                Resource.Failure -> AnimationScreen(
                     resourceRaw = R.raw.empty3,
                     emptyText = stringResource(R.string.message_empty_notify)
                 )
@@ -60,7 +60,7 @@ fun NotifyScreen(
                     val listNotify = (stateListNotify as Resource.Success<List<Notify>>).data
 
                     if (listNotify.isEmpty()) {
-                        EmptyScreen(
+                        AnimationScreen(
                             resourceRaw = R.raw.empty3,
                             emptyText = stringResource(R.string.message_empty_notify)
                         )

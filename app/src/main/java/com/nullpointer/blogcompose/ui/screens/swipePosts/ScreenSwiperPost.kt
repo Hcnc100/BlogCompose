@@ -14,7 +14,7 @@ import androidx.compose.ui.Modifier
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.SwipeRefreshState
 import com.nullpointer.blogcompose.models.posts.SimplePost
-import com.nullpointer.blogcompose.ui.screens.emptyScreen.EmptyScreen
+import com.nullpointer.blogcompose.ui.screens.emptyScreen.AnimationScreen
 import com.nullpointer.blogcompose.ui.share.ButtonAdd
 import com.nullpointer.blogcompose.ui.share.CircularProgressAnimation
 import com.nullpointer.blogcompose.ui.share.OnBottomReached
@@ -63,7 +63,7 @@ fun ScreenSwiperPost(
                     // ! this for no lost header when this list post is empty
                     Column(modifier = Modifier.padding(it)) {
                         header?.invoke()
-                        EmptyScreen(resourceRaw = emptyResRaw, emptyText = emptyString)
+                        AnimationScreen(resourceRaw = emptyResRaw, emptyText = emptyString)
                     }
                 } else {
                     // ? show swipe list of posts

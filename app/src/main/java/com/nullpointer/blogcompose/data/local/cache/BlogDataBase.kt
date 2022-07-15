@@ -8,7 +8,7 @@ import com.nullpointer.blogcompose.models.posts.MyPost
 import com.nullpointer.blogcompose.models.notify.Notify
 import com.nullpointer.blogcompose.models.posts.Post
 
-@Database(entities = [Post::class, Notify::class, MyPost::class, Comment::class],
+@Database(entities = [Post::class, Notify::class, MyPost::class],
     version = 1,
     exportSchema = false)
 @TypeConverters(Converts::class)
@@ -20,5 +20,4 @@ abstract class BlogDataBase : RoomDatabase() {
     abstract fun getNotifyDAO(): NotifyDAO
     abstract fun getPostDAO(): PostDAO
     abstract fun getMyPostDAO(): MyPostDAO
-    abstract fun getCommentsDAO(): CommentsDAO
 }

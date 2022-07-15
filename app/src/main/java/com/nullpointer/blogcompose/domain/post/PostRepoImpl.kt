@@ -2,32 +2,36 @@ package com.nullpointer.blogcompose.domain.post
 
 import com.nullpointer.blogcompose.core.utils.InternetCheck
 import com.nullpointer.blogcompose.core.utils.NetworkException
-import com.nullpointer.blogcompose.data.local.cache.CommentsDAO
 import com.nullpointer.blogcompose.data.local.cache.MyPostDAO
 import com.nullpointer.blogcompose.data.local.cache.PostDAO
 import com.nullpointer.blogcompose.data.remote.post.PostDataSourceImpl
+import com.nullpointer.blogcompose.domain.auth.AuthRepoImpl
 import com.nullpointer.blogcompose.models.Comment
+import com.nullpointer.blogcompose.models.notify.Notify
+import com.nullpointer.blogcompose.models.notify.TypeNotify
 import com.nullpointer.blogcompose.models.posts.MyPost
 import com.nullpointer.blogcompose.models.posts.Post
 import com.nullpointer.blogcompose.models.posts.SimplePost
+import com.nullpointer.blogcompose.models.users.InnerUser
+import com.nullpointer.blogcompose.models.users.MyUser
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import timber.log.Timber
 
 class PostRepoImpl(
     private val postDataSource: PostDataSourceImpl,
     private val postDAO: PostDAO,
     private val myPostDAO: MyPostDAO,
-    private val commentsDAO: CommentsDAO,
+    private val authRepoImpl: AuthRepoImpl
 ) : PostRepository {
 
     companion object {
-        private const val SIZE_POST_REQUEST = 5
-        private const val SIZE_COMMENTS = 4
+        private const val SIZE_POST_REQUEST = 7
+        private const val SIZE_COMMENTS = 7
     }
 
     override val listLastPost: Flow<List<Post>> = postDAO.getAllPost()
     override val listMyLastPost: Flow<List<MyPost>> = myPostDAO.getAllPost()
-    override val listComments: Flow<List<Comment>> = commentsDAO.getAllComments()
 
 
     override suspend fun requestLastPost(forceRefresh: Boolean): Int {
@@ -104,18 +108,27 @@ class PostRepoImpl(
         }
     }
 
-    override suspend fun updateLikePost(post: SimplePost, isLiked: Boolean) {
+    override suspend fun updateLikePost(post: SimplePost) {
         val oldPost = postDAO.getPostById(post.id)
         val oldMyPost = myPostDAO.getPostById(post.id)
+        val currentUser = authRepoImpl.myUser.first()
+        val newNotify = post.createLikeNotify(currentUser)
+
         try {
 
             // * update fake post
-            if (oldPost != null) postDAO.updatePost(oldPost.copyInnerLike(isLiked))
-            if (oldMyPost != null) myPostDAO.updatePost(oldMyPost.copyInnerLike(isLiked))
+            if (oldPost != null) postDAO.updatePost(oldPost.toggleLike())
+            if (oldMyPost != null) myPostDAO.updatePost(oldMyPost.toggleLike())
 
             // * if has null update post or dont have internet, launch exception
             if (!InternetCheck.isNetworkAvailable()) throw NetworkException()
-            val postUpdate = postDataSource.updateLikes(post, isLiked)!!
+            val postUpdate = postDataSource.updateLikes(
+                idPost = post.id,
+                isLiked = !post.ownerLike,
+                notify = newNotify,
+                ownerPost = post.userPoster?.idUser!!,
+                idUser = currentUser.idUser
+            )!!
 
 
             // * update the info from post
@@ -123,7 +136,7 @@ class PostRepoImpl(
             if (oldMyPost != null) myPostDAO.updatePost(MyPost.fromPost(postUpdate))
         } catch (e: Exception) {
             // ? if has problem restore data post
-            oldPost?.let { postDAO.updatePost(oldPost) }
+            oldPost?.let { postDAO.updatePost(it) }
             oldMyPost?.let { myPostDAO.updatePost(it) }
 
             throw e
@@ -158,37 +171,44 @@ class PostRepoImpl(
         return postDataSource.getRealTimePost(idPost)
     }
 
-    override suspend fun getLastComments(idPost: String):List<Comment> {
+    override suspend fun getLastComments(idPost: String): List<Comment> {
         if (!InternetCheck.isNetworkAvailable()) throw NetworkException()
         return postDataSource.getCommentsForPost(nComments = SIZE_COMMENTS, idPost = idPost)
 
     }
 
 
-    override suspend fun addNewComment(post: Post, comment: String) {
-        val idComment = postDataSource.addNewComment(post, comment)
+    override suspend fun addNewComment(post: SimplePost, comment: String): List<Comment> {
+        val currentUser = authRepoImpl.myUser.first()
+        val newComment = Comment(
+            userComment = currentUser.toInnerUser(),
+            comment = comment
+        )
+        val notify = post.createCommentNotify(currentUser)
+        val idComment =
+            postDataSource.addNewComment(post.id, post.userPoster?.idUser!!, newComment, notify)
         Timber.d("id del commentario $idComment")
-        updateAllComments(post.id, idComment)
+        return updateAllComments(post.id, idComment)
     }
 
-    private suspend fun updateAllComments(idPost: String, idComment: String) {
-        val list = postDataSource.getCommentsForPost(nComments = SIZE_COMMENTS,
+    private suspend fun updateAllComments(idPost: String, idComment: String): List<Comment> {
+        return postDataSource.getCommentsForPost(
+            nComments = SIZE_COMMENTS,
             idPost = idPost,
             startWithCommentId = idComment,
-            includeComment = true)
-        commentsDAO.updateAllComments(list)
+            includeComment = true
+        )
     }
 
-    override suspend fun clearComments() {
-        commentsDAO.deleterAll()
-    }
 
-    suspend fun concatenateComments(idPost: String): List<Comment> {
+
+    suspend fun concatenateComments(idPost: String, lastComment: String): List<Comment> {
         if (!InternetCheck.isNetworkAvailable()) throw NetworkException()
-        val idComment = commentsDAO.getLastComment()?.id
-       return postDataSource.getCommentsForPost(nComments = SIZE_COMMENTS,
+        return postDataSource.getCommentsForPost(
+            nComments = SIZE_COMMENTS,
             idPost = idPost,
-            startWithCommentId = idComment)
+            startWithCommentId = lastComment
+        )
     }
 
 
@@ -200,7 +220,7 @@ class PostRepoImpl(
     override suspend fun deleterPost(post: Post) =
         postDataSource.deleterPost(post.id)
 
-    suspend fun deleterInvalidPost(id: String){
+    suspend fun deleterInvalidPost(id: String) {
         postDAO.deleterPost(id)
         myPostDAO.deleterPost(id)
     }
@@ -216,4 +236,29 @@ class PostRepoImpl(
         postDataSource.getPost(idPost)
 
 
+    private fun MyUser.toInnerUser(): InnerUser {
+        return InnerUser(
+            idUser = idUser,
+            name = name,
+            urlImg = urlImg
+        )
+    }
+
+    private fun SimplePost.createLikeNotify(myUser: MyUser): Notify {
+        return Notify(
+            userInNotify = myUser.toInnerUser(),
+            idPost = id,
+            urlImgPost = urlImage,
+            type = TypeNotify.LIKE
+        )
+    }
+
+    private fun SimplePost.createCommentNotify(myUser: MyUser): Notify {
+        return Notify(
+            userInNotify = myUser.toInnerUser(),
+            idPost = id,
+            urlImgPost = urlImage,
+            type = TypeNotify.COMMENT
+        )
+    }
 }

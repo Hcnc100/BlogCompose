@@ -1,4 +1,4 @@
-package com.nullpointer.blogcompose.core.utils
+package com.nullpointer.blogcompose.ui.screens.states
 
 import android.content.Context
 import androidx.annotation.StringRes

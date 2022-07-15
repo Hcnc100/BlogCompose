@@ -1,16 +1,13 @@
 package com.nullpointer.blogcompose.data.remote.post
 
 import com.google.firebase.auth.ktx.auth
-import com.google.firebase.firestore.DocumentSnapshot
-import com.google.firebase.firestore.Query
-import com.google.firebase.firestore.Source
+import com.google.firebase.firestore.*
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.functions.ktx.functions
 import com.google.firebase.ktx.Firebase
 import com.nullpointer.blogcompose.models.Comment
+import com.nullpointer.blogcompose.models.notify.Notify
 import com.nullpointer.blogcompose.models.posts.Post
-import com.nullpointer.blogcompose.models.posts.SimplePost
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
@@ -24,6 +21,7 @@ class PostDataSourceImpl {
         private const val NAME_REF_POST = "posts"
         private const val NAME_REF_LIKE_POST = "likePost"
         private const val NAME_REF_COMMENTS = "comments"
+        private const val NAME_REF_NOTIFY = "notifications"
         private const val NAME_REF_USERS_LIKE = "usersLike"
         private const val NAME_REF_LIST_COMMENTS = "listComments"
         private const val TIMESTAMP = "timestamp"
@@ -37,10 +35,10 @@ class PostDataSourceImpl {
     private val refPosts = database.collection(NAME_REF_POST)
     private val refLikePost = database.collection(NAME_REF_LIKE_POST)
     private val refComment = database.collection(NAME_REF_COMMENTS)
+    private val refNotify = database.collection(NAME_REF_NOTIFY)
     private val refUsers = database.collection(NAME_REF_USERS)
     private val auth = Firebase.auth
     private val functions = Firebase.functions
-
 
 
     suspend fun addNewPost(post: Post): String {
@@ -123,7 +121,8 @@ class PostDataSourceImpl {
             startWithPostId = startWithPostId,
             endWithPostId = endWithPostId,
             fromUserId = auth.currentUser?.uid!!,
-            includePost = includePost)
+            includePost = includePost
+        )
     }
 
     suspend fun getMyLastPostDate(
@@ -169,27 +168,46 @@ class PostDataSourceImpl {
     private suspend fun isPostLiked(idPost: String): Boolean {
         // * if document with owner id exists, then so like
         val uuid = auth.currentUser?.uid!!
-        val refLikePost =
-            refLikePost.document(idPost).collection(NAME_REF_USERS_LIKE).document(uuid)
-        return refLikePost.get().await().exists()
+        val refListLike = refLikePost.document(idPost).get().await()
+        return if (refListLike.exists()) {
+            (refListLike.get("likes") as List<*>).contains(uuid)
+        } else false
     }
 
-    suspend fun updateLikes(post:SimplePost,isLiked: Boolean): Post? {
-        val uid:String=post.userPoster?.idUser ?: auth.currentUser!!.uid
-        val response = functions.getHttpsCallable("createLikeAndNotify").call(
-            mapOf(
-                "idPost" to post.id,
-                "isLiked" to isLiked,
-                "idPosterOwner" to uid,
-                "urlImgPost" to post.urlImage,
-            )
-        ).continueWith { task ->
-            val reponse = task.result.data as (Map<String, Object>)
-            reponse["idPost"] as String
-        }.await()
+    suspend fun updateLikes(
+        idPost: String,
+        isLiked: Boolean,
+        notify: Notify?,
+        ownerPost: String,
+        idUser: String
+    ): Post? {
+        val refPostLiked = refPosts.document(idPost)
+        val refListPostLike = refLikePost.document(idPost)
+        val refNotifyOwner =
+            refNotify.document(ownerPost).collection("listNotify").document(notify?.id ?: "")
 
-        Timber.d("response ${response}")
-        return getPost(response)
+        database.runTransaction { transaction ->
+            val snapshotLikePos = transaction.get(refListPostLike)
+            if (isLiked) {
+                if (snapshotLikePos.exists()) {
+                    transaction.update(refListPostLike, "likes", FieldValue.arrayUnion(idUser))
+                } else {
+                    transaction.set(
+                        refListPostLike,
+                        hashMapOf("likes" to arrayListOf(idUser)),
+                        SetOptions.merge()
+                    )
+                }
+            } else {
+                transaction.update(refListPostLike, "likes", FieldValue.arrayRemove(idUser))
+            }
+            notify?.let {
+                transaction.set(refNotifyOwner, notify)
+            }
+            val updateCount = if (isLiked) FieldValue.increment(1) else FieldValue.increment(-1)
+            transaction.update(refPostLiked, "numberLikes", updateCount)
+        }.await()
+        return transformDocumentPost(refPosts.document(idPost).get().await())
     }
 
     suspend fun getCommentsForPost(
@@ -218,7 +236,8 @@ class PostDataSourceImpl {
         if (endWithCommentId != null) {
             val refDocument = refCommentCurrent.document(endWithCommentId).get().await()
             if (refDocument.exists())
-                query = if (includeComment) query.endAt(refDocument) else query.endBefore(refDocument)
+                query =
+                    if (includeComment) query.endAt(refDocument) else query.endBefore(refDocument)
         }
 
         // * limit result or for default all
@@ -226,7 +245,7 @@ class PostDataSourceImpl {
 
         return query.get(Source.SERVER).await().documents.mapNotNull {
             transformDocumentToComment(it)
-        }
+        }.reversed()
     }
 
     private fun transformDocumentToComment(documentSnapshot: DocumentSnapshot?): Comment? {
@@ -243,20 +262,25 @@ class PostDataSourceImpl {
     }
 
 
-    suspend fun addNewComment(post: Post, newComment: String): String {
-        val response = functions.getHttpsCallable("createCommentAndNotify").call(
-            mapOf(
-                "idPost" to post.id,
-                "comment" to newComment,
-                "urlImgPost" to post.urlImage,
-                "idPosterOwner" to post.userPoster?.idUser.toString()
-            )
-        ).continueWith { task ->
-            val reponse = task.result.data as (Map<String, Object>)
-            reponse["idComment"] as String
-        }.await()
+    suspend fun addNewComment(
+        idPost: String,
+        ownerPost: String,
+        comment: Comment,
+        notify: Notify?
+    ): String {
+        val refPostComment = refPosts.document(idPost)
+        val refNewComment =
+            refComment.document(idPost).collection("listComments").document(comment.id)
+        val refNotifyOwner =
+            refNotify.document(ownerPost).collection("listNotify").document(notify?.id ?: "")
 
-        Timber.d("response ${response}")
-        return response
+        database.runTransaction { transaction ->
+            transaction.update(refPostComment, "numberComments", FieldValue.increment(1))
+            transaction.set(refNewComment, comment)
+            notify?.let {
+                transaction.set(refNotifyOwner, notify)
+            }
+        }.await()
+        return refNewComment.id
     }
 }

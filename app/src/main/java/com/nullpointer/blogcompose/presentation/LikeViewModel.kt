@@ -29,13 +29,13 @@ class LikeViewModel @Inject constructor(
     private var jobLike: Job? = null
 
 
-    fun likePost(simplePost: SimplePost, isLiked: Boolean) {
+    fun likePost(simplePost: SimplePost) {
         // * this init like job, update the database with new data with the new data of
         // * server
         jobLike?.cancel()
         jobLike = viewModelScope.launch(Dispatchers.IO) {
             try {
-                postRepo.updateLikePost(simplePost, isLiked)
+                postRepo.updateLikePost(simplePost)
             } catch (e: Exception) {
                 when (e) {
                     is CancellationException -> throw e

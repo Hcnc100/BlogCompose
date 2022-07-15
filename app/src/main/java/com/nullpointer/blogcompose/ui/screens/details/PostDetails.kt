@@ -1,43 +1,43 @@
 package com.nullpointer.blogcompose.ui.screens.details
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
-import androidx.compose.material.ScaffoldState
-import androidx.compose.material.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
-import coil.transform.CircleCropTransformation
 import com.nullpointer.blogcompose.R
+import com.nullpointer.blogcompose.core.delegates.PropertySavableString
 import com.nullpointer.blogcompose.core.states.Resource
-import com.nullpointer.blogcompose.core.utils.SimpleScreenState
-import com.nullpointer.blogcompose.core.utils.rememberSimpleScreenState
-import com.nullpointer.blogcompose.models.Comment
-import com.nullpointer.blogcompose.models.posts.Post
+import com.nullpointer.blogcompose.models.posts.ActionDetails
 import com.nullpointer.blogcompose.presentation.LikeViewModel
 import com.nullpointer.blogcompose.ui.interfaces.ActionRootDestinations
 import com.nullpointer.blogcompose.ui.navigation.RootNavGraph
-import com.nullpointer.blogcompose.ui.screens.details.componets.ButtonHasNewComment
-import com.nullpointer.blogcompose.ui.screens.details.componets.Comments
-import com.nullpointer.blogcompose.ui.screens.details.componets.DataPost
-import com.nullpointer.blogcompose.ui.screens.details.componets.TextInputComment
+import com.nullpointer.blogcompose.ui.screens.details.componets.ErrorLoadingOnlyComments
+import com.nullpointer.blogcompose.ui.screens.details.componets.LoadingFullPostDetails
+import com.nullpointer.blogcompose.ui.screens.details.componets.LoadingOnlyComments
+import com.nullpointer.blogcompose.ui.screens.details.componets.SuccessFullDetails
 import com.nullpointer.blogcompose.ui.screens.details.viewModel.PostDetailsViewModel
-import com.nullpointer.blogcompose.ui.screens.emptyScreen.EmptyScreen
+import com.nullpointer.blogcompose.ui.screens.emptyScreen.AnimationScreen
+import com.nullpointer.blogcompose.ui.screens.states.PostDetailsState
+import com.nullpointer.blogcompose.ui.screens.states.rememberPostDetailsState
+import com.nullpointer.blogcompose.ui.share.EditableTextSavable
 import com.nullpointer.blogcompose.ui.share.ToolbarBack
 import com.ramcosta.composedestinations.annotation.DeepLink
 import com.ramcosta.composedestinations.annotation.Destination
@@ -58,7 +58,7 @@ fun PostDetails(
     goToBottom: Boolean = false,
     postDetailsViewModel: PostDetailsViewModel = hiltViewModel(),
     likeViewModel: LikeViewModel = hiltViewModel(),
-    postDetailsState: SimpleScreenState = rememberSimpleScreenState(),
+    postDetailsState: PostDetailsState = rememberPostDetailsState(),
     actionRootDestinations: ActionRootDestinations
 ) {
     val postState by postDetailsViewModel.postState.collectAsState()
@@ -82,37 +82,67 @@ fun PostDetails(
                 title = stringResource(R.string.title_post),
                 actionBack = actionRootDestinations::backDestination
             )
+        },
+        bottomBar = {
+            if (postState !is Resource.Failure)
+                TextInputComment(
+                    valueProperty = postDetailsViewModel.comment,
+                    actionSend = {
+                        postDetailsState.scope.launch {
+                            postDetailsViewModel.addComment(it).join()
+                            delay(200)
+                            postDetailsState.lazyListState.animateScrollToItem(postDetailsState.lazyListState.layoutInfo.totalItemsCount - 1)
+                        }
+                    }
+                )
         }
     ) {
         when (val statePost = postState) {
             Resource.Failure -> {
-                EmptyScreen(
-                    resourceRaw = R.raw.error1, emptyText = stringResource(
-                        id = R.string.error_load_post
-                    )
+                AnimationScreen(
+                    resourceRaw = R.raw.error1,
+                    emptyText = stringResource(id = R.string.error_load_post),
+                    modifier = Modifier.padding(it)
                 )
             }
-            Resource.Loading -> LoadingPost()
+            Resource.Loading -> LoadingFullPostDetails(modifier = Modifier.padding(it))
             is Resource.Success -> {
                 val commentsState by postDetailsViewModel.listComments.collectAsState()
                 when (val commentsState = commentsState) {
                     Resource.Failure -> {
-                        Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                            HeaderBlogDetails(blog = statePost.data)
-                            EmptyScreen(
-                                resourceRaw = R.raw.error1, emptyText = stringResource(
-                                    id = R.string.error_load_comments
-                                )
-                            )
-                        }
+                        ErrorLoadingOnlyComments(
+                            post = statePost.data,
+                            modifier = Modifier.padding(it),
+                            actionLike = {
+                                likeViewModel.likePost(statePost.data)
+                            }
+                        )
                     }
                     Resource.Loading -> {
-                        LoadingPost {
-                            HeaderBlogDetails(blog = statePost.data)
-                        }
+                        LoadingOnlyComments(
+                            post = statePost.data,
+                            modifier = Modifier.padding(it),
+                            actionLike = {
+                                likeViewModel.likePost(statePost.data)
+                            }
+                        )
                     }
-                    is Resource.Success -> CompleteBlogData(listComment = commentsState.data) {
-                        HeaderBlogDetails(blog = statePost.data)
+                    is Resource.Success -> {
+                        SuccessFullDetails(
+                            isLoading = postDetailsViewModel.stateConcatComment,
+                            listState = postDetailsState.lazyListState,
+                            listComment = commentsState.data,
+                            post = statePost.data,
+                            modifier = Modifier.padding(it),
+                            hasNewComments = postDetailsViewModel.hasNewComments,
+                            actionPost = { action ->
+                                when (action) {
+                                    ActionDetails.HAS_NEW_COMMENTS -> postDetailsViewModel.requestsComments()
+                                    ActionDetails.LIKE_THIS_POST -> likeViewModel.likePost(simplePost = statePost.data)
+                                    ActionDetails.GET_MORE_COMMENTS -> postDetailsViewModel.concatenateComments()
+                                }
+                            }
+                        )
                     }
                 }
             }
@@ -120,195 +150,44 @@ fun PostDetails(
     }
 }
 
-@Composable
-fun CompleteBlogData(
-    listComment: List<Comment>,
-    header: @Composable () -> Unit,
-) {
-    LazyColumn {
-        item { header() }
-        items(listComment.size) { index ->
-            ItemComment(comment = listComment[index])
-        }
-    }
-}
 
 @Composable
-private fun HeaderBlogDetails(blog: Post) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(10.dp)
-        ) {
-            AsyncImage(
-                model = ImageRequest
-                    .Builder(LocalContext.current)
-                    .data(blog.userPoster?.urlImg)
-                    .transformations(CircleCropTransformation())
-                    .crossfade(true)
-                    .build(),
-                contentDescription = "",
-                placeholder = painterResource(id = R.drawable.ic_person),
-                error = painterResource(id = R.drawable.ic_person),
-                modifier = Modifier.size(40.dp)
-            )
-            Spacer(modifier = Modifier.width(10.dp))
-            Text(text = blog.userPoster?.name ?: "")
+fun TextInputComment(
+    valueProperty: PropertySavableString,
+    actionSend: (String) -> Unit
+) {
+    val actionSendValidate = {
+        if (valueProperty.hasChanged) {
+            actionSend(valueProperty.value)
+            valueProperty.clearValue()
         }
-        Text(text = blog.description, modifier = Modifier.padding(10.dp))
-        Spacer(modifier = Modifier.height(10.dp))
-        AsyncImage(
-            model = blog.urlImage,
-            contentDescription = "",
-            modifier = Modifier
-                .fillMaxWidth()
+    }
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceEvenly
+    ) {
+        EditableTextSavable(
+            valueProperty = valueProperty,
+            shape = RoundedCornerShape(15.dp),
+            modifier = Modifier.weight(0.8f),
+            keyboardOptions = KeyboardOptions.Default.copy(
+                imeAction = ImeAction.Send
+            ),
+            keyboardActions = KeyboardActions(
+                onSend = { actionSendValidate() }
+            )
         )
-    }
-}
-
-@Composable
-fun PostReal(
-    post: Resource<Post>,
-    list: Resource<List<Comment>>,
-    scaffoldState: ScaffoldState,
-    hasNewComment: Boolean,
-    totalComments: Int,
-    goToBottom: Boolean,
-    stateRequestComments: Resource<Unit>?,
-    actionLike: (Boolean) -> Unit,
-    reloadNewComment: () -> Unit,
-    concatenate: () -> Unit,
-    actionBack: () -> Unit,
-    addComment: (String) -> Unit,
-) {
-
-    val stateLazy = rememberLazyListState()
-    val scope = rememberCoroutineScope()
-    val focusRequester = remember { FocusRequester() }
-
-    // ! this for no overlap text input
-    LaunchedEffect(list) {
-        delay(500)
-        if (goToBottom) focusRequester.requestFocus()
-    }
-
-
-    Scaffold(
-        scaffoldState = scaffoldState,
-        topBar = {
-            ToolbarBack(
-                title = stringResource(R.string.title_post),
-                actionBack = actionBack
+        IconButton(onClick = actionSendValidate) {
+            Icon(
+                painter = painterResource(id = R.drawable.ic_send),
+                contentDescription = "",
+                tint = if (valueProperty.hasChanged) MaterialTheme.colors.primary else Color.Unspecified
             )
-        },
-        bottomBar = {
-            // * input comment
-            TextInputComment(
-                // * request focus when click in icon comment
-                // * when enter normal no request focus
-                focusRequester = focusRequester,
-                // * when add new comment, so scroll to start list
-                // * list order is ascending (more recent first)
-                actionSendComment = {
-                    addComment(it)
-                    scope.launch {
-                        stateLazy.animateScrollToItem(0)
-                    }
-                }
-            )
-        },
-    ) {
-        // * needed a box to positioned button "has new comments"
-        // * because this is "floating"
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(it)
-        ) {
-            LazyColumn(
-                state = stateLazy,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                // * image with post
-                item {
-                    DataPost(
-                        statePost = post,
-                        actionLike = actionLike,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(250.dp)
-                    )
-                }
-                // * comments list
-                listComments(
-                    listState = list,
-                    stateRequestComments = stateRequestComments,
-                    totalComments = totalComments,
-                    lazyListScope = this,
-                    actionConcatenate = concatenate
-                )
-            }
-            // * floating button "has new comments"
-            // ? only show when has new comments xd
-            if (hasNewComment)
-                ButtonHasNewComment(
-                    actionReload = reloadNewComment,
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(bottom = 35.dp)
-                )
         }
     }
 }
 
-
-fun listComments(
-    listState: Resource<List<Comment>>,
-    stateRequestComments: Resource<Unit>?,
-    totalComments: Int,
-    lazyListScope: LazyListScope,
-    actionConcatenate: () -> Unit,
-) = with(lazyListScope) {
-
-    when (listState) {
-        is Resource.Failure -> Unit
-        is Resource.Loading -> {
-            // * show empty comments (with shimmer, as facebook)
-            items(10) { Comments() }
-        }
-        is Resource.Success -> {
-            val listComments = listState.data
-            // * show list comments
-            items(listComments.size) { index ->
-                Comments(comment = listState.data[index])
-            }
-            // * if has comments and no load all, so show clicked item
-            // * that load more, this change a progress circular when load state
-            if (listComments.isNotEmpty() && listComments.size != totalComments) {
-                item {
-                    if (stateRequestComments is Resource.Loading) {
-                        Box(modifier = Modifier.fillMaxWidth()) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(25.dp),
-                                strokeWidth = 4.dp
-                            )
-                        }
-                    } else {
-                        Box(modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { actionConcatenate() }
-                            .padding(vertical = 10.dp)) {
-                            Text(text = stringResource(R.string.text_load_more_comments))
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
 
 
 

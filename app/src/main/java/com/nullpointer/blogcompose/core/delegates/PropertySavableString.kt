@@ -11,9 +11,9 @@ class PropertySavableString(
     val hint: Int,
     private val maxLength: Int,
     @StringRes
-    private val emptyError: Int,
+    private val emptyError: Int = RESOURCE_DEFAULT,
     @StringRes
-    private val lengthError: Int,
+    private val lengthError: Int = RESOURCE_DEFAULT,
 ) {
     companion object {
         private const val INIT_ID = 1
@@ -47,8 +47,8 @@ class PropertySavableString(
     fun changeValue(stringValue: String) {
         this.value = stringValue
         this.errorValue = when {
-            stringValue.isEmpty() -> emptyError
-            stringValue.length > maxLength -> lengthError
+            stringValue.isEmpty() && emptyError != RESOURCE_DEFAULT -> emptyError
+            stringValue.length > maxLength && lengthError != RESOURCE_DEFAULT -> lengthError
             else -> RESOURCE_DEFAULT
         }
     }

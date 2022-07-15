@@ -150,4 +150,7 @@
     <string name="text_hint_description">Escribe la descripcion</string>
     <string name="error_upload_service" translatable="false">error al subir el post</string>
     <string name="error_load_post">El post ya no esta disponible</string>
+    <string name="comment_hint">Escribe un comentario</string>
+    <string name="label_comment">Comment</string>
+    <string name="error_length_comment">El comentario es muy largo</string>
 </resources>
