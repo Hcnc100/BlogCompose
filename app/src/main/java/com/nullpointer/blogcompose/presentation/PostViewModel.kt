@@ -11,6 +11,7 @@ import com.nullpointer.blogcompose.core.delegates.SavableProperty
 import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.core.utils.NetworkException
 import com.nullpointer.blogcompose.domain.post.PostRepoImpl
+import com.nullpointer.blogcompose.domain.post.PostRepository
 import com.nullpointer.blogcompose.models.posts.Post
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
@@ -21,7 +22,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class PostViewModel @Inject constructor(
-    private val postRepo: PostRepoImpl,
+    private val postRepository: PostRepository,
     state: SavedStateHandle
 ) : ViewModel() {
 
@@ -49,7 +50,7 @@ class PostViewModel @Inject constructor(
         private set
 
     val listPost = flow<Resource<List<Post>>> {
-        postRepo.listLastPost.collect {
+        postRepository.listLastPost.collect {
             emit(Resource.Success(it))
         }
     }.catch {
@@ -76,7 +77,7 @@ class PostViewModel @Inject constructor(
             stateRequestData = true
             try {
                 val sizeNewPost =
-                    withContext(Dispatchers.IO) { postRepo.requestLastPost(forceRefresh) }
+                    withContext(Dispatchers.IO) { postRepository.requestLastPost(forceRefresh) }
                 Timber.d("were obtained $sizeNewPost new post")
             } catch (e: Exception) {
                 when (e) {
@@ -102,7 +103,7 @@ class PostViewModel @Inject constructor(
             jobConcatPost = viewModelScope.launch {
                 stateRequestData = true
                 try {
-                    val sizeConcat = withContext(Dispatchers.IO) { postRepo.concatenatePost() }
+                    val sizeConcat = withContext(Dispatchers.IO) { postRepository.concatenatePost() }
                     Timber.d("New post concatenate $sizeConcat")
                     if (sizeConcat == 0) isConcatEnable = false
 
@@ -123,6 +124,6 @@ class PostViewModel @Inject constructor(
     }
 
     fun deleterPostInvalid(idPost: String) = viewModelScope.launch(Dispatchers.IO) {
-        postRepo.deleterInvalidPost(idPost)
+        postRepository.deleterPost(idPost)
     }
 }

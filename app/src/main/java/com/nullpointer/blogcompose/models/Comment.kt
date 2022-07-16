@@ -12,11 +12,11 @@ import java.util.*
 @Entity(tableName = "table_comments")
 data class Comment(
     @Embedded
-    var userComment:InnerUser?=null,
-    var comment: String = "",
+    val userComment:InnerUser?=null,
+    val comment: String = "",
     @ServerTimestamp
-    var timestamp: Date? = null,
+    val timestamp: Date? = null,
     @PrimaryKey
-    @set:Exclude @get:Exclude
-    var id: String=UUID.randomUUID().toString(),
+    @get:Exclude
+    val id: String=UUID.randomUUID().toString(),
 )

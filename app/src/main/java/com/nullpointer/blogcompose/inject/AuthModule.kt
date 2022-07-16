@@ -1,7 +1,10 @@
 package com.nullpointer.blogcompose.inject
 
-import com.nullpointer.blogcompose.data.local.PreferencesDataSource
+import com.nullpointer.blogcompose.data.local.preferences.PreferencesDataSource
+import com.nullpointer.blogcompose.data.local.preferences.PreferencesDataSourceImpl
+import com.nullpointer.blogcompose.data.remote.auth.AuthDataSource
 import com.nullpointer.blogcompose.data.remote.auth.AuthDataSourceImpl
+import com.nullpointer.blogcompose.data.remote.image.ImagesDataSource
 import com.nullpointer.blogcompose.data.remote.image.ImagesDataSourceImpl
 import com.nullpointer.blogcompose.domain.auth.AuthRepoImpl
 import dagger.Module
@@ -16,15 +19,15 @@ object AuthModule {
 
     @Provides
     @Singleton
-    fun provideAuthDataSource(): AuthDataSourceImpl =
+    fun provideAuthDataSource(): AuthDataSource =
         AuthDataSourceImpl()
 
     @Provides
     @Singleton
     fun provideAuthRepository(
-        authDataSource: AuthDataSourceImpl,
+        authDataSource: AuthDataSource,
         preferencesDataSource: PreferencesDataSource,
-        imagesDataSource: ImagesDataSourceImpl
+        imagesDataSource: ImagesDataSource
     ): AuthRepoImpl = AuthRepoImpl(authDataSource, preferencesDataSource, imagesDataSource)
 
 

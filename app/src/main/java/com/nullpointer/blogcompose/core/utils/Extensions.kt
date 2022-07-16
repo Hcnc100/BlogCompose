@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
+import com.google.firebase.firestore.DocumentSnapshot
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -62,4 +63,8 @@ fun Context.sendEmail(email:String){
 inline fun <reified VM : ViewModel> shareViewModel():VM {
     val activity = LocalContext.current as ComponentActivity
     return hiltViewModel(activity)
+}
+
+fun DocumentSnapshot.timestampEstimate(nameField: String): Date? {
+    return getTimestamp(nameField, DocumentSnapshot.ServerTimestampBehavior.ESTIMATE)?.toDate()
 }

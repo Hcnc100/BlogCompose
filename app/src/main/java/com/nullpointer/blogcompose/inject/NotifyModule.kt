@@ -2,6 +2,7 @@ package com.nullpointer.blogcompose.inject
 
 import com.nullpointer.blogcompose.data.local.cache.BlogDataBase
 import com.nullpointer.blogcompose.data.local.cache.NotifyDAO
+import com.nullpointer.blogcompose.data.remote.notify.NotifyDataSource
 import com.nullpointer.blogcompose.data.remote.notify.NotifyDataSourceImpl
 import com.nullpointer.blogcompose.domain.notify.NotifyRepoImpl
 import dagger.Module
@@ -22,13 +23,13 @@ object NotifyModule {
 
     @Provides
     @Singleton
-    fun provideNotifyDatSource(): NotifyDataSourceImpl =
+    fun provideNotifyDatSource(): NotifyDataSource =
         NotifyDataSourceImpl()
 
     @Provides
     @Singleton
     fun provideNotifyRepo(
-        notifyDataSource: NotifyDataSourceImpl,
+        notifyDataSource: NotifyDataSource,
         notifyDAO: NotifyDAO,
     ): NotifyRepoImpl = NotifyRepoImpl(notifyDataSource, notifyDAO)
 }

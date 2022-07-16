@@ -33,7 +33,7 @@ import com.nullpointer.blogcompose.ui.screens.details.componets.ErrorLoadingOnly
 import com.nullpointer.blogcompose.ui.screens.details.componets.LoadingFullPostDetails
 import com.nullpointer.blogcompose.ui.screens.details.componets.LoadingOnlyComments
 import com.nullpointer.blogcompose.ui.screens.details.componets.SuccessFullDetails
-import com.nullpointer.blogcompose.ui.screens.details.viewModel.PostDetailsViewModel
+import com.nullpointer.blogcompose.presentation.PostDetailsViewModel
 import com.nullpointer.blogcompose.ui.screens.emptyScreen.AnimationScreen
 import com.nullpointer.blogcompose.ui.screens.states.PostDetailsState
 import com.nullpointer.blogcompose.ui.screens.states.rememberPostDetailsState

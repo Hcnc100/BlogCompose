@@ -23,4 +23,12 @@ data class MyUser(
     val isUserAuth get() = idUser.isNotEmpty()
     val isDataComplete get() = name.isNotEmpty() && urlImg.isNotEmpty()
 
+    fun toInnerUser(): InnerUser {
+        return InnerUser(
+            idUser = idUser,
+            name = name,
+            urlImg = urlImg
+        )
+    }
+
 }

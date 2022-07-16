@@ -11,6 +11,7 @@ import com.nullpointer.blogcompose.core.delegates.SavableProperty
 import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.core.utils.NetworkException
 import com.nullpointer.blogcompose.domain.post.PostRepoImpl
+import com.nullpointer.blogcompose.domain.post.PostRepository
 import com.nullpointer.blogcompose.models.posts.MyPost
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -25,7 +26,7 @@ import kotlin.coroutines.cancellation.CancellationException
 
 @HiltViewModel
 class MyPostViewModel @Inject constructor(
-    private val postRepo: PostRepoImpl,
+    private val postRepository: PostRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -51,7 +52,7 @@ class MyPostViewModel @Inject constructor(
 
 
     val listMyPost = flow<Resource<List<MyPost>>> {
-        postRepo.listMyLastPost.collect {
+        postRepository.listMyLastPost.collect {
             emit(Resource.Success(it))
         }
     }.catch {
@@ -77,7 +78,7 @@ class MyPostViewModel @Inject constructor(
             stateRequestMyPost = true
             try {
                 val sizeNewPost =
-                    withContext(Dispatchers.IO) { postRepo.requestMyLastPost(forceRefresh) }
+                    withContext(Dispatchers.IO) { postRepository.requestMyLastPost(forceRefresh) }
                 Timber.d("get $sizeNewPost my post news")
             } catch (e: Exception) {
                 when (e) {
@@ -103,7 +104,7 @@ class MyPostViewModel @Inject constructor(
                 try {
                     stateConcatMyPost = true
                     val countPost = withContext(Dispatchers.IO) {
-                        postRepo.concatenateMyPost()
+                        postRepository.concatenateMyPost()
                     }
                     Timber.d("number concat my post $countPost")
                     if (countPost == 0) isConcatenateEnable = false

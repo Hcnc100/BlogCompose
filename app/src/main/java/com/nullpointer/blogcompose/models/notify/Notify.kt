@@ -15,11 +15,11 @@ data class Notify(
     val idPost: String = "",
     val urlImgPost: String = "",
     @ServerTimestamp
-    var timestamp: Date? = null,
+    val timestamp: Date? = null,
     @field:JvmField
     var isOpen: Boolean = false,
-    @set:Exclude @get:Exclude
+    @get:Exclude
     @PrimaryKey
-    var id: String = UUID.randomUUID().toString(),
-    var type: TypeNotify = TypeNotify.LIKE,
+    val id: String = UUID.randomUUID().toString(),
+    val type: TypeNotify = TypeNotify.LIKE,
 )

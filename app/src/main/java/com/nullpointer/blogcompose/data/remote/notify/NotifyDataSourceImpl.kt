@@ -4,7 +4,9 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
+import com.nullpointer.blogcompose.core.utils.timestampEstimate
 import com.nullpointer.blogcompose.models.notify.Notify
 import kotlinx.coroutines.tasks.await
 import java.util.*
@@ -44,12 +46,10 @@ class NotifyDataSourceImpl:NotifyDataSource{
         // * limit result or for default all
         if (numberRequest != Integer.MAX_VALUE) baseQuery = baseQuery.limit(numberRequest.toLong())
         // * transform document to notifications
-        return baseQuery.get().await().documents.mapNotNull { document ->
-            transformDocumentInNotify(document)
-        }
+        return baseQuery.get().await().documents.mapNotNull { it.toNotify() }
     }
 
-    override suspend fun getLastNotifyDate(numberRequest: Int, date: Date?): List<Notify> {
+    override suspend fun getLastNotifyBeforeThat(numberRequest: Int, date: Date?): List<Notify> {
         // * node of notifications
         val nodeUserNotify = nodeNotify.document(auth.currentUser?.uid!!).collection(LIST_NOTIFY)
         // * order for timestamp
@@ -59,26 +59,20 @@ class NotifyDataSourceImpl:NotifyDataSource{
         // * limit result or get all notifications (no recommended)
         if (numberRequest != Integer.MAX_VALUE) baseQuery = baseQuery.limit(numberRequest.toLong())
         // * transform result in notify
-        return baseQuery.get().await().documents.mapNotNull { document ->
-            transformDocumentInNotify(document)
-        }
-    }
-
-    private fun transformDocumentInNotify(document: DocumentSnapshot): Notify? {
-        // * transform the document in notify
-        // ? adding id and timestamp estimate
-        return document.toObject(Notify::class.java)?.apply {
-            id = document.id
-            timestamp = document
-                .getTimestamp(
-                    TIMESTAMP, DocumentSnapshot.ServerTimestampBehavior.ESTIMATE
-                )?.toDate()
-        }
+        return baseQuery.get().await().documents.mapNotNull{ it.toNotify() }
     }
 
     override fun updateOpenNotify(idNotify: String) {
         val nodeUserNotify = nodeNotify.document(auth.currentUser?.uid!!).collection(LIST_NOTIFY)
         nodeUserNotify.document(idNotify).update(FIELD_IS_OPEN, true)
+    }
+
+
+    private fun DocumentSnapshot.toNotify(): Notify? {
+        return toObject<Notify>()?.copy(
+            id = id,
+            timestamp = timestampEstimate(TIMESTAMP)
+        )
     }
 
 

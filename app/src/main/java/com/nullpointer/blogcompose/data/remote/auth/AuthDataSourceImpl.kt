@@ -28,6 +28,7 @@ class AuthDataSourceImpl : AuthDataSource {
     private val nodeUsers = Firebase.firestore.collection(NAME_REF_USERS)
 
 
+
     override suspend fun authWithCredential(credential: AuthCredential): MyUser {
         val resultAuth = auth.signInWithCredential(credential).await()
         updateTokenUser(uuidUser = resultAuth.user!!.uid)

@@ -3,8 +3,9 @@ package com.nullpointer.blogcompose.inject
 import com.nullpointer.blogcompose.data.local.cache.BlogDataBase
 import com.nullpointer.blogcompose.data.local.cache.MyPostDAO
 import com.nullpointer.blogcompose.data.local.cache.PostDAO
+import com.nullpointer.blogcompose.data.local.preferences.PreferencesDataSource
+import com.nullpointer.blogcompose.data.remote.post.PostDataSource
 import com.nullpointer.blogcompose.data.remote.post.PostDataSourceImpl
-import com.nullpointer.blogcompose.domain.auth.AuthRepoImpl
 import com.nullpointer.blogcompose.domain.post.PostRepoImpl
 import dagger.Module
 import dagger.Provides
@@ -22,23 +23,25 @@ object PostModule {
         database: BlogDataBase,
     ): MyPostDAO = database.getMyPostDAO()
 
-    @Provides
-    @Singleton
-    fun getPostDataSource(): PostDataSourceImpl =
-        PostDataSourceImpl()
-
-    @Provides
-    @Singleton
-    fun getPostRepository(
-        postDataSource: PostDataSourceImpl,
-        postDAO: PostDAO,
-        myPostDAO: MyPostDAO,
-        authRepoImpl: AuthRepoImpl
-    ): PostRepoImpl = PostRepoImpl(postDataSource, postDAO, myPostDAO,authRepoImpl)
 
     @Provides
     @Singleton
     fun getPostDao(
         database: BlogDataBase,
     ): PostDAO = database.getPostDAO()
+
+    @Provides
+    @Singleton
+    fun getPostDataSource(): PostDataSource =
+        PostDataSourceImpl()
+
+    @Provides
+    @Singleton
+    fun getPostRepository(
+        prefDataSource: PreferencesDataSource,
+        postDataSource: PostDataSource,
+        myPostDAO: MyPostDAO,
+        postDAO: PostDAO,
+    ): PostRepoImpl = PostRepoImpl(postDataSource, prefDataSource, postDAO, myPostDAO)
+
 }

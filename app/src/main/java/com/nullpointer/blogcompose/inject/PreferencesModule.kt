@@ -2,9 +2,9 @@ package com.nullpointer.blogcompose.inject
 
 import android.content.Context
 import androidx.room.Room
-import com.nullpointer.blogcompose.data.local.PreferencesDataSource
+import com.nullpointer.blogcompose.data.local.preferences.PreferencesDataSourceImpl
 import com.nullpointer.blogcompose.data.local.cache.BlogDataBase
-import com.nullpointer.blogcompose.domain.preferences.PreferencesRepoImpl
+import com.nullpointer.blogcompose.data.local.preferences.PreferencesDataSource
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -18,19 +18,6 @@ object PreferencesModule {
 
     @Provides
     @Singleton
-    fun providePreferencesDataSource(
-        @ApplicationContext context: Context,
-    ): PreferencesDataSource =
-        PreferencesDataSource(context)
-
-    @Provides
-    @Singleton
-    fun providePreferencesRepo(
-        preferencesDataSource: PreferencesDataSource,
-    ): PreferencesRepoImpl = PreferencesRepoImpl(preferencesDataSource)
-
-    @Provides
-    @Singleton
     fun provideDatabase(
         @ApplicationContext app: Context,
     ): BlogDataBase = Room.databaseBuilder(
@@ -38,5 +25,19 @@ object PreferencesModule {
         BlogDataBase::class.java,
         BlogDataBase.BLOG_DATABASE
     ).build()
+
+
+    @Provides
+    @Singleton
+    fun providePreferencesDataSource(
+        @ApplicationContext context: Context,
+    ): PreferencesDataSource = PreferencesDataSourceImpl(context)
+
+//    @Provides
+//    @Singleton
+//    fun providePreferencesRepo(
+//        preferencesDataSource: PreferencesDataSource,
+//    ): PreferencesRepoImpl = PreferencesRepoImpl(preferencesDataSource)
+
 
 }

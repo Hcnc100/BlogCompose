@@ -3,12 +3,13 @@ package com.nullpointer.blogcompose.domain.notify
 import com.nullpointer.blogcompose.core.utils.InternetCheck
 import com.nullpointer.blogcompose.core.utils.NetworkException
 import com.nullpointer.blogcompose.data.local.cache.NotifyDAO
+import com.nullpointer.blogcompose.data.remote.notify.NotifyDataSource
 import com.nullpointer.blogcompose.data.remote.notify.NotifyDataSourceImpl
 import com.nullpointer.blogcompose.models.notify.Notify
 import kotlinx.coroutines.flow.Flow
 
 class NotifyRepoImpl(
-    private val notifyDataSource: NotifyDataSourceImpl,
+    private val notifyDataSource: NotifyDataSource,
     private val notifyDAO: NotifyDAO,
 ) : NotifyRepository {
 
@@ -26,7 +27,7 @@ class NotifyRepoImpl(
         // ? if the database is empty o the parameter "force refresh" is true
         // ? request new data and replace data in database
         val firstNotify = if (forceRefresh) null else notifyDAO.getFirstNotify()
-        val listNewNotify = notifyDataSource.getLastNotifyDate(
+        val listNewNotify = notifyDataSource.getLastNotifyBeforeThat(
             numberRequest = SIZE_NOTIFY_REQUEST,
             date = firstNotify?.timestamp)
         if (listNewNotify.isNotEmpty()) notifyDAO.updateAllNotify(listNewNotify)

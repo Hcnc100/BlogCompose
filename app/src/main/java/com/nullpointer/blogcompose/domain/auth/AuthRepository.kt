@@ -11,4 +11,5 @@ interface AuthRepository {
     suspend fun uploadDataUser(urlImg: String? = null, name: String? = null)
     suspend fun logOut()
     suspend fun createNewUser(user: MyUser)
+    suspend fun getIdUser(): String
 }

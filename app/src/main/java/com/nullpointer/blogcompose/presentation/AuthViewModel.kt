@@ -10,9 +10,10 @@ import com.google.firebase.auth.AuthCredential
 import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.delegates.SavableComposeState
 import com.nullpointer.blogcompose.core.states.LoginStatus
-import com.nullpointer.blogcompose.domain.auth.AuthRepoImpl
-import com.nullpointer.blogcompose.domain.notify.NotifyRepoImpl
+import com.nullpointer.blogcompose.domain.auth.AuthRepository
+import com.nullpointer.blogcompose.domain.notify.NotifyRepository
 import com.nullpointer.blogcompose.domain.post.PostRepoImpl
+import com.nullpointer.blogcompose.domain.post.PostRepository
 import com.nullpointer.blogcompose.models.users.MyUser
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CancellationException
@@ -26,13 +27,13 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
-    private val authRepoImpl: AuthRepoImpl,
-    private val notifyRepoImpl: NotifyRepoImpl,
-    private val postRepoImpl: PostRepoImpl,
+    private val authRepository: AuthRepository,
+    private val notifyRepository: NotifyRepository,
+    private val postRepository: PostRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    val currentUser = authRepoImpl.myUser.flowOn(Dispatchers.IO).stateIn(
+    val currentUser = authRepository.myUser.flowOn(Dispatchers.IO).stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(5000),
         MyUser()
@@ -42,7 +43,7 @@ class AuthViewModel @Inject constructor(
     val messageAuth = _messageAuth.receiveAsFlow()
 
     val stateAuthUser = flow {
-        authRepoImpl.myUser.collect { user ->
+        authRepository.myUser.collect { user ->
             val state = if (!user.isUserAuth) {
                 LoginStatus.Unauthenticated
             } else if (user.isDataComplete) {
@@ -74,7 +75,7 @@ class AuthViewModel @Inject constructor(
     ) = viewModelScope.launch(Dispatchers.IO) {
         try {
             isLoading = true
-            authRepoImpl.authWithCredential(authCredential)
+            authRepository.authWithCredential(authCredential)
         } catch (e: Exception) {
             when (e) {
                 is CancellationException -> throw e
@@ -89,9 +90,9 @@ class AuthViewModel @Inject constructor(
     }
 
     fun logOut() = viewModelScope.launch(Dispatchers.IO) {
-        authRepoImpl.logOut()
-        notifyRepoImpl.deleterAllNotify()
-        postRepoImpl.deleterAllPost()
+        authRepository.logOut()
+        notifyRepository.deleterAllNotify()
+        postRepository.deleterAllPost()
     }
 
 
@@ -101,7 +102,7 @@ class AuthViewModel @Inject constructor(
     ) = viewModelScope.launch(Dispatchers.IO) {
         try {
             creatingUser = true
-            authRepoImpl.createNewUser(myUser)
+            authRepository.createNewUser(myUser)
         } catch (e: Exception) {
             when (e) {
                 is CancellationException -> throw e

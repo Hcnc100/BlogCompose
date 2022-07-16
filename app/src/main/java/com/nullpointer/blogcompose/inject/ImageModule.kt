@@ -1,5 +1,6 @@
 package com.nullpointer.blogcompose.inject
 
+import com.nullpointer.blogcompose.data.remote.image.ImagesDataSource
 import com.nullpointer.blogcompose.data.remote.image.ImagesDataSourceImpl
 import com.nullpointer.blogcompose.domain.images.ImagesRepoImpl
 import dagger.Module
@@ -14,13 +15,12 @@ object ImageModule {
 
     @Provides
     @Singleton
-    fun getImagesDataSource(): ImagesDataSourceImpl =
-        ImagesDataSourceImpl()
+    fun getImagesDataSource(): ImagesDataSource = ImagesDataSourceImpl()
 
     @Provides
     @Singleton
     fun getImagesRepository(
-        imagesDataSource: ImagesDataSourceImpl,
+        imagesDataSource: ImagesDataSource,
     ): ImagesRepoImpl = ImagesRepoImpl(imagesDataSource)
 
 }

@@ -7,9 +7,9 @@ import androidx.lifecycle.lifecycleScope
 import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.states.StorageUploadTaskResult
 import com.nullpointer.blogcompose.core.utils.showToastMessage
-import com.nullpointer.blogcompose.domain.auth.AuthRepoImpl
-import com.nullpointer.blogcompose.domain.images.ImagesRepoImpl
-import com.nullpointer.blogcompose.domain.post.PostRepoImpl
+import com.nullpointer.blogcompose.domain.auth.AuthRepository
+import com.nullpointer.blogcompose.domain.images.ImagesRepository
+import com.nullpointer.blogcompose.domain.post.PostRepository
 import com.nullpointer.blogcompose.models.posts.Post
 import com.nullpointer.blogcompose.models.users.InnerUser
 import com.nullpointer.blogcompose.services.uploadImg.UploadDataControl.ACTION_START_POST
@@ -38,16 +38,13 @@ class UploadDataServices : LifecycleService() {
     private var jobUploadTask: Job? = null
 
     @Inject
-    lateinit
-    var imagesRepoImpl: ImagesRepoImpl
+    lateinit var imagesRepository: ImagesRepository
 
     @Inject
-    lateinit
-    var postRepoImpl: PostRepoImpl
+    lateinit var postRepository: PostRepository
 
     @Inject
-    lateinit
-    var authRepoImpl: AuthRepoImpl
+    lateinit var authRepository: AuthRepository
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
@@ -76,7 +73,7 @@ class UploadDataServices : LifecycleService() {
                             typeUpdate = typeUpdate
                         ) {
                             withContext(Dispatchers.IO){
-                                postRepoImpl.addNewPost(post = createNewPost(uuid, description, it))
+                                postRepository.addNewPost(post = createNewPost(uuid, description, it))
                             }
                         }
                         showToastMessage(R.string.post_upload_sucess)
@@ -88,7 +85,7 @@ class UploadDataServices : LifecycleService() {
                             typeUpdate = typeUpdate
                         ) {
                             withContext(Dispatchers.IO){
-                                authRepoImpl.uploadDataUser(urlImg = it, name = name)
+                                authRepository.uploadDataUser(urlImg = it, name = name)
                             }
                         }
                         showToastMessage(R.string.data_user_upload_sucess)
@@ -110,7 +107,7 @@ class UploadDataServices : LifecycleService() {
 
 
     private suspend fun createNewPost(uuidPost: String, description: String, urlImg: String): Post {
-        val user = authRepoImpl.myUser.first()
+        val user = authRepository.myUser.first()
         return Post(
             id = uuidPost,
             description = description,
@@ -132,8 +129,8 @@ class UploadDataServices : LifecycleService() {
         notifyHelper.startServicesForeground(this)
 
         val taskUpload = when (typeUpdate) {
-            TypeUpdate.POST -> imagesRepoImpl.uploadImgBlog(uriImage, idImgUpload)
-            TypeUpdate.USER -> imagesRepoImpl.uploadImgProfile(uriImage)
+            TypeUpdate.POST -> imagesRepository.uploadImgBlog(uriImage, idImgUpload)
+            TypeUpdate.USER -> imagesRepository.uploadImgProfile(uriImage)
         }
 
         taskUpload.catch { exception ->

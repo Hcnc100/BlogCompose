@@ -17,9 +17,10 @@ import com.google.firebase.messaging.RemoteMessage
 import com.google.gson.GsonBuilder
 import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.utils.toFormat
-import com.nullpointer.blogcompose.domain.auth.AuthRepoImpl
-import com.nullpointer.blogcompose.domain.notify.NotifyRepoImpl
+import com.nullpointer.blogcompose.domain.auth.AuthRepository
+import com.nullpointer.blogcompose.domain.notify.NotifyRepository
 import com.nullpointer.blogcompose.domain.post.PostRepoImpl
+import com.nullpointer.blogcompose.domain.post.PostRepository
 import com.nullpointer.blogcompose.models.notify.Notify
 import com.nullpointer.blogcompose.models.notify.NotifyDeserializer
 import com.nullpointer.blogcompose.models.notify.TypeNotify
@@ -36,13 +37,13 @@ import javax.inject.Inject
 class MyFirebaseMessagingService : FirebaseMessagingService() {
 
     @Inject
-    lateinit var authRepoImpl: AuthRepoImpl
+    lateinit var authRepository: AuthRepository
 
     @Inject
-    lateinit var notifyRepoImpl: NotifyRepoImpl
+    lateinit var notifyRepository: NotifyRepository
 
     @Inject
-    lateinit var postRepoImpl: PostRepoImpl
+    lateinit var postRepository: PostRepository
 
     private val job = SupervisorJob()
 
@@ -56,7 +57,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         super.onNewToken(token)
         CoroutineScope(job).launch {
             try {
-                authRepoImpl.updateTokenUser(token)
+                authRepository.updateTokenUser(token)
             } catch (e: Exception) {
                 when (e) {
                     is CancellationException -> throw e
@@ -79,8 +80,8 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
                         // * launch notification * if is validate
                         launchNotifications(notify)
                         // * lauch update databse
-                        notifyRepoImpl.requestLastNotify(true)
-                        postRepoImpl.updatePost(notify.idPost)
+                        notifyRepository.requestLastNotify(true)
+                        postRepository.updatePost(notify.idPost)
                     }
                 }
             } catch (e: Exception) {

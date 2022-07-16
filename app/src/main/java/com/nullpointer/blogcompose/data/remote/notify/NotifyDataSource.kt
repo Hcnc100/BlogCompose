@@ -11,7 +11,10 @@ interface NotifyDataSource {
         numberRequest: Int = Integer.MAX_VALUE,
     ): List<Notify>
 
-    suspend fun getLastNotifyDate(numberRequest: Int, date: Date?): List<Notify>
+    suspend fun getLastNotifyBeforeThat(
+        numberRequest: Int,
+        date: Date?
+    ): List<Notify>
 
     fun updateOpenNotify(idNotify: String)
 }

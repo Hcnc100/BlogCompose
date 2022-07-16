@@ -11,6 +11,7 @@ import com.nullpointer.blogcompose.core.delegates.SavableProperty
 import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.core.utils.NetworkException
 import com.nullpointer.blogcompose.domain.notify.NotifyRepoImpl
+import com.nullpointer.blogcompose.domain.notify.NotifyRepository
 import com.nullpointer.blogcompose.models.notify.Notify
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -25,7 +26,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class NotifyViewModel @Inject constructor(
-    private val notifyRepoImpl: NotifyRepoImpl,
+    private val notifyRepository: NotifyRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -54,7 +55,7 @@ class NotifyViewModel @Inject constructor(
 
     // * show notification from database
     val listNotify = flow<Resource<List<Notify>>> {
-        notifyRepoImpl.listNotify.collect {
+        notifyRepository.listNotify.collect {
             emit(Resource.Success(it))
         }
     }.catch { e ->
@@ -81,7 +82,7 @@ class NotifyViewModel @Inject constructor(
                 stateConcatNotify = true
                 try {
                     val countNotify =
-                        withContext(Dispatchers.IO) { notifyRepoImpl.concatenateNotify() }
+                        withContext(Dispatchers.IO) { notifyRepository.concatenateNotify() }
                     Timber.d("notify get with concatenate $countNotify")
                     if (countNotify == 0) isConcatEnable = false
                 } catch (e: Exception) {
@@ -109,7 +110,7 @@ class NotifyViewModel @Inject constructor(
             stateRequestNotify = true
             try {
                 val countNotify =
-                    withContext(Dispatchers.IO) { notifyRepoImpl.requestLastNotify(forceRefresh) }
+                    withContext(Dispatchers.IO) { notifyRepository.requestLastNotify(forceRefresh) }
                 Timber.d("notify get for request :$countNotify")
             } catch (e: Exception) {
                 when (e) {
@@ -130,7 +131,7 @@ class NotifyViewModel @Inject constructor(
     fun openNotifications(
         notify: Notify
     ) = viewModelScope.launch(Dispatchers.IO) {
-        notifyRepoImpl.openNotify(notify)
+        notifyRepository.openNotify(notify)
     }
 
 }

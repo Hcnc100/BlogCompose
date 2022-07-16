@@ -1,4 +1,4 @@
-package com.nullpointer.blogcompose.ui.screens.details.viewModel
+package com.nullpointer.blogcompose.presentation
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -11,7 +11,9 @@ import com.nullpointer.blogcompose.core.delegates.PropertySavableString
 import com.nullpointer.blogcompose.core.delegates.SavableProperty
 import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.core.utils.NetworkException
+import com.nullpointer.blogcompose.domain.comment.CommentsRepository
 import com.nullpointer.blogcompose.domain.post.PostRepoImpl
+import com.nullpointer.blogcompose.domain.post.PostRepository
 import com.nullpointer.blogcompose.models.Comment
 import com.nullpointer.blogcompose.models.posts.Post
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,7 +25,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class PostDetailsViewModel @Inject constructor(
-    private val postRepoImpl: PostRepoImpl,
+    private val postRepository: PostRepository,
+    private val commentsRepository: CommentsRepository,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
@@ -69,7 +72,7 @@ class PostDetailsViewModel @Inject constructor(
     val postState: StateFlow<Resource<Post>> = flow<Resource<Post>> {
         // * update the comments when idPost is updated and this is not empty
         _idPost.collect {
-            postRepoImpl.getRealTimePost(it).collect { newPost ->
+            postRepository.getRealTimePost(it).collect { newPost ->
                 if (newPost!!.numberComments != numberComments) {
                     if (numberComments != -1 && newPost.numberComments > numberComments)
                         hasNewComments = true
@@ -80,14 +83,14 @@ class PostDetailsViewModel @Inject constructor(
                 emit(Resource.Success(newPost))
                 // * update inner post (saved in database)
                 withContext(Dispatchers.IO) {
-                    postRepoImpl.updateInnerPost(newPost)
+                    postRepository.updatePost(newPost)
                 }
             }
         }
     }.flowOn(Dispatchers.IO).catch {
         Timber.d("Error con el post $it")
         _messageDetails.send(R.string.message_error_load_post)
-        postRepoImpl.deleterInvalidPost(_idPost.value)
+        postRepository.deleterPost(_idPost.value)
         emit(Resource.Failure)
     }.stateIn(
         viewModelScope,
@@ -118,7 +121,7 @@ class PostDetailsViewModel @Inject constructor(
                     if (stateListComment is Resource.Success) {
                         val lastComment = stateListComment.data.first()
                         val listNewComments = withContext(Dispatchers.IO) {
-                            postRepoImpl.concatenateComments(_idPost.value, lastComment.id)
+                            commentsRepository.concatenateComments(_idPost.value, lastComment.id)
                         }
                         val newList = listNewComments + stateListComment.data
                         _listComments.emit(Resource.Success(newList))
@@ -149,7 +152,7 @@ class PostDetailsViewModel @Inject constructor(
             postState.value.let {
                 if (it is Resource.Success) {
                     val listNewComment = withContext(Dispatchers.IO) {
-                        postRepoImpl.addNewComment(it.data, comment)
+                        commentsRepository.addNewComment(it.data, comment)
                     }
                     _listComments.emit(Resource.Success(listNewComment))
                 }
@@ -169,7 +172,7 @@ class PostDetailsViewModel @Inject constructor(
                 hasNewComments = false
                 _listComments.emit(Resource.Loading)
                 val listNewComments = withContext(Dispatchers.IO) {
-                    postRepoImpl.getLastComments(idPost)
+                    commentsRepository.getLastComments(idPost)
                 }
                 _listComments.emit(Resource.Success(listNewComments))
             } catch (e: Exception) {
