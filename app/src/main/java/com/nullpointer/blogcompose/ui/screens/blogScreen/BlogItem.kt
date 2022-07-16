@@ -35,9 +35,10 @@ import java.util.*
 @Composable
 fun BlogItem(
     post: SimplePost,
-    actionBlog: (ActionsPost, SimplePost) -> Unit
+    actionBlog: (ActionsPost, SimplePost) -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    ContainerBlog {
+    ContainerBlog(modifier=modifier) {
         Column {
             HeaderOwnerBlog(
                 urlImg = post.userPoster?.urlImg!!,
@@ -61,10 +62,11 @@ fun BlogItem(
 
 @Composable
 private fun ContainerBlog(
-    content: @Composable () -> Unit
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit,
 ) {
     Card(
-        modifier = Modifier
+        modifier = modifier
             .padding(10.dp)
             .wrapContentWidth(),
         shape = RoundedCornerShape(10.dp),

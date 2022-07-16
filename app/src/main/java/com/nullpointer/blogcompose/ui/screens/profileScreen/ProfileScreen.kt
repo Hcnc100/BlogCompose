@@ -40,6 +40,7 @@ import com.nullpointer.blogcompose.ui.screens.states.ProfileScreenState
 import com.nullpointer.blogcompose.ui.screens.states.rememberProfileScreenState
 import com.nullpointer.blogcompose.ui.share.BackHandler
 import com.nullpointer.blogcompose.ui.share.ButtonAdd
+import com.nullpointer.blogcompose.ui.share.OnBottomReached
 import com.nullpointer.blogcompose.ui.share.SelectImgButtonSheet
 import com.ramcosta.composedestinations.annotation.Destination
 
@@ -52,7 +53,8 @@ fun ProfileScreen(
     actionRootDestinations: ActionRootDestinations,
     myPostViewModel: MyPostViewModel = hiltViewModel(),
     profileScreenState: ProfileScreenState = rememberProfileScreenState(
-        isRefresh = myPostViewModel.stateRequestMyPost
+        isRefresh = myPostViewModel.stateRequestMyPost,
+        sizeScrollMore = 50f
     )
 ) {
     // * states
@@ -106,7 +108,12 @@ fun ProfileScreen(
                     } else {
                         GridPost(
                             listPost = listPost,
-                            gridState = profileScreenState.listState
+                            gridState = profileScreenState.listState,
+                            actionLoadMore = {
+                                myPostViewModel.concatenatePost {
+                                    profileScreenState.animateScrollMore()
+                                }
+                            }
                         ) {
                             HeaderUser(
                                 user = currentUser,
@@ -130,23 +137,27 @@ fun ProfileScreen(
 private fun GridPost(
     listPost: List<MyPost>,
     gridState: LazyGridState,
-    headerProfile: @Composable () -> Unit
+    actionLoadMore: () -> Unit,
+    headerProfile: @Composable () -> Unit,
 ) {
     LazyVerticalGrid(
         state = gridState,
         contentPadding = PaddingValues(2.dp),
         cells = GridCells.Adaptive(100.dp)
     ) {
-        item(span = { GridItemSpan(maxLineSpan) }) {
+        item(span = { GridItemSpan(maxLineSpan) }, key = { 12345 }) {
             headerProfile()
         }
-        items(listPost.size) { index ->
+        items(listPost.size, key = { index ->
+            listPost[index].id
+        }) { index ->
             val post = listPost[index]
             Card(
                 modifier = Modifier
                     .padding(4.dp)
                     .fillMaxWidth()
-                    .aspectRatio(1f),
+                    .aspectRatio(1f)
+                    .animateItemPlacement(),
                 shape = RoundedCornerShape(5.dp)
             ) {
                 AsyncImage(
@@ -157,6 +168,11 @@ private fun GridPost(
             }
         }
     }
+
+    gridState.OnBottomReached(0) {
+        actionLoadMore()
+    }
+
 }
 
 @Composable

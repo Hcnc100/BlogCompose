@@ -74,7 +74,10 @@ fun AddBlogScreen(
                 ImageNewBlog(
                     imgBlog = addBlogVM.imageBlog.value,
                     isCompress = addBlogVM.imageBlog.isCompress,
-                    actionEditImg = addBlogState::showModal
+                    actionEditImg = {
+                        addBlogState.hiddenKeyBoard()
+                        addBlogState.showModal()
+                    }
                 )
                 EditableTextSavable(
                     valueProperty = addBlogVM.description,

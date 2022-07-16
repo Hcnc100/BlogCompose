@@ -20,9 +20,11 @@ import com.nullpointer.blogcompose.services.uploadImg.UploadDataControl.KEY_IMG_
 import com.nullpointer.blogcompose.services.uploadImg.UploadDataControl.KEY_NAME_USER_SERVICES
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.receiveAsFlow
 import timber.log.Timber
 import java.util.*
 import javax.inject.Inject
@@ -32,6 +34,11 @@ class UploadDataServices : LifecycleService() {
 
     private enum class TypeUpdate {
         POST, USER
+    }
+
+    companion object {
+        private val finishUploadSuccessEvent = Channel<Unit>()
+        val finishUploadSuccess = finishUploadSuccessEvent.receiveAsFlow()
     }
 
     private val notifyHelper by lazy { NotifyUploadImgHelper(this) }
@@ -76,6 +83,7 @@ class UploadDataServices : LifecycleService() {
                                 postRepository.addNewPost(post = createNewPost(uuid, description, it))
                             }
                         }
+                        finishUploadSuccessEvent.trySend(Unit)
                         showToastMessage(R.string.post_upload_sucess)
                     }
                     TypeUpdate.USER -> {
@@ -84,14 +92,14 @@ class UploadDataServices : LifecycleService() {
                             uriImage = uriImg,
                             typeUpdate = typeUpdate
                         ) {
-                            withContext(Dispatchers.IO){
+                            withContext(Dispatchers.IO) {
                                 authRepository.uploadDataUser(urlImg = it, name = name)
                             }
                         }
                         showToastMessage(R.string.data_user_upload_sucess)
                     }
-
                 }
+
             } catch (e: Exception) {
                 when (e) {
                     is CancellationException -> throw e

@@ -17,7 +17,7 @@ open class SelectImageScreenState(
     context: Context,
     focusManager: FocusManager,
     val modalBottomSheetState: ModalBottomSheetState,
-    private val scope: CoroutineScope
+    val scope: CoroutineScope
 ) : SimpleScreenState(scaffoldState, context, focusManager) {
 
     val isShowModal get() = modalBottomSheetState.isVisible

@@ -1,5 +1,6 @@
 package com.nullpointer.blogcompose.ui.screens.notifyScreen
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.Scaffold
@@ -32,7 +33,10 @@ import com.ramcosta.composedestinations.annotation.Destination
 fun NotifyScreen(
     notifyVM: NotifyViewModel = hiltViewModel(),
     actionRootDestinations: ActionRootDestinations,
-    notifyScreenState: SwipeRefreshScreenState = rememberSwipeRefreshScreenState(isRefreshing = notifyVM.stateRequestNotify)
+    notifyScreenState: SwipeRefreshScreenState = rememberSwipeRefreshScreenState(
+        isRefreshing = notifyVM.stateRequestNotify,
+        sizeScrollMore = 120f
+    )
 ) {
     // * states
     val stateListNotify by notifyVM.listNotify.collectAsState()
@@ -68,7 +72,9 @@ fun NotifyScreen(
                         ListSwipeNotify(
                             listState = notifyScreenState.listState,
                             listNotify = listNotify,
-                            actionBottomReached = notifyVM::concatenateNotify,
+                            actionBottomReached = {
+                                notifyVM.concatenateNotify(callbackSuccess = notifyScreenState::animateScrollMore)
+                            },
                             actionClick = { notify ->
                                 actionRootDestinations.changeRoot(
                                     PostDetailsDestination(
@@ -98,19 +104,21 @@ private fun ListSwipeNotify(
         state = listState
     ) {
         // * all notifications
-        items(listNotify.size) { index ->
+        items(
+            listNotify.size,
+//            key = { index -> listNotify[index].id }
+        ) { index ->
             ItemNotify(
                 notify = listNotify[index],
-                actionClick = actionClick
+                actionClick = actionClick,
+//                modifier = Modifier.animateItemPlacement()
             )
         }
     }
-    // * when go to the finish list, request more notifications
-    if (listState.layoutInfo.visibleItemsInfo.size < listState.layoutInfo.totalItemsCount) {
-        listState.OnBottomReached(0) {
-            actionBottomReached()
-        }
+    listState.OnBottomReached(0) {
+        actionBottomReached()
     }
+
 }
 
 

@@ -30,9 +30,11 @@ import com.nullpointer.blogcompose.models.notify.TypeNotify
 @Composable
 fun ItemNotify(
     notify: Notify,
+    modifier: Modifier = Modifier,
     actionClick: (notify: Notify) -> Unit,
 ) {
     ContainerNotify(
+        modifier = modifier,
         notifyIsOpen = notify.isOpen,
         actionClick = { actionClick(notify) }) {
         Row(

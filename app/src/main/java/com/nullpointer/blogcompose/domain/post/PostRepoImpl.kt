@@ -23,8 +23,8 @@ class PostRepoImpl(
 ) : PostRepository {
 
     companion object {
-        private const val SIZE_POST_REQUEST = 7
-
+        private const val SIZE_POST_REQUEST = 5
+        private const val SIZE_MY_POST_REQUEST = 10
     }
 
     override val listLastPost: Flow<List<Post>> = postDAO.getAllPost()
@@ -33,7 +33,10 @@ class PostRepoImpl(
 
     override suspend fun requestLastPost(forceRefresh: Boolean): Int {
         val firstPost = if (forceRefresh) null else postDAO.getFirstPost()
-        val listLastPost = getPostBeforeThat(firstPost?.timestamp)
+        val listLastPost = getPostBeforeThat(
+            firstPost?.timestamp,
+            size = SIZE_POST_REQUEST
+        )
         if (listLastPost.isNotEmpty()) postDAO.updateAllPost(listLastPost)
         return listLastPost.size
     }
@@ -43,7 +46,8 @@ class PostRepoImpl(
         val firstPost = if (forceRefresh) null else myPostDAO.getFirstPost()
         val listMyLastPost = getPostBeforeThat(
             beforePostTimestamp = firstPost?.timestamp,
-            fromUser = prefDataSource.getIdUser()
+            fromUser = prefDataSource.getIdUser(),
+            size = SIZE_MY_POST_REQUEST
         ).map { MyPost.fromPost(it) }
         if (listMyLastPost.isNotEmpty()) myPostDAO.updateAllPost(listMyLastPost)
         return listMyLastPost.size
@@ -52,7 +56,8 @@ class PostRepoImpl(
     override suspend fun concatenatePost(): Int {
         postDAO.getLastPost()?.let { lastPost ->
             val concatenatePost = getPostStartWith(
-                postStartId = lastPost.id
+                postStartId = lastPost.id,
+                size = SIZE_POST_REQUEST
             )
             postDAO.insertListPost(concatenatePost)
             return concatenatePost.size
@@ -65,6 +70,7 @@ class PostRepoImpl(
             val concatenatePost = getPostStartWith(
                 fromUser = prefDataSource.getIdUser(),
                 postStartId = lastPost.id,
+                size = SIZE_MY_POST_REQUEST
             )
             val listSimplePost = concatenatePost.map { MyPost.fromPost(it) }
             myPostDAO.insertListPost(listSimplePost)
@@ -108,7 +114,8 @@ class PostRepoImpl(
     override suspend fun requestLastPostInitWith(idPost: String) {
         getPostStartWith(
             postStartId = idPost,
-            includePost = true
+            includePost = true,
+            size = SIZE_POST_REQUEST
         ).let { listPost ->
             if (listPost.isNotEmpty()) {
                 postDAO.updateAllPost(listPost)
@@ -136,12 +143,13 @@ class PostRepoImpl(
 
     private suspend fun getPostBeforeThat(
         beforePostTimestamp: Date?,
-        fromUser: String? = null
+        fromUser: String? = null,
+        size: Int
     ): List<Post> {
         if (!InternetCheck.isNetworkAvailable()) throw NetworkException()
         return postDataSource.getLastPostBeforeThat(
             date = beforePostTimestamp,
-            nPosts = SIZE_POST_REQUEST,
+            nPosts = size,
             fromUserId = fromUser
         )
     }
@@ -149,11 +157,12 @@ class PostRepoImpl(
     private suspend fun getPostStartWith(
         fromUser: String? = null,
         postStartId: String,
-        includePost: Boolean = false
+        includePost: Boolean = false,
+        size: Int
     ): List<Post> {
         if (!InternetCheck.isNetworkAvailable()) throw NetworkException()
         return postDataSource.getLastPost(
-            nPosts = SIZE_POST_REQUEST,
+            nPosts = size,
             startWithPostId = postStartId,
             fromUserId = fromUser,
             includePost = includePost

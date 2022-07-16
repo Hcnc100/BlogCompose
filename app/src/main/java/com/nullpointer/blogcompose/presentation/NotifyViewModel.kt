@@ -10,7 +10,6 @@ import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.delegates.SavableProperty
 import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.core.utils.NetworkException
-import com.nullpointer.blogcompose.domain.notify.NotifyRepoImpl
 import com.nullpointer.blogcompose.domain.notify.NotifyRepository
 import com.nullpointer.blogcompose.models.notify.Notify
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -73,18 +72,19 @@ class NotifyViewModel @Inject constructor(
         requestLastNotify()
     }
 
-    fun concatenateNotify() {
+    fun concatenateNotify(callbackSuccess: () -> Unit){
         // * request notifications and add to databse
         // * stop job if is alive and create new request
         if (isConcatEnable) {
             jobConcatNotify?.cancel()
             jobConcatNotify = viewModelScope.launch {
+                Timber.d("Init process concatenate notify")
                 stateConcatNotify = true
                 try {
                     val countNotify =
                         withContext(Dispatchers.IO) { notifyRepository.concatenateNotify() }
                     Timber.d("notify get with concatenate $countNotify")
-                    if (countNotify == 0) isConcatEnable = false
+                    if (countNotify == 0) isConcatEnable = false else callbackSuccess()
                 } catch (e: Exception) {
                     when (e) {
                         is CancellationException -> throw e
@@ -111,6 +111,7 @@ class NotifyViewModel @Inject constructor(
             try {
                 val countNotify =
                     withContext(Dispatchers.IO) { notifyRepository.requestLastNotify(forceRefresh) }
+                isConcatEnable = true
                 Timber.d("notify get for request :$countNotify")
             } catch (e: Exception) {
                 when (e) {

@@ -96,18 +96,19 @@ class MyPostViewModel @Inject constructor(
         }
     }
 
-    fun concatenatePost() {
+    fun concatenatePost(callbackSuccess:()->Unit) {
         // * request post and concatenate and the last post
         if (isConcatenateEnable) {
             jobConcatMyPost?.cancel()
             jobConcatMyPost = viewModelScope.launch {
                 try {
+                    Timber.d("init concatenate more mypost")
                     stateConcatMyPost = true
                     val countPost = withContext(Dispatchers.IO) {
                         postRepository.concatenateMyPost()
                     }
                     Timber.d("number concat my post $countPost")
-                    if (countPost == 0) isConcatenateEnable = false
+                    if (countPost == 0) isConcatenateEnable = false else callbackSuccess()
                 } catch (e: Exception) {
                     when (e) {
                         is CancellationException -> throw e

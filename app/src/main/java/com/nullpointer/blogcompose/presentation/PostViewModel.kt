@@ -10,7 +10,6 @@ import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.delegates.SavableProperty
 import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.core.utils.NetworkException
-import com.nullpointer.blogcompose.domain.post.PostRepoImpl
 import com.nullpointer.blogcompose.domain.post.PostRepository
 import com.nullpointer.blogcompose.models.posts.Post
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -94,18 +93,19 @@ class PostViewModel @Inject constructor(
         }
     }
 
-    fun concatenatePost() {
+    fun concatenatePost(callbackSuccess: () -> Unit) {
         // * this init new data but, consideration las post saved,
         // * this for concatenate new post and no override the database
         // * launch exception if no there internet
         if (isConcatEnable) {
             jobConcatPost?.cancel()
             jobConcatPost = viewModelScope.launch {
-                stateRequestData = true
+                Timber.d("Init process concatenate post")
+                stateConcatData = true
                 try {
                     val sizeConcat = withContext(Dispatchers.IO) { postRepository.concatenatePost() }
                     Timber.d("New post concatenate $sizeConcat")
-                    if (sizeConcat == 0) isConcatEnable = false
+                    if (sizeConcat == 0) isConcatEnable = false else callbackSuccess()
 
                 } catch (e: Exception) {
                     when (e) {

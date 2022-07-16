@@ -6,10 +6,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.Scaffold
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -22,6 +19,7 @@ import com.nullpointer.blogcompose.models.posts.Post
 import com.nullpointer.blogcompose.models.posts.SimplePost
 import com.nullpointer.blogcompose.presentation.LikeViewModel
 import com.nullpointer.blogcompose.presentation.PostViewModel
+import com.nullpointer.blogcompose.services.uploadImg.UploadDataServices
 import com.nullpointer.blogcompose.ui.interfaces.ActionRootDestinations
 import com.nullpointer.blogcompose.ui.navigation.HomeNavGraph
 import com.nullpointer.blogcompose.ui.navigation.MainTransitions
@@ -32,7 +30,10 @@ import com.nullpointer.blogcompose.ui.screens.states.SwipeRefreshScreenState
 import com.nullpointer.blogcompose.ui.screens.states.rememberSwipeRefreshScreenState
 import com.nullpointer.blogcompose.ui.share.ButtonAdd
 import com.nullpointer.blogcompose.ui.share.CircularProgressAnimation
+import com.nullpointer.blogcompose.ui.share.OnBottomReached
 import com.ramcosta.composedestinations.annotation.Destination
+import kotlinx.coroutines.delay
+import timber.log.Timber
 
 @HomeNavGraph(start = true)
 @Destination(style = MainTransitions::class)
@@ -40,7 +41,10 @@ import com.ramcosta.composedestinations.annotation.Destination
 fun BlogScreen(
     postVM: PostViewModel = hiltViewModel(),
     likeVM: LikeViewModel = hiltViewModel(),
-    blogScreenState: SwipeRefreshScreenState = rememberSwipeRefreshScreenState(postVM.stateRequestData),
+    blogScreenState: SwipeRefreshScreenState = rememberSwipeRefreshScreenState(
+        sizeScrollMore = 80f,
+        isRefreshing = postVM.stateRequestData,
+    ),
     actionRootDestinations: ActionRootDestinations
 ) {
     val statePost by postVM.listPost.collectAsState()
@@ -51,6 +55,12 @@ fun BlogScreen(
 
     LaunchedEffect(key1 = Unit) {
         postVM.messagePost.collect(blogScreenState::showSnackMessage)
+    }
+
+    val firstItemVisible by remember {
+        derivedStateOf {
+            blogScreenState.listState.firstVisibleItemIndex == 0
+        }
     }
 
     SwipeRefresh(
@@ -84,6 +94,11 @@ fun BlogScreen(
                         ListPost(
                             listPost = listPost,
                             listState = blogScreenState.listState,
+                            actionBottomReached = {
+                                postVM.concatenatePost {
+                                    blogScreenState.animateScrollMore()
+                                }
+                            },
                             actionBlog = { action, post ->
                                 when (action) {
                                     DETAILS -> {
@@ -112,17 +127,39 @@ fun BlogScreen(
 private fun ListPost(
     listPost: List<Post>,
     listState: LazyListState,
+    actionBottomReached: () -> Unit,
     actionBlog: (ActionsPost, SimplePost) -> Unit
 ) {
+
+    LaunchedEffect(key1 = Unit) {
+        UploadDataServices.finishUploadSuccess.collect {
+            delay(200)
+            Timber.d("Se colecto")
+            if (listState.firstVisibleItemIndex != 0) {
+                listState.animateScrollToItem(0)
+            }
+        }
+    }
+
     LazyColumn(state = listState) {
-        items(listPost.size) { index ->
+        items(
+            listPost.size,
+            key = { index -> listPost[index].id }
+        ) { index ->
             BlogItem(
                 post = listPost[index],
                 actionBlog = actionBlog,
+//                modifier = Modifier.animateItemPlacement()
             )
         }
     }
+    // * when go to the finish list, request more notifications
+    listState.OnBottomReached(0) {
+        actionBottomReached()
+    }
+
 }
+
 
 private fun sharePost(idPost: String, context: Context) {
     val intent = Intent(Intent.ACTION_SEND)
