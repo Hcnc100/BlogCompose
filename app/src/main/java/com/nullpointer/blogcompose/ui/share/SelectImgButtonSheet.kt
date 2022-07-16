@@ -3,6 +3,7 @@ package com.nullpointer.blogcompose.ui.share
 import android.content.Context
 
 import android.net.Uri
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.DrawableRes

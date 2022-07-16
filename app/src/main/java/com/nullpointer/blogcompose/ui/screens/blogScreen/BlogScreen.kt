@@ -57,12 +57,6 @@ fun BlogScreen(
         postVM.messagePost.collect(blogScreenState::showSnackMessage)
     }
 
-    val firstItemVisible by remember {
-        derivedStateOf {
-            blogScreenState.listState.firstVisibleItemIndex == 0
-        }
-    }
-
     SwipeRefresh(
         modifier = Modifier.fillMaxSize(),
         state = blogScreenState.swipeState,
@@ -134,7 +128,6 @@ private fun ListPost(
     LaunchedEffect(key1 = Unit) {
         UploadDataServices.finishUploadSuccess.collect {
             delay(200)
-            Timber.d("Se colecto")
             if (listState.firstVisibleItemIndex != 0) {
                 listState.animateScrollToItem(0)
             }

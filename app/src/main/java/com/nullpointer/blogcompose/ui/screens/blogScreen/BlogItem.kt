@@ -11,6 +11,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,7 +43,7 @@ fun BlogItem(
         Column {
             HeaderOwnerBlog(
                 urlImg = post.userPoster?.urlImg!!,
-                name = post.userPoster?.name ?: "Oeoeo sosoos eeefd saefdwedf ",
+                name = post.userPoster?.name!!,
                 modifier = Modifier.padding(10.dp)
             )
             ImageBlog(urlImg = post.urlImage) {
@@ -89,16 +90,16 @@ private fun ActionsPost(
                 actionBlog(ActionsPost.DETAILS, post)
             }
             IconAction(drawableRes = R.drawable.ic_share) {
-                actionBlog(ActionsPost.DETAILS, post)
+                actionBlog(ActionsPost.SHARE, post)
             }
         }
 
         Row {
             IconAction(drawableRes = R.drawable.ic_download) {
-                actionBlog(ActionsPost.LIKE, post)
+                actionBlog(ActionsPost.DOWNLOAD, post)
             }
             IconAction(drawableRes = R.drawable.ic_save) {
-                actionBlog(ActionsPost.DETAILS, post)
+                actionBlog(ActionsPost.SAVE, post)
             }
         }
     }
@@ -156,7 +157,7 @@ private fun HeaderOwnerBlog(
         )
         Spacer(modifier = Modifier.width(10.dp))
         Text(
-            text = "Pepe",
+            text = name,
             style = MaterialTheme.typography.body1,
             overflow = TextOverflow.Ellipsis
         )
@@ -166,8 +167,11 @@ private fun HeaderOwnerBlog(
 @Composable
 private fun TextTime(timeStamp: Date?, modifier: Modifier = Modifier) {
     val context = LocalContext.current
+    val textTime= remember {
+        TimeUtils.getTimeAgo(timeStamp?.time ?: 0, context)
+    }
     Text(
-        text = TimeUtils.getTimeAgo(timeStamp?.time ?: 0, context),
+        text = textTime,
         style = MaterialTheme.typography.caption,
         modifier = modifier
     )

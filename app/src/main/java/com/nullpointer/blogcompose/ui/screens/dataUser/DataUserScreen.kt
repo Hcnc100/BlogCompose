@@ -1,6 +1,7 @@
 package com.nullpointer.blogcompose.ui.screens.dataUser
 
 import android.net.Uri
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
@@ -22,7 +23,6 @@ import com.nullpointer.blogcompose.presentation.RegistryViewModel
 import com.nullpointer.blogcompose.ui.navigation.RootNavGraph
 import com.nullpointer.blogcompose.ui.screens.states.SelectImageScreenState
 import com.nullpointer.blogcompose.ui.screens.states.rememberSelectImageScreenState
-import com.nullpointer.blogcompose.ui.share.BackHandler
 import com.nullpointer.blogcompose.ui.share.EditableTextSavable
 import com.nullpointer.blogcompose.ui.share.SelectImgButtonSheet
 import com.nullpointer.blogcompose.ui.share.SimpleToolbar

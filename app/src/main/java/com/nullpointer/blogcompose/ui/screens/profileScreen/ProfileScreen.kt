@@ -1,5 +1,6 @@
 package com.nullpointer.blogcompose.ui.screens.profileScreen
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.GridCells
@@ -38,7 +39,6 @@ import com.nullpointer.blogcompose.ui.screens.destinations.ConfigScreenDestinati
 import com.nullpointer.blogcompose.ui.screens.emptyScreen.AnimationScreen
 import com.nullpointer.blogcompose.ui.screens.states.ProfileScreenState
 import com.nullpointer.blogcompose.ui.screens.states.rememberProfileScreenState
-import com.nullpointer.blogcompose.ui.share.BackHandler
 import com.nullpointer.blogcompose.ui.share.ButtonAdd
 import com.nullpointer.blogcompose.ui.share.OnBottomReached
 import com.nullpointer.blogcompose.ui.share.SelectImgButtonSheet

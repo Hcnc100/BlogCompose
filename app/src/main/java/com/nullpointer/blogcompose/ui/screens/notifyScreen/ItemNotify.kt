@@ -1,17 +1,17 @@
 package com.nullpointer.blogcompose.ui.screens.notifyScreen
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -88,7 +88,20 @@ private fun ImageIconNotify(
     type: TypeNotify,
     modifier: Modifier = Modifier
 ) {
-    Box(modifier=modifier,) {
+    val backgroundColorIcon = remember {
+        when (type) {
+            TypeNotify.LIKE -> Color.Red
+            TypeNotify.COMMENT -> Color.DarkGray
+        }
+    }
+    val iconNotify = remember {
+        when (type) {
+            TypeNotify.LIKE -> R.drawable.ic_fav
+            TypeNotify.COMMENT -> R.drawable.ic_comment
+        }
+    }
+
+    Box(modifier = modifier) {
         AsyncImage(
             model = ImageRequest.Builder(LocalContext.current).data(urlImg)
                 .transformations(CircleCropTransformation()).crossfade(true).build(),
@@ -98,23 +111,15 @@ private fun ImageIconNotify(
             modifier = Modifier.size(60.dp),
             contentScale = ContentScale.Crop
         )
-        Card(
-            backgroundColor = when (type) {
-                TypeNotify.LIKE -> Color.Red
-                TypeNotify.COMMENT -> Color.DarkGray
-            },
-            shape = CircleShape,
+        Box(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .size(22.dp)
+                .drawBehind { drawCircle(backgroundColorIcon) },
+            contentAlignment = Alignment.Center
         ) {
             Image(
-                painter = painterResource(
-                    id = when (type) {
-                        TypeNotify.LIKE -> R.drawable.ic_fav
-                        TypeNotify.COMMENT -> R.drawable.ic_comment
-                    }
-                ),
+                painter = painterResource(id = iconNotify),
                 contentDescription = stringResource(R.string.description_icon_notify_indicate),
                 modifier = Modifier
                     .fillMaxSize()
@@ -132,6 +137,10 @@ private fun ContainerNotify(
     actionClick: () -> Unit,
     content: @Composable () -> Unit,
 ) {
+    val background = remember {
+        if (notifyIsOpen) Color.Transparent else Color.Cyan.copy(alpha = 0.5f)
+    }
+
     Card(modifier = modifier
         .clickable { actionClick() }
         .padding(5.dp),
@@ -139,9 +148,7 @@ private fun ContainerNotify(
         // * container background color
         Box(
             modifier = Modifier
-                .background(
-                    if (notifyIsOpen) Color.Transparent else MaterialTheme.colors.primary.copy(alpha = 0.5f)
-                )
+                .drawBehind { drawRect(background) }
                 .padding(10.dp)
         ) {
             content()
@@ -156,20 +163,26 @@ private fun TextNotifyInfo(
     timeStamp: Long,
     typeNotify: TypeNotify,
 ) {
-    val textNotify = when (typeNotify) {
-        TypeNotify.LIKE -> stringResource(id = R.string.message_notify_liked, nameLiked)
-        TypeNotify.COMMENT -> stringResource(id = R.string.message_notify_comment, nameLiked)
-    }
     val context = LocalContext.current
+    val tileNotify = remember {
+        when (typeNotify) {
+            TypeNotify.LIKE -> context.getString(R.string.message_notify_liked, nameLiked)
+            TypeNotify.COMMENT -> context.getString(R.string.message_notify_comment, nameLiked)
+        }
+    }
+    val timeAgo= remember {
+        TimeUtils.getTimeAgo(timeStamp, context)
+    }
+
     Column(modifier = modifier) {
         Text(
-            text = textNotify,
+            text = tileNotify,
             style = MaterialTheme.typography.body2,
             fontSize = 13.sp,
         )
         Spacer(modifier = Modifier.height(10.dp))
         Text(
-            text = TimeUtils.getTimeAgo(timeStamp, context),
+            text = timeAgo,
             style = MaterialTheme.typography.caption
         )
     }
