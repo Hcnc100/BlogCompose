@@ -11,15 +11,18 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
+import coil.transform.CircleCropTransformation
 import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.presentation.AuthViewModel
 import com.nullpointer.blogcompose.ui.interfaces.ActionRootDestinations
 import com.nullpointer.blogcompose.ui.navigation.RootNavGraph
-import com.nullpointer.blogcompose.ui.share.ImageProfile
 import com.nullpointer.blogcompose.ui.share.ToolbarBack
 import com.ramcosta.composedestinations.annotation.Destination
 
@@ -46,11 +49,12 @@ fun ConfigScreen(
             // * main buttons
             Column {
                 ButtonCard(text = currentUser.name) {
-                    ImageProfile(
-                        urlImgProfile = currentUser.urlImg,
-                        paddingLoading = 5.dp,
-                        modifier = Modifier.size(30.dp),
-                        contentDescription = stringResource(R.string.description_image_profile)
+                    AsyncImage(
+                        model = ImageRequest.Builder(LocalContext.current).crossfade(true)
+                            .data(currentUser.urlImg).transformations(CircleCropTransformation())
+                            .build(),
+                        contentDescription = stringResource(R.string.description_image_profile),
+                        modifier = Modifier.size(30.dp)
                     )
                 }
             }

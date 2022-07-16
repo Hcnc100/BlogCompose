@@ -13,103 +13,142 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
+import coil.transform.CircleCropTransformation
 import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.utils.TimeUtils
 import com.nullpointer.blogcompose.models.notify.Notify
 import com.nullpointer.blogcompose.models.notify.TypeNotify
-import com.nullpointer.blogcompose.ui.share.ImagePost
-import com.nullpointer.blogcompose.ui.share.ImageProfile
 
 @Composable
 fun ItemNotify(
     notify: Notify,
     actionClick: (notify: Notify) -> Unit,
 ) {
-    // * change color of items when is open or no
-    val modifierColor = Modifier.background(
-        if (notify.isOpen) Color.Transparent else MaterialTheme.colors.primary.copy(alpha = 0.5f)
-    )
-    // * card container
-    Card(modifier = Modifier
-        .clickable { actionClick(notify) }
-        .padding(vertical = 5.dp, horizontal = 5.dp),
-        shape = RoundedCornerShape(10.dp)) {
-        // * container background color
-        Box(modifier = modifierColor) {
-            Row(
+    ContainerNotify(
+        notifyIsOpen = notify.isOpen,
+        actionClick = { actionClick(notify) }) {
+        Row(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+
+            ImageIconNotify(
+                urlImg = notify.userInNotify?.urlImg.toString(),
+                type = notify.type,
+                modifier = Modifier.weight(2f)
+            )
+
+            Spacer(modifier = Modifier.width(10.dp))
+
+            TextNotifyInfo(
+                modifier = Modifier.weight(5f),
+                nameLiked = notify.userInNotify?.name.toString(),
+                timeStamp = notify.timestamp?.time ?: 0,
+                typeNotify = notify.type
+            )
+
+            Spacer(modifier = Modifier.width(10.dp)) 
+            ImagePostNotify(
+                urlImgPost = notify.urlImgPost,
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 10.dp)
-            ) {
-
-                Box(
-                    modifier = Modifier
-                        .weight(2f)
-                        .size(60.dp),
-                ) {
-                    ImageProfile(
-                        urlImgProfile = notify.userInNotify?.urlImg.toString(),
-                        paddingLoading = 10.dp,
-                        modifier = Modifier
-                            .fillMaxSize(),
-                        contentDescription = stringResource(R.string.description_user_notify)
-                    )
-                    Card(
-                        backgroundColor = when (notify.type) {
-                            TypeNotify.LIKE -> Color.Red
-                            TypeNotify.COMMENT -> Color.DarkGray
-                        },
-                        shape = CircleShape,
-                        modifier = Modifier
-                            .align(Alignment.BottomEnd)
-                            .size(22.dp)
-                    ) {
-                        Image(
-                            painter = painterResource(
-                                id = when (notify.type) {
-                                    TypeNotify.LIKE -> R.drawable.ic_fav
-                                    TypeNotify.COMMENT -> R.drawable.ic_comment
-                                }
-                            ),
-                            contentDescription = stringResource(R.string.description_icon_notify_indicate),
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(3.dp)
-                        )
-                    }
-
-                }
-
-                Spacer(modifier = Modifier.width(10.dp))
-
-                TextNotifyInfo(
-                    modifier = Modifier.weight(5f),
-                    nameLiked = notify.userInNotify?.name.toString(),
-                    timeStamp = notify.timestamp?.time ?: 0,
-                    typeNotify = notify.type
-                )
-
-                ImagePost(
-                    urlImgPost = notify.urlImgPost,
-                    paddingLoading = 0.dp,
-                    contentDescription = stringResource(R.string.description_post_img_notify),
-                    modifier = Modifier
-                        .size(60.dp)
-                        .weight(2f)
-                        .align(Alignment.CenterVertically)
-                )
-            }
+                    .size(60.dp)
+                    .weight(2f)
+                    .align(Alignment.CenterVertically)
+            )
         }
     }
 }
 
 @Composable
-fun TextNotifyInfo(
+private fun ImagePostNotify(
+    urlImgPost: String,
+    modifier: Modifier = Modifier
+) {
+    AsyncImage(
+        model = ImageRequest.Builder(LocalContext.current).data(urlImgPost).crossfade(true).build(),
+        contentDescription = stringResource(R.string.description_post_img_notify),
+        placeholder = painterResource(id = R.drawable.ic_image),
+        error = painterResource(id = R.drawable.ic_broken_image),
+        modifier = modifier
+    )
+}
+
+@Composable
+private fun ImageIconNotify(
+    urlImg: String,
+    type: TypeNotify,
+    modifier: Modifier = Modifier
+) {
+    Box(modifier=modifier,) {
+        AsyncImage(
+            model = ImageRequest.Builder(LocalContext.current).data(urlImg)
+                .transformations(CircleCropTransformation()).crossfade(true).build(),
+            contentDescription = stringResource(R.string.description_user_notify),
+            placeholder = painterResource(id = R.drawable.ic_person),
+            error = painterResource(id = R.drawable.ic_person),
+            modifier = Modifier.size(60.dp),
+            contentScale = ContentScale.Crop
+        )
+        Card(
+            backgroundColor = when (type) {
+                TypeNotify.LIKE -> Color.Red
+                TypeNotify.COMMENT -> Color.DarkGray
+            },
+            shape = CircleShape,
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .size(22.dp)
+        ) {
+            Image(
+                painter = painterResource(
+                    id = when (type) {
+                        TypeNotify.LIKE -> R.drawable.ic_fav
+                        TypeNotify.COMMENT -> R.drawable.ic_comment
+                    }
+                ),
+                contentDescription = stringResource(R.string.description_icon_notify_indicate),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(3.dp)
+            )
+        }
+
+    }
+}
+
+@Composable
+private fun ContainerNotify(
+    notifyIsOpen: Boolean,
+    modifier: Modifier = Modifier,
+    actionClick: () -> Unit,
+    content: @Composable () -> Unit,
+) {
+    Card(modifier = modifier
+        .clickable { actionClick() }
+        .padding(5.dp),
+        shape = RoundedCornerShape(10.dp)) {
+        // * container background color
+        Box(
+            modifier = Modifier
+                .background(
+                    if (notifyIsOpen) Color.Transparent else MaterialTheme.colors.primary.copy(alpha = 0.5f)
+                )
+                .padding(10.dp)
+        ) {
+            content()
+        }
+    }
+}
+
+@Composable
+private fun TextNotifyInfo(
     modifier: Modifier,
     nameLiked: String,
     timeStamp: Long,
