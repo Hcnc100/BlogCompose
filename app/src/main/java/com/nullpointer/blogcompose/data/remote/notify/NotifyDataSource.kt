@@ -9,6 +9,7 @@ interface NotifyDataSource {
         startWith: String? = null,
         endWith: String? = null,
         numberRequest: Int = Integer.MAX_VALUE,
+        includeNotify: Boolean = false
     ): List<Notify>
 
     suspend fun getLastNotifyBeforeThat(

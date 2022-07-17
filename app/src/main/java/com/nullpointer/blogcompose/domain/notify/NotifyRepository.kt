@@ -9,4 +9,5 @@ interface NotifyRepository {
     suspend fun concatenateNotify(): Int
     suspend fun deleterAllNotify()
     suspend fun openNotify(notify: Notify)
+    suspend fun requestLastNotifyStartWith(idNotify: String)
 }

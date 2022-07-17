@@ -19,13 +19,14 @@ class NotifyDeserializer : JsonDeserializer<Notify?> {
         val userInNotify = InnerUser(
             idUser = userObject["idUser"].asString,
             urlImg = userObject["urlImg"].asString,
-            name = userObject["nameUser"].asString,
+            name = userObject["name"].asString,
         )
         return Notify(
-            userInNotify = userInNotify,
+            id = jsonObject["id"].asString,
             idPost = jsonObject["idPost"].asString,
             urlImgPost = jsonObject["urlImgPost"].asString,
-            type = TypeNotify.valueOf( jsonObject["type"].asString)
+            type = TypeNotify.valueOf( jsonObject["type"].asString),
+            userInNotify = userInNotify
         )
     }
 }

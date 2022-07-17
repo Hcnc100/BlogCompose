@@ -26,6 +26,7 @@ class NotifyDataSourceImpl:NotifyDataSource{
         startWith: String?,
         endWith: String?,
         numberRequest: Int,
+        includeNotify:Boolean
     ): List<Notify> {
         // * get last notify consideration the id passed from parameter, this for no reload all
         // * else just return the request number of notify, this is "pagination"
@@ -37,11 +38,11 @@ class NotifyDataSourceImpl:NotifyDataSource{
         if (startWith != null) {
             val refDocument = nodeUserNotify.document(startWith).get().await()
             if (refDocument.exists())
-                baseQuery = baseQuery.startAfter(refDocument)
+                baseQuery = if (includeNotify) baseQuery.startAt(refDocument) else baseQuery.startAfter(refDocument)
         } else if (endWith != null) {
             val refDocument = nodeUserNotify.document(endWith).get().await()
             if (refDocument.exists())
-                baseQuery = baseQuery.endBefore(refDocument)
+                baseQuery =  if (includeNotify) baseQuery.endAt(refDocument) else baseQuery.endBefore(refDocument)
         }
         // * limit result or for default all
         if (numberRequest != Integer.MAX_VALUE) baseQuery = baseQuery.limit(numberRequest.toLong())

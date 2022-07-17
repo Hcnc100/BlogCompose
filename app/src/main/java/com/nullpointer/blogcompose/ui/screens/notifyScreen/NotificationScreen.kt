@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.swiperefresh.SwipeRefresh
@@ -15,6 +16,8 @@ import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.models.notify.Notify
 import com.nullpointer.blogcompose.presentation.NotifyViewModel
+import com.nullpointer.blogcompose.services.notfication.MyFirebaseMessagingService
+import com.nullpointer.blogcompose.services.uploadImg.UploadDataServices
 import com.nullpointer.blogcompose.ui.interfaces.ActionRootDestinations
 import com.nullpointer.blogcompose.ui.navigation.HomeNavGraph
 import com.nullpointer.blogcompose.ui.navigation.MainTransitions
@@ -25,6 +28,7 @@ import com.nullpointer.blogcompose.ui.screens.states.rememberSwipeRefreshScreenS
 import com.nullpointer.blogcompose.ui.share.CircularProgressAnimation
 import com.nullpointer.blogcompose.ui.share.OnBottomReached
 import com.ramcosta.composedestinations.annotation.Destination
+import kotlinx.coroutines.delay
 
 
 @HomeNavGraph
@@ -92,6 +96,7 @@ fun NotifyScreen(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun ListSwipeNotify(
     listNotify: List<Notify>,
@@ -99,6 +104,16 @@ private fun ListSwipeNotify(
     actionBottomReached: () -> Unit,
     actionClick: (notify: Notify) -> Unit,
 ) {
+
+    LaunchedEffect(key1 = Unit) {
+        MyFirebaseMessagingService.notifyServices.collect {
+            delay(200)
+            if (listState.firstVisibleItemIndex != 0) {
+                listState.animateScrollToItem(0)
+            }
+        }
+    }
+
     // * list to show notifications
     LazyColumn(
         state = listState
@@ -106,12 +121,12 @@ private fun ListSwipeNotify(
         // * all notifications
         items(
             listNotify.size,
-//            key = { index -> listNotify[index].id }
+            key = { index -> listNotify[index].id }
         ) { index ->
             ItemNotify(
                 notify = listNotify[index],
                 actionClick = actionClick,
-//                modifier = Modifier.animateItemPlacement()
+                modifier = Modifier.animateItemPlacement()
             )
         }
     }

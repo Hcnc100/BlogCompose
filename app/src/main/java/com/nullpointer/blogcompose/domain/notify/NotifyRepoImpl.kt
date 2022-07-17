@@ -4,7 +4,6 @@ import com.nullpointer.blogcompose.core.utils.InternetCheck
 import com.nullpointer.blogcompose.core.utils.NetworkException
 import com.nullpointer.blogcompose.data.local.cache.NotifyDAO
 import com.nullpointer.blogcompose.data.remote.notify.NotifyDataSource
-import com.nullpointer.blogcompose.data.remote.notify.NotifyDataSourceImpl
 import com.nullpointer.blogcompose.models.notify.Notify
 import kotlinx.coroutines.flow.Flow
 
@@ -32,6 +31,14 @@ class NotifyRepoImpl(
             date = firstNotify?.timestamp)
         if (listNewNotify.isNotEmpty()) notifyDAO.updateAllNotify(listNewNotify)
         return listNewNotify.size
+    }
+    override suspend fun requestLastNotifyStartWith(idNotify: String){
+        val listConcatNotify = notifyDataSource.getLastNotifications(
+            numberRequest = SIZE_NOTIFY_REQUEST,
+            startWith = idNotify,
+            includeNotify = true
+        )
+        if (listConcatNotify.isNotEmpty()) notifyDAO.updateAllNotify(listConcatNotify)
     }
 
     override suspend fun concatenateNotify(): Int {

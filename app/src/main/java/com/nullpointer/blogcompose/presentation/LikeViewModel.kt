@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.utils.NetworkException
-import com.nullpointer.blogcompose.domain.post.PostRepoImpl
 import com.nullpointer.blogcompose.domain.post.PostRepository
 import com.nullpointer.blogcompose.models.posts.SimplePost
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -15,7 +14,6 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import java.lang.Exception
 import javax.inject.Inject
 
 @HiltViewModel
@@ -36,7 +34,7 @@ class LikeViewModel @Inject constructor(
         jobLike?.cancel()
         jobLike = viewModelScope.launch(Dispatchers.IO) {
             try {
-                postRepository.updateLikePost(simplePost)
+                postRepository.updateLikePost(simplePost, !simplePost.ownerLike)
             } catch (e: Exception) {
                 when (e) {
                     is CancellationException -> throw e

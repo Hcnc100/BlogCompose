@@ -20,7 +20,8 @@ class CommentsRepoImpl(
     }
     override suspend fun addNewComment(post: SimplePost, comment: String): List<Comment> {
         val currentUser = prefDataSource.getCurrentUser()
-        val notify = post.createCommentNotify(currentUser)
+        val notify = if (post.userPoster?.idUser == prefDataSource.getIdUser())
+            null else post.createCommentNotify(currentUser)
         val newComment = currentUser.createNewComment(comment)
         val idComment = commentDataSource.addNewComment(
             idPost = post.id,

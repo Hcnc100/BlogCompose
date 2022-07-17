@@ -1,7 +1,10 @@
 package com.nullpointer.blogcompose.data.remote.post
 
 import com.google.firebase.auth.ktx.auth
-import com.google.firebase.firestore.*
+import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.Query
+import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
@@ -9,13 +12,11 @@ import com.nullpointer.blogcompose.core.utils.timestampEstimate
 import com.nullpointer.blogcompose.data.remote.FirebaseConstants.FIELD_ARRAY_LIKES
 import com.nullpointer.blogcompose.data.remote.FirebaseConstants.FIELD_NUMBER_LIKES
 import com.nullpointer.blogcompose.data.remote.FirebaseConstants.FIELD_POST_ID
-import com.nullpointer.blogcompose.data.remote.FirebaseConstants.NAME_REF_COMMENTS
 import com.nullpointer.blogcompose.data.remote.FirebaseConstants.NAME_REF_LIKE_POST
 import com.nullpointer.blogcompose.data.remote.FirebaseConstants.NAME_REF_LIST_NOTIFY
 import com.nullpointer.blogcompose.data.remote.FirebaseConstants.NAME_REF_NOTIFY
 import com.nullpointer.blogcompose.data.remote.FirebaseConstants.NAME_REF_POST
 import com.nullpointer.blogcompose.data.remote.FirebaseConstants.TIMESTAMP
-import com.nullpointer.blogcompose.models.Comment
 import com.nullpointer.blogcompose.models.notify.Notify
 import com.nullpointer.blogcompose.models.posts.Post
 import kotlinx.coroutines.channels.awaitClose
@@ -128,8 +129,7 @@ class PostDataSourceImpl:PostDataSource {
     ): Post? {
         val refPostLiked = refPosts.document(idPost)
         val refListPostLike = refLikePost.document(idPost)
-        val refNotifyOwner = refNotify.document(ownerPost)
-            .collection(NAME_REF_LIST_NOTIFY).document(notify?.id ?: "")
+        val refListNotifyOwnerPost = refNotify.document(ownerPost).collection(NAME_REF_LIST_NOTIFY)
 
         database.runTransaction { transaction ->
             val snapshotLikePos = transaction.get(refListPostLike)
@@ -155,7 +155,7 @@ class PostDataSourceImpl:PostDataSource {
                 )
             }
             notify?.let {
-                transaction.set(refNotifyOwner, notify)
+                transaction.set(refListNotifyOwnerPost.document(it.id), notify)
             }
             val updateCount = if (isLiked) FieldValue.increment(1) else FieldValue.increment(-1)
             transaction.update(refPostLiked, FIELD_NUMBER_LIKES, updateCount)

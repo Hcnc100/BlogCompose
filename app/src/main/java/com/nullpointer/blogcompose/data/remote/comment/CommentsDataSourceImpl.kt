@@ -68,17 +68,13 @@ class CommentsDataSourceImpl:CommentsDataSource {
         notify: Notify?
     ): String {
         val refPostComment = refPosts.document(idPost)
-        val refNewComment =
-            refComment.document(idPost).collection(NAME_REF_LIST_COMMENTS).document(comment.id)
-        val refNotifyOwner =
-            refNotify.document(ownerPost).collection(NAME_REF_LIST_NOTIFY)
-                .document(notify?.id ?: "")
-
+        val refNewComment = refComment.document(idPost).collection(NAME_REF_LIST_COMMENTS).document(comment.id)
+        val refListNotifyOwnerPost = refNotify.document(ownerPost).collection(NAME_REF_LIST_NOTIFY)
         database.runTransaction { transaction ->
             transaction.update(refPostComment, FIELD_NUMBER_COMMENTS, FieldValue.increment(1))
             transaction.set(refNewComment, comment)
             notify?.let {
-                transaction.set(refNotifyOwner, notify)
+                transaction.set(refListNotifyOwnerPost.document(it.id), notify)
             }
         }.await()
         return refNewComment.id

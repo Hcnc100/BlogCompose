@@ -15,8 +15,8 @@ import com.nullpointer.blogcompose.ui.activitys.MainActivity
 
 class NotifyUploadImgHelper(private val context: Context) {
     companion object {
-        const val ID_CHANNEL_UPLOAD_DATA = "ID_CHANNEL_UPLOAD_POST_BLOG_COMPOSE"
-        const val ID_NOTIFY_UPLOAD=123456
+        private const val ID_CHANNEL_UPLOAD_DATA = "ID_CHANNEL_UPLOAD_POST_BLOG_COMPOSE"
+        private const val ID_NOTIFY_UPLOAD=123456
     }
 
     private val notificationManager = context.getNotifyServices()
