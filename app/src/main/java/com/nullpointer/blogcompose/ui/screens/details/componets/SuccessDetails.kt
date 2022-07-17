@@ -7,15 +7,13 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Card
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -38,7 +36,7 @@ fun SuccessFullDetails(
     hasNewComments: Boolean,
     listState: LazyListState,
     isLoading: Boolean,
-    actionPost: (ActionDetails) -> Unit
+    actionPost: (ActionDetails) -> Unit,
 ) {
     Box(modifier = modifier) {
         LazyColumn(state = listState) {
@@ -96,14 +94,14 @@ private fun ItemComment(
 ) {
     Row(modifier = modifier.padding(10.dp)) {
         ImageProfileUser(
-            urlImg = comment.userComment?.urlImg ?: "",
-            contentDescription = "",
+            urlImg = comment.userComment?.urlImg.toString(),
+            contentDescription = stringResource(id = R.string.description_img_owner_post),
             modifier = Modifier.size(40.dp)
         )
         Spacer(modifier = Modifier.width(10.dp))
         Card(shape = RoundedCornerShape(10.dp)) {
             Column(modifier = Modifier.padding(10.dp)) {
-                Text(comment.userComment?.name ?: "")
+                Text(comment.userComment?.name.toString())
                 Spacer(modifier = Modifier.height(5.dp))
                 Text(text = comment.comment)
             }
@@ -135,6 +133,11 @@ fun HeaderBlogDetails(
     modifier: Modifier = Modifier,
     actionLike: () -> Unit
 ) {
+
+    val iconLike = derivedStateOf {
+        if (blog.ownerLike) R.drawable.ic_fav else R.drawable.ic_unfav
+    }
+
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -155,30 +158,34 @@ fun HeaderBlogDetails(
         Spacer(modifier = Modifier.height(10.dp))
         AsyncImage(
             model = blog.urlImage,
-            contentDescription = "",
+            contentDescription = stringResource(id = R.string.description_img_post),
             modifier = Modifier
                 .fillMaxWidth()
         )
-        Spacer(
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(1.dp)
-                .background(Color.White)
-        )
-        Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.padding(10.dp)) {
-            Text(
-                text = stringResource(id = R.string.text_count_likes, blog.numberLikes),
-                modifier = Modifier
-                    .padding(10.dp)
-                    .clickable {
-                        actionLike()
-                    }
-            )
-
+                .padding(10.dp)
+        ) {
+            Row(modifier = Modifier
+                .padding(10.dp)
+                .clickable {
+                    actionLike()
+                }, verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    painter = painterResource(id = iconLike.value), contentDescription = stringResource(
+                        id = R.string.description_like_button
+                    )
+                )
+                Spacer(modifier = Modifier.width(5.dp))
+                Text(
+                    text = stringResource(id = R.string.text_count_likes, blog.numberLikes)
+                )
+            }
             Text(
                 text = stringResource(id = R.string.text_count_comments, blog.numberComments),
-                modifier = Modifier
-                    .padding(10.dp)
+                modifier = Modifier.padding(10.dp)
             )
         }
 

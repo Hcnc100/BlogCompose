@@ -6,6 +6,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -19,13 +20,12 @@ fun LoadingPost() {
                 modifier = Modifier.padding(10.dp),
                 shape = RoundedCornerShape(10.dp)
             ) {
-                val widthRandom=(50..280).random()
                 Column(
                     modifier = Modifier
                         .padding(10.dp)
                         .fillMaxWidth()
                 ) {
-                    HeaderLoading(widthRandom=widthRandom)
+                    HeaderLoading()
                     Spacer(modifier = Modifier.padding(10.dp))
                     ImageLoading()
                     Spacer(modifier = Modifier.padding(10.dp))
@@ -38,8 +38,11 @@ fun LoadingPost() {
 
 @Composable
 private fun FakeTextLoading() {
+    val numberCommentsFake= remember {
+        (1..3).random()
+    }
     Column(modifier = Modifier.fillMaxWidth()) {
-        repeat((1..3).random()) {
+        repeat(numberCommentsFake) {
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -63,8 +66,13 @@ private fun ImageLoading(modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun HeaderLoading(modifier: Modifier = Modifier,widthRandom:Int) {
-    Row(verticalAlignment = Alignment.CenterVertically, modifier = modifier) {
+private fun HeaderLoading(modifier: Modifier = Modifier) {
+    val widthRandom = remember {
+        (50..280).random()
+    }
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier) {
         Card(
             modifier = Modifier
                 .size(45.dp)

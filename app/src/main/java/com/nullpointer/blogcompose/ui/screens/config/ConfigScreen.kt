@@ -50,8 +50,10 @@ fun ConfigScreen(
             Column {
                 ButtonCard(text = currentUser.name) {
                     AsyncImage(
-                        model = ImageRequest.Builder(LocalContext.current).crossfade(true)
-                            .data(currentUser.urlImg).transformations(CircleCropTransformation())
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .crossfade(true)
+                            .data(currentUser.urlImg)
+                            .transformations(CircleCropTransformation())
                             .build(),
                         contentDescription = stringResource(R.string.description_image_profile),
                         modifier = Modifier.size(30.dp)

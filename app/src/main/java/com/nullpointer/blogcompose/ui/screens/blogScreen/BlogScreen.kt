@@ -2,11 +2,15 @@ package com.nullpointer.blogcompose.ui.screens.blogScreen
 
 import android.content.Context
 import android.content.Intent
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.Scaffold
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -33,7 +37,6 @@ import com.nullpointer.blogcompose.ui.share.CircularProgressAnimation
 import com.nullpointer.blogcompose.ui.share.OnBottomReached
 import com.ramcosta.composedestinations.annotation.Destination
 import kotlinx.coroutines.delay
-import timber.log.Timber
 
 @HomeNavGraph(start = true)
 @Destination(style = MainTransitions::class)
@@ -95,18 +98,16 @@ fun BlogScreen(
                             },
                             actionBlog = { action, post ->
                                 when (action) {
-                                    DETAILS -> {
-                                        actionRootDestinations.changeRoot(
-                                            PostDetailsDestination(
-                                                post.id,
-                                                false
-                                            )
-                                        )
-                                    }
+                                    DETAILS -> actionRootDestinations.changeRoot(
+                                        PostDetailsDestination(post.id)
+                                    )
+                                    COMMENT -> actionRootDestinations.changeRoot(
+                                        PostDetailsDestination(post.id, true)
+                                    )
                                     SHARE -> sharePost(post.id, blogScreenState.context)
                                     LIKE -> likeVM.likePost(post)
-                                    DOWNLOAD -> TODO()
-                                    SAVE -> TODO()
+                                    DOWNLOAD -> {}
+                                    SAVE -> {}
                                 }
                             }
                         )
@@ -117,6 +118,7 @@ fun BlogScreen(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun ListPost(
     listPost: List<Post>,
@@ -142,7 +144,7 @@ private fun ListPost(
             BlogItem(
                 post = listPost[index],
                 actionBlog = actionBlog,
-//                modifier = Modifier.animateItemPlacement()
+                modifier = Modifier.animateItemPlacement()
             )
         }
     }

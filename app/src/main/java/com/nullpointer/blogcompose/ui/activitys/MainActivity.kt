@@ -32,11 +32,8 @@ class MainActivity : ComponentActivity() {
         var loading = true
         val splash = installSplashScreen()
         splash.setKeepOnScreenCondition { loading }
-//        WindowCompat.setDecorFitsSystemWindows(window, false)
         setContent {
             BlogComposeTheme {
-//                ProvideWindowInsets(windowInsetsAnimationsEnabled = true) {
-
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
                     color = MaterialTheme.colors.background

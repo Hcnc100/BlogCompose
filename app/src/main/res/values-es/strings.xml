@@ -94,8 +94,11 @@
     <!-- blog screen -->
     <string name="message_empty_post">No hay post, deberías hacer uno</string>
     <string name="title_share_post">Compartir post</string>
-    <string name="description_to_to_comment">Ir a los comentarios y publicar uno nuevo</string>
     <string name="description_share_post">Compartir el post actual</string>
+
+    <string name="description_to_comment">Ir a los comentarios y publicar uno nuevo</string>
+    <string name="description_download_post">Descarga la imagen del post</string>
+    <string name="description_save_post">Guarda el post actual</string>
 
     <!-- notify screen -->
     <string name="message_empty_notify">No tiene notificaciones</string>

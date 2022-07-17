@@ -39,11 +39,6 @@ enum class HomeDestinations(
             NotifyScreen,
             ProfileScreen
         )
-
-        fun isHomeRoute(route: String?): Boolean {
-            if (route == null) return false
-            return listDestinations.find { it.direction.route == route } != null
-        }
     }
 
 }

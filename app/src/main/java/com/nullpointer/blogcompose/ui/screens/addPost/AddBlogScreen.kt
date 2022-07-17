@@ -117,33 +117,32 @@ private fun ImageNewBlog(
         Box(contentAlignment = Alignment.Center) {
             SubcomposeAsyncImage(
                 model = imgBlog,
-                contentDescription = "",
+                contentDescription = stringResource(id = R.string.description_img_loaded),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(250.dp)
             ) {
 
                 when {
-                    painter.state is AsyncImagePainter.State.Loading || isCompress -> {
-                        CircularProgressIndicator(
-                            modifier = Modifier.padding(60.dp),
-                            strokeWidth = 8.dp,
-                            color = MaterialTheme.colors.primary
-                        )
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_image),
-                            contentDescription = "",
-                            modifier = Modifier.padding(40.dp)
-                        )
-                    }
                     painter.state is AsyncImagePainter.State.Success -> SubcomposeAsyncImageContent()
+                    painter.state is AsyncImagePainter.State.Error && imgBlog != Uri.EMPTY -> Icon(
+                        painter = painterResource(id = R.drawable.ic_broken_image),
+                        contentDescription = stringResource(id = R.string.description_error_load_img),
+                        modifier = Modifier.padding(40.dp)
+                    )
                     else -> Icon(
                         painter = painterResource(id = R.drawable.ic_image),
-                        contentDescription = "",
+                        contentDescription = stringResource(id = R.string.description_img_loaded),
                         modifier = Modifier.padding(40.dp)
                     )
                 }
             }
+            if (isCompress)
+                CircularProgressIndicator(
+                    modifier = Modifier.size(50.dp),
+                    color = MaterialTheme.colors.primary,
+                    strokeWidth = 5.dp
+                )
             FloatingActionButton(
                 onClick = actionEditImg,
                 modifier = Modifier
@@ -151,8 +150,14 @@ private fun ImageNewBlog(
                     .size(40.dp)
                     .align(Alignment.BottomEnd)
             ) {
-                Icon(painter = painterResource(id = R.drawable.ic_edit), contentDescription = "")
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_edit),
+                    contentDescription = stringResource(
+                        id = R.string.description_edit_img_post
+                    )
+                )
             }
+
         }
     }
 

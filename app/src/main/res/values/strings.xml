@@ -153,4 +153,10 @@
     <string name="comment_hint">Escribe un comentario</string>
     <string name="label_comment">Comment</string>
     <string name="error_length_comment">El comentario es muy largo</string>
+    <string name="description_error_load_img">Error al cargar la imagen</string>
+    <string name="description_img_loaded">Imagen cargada actualmente</string>
+    <string name="title_dialog_creating_user">Creando usuario</string>
+    <string name="description_to_comment">Ir a los comentarios y publicar uno nuevo</string>
+    <string name="description_download_post">Descarga la imagen del post</string>
+    <string name="description_save_post">Guarda el post actual</string>
 </resources>

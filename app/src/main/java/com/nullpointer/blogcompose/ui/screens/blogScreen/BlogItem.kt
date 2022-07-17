@@ -1,6 +1,7 @@
 package com.nullpointer.blogcompose.ui.screens.blogScreen
 
 import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -10,6 +11,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -42,21 +44,31 @@ fun BlogItem(
     ContainerBlog(modifier=modifier) {
         Column {
             HeaderOwnerBlog(
-                urlImg = post.userPoster?.urlImg!!,
-                name = post.userPoster?.name!!,
+                urlImg = post.userPoster?.urlImg.toString(),
+                name = post.userPoster?.name.toString(),
                 modifier = Modifier.padding(10.dp)
             )
             ImageBlog(urlImg = post.urlImage) {
                 actionBlog(ActionsPost.DETAILS, post)
             }
-            ActionsPost(post = post, actionBlog = actionBlog, modifier = Modifier.padding(5.dp))
+            ActionsPost(
+                post = post,
+                actionBlog = actionBlog,
+                modifier = Modifier.padding(5.dp)
+            )
             TextLikes(
                 numberComments = post.numberComments,
                 numberLikes = post.numberLikes,
                 modifier = Modifier.padding(5.dp)
             )
-            DescriptionBlog(description = post.description, modifier = Modifier.padding(5.dp))
-            TextTime(timeStamp = post.timestamp, modifier = Modifier.padding(5.dp))
+            DescriptionBlog(
+                description = post.description,
+                modifier = Modifier.padding(5.dp)
+            )
+            TextTime(
+                timeStamp = post.timestamp,
+                modifier = Modifier.padding(5.dp)
+            )
         }
     }
 }
@@ -81,24 +93,42 @@ private fun ActionsPost(
     post: SimplePost,
     actionBlog: (ActionsPost, SimplePost) -> Unit
 ) {
+    val iconLike = derivedStateOf {
+        if (post.ownerLike) R.drawable.ic_fav else R.drawable.ic_unfav
+    }
     Row(modifier = modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
         Row {
-            IconAction(drawableRes = R.drawable.ic_fav) {
+            IconAction(
+                drawableRes = iconLike.value,
+                stringDescription = R.string.description_like_button
+            ) {
                 actionBlog(ActionsPost.LIKE, post)
             }
-            IconAction(drawableRes = R.drawable.ic_comment) {
-                actionBlog(ActionsPost.DETAILS, post)
+            IconAction(
+                drawableRes = R.drawable.ic_comment,
+                stringDescription = R.string.description_to_comment
+            ) {
+                actionBlog(ActionsPost.COMMENT, post)
             }
-            IconAction(drawableRes = R.drawable.ic_share) {
+            IconAction(
+                drawableRes = R.drawable.ic_share,
+                stringDescription = R.string.description_share_post
+            ) {
                 actionBlog(ActionsPost.SHARE, post)
             }
         }
 
         Row {
-            IconAction(drawableRes = R.drawable.ic_download) {
+            IconAction(
+                drawableRes = R.drawable.ic_download,
+                stringDescription = R.string.description_download_post
+            ) {
                 actionBlog(ActionsPost.DOWNLOAD, post)
             }
-            IconAction(drawableRes = R.drawable.ic_save) {
+            IconAction(
+                drawableRes = R.drawable.ic_save,
+                stringDescription = R.string.description_save_post
+            ) {
                 actionBlog(ActionsPost.SAVE, post)
             }
         }
@@ -107,14 +137,14 @@ private fun ActionsPost(
 
 @Composable
 private fun IconAction(
-    @DrawableRes
-    drawableRes: Int,
+    @DrawableRes drawableRes: Int,
+    @StringRes stringDescription: Int,
     modifier: Modifier = Modifier,
     action: () -> Unit,
 ) {
     Icon(
         painter = painterResource(id = drawableRes),
-        contentDescription = "",
+        contentDescription = stringResource(id = stringDescription),
         modifier = modifier
             .clip(CircleShape)
             .clickable { action() }
@@ -130,7 +160,7 @@ private fun ImageBlog(
     AsyncImage(
         contentScale = ContentScale.Crop,
         model = urlImg,
-        contentDescription = "",
+        contentDescription = stringResource(id = R.string.description_img_blog),
         modifier = Modifier
             .fillMaxWidth()
             .aspectRatio(1f)
@@ -151,7 +181,7 @@ private fun HeaderOwnerBlog(
                 .crossfade(true)
                 .transformations(CircleCropTransformation())
                 .build(),
-            contentDescription = "",
+            contentDescription = stringResource(id = R.string.description_img_owner_post),
             modifier = Modifier.size(50.dp),
             placeholder = painterResource(id = R.drawable.ic_person)
         )
@@ -196,7 +226,11 @@ private fun DescriptionBlog(
 
 
 @Composable
-fun TextLikes(numberLikes: Int, numberComments: Int, modifier: Modifier = Modifier) {
+fun TextLikes(
+    numberLikes: Int,
+    numberComments: Int,
+    modifier: Modifier = Modifier
+) {
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween

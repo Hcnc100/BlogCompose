@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -32,7 +33,7 @@ fun CreatingDialog() {
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    text = "Creando usuario",
+                    text = stringResource(R.string.title_dialog_creating_user),
                     style = MaterialTheme.typography.body1,
                     fontSize = 17.sp,
                     fontWeight = FontWeight.W500

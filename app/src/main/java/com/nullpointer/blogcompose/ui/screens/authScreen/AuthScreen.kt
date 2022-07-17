@@ -76,7 +76,7 @@ private fun ContainerLogo(
             elevation = 10.dp
         ) {
             AsyncImage(
-                R.mipmap.ic_launcher,
+                model = R.mipmap.ic_launcher,
                 contentDescription = stringResource(R.string.description_logo_app),
                 modifier = Modifier.size(150.dp)
             )

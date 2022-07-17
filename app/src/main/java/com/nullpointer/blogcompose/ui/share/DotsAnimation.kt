@@ -71,7 +71,6 @@ fun DotsPulsing(modifier: Modifier = Modifier,color: Color) {
 @Composable
 fun DotsTyping(modifier: Modifier = Modifier,color: Color) {
     val maxOffset = 6.5f
-
     @Composable
     fun Dot(
         offset: Float
