@@ -70,6 +70,7 @@ fun BlogScreen(
                 ButtonAdd(isScrollInProgress = blogScreenState.isScrollInProgress) {
                     actionRootDestinations.changeRoot(AddBlogScreenDestination)
                 }
+
             }
         ) {
             when (statePost) {
@@ -83,9 +84,9 @@ fun BlogScreen(
                     val listPost = (statePost as Resource.Success<List<Post>>).data
                     if (listPost.isEmpty()) {
                         AnimationScreen(
-                            resourceRaw = R.raw.empty1, emptyText = stringResource(
-                                id = R.string.message_empty_post
-                            )
+                            modifier = Modifier.fillMaxSize(),
+                            resourceRaw = R.raw.empty1,
+                            emptyText = stringResource(id = R.string.message_empty_post)
                         )
                     } else {
                         ListPost(

@@ -17,7 +17,7 @@ fun AnimationScreen(
     emptyText: String,
     modifier: Modifier = Modifier
 ) {
-    Column(modifier = modifier.fillMaxSize()) {
+    Column(modifier = modifier) {
         LottieContainer(
             animation = resourceRaw,
             modifier = Modifier

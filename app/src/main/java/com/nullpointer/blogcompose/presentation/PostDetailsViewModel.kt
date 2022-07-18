@@ -71,18 +71,20 @@ class PostDetailsViewModel @Inject constructor(
     val postState: StateFlow<Resource<Post>> = flow<Resource<Post>> {
         // * update the comments when idPost is updated and this is not empty
         _idPost.collect {
-            postRepository.getRealTimePost(it).collect { newPost ->
-                if (newPost!!.numberComments != numberComments) {
-                    if (numberComments != -1 && newPost.numberComments > numberComments)
-                        hasNewComments = true
-                    numberComments = newPost.numberComments
-                }
+            if(it.isNotEmpty()){
+                postRepository.getRealTimePost(it).collect { newPost ->
+                    if (newPost!!.numberComments != numberComments) {
+                        if (numberComments != -1 && newPost.numberComments > numberComments)
+                            hasNewComments = true
+                        numberComments = newPost.numberComments
+                    }
 
-                // * emit post reciber
-                emit(Resource.Success(newPost))
-                // * update inner post (saved in database)
-                withContext(Dispatchers.IO) {
-                    postRepository.updatePost(newPost)
+                    // * emit post reciber
+                    emit(Resource.Success(newPost))
+                    // * update inner post (saved in database)
+                    withContext(Dispatchers.IO) {
+                        postRepository.updatePost(newPost)
+                    }
                 }
             }
         }

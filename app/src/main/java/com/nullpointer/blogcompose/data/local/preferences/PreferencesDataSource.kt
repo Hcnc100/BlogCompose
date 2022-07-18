@@ -1,12 +1,12 @@
 package com.nullpointer.blogcompose.data.local.preferences
 
-import com.nullpointer.blogcompose.models.users.MyUser
+import com.nullpointer.blogcompose.models.users.SimpleUser
 import kotlinx.coroutines.flow.Flow
 
 interface PreferencesDataSource {
-    val user: Flow<MyUser>
-    suspend fun getCurrentUser(): MyUser
+    val user: Flow<SimpleUser>
+    suspend fun getCurrentUser(): SimpleUser
     suspend fun getIdUser(): String
     suspend fun deleterUser()
-    suspend fun updateUser(myUser: MyUser)
+    suspend fun updateUser(myUser: SimpleUser)
 }

@@ -2,6 +2,7 @@ package com.nullpointer.blogcompose.ui.screens.details
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -109,7 +110,7 @@ fun PostDetails(
                 AnimationScreen(
                     resourceRaw = R.raw.error1,
                     emptyText = stringResource(id = R.string.error_load_post),
-                    modifier = Modifier.padding(it)
+                    modifier = Modifier.padding(it).fillMaxSize()
                 )
             }
             Resource.Loading -> LoadingFullPostDetails(modifier = Modifier.padding(it))
@@ -133,6 +134,7 @@ fun PostDetails(
                     isConcatenate = postDetailsViewModel.stateConcatComment,
                     listState = postDetailsState.lazyListState,
                     hasNewComments = postDetailsViewModel.hasNewComments,
+                    actionReloadComments = postDetailsViewModel::requestsComments,
                     actionDetails = { action ->
                         when (action) {
                             ActionDetails.HAS_NEW_COMMENTS -> postDetailsViewModel.requestsComments()
@@ -155,13 +157,15 @@ private fun FullDetailsScreen(
     listState: LazyListState,
     hasNewComments: Boolean,
     actionDetails: (ActionDetails) -> Unit,
+    actionReloadComments: () -> Unit
 ) {
     when (commentsState) {
         Resource.Failure -> {
             ErrorLoadingOnlyComments(
                 post = post,
                 modifier = modifier,
-                actionLike = { actionDetails(ActionDetails.LIKE_THIS_POST) }
+                actionLike = { actionDetails(ActionDetails.LIKE_THIS_POST) },
+                actionReloadComments = actionReloadComments
             )
         }
         Resource.Loading -> {

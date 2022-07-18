@@ -12,6 +12,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import com.nullpointer.blogcompose.ui.interfaces.ActionRootDestinations
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -24,9 +25,12 @@ class ProfileScreenState constructor(
     context: Context,
     modalBottomSheetState: ModalBottomSheetState,
     scope: CoroutineScope,
-    val swipeRefreshScreenState: SwipeRefreshScreenState,
-    val listState: LazyGridState
+    private val swipeRefreshScreenState: SwipeRefreshScreenState,
+    val listState: LazyGridState,
 ) : SelectImageScreenState(scaffoldState, context, focusManager, modalBottomSheetState, scope) {
+
+    val swipeState get() = swipeRefreshScreenState.swipeState
+
     @OptIn(ExperimentalFoundationApi::class)
     val isScrollInProgress get() = listState.isScrollInProgress
 
@@ -69,6 +73,6 @@ fun rememberProfileScreenState(
         modalBottomSheetState,
         coroutineScope,
         swipeRefreshScreenState,
-        gridState
+        gridState,
     )
 }

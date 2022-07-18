@@ -76,6 +76,7 @@ class MyPostViewModel @Inject constructor(
         jobRequestNew?.cancel()
         jobRequestNew = viewModelScope.launch {
             stateRequestMyPost = true
+            isConcatenateEnable=true
             try {
                 val sizeNewPost =
                     withContext(Dispatchers.IO) { postRepository.requestMyLastPost(forceRefresh) }
@@ -119,7 +120,7 @@ class MyPostViewModel @Inject constructor(
                         }
                     }
                 } finally {
-                    stateRequestMyPost = false
+                    stateConcatMyPost = false
                 }
             }
         }

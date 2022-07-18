@@ -74,6 +74,7 @@ class PostViewModel @Inject constructor(
         jobRequestNew?.cancel()
         jobRequestNew = viewModelScope.launch {
             stateRequestData = true
+            isConcatEnable = true
             try {
                 val sizeNewPost =
                     withContext(Dispatchers.IO) { postRepository.requestLastPost(forceRefresh) }

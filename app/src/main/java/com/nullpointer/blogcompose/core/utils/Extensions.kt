@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
+import android.os.Parcel
 import android.text.format.DateFormat
 import android.text.format.DateFormat.is24HourFormat
 import android.widget.Toast
@@ -67,4 +68,13 @@ inline fun <reified VM : ViewModel> shareViewModel():VM {
 
 fun DocumentSnapshot.timestampEstimate(nameField: String): Date? {
     return getTimestamp(nameField, DocumentSnapshot.ServerTimestampBehavior.ESTIMATE)?.toDate()
+}
+
+fun Parcel.writeDate(date: Date?) {
+    writeLong(date?.time ?: -1)
+}
+
+fun Parcel.readDate(): Date? {
+    val long = readLong()
+    return if (long != -1L) Date(long) else null
 }

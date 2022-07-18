@@ -24,8 +24,10 @@ interface PostDAO {
 
     @Transaction
     suspend fun updateAllPost(list: List<Post>) {
-        deleterAll()
-        insertListPost(list)
+        if(list.isNotEmpty()){
+            deleterAll()
+            insertListPost(list)
+        }
     }
 
     @Query("SELECT * FROM table_post ORDER BY timeStamp DESC")

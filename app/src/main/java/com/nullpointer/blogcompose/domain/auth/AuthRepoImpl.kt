@@ -7,7 +7,7 @@ import com.nullpointer.blogcompose.core.utils.NetworkException
 import com.nullpointer.blogcompose.data.local.preferences.PreferencesDataSource
 import com.nullpointer.blogcompose.data.remote.auth.AuthDataSource
 import com.nullpointer.blogcompose.data.remote.image.ImagesDataSource
-import com.nullpointer.blogcompose.models.users.MyUser
+import com.nullpointer.blogcompose.models.users.SimpleUser
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 
@@ -17,7 +17,7 @@ class AuthRepoImpl(
     private val imagesDataSource: ImagesDataSource
 ) : AuthRepository {
 
-    override val myUser: Flow<MyUser> = prefDataSource.user
+    override val myUser: Flow<SimpleUser> = prefDataSource.user
 
     override suspend fun getIdUser() = this.myUser.first().idUser
 
@@ -43,14 +43,10 @@ class AuthRepoImpl(
     }
 
 
-    override suspend fun createNewUser(user: MyUser) {
+    override suspend fun createNewUser(user: SimpleUser) {
         if (!InternetCheck.isNetworkAvailable()) throw NetworkException()
-        val uriImg = imagesDataSource.uploadImageUserWithState(user.urlImg.toUri())
+        val uriImg = imagesDataSource.uploadImageUserWithOutState(user.urlImg.toUri())
         val updateUser = authDataSource.updateFullDataUser(user.name, uriImg.toString())
         prefDataSource.updateUser(updateUser)
     }
-
-
-
-
 }

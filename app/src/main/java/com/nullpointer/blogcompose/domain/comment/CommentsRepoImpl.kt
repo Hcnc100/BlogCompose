@@ -8,7 +8,7 @@ import com.nullpointer.blogcompose.models.Comment
 import com.nullpointer.blogcompose.models.notify.Notify
 import com.nullpointer.blogcompose.models.notify.TypeNotify
 import com.nullpointer.blogcompose.models.posts.SimplePost
-import com.nullpointer.blogcompose.models.users.MyUser
+import com.nullpointer.blogcompose.models.users.SimpleUser
 
 class CommentsRepoImpl(
     private val prefDataSource: PreferencesDataSource,
@@ -55,17 +55,17 @@ class CommentsRepoImpl(
         )
     }
 
-    private fun MyUser.createNewComment(newComment: String): Comment {
+    private fun SimpleUser.createNewComment(newComment: String): Comment {
         return Comment(
-            userComment = this.toInnerUser(),
+            userComment = this,
             comment = newComment
         )
     }
 
 
-    private fun SimplePost.createCommentNotify(myUser: MyUser): Notify {
+    private fun SimplePost.createCommentNotify(myUser: SimpleUser): Notify {
         return Notify(
-            userInNotify = myUser.toInnerUser(),
+            userInNotify = myUser,
             idPost = id,
             urlImgPost = urlImage,
             type = TypeNotify.COMMENT

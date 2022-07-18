@@ -160,4 +160,5 @@
     <string name="description_img_user">Foto de perfil del usuario</string>
     <string name="description_edit_img_user">Icono para cambiar la imagen actual del usuario</string>
     <string name="description_settings">Icono para ir a la pantalla de ajustes</string>
+    <string name="retry_load_comments">Reintentar cargar comentarios</string>
 </resources>

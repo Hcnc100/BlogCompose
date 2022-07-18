@@ -3,13 +3,12 @@ package com.nullpointer.blogcompose.data.remote.auth
 import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.DocumentReference
-import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.ktx.messaging
-import com.nullpointer.blogcompose.models.users.MyUser
+import com.nullpointer.blogcompose.models.users.SimpleUser
 import kotlinx.coroutines.tasks.await
 
 class AuthDataSourceImpl : AuthDataSource {
@@ -29,7 +28,7 @@ class AuthDataSourceImpl : AuthDataSource {
 
 
 
-    override suspend fun authWithCredential(credential: AuthCredential): MyUser {
+    override suspend fun authWithCredential(credential: AuthCredential): SimpleUser {
         val resultAuth = auth.signInWithCredential(credential).await()
         updateTokenUser(uuidUser = resultAuth.user!!.uid)
         return nodeUsers.document(resultAuth.user!!.uid).toMyUser()
@@ -62,7 +61,7 @@ class AuthDataSourceImpl : AuthDataSource {
     }
 
 
-    override suspend fun updateDataUser(name: String?, urlImg: String?): MyUser {
+    override suspend fun updateDataUser(name: String?, urlImg: String?): SimpleUser {
         val nodeUser = nodeUsers.document(auth.currentUser!!.uid)
         val mapUpdate = mutableMapOf<String, Any>()
         name?.let { mapUpdate[FIELD_NAME] = name }
@@ -72,13 +71,12 @@ class AuthDataSourceImpl : AuthDataSource {
         return nodeUser.toMyUser()
     }
 
-    override suspend fun updateFullDataUser(name: String, urlImg: String): MyUser {
+    override suspend fun updateFullDataUser(name: String, urlImg: String): SimpleUser {
         val nodeUser = nodeUsers.document(auth.currentUser!!.uid)
         val dataUpdate = mapOf<String, Any>(
             FIELD_NAME to name,
             FIELD_URL_IMG to urlImg,
             FIELD_EMAIL to auth.currentUser?.email!!,
-
         )
         nodeUser.update(dataUpdate).await()
         return nodeUser.toMyUser()
@@ -92,9 +90,9 @@ class AuthDataSourceImpl : AuthDataSource {
         auth.signOut()
     }
 
-    private suspend fun DocumentReference.toMyUser(): MyUser{
+    private suspend fun DocumentReference.toMyUser(): SimpleUser{
         return get().await().let {
-            it.toObject<MyUser>()!!.copy(idUser = it.id)
+            it.toObject<SimpleUser>()!!.copy(idUser = it.id)
         }
     }
 }

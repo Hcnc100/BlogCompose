@@ -11,7 +11,7 @@ import com.nullpointer.blogcompose.models.notify.TypeNotify
 import com.nullpointer.blogcompose.models.posts.MyPost
 import com.nullpointer.blogcompose.models.posts.Post
 import com.nullpointer.blogcompose.models.posts.SimplePost
-import com.nullpointer.blogcompose.models.users.MyUser
+import com.nullpointer.blogcompose.models.users.SimpleUser
 import kotlinx.coroutines.flow.Flow
 import java.util.*
 
@@ -24,7 +24,7 @@ class PostRepoImpl(
 
     companion object {
         private const val SIZE_POST_REQUEST = 5
-        private const val SIZE_MY_POST_REQUEST = 10
+        private const val SIZE_MY_POST_REQUEST = 15
     }
 
     override val listLastPost: Flow<List<Post>> = postDAO.getAllPost()
@@ -37,7 +37,7 @@ class PostRepoImpl(
             firstPost?.timestamp,
             size = SIZE_POST_REQUEST
         )
-        if (listLastPost.isNotEmpty()) postDAO.updateAllPost(listLastPost)
+        postDAO.updateAllPost(listLastPost)
         return listLastPost.size
     }
 
@@ -49,7 +49,7 @@ class PostRepoImpl(
             fromUser = prefDataSource.getIdUser(),
             size = SIZE_MY_POST_REQUEST
         ).map { MyPost.fromPost(it) }
-        if (listMyLastPost.isNotEmpty()) myPostDAO.updateAllPost(listMyLastPost)
+         myPostDAO.updateAllPost(listMyLastPost)
         return listMyLastPost.size
     }
 
@@ -117,12 +117,14 @@ class PostRepoImpl(
             postStartId = idPost,
             includePost = true,
             size = SIZE_POST_REQUEST
-        ).let { listPost ->
-            if (listPost.isNotEmpty()) {
-                postDAO.updateAllPost(listPost)
-                myPostDAO.updateAllPost(listPost.map { MyPost.fromPost(it) })
-            }
-        }
+        ).let { listPost -> postDAO.updateAllPost(listPost) }
+        val userId = prefDataSource.getIdUser()
+        getPostStartWith(
+            postStartId = idPost,
+            includePost = true,
+            size = SIZE_MY_POST_REQUEST,
+            fromUser = userId
+        ).let { listPost -> myPostDAO.updateAllPost(listPost.map { MyPost.fromPost(it) }) }
     }
 
     override suspend fun deleterAllPost() {
@@ -194,9 +196,9 @@ class PostRepoImpl(
         }
     }
 
-    private fun SimplePost.createLikeNotify(myUser: MyUser): Notify {
+    private fun SimplePost.createLikeNotify(myUser: SimpleUser): Notify {
         return Notify(
-            userInNotify = myUser.toInnerUser(),
+            userInNotify = myUser,
             idPost = id,
             urlImgPost = urlImage,
             type = TypeNotify.LIKE

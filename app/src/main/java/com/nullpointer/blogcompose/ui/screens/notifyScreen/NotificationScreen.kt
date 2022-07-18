@@ -1,6 +1,7 @@
 package com.nullpointer.blogcompose.ui.screens.notifyScreen
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.Scaffold
@@ -69,6 +70,7 @@ fun NotifyScreen(
 
                     if (listNotify.isEmpty()) {
                         AnimationScreen(
+                            modifier = Modifier.fillMaxSize(),
                             resourceRaw = R.raw.empty3,
                             emptyText = stringResource(R.string.message_empty_notify)
                         )

@@ -12,9 +12,8 @@ import com.nullpointer.blogcompose.core.delegates.SavableComposeState
 import com.nullpointer.blogcompose.core.states.LoginStatus
 import com.nullpointer.blogcompose.domain.auth.AuthRepository
 import com.nullpointer.blogcompose.domain.notify.NotifyRepository
-import com.nullpointer.blogcompose.domain.post.PostRepoImpl
 import com.nullpointer.blogcompose.domain.post.PostRepository
-import com.nullpointer.blogcompose.models.users.MyUser
+import com.nullpointer.blogcompose.models.users.SimpleUser
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -33,10 +32,13 @@ class AuthViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
+    private val SimpleUser.isUserAuth get() = idUser.isNotEmpty()
+    private val SimpleUser.isDataComplete get() = name.isNotEmpty() && urlImg.isNotEmpty()
+
     val currentUser = authRepository.myUser.flowOn(Dispatchers.IO).stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(5000),
-        MyUser()
+        SimpleUser()
     )
 
     private val _messageAuth = Channel<Int>()
@@ -98,7 +100,7 @@ class AuthViewModel @Inject constructor(
 
 
     fun createNewUser(
-        myUser: MyUser
+        myUser: SimpleUser
     ) = viewModelScope.launch(Dispatchers.IO) {
         try {
             creatingUser = true
@@ -115,4 +117,7 @@ class AuthViewModel @Inject constructor(
             creatingUser = false
         }
     }
+
+
+
 }

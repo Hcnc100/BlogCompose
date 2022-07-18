@@ -108,10 +108,11 @@ class NotifyViewModel @Inject constructor(
         jobRequestNotify?.cancel()
         jobRequestNotify = viewModelScope.launch {
             stateRequestNotify = true
+            isConcatEnable = true
             try {
                 val countNotify =
                     withContext(Dispatchers.IO) { notifyRepository.requestLastNotify(forceRefresh) }
-                isConcatEnable = true
+
                 Timber.d("notify get for request :$countNotify")
             } catch (e: Exception) {
                 when (e) {

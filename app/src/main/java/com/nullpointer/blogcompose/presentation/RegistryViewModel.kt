@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.delegates.PropertySavableImg
 import com.nullpointer.blogcompose.core.delegates.PropertySavableString
-import com.nullpointer.blogcompose.models.users.MyUser
+import com.nullpointer.blogcompose.models.users.SimpleUser
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -51,9 +51,9 @@ class RegistryViewModel @Inject constructor(
     val isDataValid get() = !nameUser.hasError && !imageProfile.isEmpty
 
 
-    fun getUpdatedUser(): MyUser? {
+    fun getUpdatedUser(): SimpleUser? {
         return if(fullDataChange){
-            MyUser(name = nameUser.value, urlImg = imageProfile.value.toString())
+            SimpleUser(name = nameUser.value, urlImg = imageProfile.value.toString())
         }else{
             _registryMessage.trySend(R.string.message_error_empty_data)
             null

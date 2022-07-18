@@ -3,11 +3,10 @@ package com.nullpointer.blogcompose.models.posts
 import android.os.Parcelable
 import androidx.room.Embedded
 import androidx.room.Entity
-import androidx.room.Ignore
 import androidx.room.PrimaryKey
 import com.google.firebase.firestore.Exclude
 import com.google.firebase.firestore.ServerTimestamp
-import com.nullpointer.blogcompose.models.users.InnerUser
+import com.nullpointer.blogcompose.models.users.SimpleUser
 import kotlinx.parcelize.Parcelize
 import java.util.*
 
@@ -20,7 +19,7 @@ data class Post(
     override var numberComments: Int = 0,
     override var numberLikes: Int = 0,
     @Embedded
-    override var userPoster: InnerUser? = null,
+    override var userPoster: SimpleUser? = null,
     @set:Exclude @get:Exclude
     override var ownerLike: Boolean = false,
     @ServerTimestamp

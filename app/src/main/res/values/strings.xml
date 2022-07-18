@@ -163,4 +163,6 @@
     <string name="hint_user_name">Type a username</string>
     <string name="message_error_empty_data">These data are necessary</string>
     <string name="text_hint_description">Write the description</string>
+    <string name="retry_load_comments">Retry load comments</string>
+    <string name="error_load_my_post">Error load my post</string>
 </resources>

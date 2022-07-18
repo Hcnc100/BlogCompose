@@ -11,7 +11,7 @@ import com.nullpointer.blogcompose.domain.auth.AuthRepository
 import com.nullpointer.blogcompose.domain.images.ImagesRepository
 import com.nullpointer.blogcompose.domain.post.PostRepository
 import com.nullpointer.blogcompose.models.posts.Post
-import com.nullpointer.blogcompose.models.users.InnerUser
+import com.nullpointer.blogcompose.models.users.SimpleUser
 import com.nullpointer.blogcompose.services.uploadImg.UploadDataControl.ACTION_START_POST
 import com.nullpointer.blogcompose.services.uploadImg.UploadDataControl.ACTION_START_USER
 import com.nullpointer.blogcompose.services.uploadImg.UploadDataControl.ACTION_STOP
@@ -120,7 +120,7 @@ class UploadDataServices : LifecycleService() {
             id = uuidPost,
             description = description,
             urlImage = urlImg,
-            userPoster = InnerUser(
+            userPoster = SimpleUser(
                 idUser = user.idUser,
                 name = user.name,
                 urlImg = user.urlImg,

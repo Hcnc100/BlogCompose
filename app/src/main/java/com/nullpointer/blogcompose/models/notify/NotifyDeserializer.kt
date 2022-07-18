@@ -4,7 +4,7 @@ import com.google.gson.JsonDeserializationContext
 import com.google.gson.JsonDeserializer
 import com.google.gson.JsonElement
 import com.google.gson.JsonParseException
-import com.nullpointer.blogcompose.models.users.InnerUser
+import com.nullpointer.blogcompose.models.users.SimpleUser
 import java.lang.reflect.Type
 
 class NotifyDeserializer : JsonDeserializer<Notify?> {
@@ -16,7 +16,7 @@ class NotifyDeserializer : JsonDeserializer<Notify?> {
     ): Notify {
         val jsonObject = json.asJsonObject
         val userObject=jsonObject["userInNotify"].asJsonObject
-        val userInNotify = InnerUser(
+        val userInNotify = SimpleUser(
             idUser = userObject["idUser"].asString,
             urlImg = userObject["urlImg"].asString,
             name = userObject["name"].asString,

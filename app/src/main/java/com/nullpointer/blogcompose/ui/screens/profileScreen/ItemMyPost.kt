@@ -1,5 +1,6 @@
 package com.nullpointer.blogcompose.ui.screens.profileScreen
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -18,12 +19,16 @@ import com.nullpointer.blogcompose.models.posts.MyPost
 fun ItemMyPost(
     post: MyPost,
     modifier: Modifier = Modifier,
+    actionDetails: (String) -> Unit
 ) {
     Card(
         modifier = modifier
             .padding(4.dp)
             .fillMaxWidth()
-            .aspectRatio(1f),
+            .aspectRatio(1f)
+            .clickable {
+                actionDetails(post.id)
+            },
         shape = RoundedCornerShape(5.dp)
     ) {
         AsyncImage(

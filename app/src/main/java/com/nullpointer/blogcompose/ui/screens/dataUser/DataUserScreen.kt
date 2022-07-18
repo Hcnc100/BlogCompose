@@ -2,12 +2,15 @@ package com.nullpointer.blogcompose.ui.screens.dataUser
 
 import android.net.Uri
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -82,7 +85,7 @@ fun DataUserScreen(
                 PhotoProfile(
                     urlImg = registryViewModel.imageProfile.value,
                     actionChangePhoto = dataScreenState::showModal,
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
                     isCompress = registryViewModel.imageProfile.isCompress
                 )
                 Spacer(modifier = Modifier.height(40.dp))
@@ -102,59 +105,60 @@ private fun PhotoProfile(
     isCompress: Boolean,
     actionChangePhoto: () -> Unit
 ) {
-    Box(
-        modifier = modifier,
-        contentAlignment = Alignment.Center
-    ) {
-        Box(contentAlignment = Alignment.Center) {
 
-            SubcomposeAsyncImage(
-                model = urlImg,
-                contentDescription = stringResource(id = R.string.description_image_profile),
-                modifier = Modifier.size(180.dp),
-                contentScale = ContentScale.Crop
-            ) {
+    Box(modifier = modifier) {
+        Card(shape = CircleShape) {
+            Box(contentAlignment = Alignment.Center) {
+                SubcomposeAsyncImage(
+                    model = urlImg,
+                    contentDescription = stringResource(id = R.string.description_image_profile),
+                    modifier = Modifier.size(180.dp),
+                    contentScale = ContentScale.Crop
+                ) {
 
-                when {
-                    painter.state is AsyncImagePainter.State.Success -> SubcomposeAsyncImageContent()
-                    painter.state is AsyncImagePainter.State.Error && urlImg != Uri.EMPTY -> {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_broken_image),
-                            contentDescription = stringResource(id = R.string.description_error_load_img),
+                    when {
+                        painter.state is AsyncImagePainter.State.Success -> SubcomposeAsyncImageContent()
+                        painter.state is AsyncImagePainter.State.Error && urlImg != Uri.EMPTY -> {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_broken_image),
+                                contentDescription = stringResource(id = R.string.description_error_load_img),
+                                modifier = Modifier.padding(40.dp)
+                            )
+                        }
+                        else -> Icon(
+                            painter = painterResource(id = R.drawable.ic_person),
+                            contentDescription = stringResource(id = R.string.description_image_profile),
                             modifier = Modifier.padding(40.dp)
                         )
                     }
-                    else -> Icon(
-                        painter = painterResource(id = R.drawable.ic_person),
-                        contentDescription = stringResource(id = R.string.description_image_profile),
-                        modifier = Modifier.padding(40.dp)
-                    )
                 }
-            }
 
-            if (isCompress)
-                CircularProgressIndicator(
-                    modifier = Modifier.size(30.dp),
-                    color = MaterialTheme.colors.primary,
-                    strokeWidth = 4.dp
-                )
-
-            FloatingActionButton(
-                onClick = actionChangePhoto,
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(15.dp)
-                    .size(40.dp)
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_edit),
-                    contentDescription = stringResource(
-                        id = R.string.change_image_user
+                if (isCompress)
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(30.dp),
+                        color = MaterialTheme.colors.primary,
+                        strokeWidth = 4.dp
                     )
-                )
+
             }
         }
+        FloatingActionButton(
+            onClick = actionChangePhoto,
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(15.dp)
+                .size(40.dp)
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.ic_edit),
+                contentDescription = stringResource(
+                    id = R.string.change_image_user
+                )
+            )
+        }
     }
+
+
 }
 
 

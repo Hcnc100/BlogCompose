@@ -21,21 +21,28 @@ fun LoadingOnlyComments(
     modifier: Modifier = Modifier,
     actionLike:()->Unit
 ) {
-    LoadingFullPostDetails(modifier = modifier) {
-        HeaderBlogDetails(blog = post, actionLike = actionLike)
+    LazyColumn(modifier = modifier) {
+        item(key = { post.id }) {
+            HeaderBlogDetails(
+                blog = post,
+                actionLike = actionLike
+            )
+        }
+        items(10, key = { it }) {
+            FakeItemBlog()
+        }
     }
 }
 
 @Composable
 fun LoadingFullPostDetails(
     modifier: Modifier = Modifier,
-    headerLoading: @Composable (() -> Unit)? = null,
 ) {
     LazyColumn(modifier = modifier) {
-        item {
-            headerLoading?.invoke() ?: FakeHeaderBlogDetails()
+        item(key = "-1") {
+            FakeHeaderBlogDetails()
         }
-        items(10) {
+        items(10, key = { it }) {
             FakeItemBlog()
         }
     }

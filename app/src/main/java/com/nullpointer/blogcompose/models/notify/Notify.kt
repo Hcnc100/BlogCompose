@@ -5,13 +5,13 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.google.firebase.firestore.Exclude
 import com.google.firebase.firestore.ServerTimestamp
-import com.nullpointer.blogcompose.models.users.InnerUser
+import com.nullpointer.blogcompose.models.users.SimpleUser
 import java.util.*
 
 @Entity(tableName = "table_notify")
 data class Notify(
     @Embedded
-    val userInNotify: InnerUser? = null,
+    val userInNotify: SimpleUser? = null,
     val idPost: String = "",
     val urlImgPost: String = "",
     @ServerTimestamp
