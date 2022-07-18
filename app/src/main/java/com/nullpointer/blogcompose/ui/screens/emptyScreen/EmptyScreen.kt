@@ -31,7 +31,8 @@ fun AnimationScreen(
                 .padding(horizontal = 20.dp),
             contentAlignment = Alignment.Center
         ) {
-            Text(emptyText,
+            Text(
+                text = emptyText,
                 style = MaterialTheme.typography.h6,
                 textAlign = TextAlign.Center
             )

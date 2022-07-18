@@ -74,7 +74,11 @@ private fun ImagePostNotify(
     modifier: Modifier = Modifier
 ) {
     AsyncImage(
-        model = ImageRequest.Builder(LocalContext.current).data(urlImgPost).crossfade(true).build(),
+        model = ImageRequest
+            .Builder(LocalContext.current)
+            .data(urlImgPost)
+            .crossfade(true)
+            .build(),
         contentDescription = stringResource(R.string.description_post_img_notify),
         placeholder = painterResource(id = R.drawable.ic_image),
         error = painterResource(id = R.drawable.ic_broken_image),

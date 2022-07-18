@@ -6,6 +6,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
@@ -35,16 +36,21 @@ fun LoadingFullPostDetails(
             headerLoading?.invoke() ?: FakeHeaderBlogDetails()
         }
         items(10) {
-            val widthRandom = (60..280).random()
-            val heightRandom = (70..100).random()
-            FakeItemBlog(widthRandom = widthRandom, heightRandom = heightRandom)
+            FakeItemBlog()
         }
     }
 }
 
 
 @Composable
-private fun FakeItemBlog(widthRandom: Int, heightRandom: Int) {
+private fun FakeItemBlog() {
+
+    val widthRandom = remember{
+        (60..280).random()
+    }
+    val heightRandom = remember {
+        (70..100).random()
+    }
     Row(modifier = Modifier.padding(10.dp)) {
         Card(
             modifier = Modifier

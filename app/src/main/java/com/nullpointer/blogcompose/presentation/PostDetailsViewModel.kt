@@ -12,7 +12,6 @@ import com.nullpointer.blogcompose.core.delegates.SavableProperty
 import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.core.utils.NetworkException
 import com.nullpointer.blogcompose.domain.comment.CommentsRepository
-import com.nullpointer.blogcompose.domain.post.PostRepoImpl
 import com.nullpointer.blogcompose.domain.post.PostRepository
 import com.nullpointer.blogcompose.models.Comment
 import com.nullpointer.blogcompose.models.posts.Post
@@ -90,7 +89,9 @@ class PostDetailsViewModel @Inject constructor(
     }.flowOn(Dispatchers.IO).catch {
         Timber.d("Error con el post $it")
         _messageDetails.send(R.string.message_error_load_post)
-        postRepository.deleterPost(_idPost.value)
+        // ! update this before
+
+//        postRepository.deleterPost(_idPost.value)
         emit(Resource.Failure)
     }.stateIn(
         viewModelScope,

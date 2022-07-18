@@ -95,7 +95,6 @@
     <!-- blog screen -->
     <string name="message_empty_post">There is no post, you should make one</string>
     <string name="title_share_post">Share post</string>
-    <string name="description_to_to_comment">Go to comments and post a new one</string>
     <string name="description_share_post">Share the current post</string>
 
     <!-- notify screen -->
@@ -137,26 +136,31 @@
     <string name="message_error_internet_data">Internet is needed to update your data</string>
     <string name="message_error_validate_img">The profile image is not a valid image</string>
     <string name="message_error_compress_img">Failed to get image, try again</string>
-    <string name="post_upload_sucess">Post uploaded successfully</string>
-    <string name="hint_user_name">Escribe un nombre de usuario</string>
-    <string name="message_error_empty_data">Estos datos son necesarios</string>
+    <string name="post_upload_success">Post uploaded successfully</string>
 
 
-    <string name="title_upload_notify" translatable="false">Subiendo Datos</string>
-    <string name="name_Action_stop" translatable="false">Detener</string>
-    <string name="name_channel_upload" translatable="false">Subida de imagenes</string>
-    <string name="message_cancel_upload_services" translatable="false">Se cancelo la actualizacion</string>
-    <string name="data_user_upload_sucess" translatable="false">INfomacion actualiza con exito</string>
-    <string name="text_hint_description">Escribe la descripcion</string>
-    <string name="error_upload_service" translatable="false">error al subir el post</string>
-    <string name="error_load_post">El post ya no esta disponible</string>
-    <string name="comment_hint">Escribe un comentario</string>
+    <string name="description_to_comment">Go to comments and post a new one</string>
+    <string name="description_download_post">Download the post image</string>
+    <string name="description_save_post">Save the current post</string>
+
+
+    <string name="title_upload_notify">Uploading Data</string>
+    <string name="name_action_stop">Stop</string>
+    <string name="name_channel_upload">Image upload</string>
+    <string name="message_cancel_upload_services">Update was canceled</string>
+    <string name="data_user_upload_sucess">Information updated successfully</string>
+    <string name="error_upload_service">Error uploading the post</string>
+    <string name="error_load_post">The post is no longer available</string>
+    <string name="comment_hint">Write a comment</string>
     <string name="label_comment">Comment</string>
-    <string name="error_length_comment">El comentario es muy largo</string>
-    <string name="description_error_load_img">Error al cargar la imagen</string>
-    <string name="description_img_loaded">Imagen cargada actualmente</string>
-    <string name="title_dialog_creating_user">Creando usuario</string>
-    <string name="description_to_comment">Ir a los comentarios y publicar uno nuevo</string>
-    <string name="description_download_post">Descarga la imagen del post</string>
-    <string name="description_save_post">Guarda el post actual</string>
+    <string name="error_length_comment">The comment is too long</string>
+    <string name="description_error_load_img">Error loading image</string>
+    <string name="description_img_loaded">Image currently loaded</string>
+    <string name="title_dialog_creating_user">Creating user</string>
+    <string name="description_img_user">User profile photo</string>
+    <string name="description_edit_img_user">Icon to change the current image of the user</string>
+    <string name="description_settings">Icon to go to the settings screen</string>
+    <string name="hint_user_name">Type a username</string>
+    <string name="message_error_empty_data">These data are necessary</string>
+    <string name="text_hint_description">Write the description</string>
 </resources>

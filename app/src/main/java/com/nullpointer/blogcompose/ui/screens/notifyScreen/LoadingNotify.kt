@@ -6,6 +6,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -15,7 +16,6 @@ import com.valentinilk.shimmer.shimmer
 fun LoadingNotify() {
     LazyColumn {
         items(10) {
-            val widthNameRandom = (50..280).random()
             Card(modifier = Modifier.padding(5.dp)) {
                 Row(
                     modifier = Modifier.padding(10.dp),
@@ -24,7 +24,7 @@ fun LoadingNotify() {
                     ImageProfile()
                     Spacer(modifier = Modifier.width(10.dp))
                     Column {
-                        NameTextFake(widthNameRandom = widthNameRandom)
+                        NameTextFake()
                         Spacer(modifier = Modifier.height(10.dp))
                         FakeTextLoading()
                     }
@@ -52,7 +52,10 @@ private fun FakeTextLoading() {
 
 
 @Composable
-private fun NameTextFake(widthNameRandom: Int) {
+private fun NameTextFake() {
+    val widthNameRandom = remember {
+       (50..280).random()
+    }
     Row {
         Card(
             modifier = Modifier

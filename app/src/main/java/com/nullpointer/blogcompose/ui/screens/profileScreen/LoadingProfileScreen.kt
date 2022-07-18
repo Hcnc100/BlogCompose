@@ -39,6 +39,7 @@ fun ItemImageFake() {
             .fillMaxWidth()
             .aspectRatio(1f)
             .padding(3.dp)
-            .shimmer(), shape = RoundedCornerShape(5.dp)
+            .shimmer(),
+        shape = RoundedCornerShape(5.dp)
     ) {}
 }

@@ -64,7 +64,7 @@ class NotifyUploadImgHelper(private val context: Context) {
             .setContentTitle(context.getString(R.string.title_upload_notify))
             .setContentIntent(getPendingIntentToClick())
             .addAction(R.drawable.ic_stop,
-                context.getString(R.string.name_Action_stop),
+                context.getString(R.string.name_action_stop),
                 getPendingIntentStop())
 
     fun startServicesForeground(service: Service){

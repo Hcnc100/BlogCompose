@@ -174,7 +174,8 @@ private fun HeaderOwnerBlog(
     name: String,
     modifier: Modifier = Modifier
 ) {
-    Row(verticalAlignment = Alignment.CenterVertically, modifier = modifier.fillMaxWidth()) {
+    Row(verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier.fillMaxWidth()) {
         AsyncImage(
             model = ImageRequest.Builder(LocalContext.current)
                 .data(urlImg)

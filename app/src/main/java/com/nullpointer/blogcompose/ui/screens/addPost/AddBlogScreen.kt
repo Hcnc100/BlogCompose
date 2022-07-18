@@ -157,9 +157,6 @@ private fun ImageNewBlog(
                     )
                 )
             }
-
         }
     }
-
-
 }

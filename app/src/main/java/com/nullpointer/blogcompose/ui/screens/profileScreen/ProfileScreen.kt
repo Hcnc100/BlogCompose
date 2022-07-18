@@ -7,7 +7,6 @@ import androidx.compose.foundation.lazy.GridCells
 import androidx.compose.foundation.lazy.GridItemSpan
 import androidx.compose.foundation.lazy.LazyGridState
 import androidx.compose.foundation.lazy.LazyVerticalGrid
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -108,23 +107,20 @@ fun ProfileScreen(
                     } else {
                         GridPost(
                             listPost = listPost,
+                            currentUser = currentUser,
                             gridState = profileScreenState.listState,
                             actionLoadMore = {
                                 myPostViewModel.concatenatePost {
                                     profileScreenState.animateScrollMore()
                                 }
+                            },
+                            actionEditPhoto = profileScreenState::showModal,
+                            actionSettings = {
+                                actionRootDestinations.changeRoot(
+                                    ConfigScreenDestination
+                                )
                             }
-                        ) {
-                            HeaderUser(
-                                user = currentUser,
-                                actionEditPhoto = { profileScreenState.showModal() },
-                                actionClickSettings = {
-                                    actionRootDestinations.changeRoot(
-                                        ConfigScreenDestination
-                                    )
-                                }
-                            )
-                        }
+                        )
                     }
                 }
             }
@@ -138,34 +134,31 @@ private fun GridPost(
     listPost: List<MyPost>,
     gridState: LazyGridState,
     actionLoadMore: () -> Unit,
-    headerProfile: @Composable () -> Unit,
+    currentUser: MyUser,
+    actionEditPhoto: () -> Unit,
+    actionSettings: () -> Unit
 ) {
     LazyVerticalGrid(
         state = gridState,
         contentPadding = PaddingValues(2.dp),
         cells = GridCells.Adaptive(100.dp)
     ) {
-        item(span = { GridItemSpan(maxLineSpan) }, key = { 12345 }) {
-            headerProfile()
+        item(
+            span = { GridItemSpan(maxLineSpan) },
+            key = { currentUser.idUser }) {
+            HeaderUser(
+                user = currentUser,
+                actionEditPhoto = actionEditPhoto,
+                actionClickSettings = actionSettings
+            )
         }
         items(listPost.size, key = { index ->
             listPost[index].id
         }) { index ->
-            val post = listPost[index]
-            Card(
-                modifier = Modifier
-                    .padding(4.dp)
-                    .fillMaxWidth()
-                    .aspectRatio(1f)
-                    .animateItemPlacement(),
-                shape = RoundedCornerShape(5.dp)
-            ) {
-                AsyncImage(
-                    model = post.urlImage,
-                    contentDescription = "",
-                    contentScale = ContentScale.Crop
-                )
-            }
+            ItemMyPost(
+                post = listPost[index],
+                modifier = Modifier.animateItemPlacement()
+            )
         }
     }
 
@@ -216,7 +209,7 @@ private fun PhotoProfile(
                 .crossfade(true)
                 .build(),
             modifier = Modifier.size(150.dp),
-            contentDescription = "",
+            contentDescription = stringResource(id = R.string.description_img_user),
             contentScale = ContentScale.Crop
         )
         FloatingActionButton(onClick = {
@@ -225,7 +218,12 @@ private fun PhotoProfile(
             .padding(10.dp)
             .size(35.dp)
             .align(Alignment.BottomEnd)) {
-            Icon(painter = painterResource(id = R.drawable.ic_edit), contentDescription = "")
+            Icon(
+                painter = painterResource(id = R.drawable.ic_edit),
+                contentDescription = stringResource(
+                    id = R.string.description_edit_img_user
+                )
+            )
         }
     }
 
@@ -244,7 +242,7 @@ private fun IconButtonSettings(
     ) {
         Icon(
             painter = painterResource(id = R.drawable.ic_settings),
-            contentDescription = ""
+            contentDescription = stringResource(id = R.string.description_settings)
         )
     }
 }

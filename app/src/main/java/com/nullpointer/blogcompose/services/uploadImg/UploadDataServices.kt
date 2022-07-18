@@ -84,7 +84,7 @@ class UploadDataServices : LifecycleService() {
                             }
                         }
                         finishUploadSuccessEvent.trySend(Unit)
-                        showToastMessage(R.string.post_upload_sucess)
+                        showToastMessage(R.string.post_upload_success)
                     }
                     TypeUpdate.USER -> {
                         val name = intent.getStringExtra(KEY_NAME_USER_SERVICES)

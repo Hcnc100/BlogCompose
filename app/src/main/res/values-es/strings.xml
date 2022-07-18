@@ -91,14 +91,6 @@
     <string name="title_post">Post</string>
     <string name="text_load_more_comments">Cargar más comentarios</string>
 
-    <!-- blog screen -->
-    <string name="message_empty_post">No hay post, deberías hacer uno</string>
-    <string name="title_share_post">Compartir post</string>
-    <string name="description_share_post">Compartir el post actual</string>
-
-    <string name="description_to_comment">Ir a los comentarios y publicar uno nuevo</string>
-    <string name="description_download_post">Descarga la imagen del post</string>
-    <string name="description_save_post">Guarda el post actual</string>
 
     <!-- notify screen -->
     <string name="message_empty_notify">No tiene notificaciones</string>
@@ -138,9 +130,34 @@
     <string name="message_error_internet_data">Se necesita internet para actualizar sus datos</string>
     <string name="message_error_validate_img">La imagen de perfil no es una imagen válida</string>
     <string name="message_error_compress_img">No se pudo obtener la imagen, reintente</string>
-    <string name="post_upload_sucess">Post subido con éxito</string>
+    <string name="post_upload_success">Post subido con éxito</string>
+
+    <!-- blog screen -->
+    <string name="message_empty_post">No hay post, deberías hacer uno</string>
+    <string name="title_share_post">Compartir post</string>
+    <string name="description_share_post">Compartir el post actual</string>
+
+    <string name="description_to_comment">Ir a los comentarios y publicar uno nuevo</string>
+    <string name="description_download_post">Descarga la imagen del post</string>
+    <string name="description_save_post">Guarda el post actual</string>
+
     <string name="hint_user_name">Escribe un nombre de usuario</string>
     <string name="message_error_empty_data">Estos datos son necesarios</string>
-    <string name="text_hint_description">Escribe la descripcion</string>
-    <string name="error_load_post">El post ya no esta disponible</string>
+    <string name="title_upload_notify">Subiendo Datos</string>
+    <string name="name_action_stop">Detener</string>
+    <string name="name_channel_upload">Subida de imágenes</string>
+    <string name="message_cancel_upload_services">Se canceló la actualización</string>
+    <string name="data_user_upload_sucess">Información actualizada con éxito</string>
+    <string name="text_hint_description">Escribe la descripción</string>
+    <string name="error_upload_service">Error al subir el post</string>
+    <string name="error_load_post">El post ya no está disponible</string>
+    <string name="comment_hint">Escribe un comentario</string>
+    <string name="label_comment">Comentario</string>
+    <string name="error_length_comment">El comentario es muy largo</string>
+    <string name="description_error_load_img">Error al cargar la imagen</string>
+    <string name="description_img_loaded">Imagen cargada actualmente</string>
+    <string name="title_dialog_creating_user">Creando usuario</string>
+    <string name="description_img_user">Foto de perfil del usuario</string>
+    <string name="description_edit_img_user">Icono para cambiar la imagen actual del usuario</string>
+    <string name="description_settings">Icono para ir a la pantalla de ajustes</string>
 </resources>
