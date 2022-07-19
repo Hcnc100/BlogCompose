@@ -60,7 +60,7 @@ private fun MainButtonNavigation(
     BottomNavigation {
         HomeDestinations.values().forEach { destination ->
             BottomNavigationItem(
-                selected = currentDestination == destination.direction,
+                selected = currentDestination?.route == destination.direction.route,
                 onClick = {
                     navController.navigate(destination.direction, fun NavOptionsBuilder.() {
                         popUpTo(navController.graph.findStartDestination().id) {
@@ -77,6 +77,9 @@ private fun MainButtonNavigation(
                     )
                 },
                 label = { Text(stringResource(id = destination.title)) },
+                selectedContentColor = MaterialTheme.colors.primary,
+                unselectedContentColor = LocalContentColor.current,
+                alwaysShowLabel = false
             )
         }
     }

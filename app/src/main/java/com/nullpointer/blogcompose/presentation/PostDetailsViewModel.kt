@@ -15,6 +15,7 @@ import com.nullpointer.blogcompose.domain.comment.CommentsRepository
 import com.nullpointer.blogcompose.domain.post.PostRepository
 import com.nullpointer.blogcompose.models.Comment
 import com.nullpointer.blogcompose.models.posts.Post
+import com.nullpointer.blogcompose.models.posts.SimplePost
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
@@ -49,6 +50,7 @@ class PostDetailsViewModel @Inject constructor(
     // * this var is for update post selected
     private val _idPost = MutableStateFlow("")
 
+
     // * show that has any comments
     var hasNewComments by mutableStateOf(false)
         private set
@@ -59,6 +61,8 @@ class PostDetailsViewModel @Inject constructor(
 
     private val _listComments = MutableStateFlow<Resource<List<Comment>>>(Resource.Loading)
     val listComments = _listComments.asStateFlow()
+
+    var currentPost:SimplePost?=null
 
     val comment = PropertySavableString(
         state = savedStateHandle,
@@ -73,6 +77,7 @@ class PostDetailsViewModel @Inject constructor(
         _idPost.collect {
             if(it.isNotEmpty()){
                 postRepository.getRealTimePost(it).collect { newPost ->
+                    currentPost=newPost
                     if (newPost!!.numberComments != numberComments) {
                         if (numberComments != -1 && newPost.numberComments > numberComments)
                             hasNewComments = true

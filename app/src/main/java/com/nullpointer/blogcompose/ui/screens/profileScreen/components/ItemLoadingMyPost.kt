@@ -12,7 +12,7 @@ import com.valentinilk.shimmer.shimmer
 
 
 @Composable
-fun ItemImageFake() {
+fun ItemLoadingMyPost() {
     Card(
         modifier = Modifier
             .fillMaxWidth()

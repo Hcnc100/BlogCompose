@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.Scaffold
@@ -17,8 +18,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.states.Resource
-import com.nullpointer.blogcompose.models.posts.ActionsPost
-import com.nullpointer.blogcompose.models.posts.ActionsPost.*
+import com.nullpointer.blogcompose.ui.screens.blogScreen.ActionsPost.*
 import com.nullpointer.blogcompose.models.posts.Post
 import com.nullpointer.blogcompose.models.posts.SimplePost
 import com.nullpointer.blogcompose.presentation.LikeViewModel
@@ -27,6 +27,8 @@ import com.nullpointer.blogcompose.services.uploadImg.UploadDataServices
 import com.nullpointer.blogcompose.ui.interfaces.ActionRootDestinations
 import com.nullpointer.blogcompose.ui.navigation.HomeNavGraph
 import com.nullpointer.blogcompose.ui.navigation.MainTransitions
+import com.nullpointer.blogcompose.ui.screens.blogScreen.components.BlogItem
+import com.nullpointer.blogcompose.ui.screens.blogScreen.components.LoadingBlog
 import com.nullpointer.blogcompose.ui.screens.destinations.AddBlogScreenDestination
 import com.nullpointer.blogcompose.ui.screens.destinations.PostDetailsDestination
 import com.nullpointer.blogcompose.ui.screens.emptyScreen.AnimationScreen
@@ -75,28 +77,25 @@ fun BlogScreen(
         ) {
             when (statePost) {
                 Resource.Failure -> AnimationScreen(
-                    resourceRaw = R.raw.empty1, emptyText = stringResource(
-                        id = R.string.message_empty_post
-                    )
+                    resourceRaw = R.raw.empty1,
+                    emptyText = stringResource(id = R.string.message_empty_post),
+                    modifier = Modifier.padding(it).fillMaxSize()
                 )
-                Resource.Loading -> LoadingPost()
+                Resource.Loading -> LoadingBlog()
                 is Resource.Success -> {
                     val listPost = (statePost as Resource.Success<List<Post>>).data
                     if (listPost.isEmpty()) {
                         AnimationScreen(
-                            modifier = Modifier.fillMaxSize(),
+                            modifier = Modifier.padding(it).fillMaxSize(),
                             resourceRaw = R.raw.empty1,
                             emptyText = stringResource(id = R.string.message_empty_post)
                         )
                     } else {
                         ListPost(
+                            modifier=Modifier.padding(it),
                             listPost = listPost,
                             listState = blogScreenState.listState,
-                            actionBottomReached = {
-                                postVM.concatenatePost {
-                                    blogScreenState.animateScrollMore()
-                                }
-                            },
+                            actionBottomReached = { postVM.concatenatePost(blogScreenState::animateScrollMore) },
                             actionBlog = { action, post ->
                                 when (action) {
                                     DETAILS -> actionRootDestinations.changeRoot(
@@ -125,7 +124,8 @@ private fun ListPost(
     listPost: List<Post>,
     listState: LazyListState,
     actionBottomReached: () -> Unit,
-    actionBlog: (ActionsPost, SimplePost) -> Unit
+    actionBlog: (ActionsPost, SimplePost) -> Unit,
+    modifier: Modifier = Modifier
 ) {
 
     LaunchedEffect(key1 = Unit) {
@@ -137,7 +137,9 @@ private fun ListPost(
         }
     }
 
-    LazyColumn(state = listState) {
+    LazyColumn(
+        state = listState,
+        modifier = modifier) {
         items(
             listPost.size,
             key = { index -> listPost[index].id }

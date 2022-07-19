@@ -1,4 +1,4 @@
-package com.nullpointer.blogcompose.ui.screens.blogScreen
+package com.nullpointer.blogcompose.ui.screens.blogScreen.components
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -13,7 +13,7 @@ import androidx.compose.ui.unit.dp
 import com.valentinilk.shimmer.shimmer
 
 @Composable
-fun LoadingPost() {
+fun LoadingBlog() {
     LazyColumn{
         items(5){
             Card(

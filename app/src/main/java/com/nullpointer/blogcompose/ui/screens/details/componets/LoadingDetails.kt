@@ -1,7 +1,6 @@
 package com.nullpointer.blogcompose.ui.screens.details.componets
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
@@ -11,46 +10,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.nullpointer.blogcompose.models.posts.Post
 import com.valentinilk.shimmer.shimmer
 
 
 @Composable
-fun LoadingOnlyComments(
-    post:Post,
-    modifier: Modifier = Modifier,
-    actionLike:()->Unit
-) {
-    LazyColumn(modifier = modifier) {
-        item(key = { post.id }) {
-            HeaderBlogDetails(
-                blog = post,
-                actionLike = actionLike
-            )
-        }
-        items(10, key = { it }) {
-            FakeItemBlog()
-        }
-    }
-}
-
-@Composable
-fun LoadingFullPostDetails(
-    modifier: Modifier = Modifier,
-) {
-    LazyColumn(modifier = modifier) {
-        item(key = "-1") {
-            FakeHeaderBlogDetails()
-        }
-        items(10, key = { it }) {
-            FakeItemBlog()
-        }
-    }
-}
-
-
-@Composable
-private fun FakeItemBlog() {
+fun FakeItemBlog() {
 
     val widthRandom = remember{
         (60..280).random()
@@ -78,7 +42,7 @@ private fun FakeItemBlog() {
 
 
 @Composable
-private fun FakeHeaderBlogDetails() {
+fun FakeHeaderBlogDetails() {
     Column(
         modifier = Modifier
             .fillMaxWidth(),

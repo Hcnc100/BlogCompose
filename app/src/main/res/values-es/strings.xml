@@ -150,7 +150,7 @@
     <string name="data_user_upload_sucess">Información actualizada con éxito</string>
     <string name="text_hint_description">Escribe la descripción</string>
     <string name="error_upload_service">Error al subir el post</string>
-    <string name="error_load_post">El post ya no está disponible</string>
+    <string name="error_load_post">El post no está disponible</string>
     <string name="comment_hint">Escribe un comentario</string>
     <string name="label_comment">Comentario</string>
     <string name="error_length_comment">El comentario es muy largo</string>

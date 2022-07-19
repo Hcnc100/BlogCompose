@@ -1,4 +1,4 @@
-package com.nullpointer.blogcompose.ui.screens.profileScreen
+package com.nullpointer.blogcompose.ui.screens.profileScreen.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.aspectRatio

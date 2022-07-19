@@ -1,20 +1,20 @@
 package com.nullpointer.blogcompose.ui.screens.details
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
+import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
@@ -27,16 +27,12 @@ import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.delegates.PropertySavableString
 import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.models.Comment
-import com.nullpointer.blogcompose.models.posts.ActionDetails
 import com.nullpointer.blogcompose.models.posts.Post
 import com.nullpointer.blogcompose.presentation.LikeViewModel
 import com.nullpointer.blogcompose.presentation.PostDetailsViewModel
 import com.nullpointer.blogcompose.ui.interfaces.ActionRootDestinations
 import com.nullpointer.blogcompose.ui.navigation.RootNavGraph
-import com.nullpointer.blogcompose.ui.screens.details.componets.ErrorLoadingOnlyComments
-import com.nullpointer.blogcompose.ui.screens.details.componets.LoadingFullPostDetails
-import com.nullpointer.blogcompose.ui.screens.details.componets.LoadingOnlyComments
-import com.nullpointer.blogcompose.ui.screens.details.componets.SuccessFullDetails
+import com.nullpointer.blogcompose.ui.screens.details.componets.*
 import com.nullpointer.blogcompose.ui.screens.emptyScreen.AnimationScreen
 import com.nullpointer.blogcompose.ui.screens.states.PostDetailsState
 import com.nullpointer.blogcompose.ui.screens.states.rememberPostDetailsState
@@ -65,6 +61,7 @@ fun PostDetails(
     actionRootDestinations: ActionRootDestinations
 ) {
     val postState by postDetailsViewModel.postState.collectAsState()
+    val commentsState by postDetailsViewModel.listComments.collectAsState()
     val focusRequester = remember { FocusRequester() }
     var isRequestFocus by remember {
         mutableStateOf(goToBottom)
@@ -80,6 +77,15 @@ fun PostDetails(
 
     LaunchedEffect(key1 = Unit) {
         likeViewModel.messageLike.collect(postDetailsState::showSnackMessage)
+    }
+
+    LaunchedEffect(key1 = commentsState) {
+        if (commentsState is Resource.Success && isRequestFocus) {
+            delay(200)
+            isRequestFocus = false
+            focusRequester.requestFocus()
+            postDetailsState.lazyListState.animateScrollToItem(postDetailsState.lazyListState.layoutInfo.totalItemsCount)
+        }
     }
 
     Scaffold(
@@ -105,88 +111,144 @@ fun PostDetails(
                 )
         }
     ) {
-        when (val postState = postState) {
-            Resource.Failure -> {
-                AnimationScreen(
-                    resourceRaw = R.raw.error1,
-                    emptyText = stringResource(id = R.string.error_load_post),
-                    modifier = Modifier.padding(it).fillMaxSize()
-                )
-            }
-            Resource.Loading -> LoadingFullPostDetails(modifier = Modifier.padding(it))
-            is Resource.Success -> {
-                val commentsState by postDetailsViewModel.listComments.collectAsState()
 
-                LaunchedEffect(key1 = commentsState) {
-                    if (commentsState is Resource.Success && isRequestFocus) {
-                        delay(200)
-                        isRequestFocus = false
-                        focusRequester.requestFocus()
-                        postDetailsState.lazyListState.animateScrollToItem(postDetailsState.lazyListState.layoutInfo.totalItemsCount)
+        PostDetails(
+            modifier = Modifier.padding(it),
+            listComments = commentsState,
+            postState = postState,
+            isConcatenate = postDetailsViewModel.stateConcatComment,
+            listState = postDetailsState.lazyListState,
+            hasNewComments = postDetailsViewModel.hasNewComments,
+            actionDetails = { action ->
+                when (action) {
+                    ActionDetails.RELOAD_COMMENTS -> postDetailsViewModel.requestsComments()
+                    ActionDetails.LIKE_THIS_POST -> postDetailsViewModel.currentPost?.let { post ->
+                        likeViewModel.likePost(
+                            simplePost = post
+                        )
                     }
+                    ActionDetails.GET_MORE_COMMENTS -> postDetailsViewModel.concatenateComments()
                 }
-
-
-                FullDetailsScreen(
-                    modifier = Modifier.padding(it),
-                    commentsState = commentsState,
-                    post = postState.data,
-                    isConcatenate = postDetailsViewModel.stateConcatComment,
-                    listState = postDetailsState.lazyListState,
-                    hasNewComments = postDetailsViewModel.hasNewComments,
-                    actionReloadComments = postDetailsViewModel::requestsComments,
-                    actionDetails = { action ->
-                        when (action) {
-                            ActionDetails.HAS_NEW_COMMENTS -> postDetailsViewModel.requestsComments()
-                            ActionDetails.LIKE_THIS_POST -> likeViewModel.likePost(simplePost = postState.data)
-                            ActionDetails.GET_MORE_COMMENTS -> postDetailsViewModel.concatenateComments()
-                        }
-                    }
-                )
             }
-        }
+        )
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun FullDetailsScreen(
-    commentsState: Resource<List<Comment>>,
-    post: Post,
+fun PostDetails(
+    postState: Resource<Post>,
+    listComments: Resource<List<Comment>>,
     modifier: Modifier = Modifier,
     isConcatenate: Boolean,
     listState: LazyListState,
     hasNewComments: Boolean,
     actionDetails: (ActionDetails) -> Unit,
-    actionReloadComments: () -> Unit
 ) {
-    when (commentsState) {
-        Resource.Failure -> {
-            ErrorLoadingOnlyComments(
-                post = post,
-                modifier = modifier,
-                actionLike = { actionDetails(ActionDetails.LIKE_THIS_POST) },
-                actionReloadComments = actionReloadComments
-            )
+    Box(modifier = modifier) {
+        LazyColumn(state = listState, modifier = Modifier.fillMaxWidth()) {
+            when (postState) {
+                Resource.Loading -> item(key = { "fake-details" }) { FakeHeaderBlogDetails() }
+                Resource.Failure -> {
+                    item(key = { "failed-details" }) {
+                        AnimationScreen(
+                            resourceRaw = R.raw.error1,
+                            emptyText = stringResource(id = R.string.error_load_post),
+                            modifier = Modifier.fillParentMaxHeight(1f)
+                        )
+                    }
+                }
+                is Resource.Success -> {
+                    item(key = { postState.data.id }) {
+                        HeaderBlogDetails(
+                            blog = postState.data,
+                            actionLike = { actionDetails(ActionDetails.LIKE_THIS_POST) })
+                    }
+                }
+            }
+            item(key = { "has-more-comments" }) {
+                if (postState is Resource.Success &&
+                    listComments is Resource.Success &&
+                    postState.data.numberComments != listState.layoutInfo.totalItemsCount - 2
+                ) {
+                    if (isConcatenate) {
+                        CircularProgressIndicator(
+                            modifier = Modifier
+                                .padding(10.dp)
+                                .size(30.dp)
+                        )
+                    } else {
+                        Text(
+                            stringResource(id = R.string.text_load_more_comments),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { actionDetails(ActionDetails.GET_MORE_COMMENTS) }
+                                .padding(10.dp))
+                    }
+
+                }
+            }
+            when (postState) {
+                Resource.Failure -> Unit
+                Resource.Loading -> {
+                    items(10, key = { "post-loading $it" }) {
+                        FakeItemBlog()
+                    }
+                }
+                is Resource.Success -> {
+                    when (listComments) {
+                        Resource.Failure -> {
+                            item(key = { "fail-comments" }) {
+                                ErrorLoadingComments(
+                                    actionReloadComments = { actionDetails(ActionDetails.RELOAD_COMMENTS) },
+                                )
+                            }
+                        }
+                        Resource.Loading -> {
+                            items(
+                                count = 10,
+                                key = { "comment-loading $it" }
+                            ) {
+                                FakeItemBlog()
+                            }
+                        }
+                        is Resource.Success -> {
+                            items(listComments.data, key = { it.id }) {
+                                ItemComment(
+                                    comment = it,
+                                    modifier = Modifier.animateItemPlacement()
+                                )
+                            }
+                        }
+                    }
+                }
+            }
         }
-        Resource.Loading -> {
-            LoadingOnlyComments(
-                post = post,
-                modifier = modifier,
-                actionLike = { actionDetails(ActionDetails.LIKE_THIS_POST) }
+        if (hasNewComments)
+            TextNewComments(
+                modifier = Modifier.align(Alignment.BottomCenter),
+                actionReloadNewComments = {
+                    actionDetails(ActionDetails.RELOAD_COMMENTS)
+                }
             )
-        }
-        is Resource.Success -> {
-            SuccessFullDetails(
-                isLoading = isConcatenate,
-                listState = listState,
-                listComment = commentsState.data,
-                post = post,
-                modifier = modifier,
-                hasNewComments = hasNewComments,
-                actionPost = actionDetails,
-            )
-        }
     }
+}
+
+@Composable
+private fun TextNewComments(
+    modifier: Modifier = Modifier,
+    actionReloadNewComments: () -> Unit
+) {
+    Text(
+        stringResource(id = R.string.message_has_new_comments),
+        modifier = modifier
+            .padding(10.dp)
+            .background(MaterialTheme.colors.primary)
+            .padding(10.dp)
+            .clip(RoundedCornerShape(10.dp))
+            .clickable { actionReloadNewComments() }
+
+    )
 }
 
 

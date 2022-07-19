@@ -1,6 +1,7 @@
 package com.nullpointer.blogcompose.ui.screens.details.componets
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -16,17 +17,13 @@ import com.nullpointer.blogcompose.models.posts.Post
 import com.nullpointer.blogcompose.ui.share.LottieContainer
 
 @Composable
-fun ErrorLoadingOnlyComments(
-    post: Post,
+fun ErrorLoadingComments(
     modifier: Modifier = Modifier,
     actionReloadComments:()->Unit,
-    actionLike: () -> Unit
 ) {
     Column(
-        modifier = modifier
-            .verticalScroll(rememberScrollState())
+        modifier = modifier.fillMaxWidth()
     ) {
-        HeaderBlogDetails(blog = post, actionLike = actionLike)
         LottieContainer(
             animation = R.raw.error3,
             modifier = Modifier

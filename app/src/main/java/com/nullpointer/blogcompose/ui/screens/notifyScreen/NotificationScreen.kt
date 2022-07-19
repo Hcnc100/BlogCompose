@@ -2,6 +2,7 @@ package com.nullpointer.blogcompose.ui.screens.notifyScreen
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.Scaffold
@@ -63,14 +64,15 @@ fun NotifyScreen(
                 Resource.Loading -> LoadingNotify()
                 Resource.Failure -> AnimationScreen(
                     resourceRaw = R.raw.empty3,
-                    emptyText = stringResource(R.string.message_empty_notify)
+                    emptyText = stringResource(R.string.message_empty_notify),
+                    modifier = Modifier.padding(it).fillMaxSize()
                 )
                 is Resource.Success -> {
                     val listNotify = (stateListNotify as Resource.Success<List<Notify>>).data
 
                     if (listNotify.isEmpty()) {
                         AnimationScreen(
-                            modifier = Modifier.fillMaxSize(),
+                            modifier = Modifier.padding(it).fillMaxSize(),
                             resourceRaw = R.raw.empty3,
                             emptyText = stringResource(R.string.message_empty_notify)
                         )
@@ -104,6 +106,7 @@ private fun ListSwipeNotify(
     listNotify: List<Notify>,
     listState: LazyListState,
     actionBottomReached: () -> Unit,
+    modifier: Modifier = Modifier,
     actionClick: (notify: Notify) -> Unit,
 ) {
 
@@ -118,7 +121,8 @@ private fun ListSwipeNotify(
 
     // * list to show notifications
     LazyColumn(
-        state = listState
+        state = listState,
+        modifier = modifier
     ) {
         // * all notifications
         items(

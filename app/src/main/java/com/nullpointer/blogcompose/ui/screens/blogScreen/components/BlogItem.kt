@@ -1,4 +1,4 @@
-package com.nullpointer.blogcompose.ui.screens.blogScreen
+package com.nullpointer.blogcompose.ui.screens.blogScreen.components
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
@@ -31,7 +31,7 @@ import coil.request.ImageRequest
 import coil.transform.CircleCropTransformation
 import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.utils.TimeUtils
-import com.nullpointer.blogcompose.models.posts.ActionsPost
+import com.nullpointer.blogcompose.ui.screens.blogScreen.ActionsPost
 import com.nullpointer.blogcompose.models.posts.SimplePost
 import java.util.*
 
