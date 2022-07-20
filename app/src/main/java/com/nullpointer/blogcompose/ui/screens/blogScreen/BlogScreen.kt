@@ -3,6 +3,7 @@ package com.nullpointer.blogcompose.ui.screens.blogScreen
 import android.content.Context
 import android.content.Intent
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -12,13 +13,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.states.Resource
-import com.nullpointer.blogcompose.ui.screens.blogScreen.ActionsPost.*
 import com.nullpointer.blogcompose.models.posts.Post
 import com.nullpointer.blogcompose.models.posts.SimplePost
 import com.nullpointer.blogcompose.presentation.LikeViewModel
@@ -27,6 +28,7 @@ import com.nullpointer.blogcompose.services.uploadImg.UploadDataServices
 import com.nullpointer.blogcompose.ui.interfaces.ActionRootDestinations
 import com.nullpointer.blogcompose.ui.navigation.HomeNavGraph
 import com.nullpointer.blogcompose.ui.navigation.MainTransitions
+import com.nullpointer.blogcompose.ui.screens.blogScreen.ActionsPost.*
 import com.nullpointer.blogcompose.ui.screens.blogScreen.components.BlogItem
 import com.nullpointer.blogcompose.ui.screens.blogScreen.components.LoadingBlog
 import com.nullpointer.blogcompose.ui.screens.destinations.AddBlogScreenDestination
@@ -67,7 +69,6 @@ fun BlogScreen(
         state = blogScreenState.swipeState,
         onRefresh = { postVM.requestNewPost(true) }) {
         Scaffold(
-            bottomBar = { CircularProgressAnimation(postVM.stateConcatData) },
             floatingActionButton = {
                 ButtonAdd(isScrollInProgress = blogScreenState.isScrollInProgress) {
                     actionRootDestinations.changeRoot(AddBlogScreenDestination)
@@ -75,45 +76,54 @@ fun BlogScreen(
 
             }
         ) {
-            when (statePost) {
-                Resource.Failure -> AnimationScreen(
-                    resourceRaw = R.raw.empty1,
-                    emptyText = stringResource(id = R.string.message_empty_post),
-                    modifier = Modifier.padding(it).fillMaxSize()
-                )
-                Resource.Loading -> LoadingBlog()
-                is Resource.Success -> {
-                    val listPost = (statePost as Resource.Success<List<Post>>).data
-                    if (listPost.isEmpty()) {
-                        AnimationScreen(
-                            modifier = Modifier.padding(it).fillMaxSize(),
-                            resourceRaw = R.raw.empty1,
-                            emptyText = stringResource(id = R.string.message_empty_post)
-                        )
-                    } else {
-                        ListPost(
-                            modifier=Modifier.padding(it),
-                            listPost = listPost,
-                            listState = blogScreenState.listState,
-                            actionBottomReached = { postVM.concatenatePost(blogScreenState::animateScrollMore) },
-                            actionBlog = { action, post ->
-                                when (action) {
-                                    DETAILS -> actionRootDestinations.changeRoot(
-                                        PostDetailsDestination(post.id)
-                                    )
-                                    COMMENT -> actionRootDestinations.changeRoot(
-                                        PostDetailsDestination(post.id, true)
-                                    )
-                                    SHARE -> sharePost(post.id, blogScreenState.context)
-                                    LIKE -> likeVM.likePost(post)
-                                    DOWNLOAD -> {}
-                                    SAVE -> {}
+            Box(modifier = Modifier.padding(it)) {
+                when (statePost) {
+                    Resource.Failure -> AnimationScreen(
+                        resourceRaw = R.raw.empty1,
+                        emptyText = stringResource(id = R.string.message_empty_post),
+                        modifier = Modifier.fillMaxSize()
+                    )
+                    Resource.Loading -> LoadingBlog()
+                    is Resource.Success -> {
+                        val listPost = (statePost as Resource.Success<List<Post>>).data
+                        if (listPost.isEmpty()) {
+                            AnimationScreen(
+                                modifier = Modifier.fillMaxSize(),
+                                resourceRaw = R.raw.empty1,
+                                emptyText = stringResource(id = R.string.message_empty_post)
+                            )
+                        } else {
+                            ListPost(
+                                modifier = Modifier.fillMaxSize(),
+                                listPost = listPost,
+                                listState = blogScreenState.listState,
+                                actionBottomReached = { postVM.concatenatePost(blogScreenState::animateScrollMore) },
+                                actionBlog = { action, post ->
+                                    when (action) {
+                                        DETAILS -> actionRootDestinations.changeRoot(
+                                            PostDetailsDestination(post.id)
+                                        )
+                                        COMMENT -> actionRootDestinations.changeRoot(
+                                            PostDetailsDestination(post.id, true)
+                                        )
+                                        SHARE -> sharePost(post.id, blogScreenState.context)
+                                        LIKE -> likeVM.likePost(post)
+                                        DOWNLOAD -> {}
+                                        SAVE -> {}
+                                    }
                                 }
-                            }
-                        )
+                            )
+                        }
                     }
                 }
+                CircularProgressAnimation(
+                    isVisible = postVM.stateConcatData,
+                    modifier = Modifier.align(
+                        Alignment.BottomCenter
+                    )
+                )
             }
+
         }
     }
 }

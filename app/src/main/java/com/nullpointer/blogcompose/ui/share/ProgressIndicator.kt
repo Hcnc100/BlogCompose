@@ -17,11 +17,13 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun CircularProgressAnimation(
     isVisible: Boolean,
+    modifier: Modifier = Modifier,
 ) {
     AnimatedVisibility(
         visible = isVisible,
         enter = expandVertically(),
-        exit = shrinkVertically()
+        exit = shrinkVertically(),
+        modifier = modifier
     ) {
         Box(modifier = Modifier
             .fillMaxWidth()

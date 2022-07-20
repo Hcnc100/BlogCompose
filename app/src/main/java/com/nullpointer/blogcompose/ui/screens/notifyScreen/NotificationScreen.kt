@@ -1,6 +1,7 @@
 package com.nullpointer.blogcompose.ui.screens.notifyScreen
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -10,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -56,46 +58,55 @@ fun NotifyScreen(
         onRefresh = { notifyVM.requestLastNotify(true) },
     ) {
         Scaffold(
-            scaffoldState = notifyScreenState.scaffoldState,
-            bottomBar = { CircularProgressAnimation(notifyVM.stateConcatNotify) }
+            scaffoldState = notifyScreenState.scaffoldState
         ) {
+            Box(modifier = Modifier.padding(it)) {
+                when (stateListNotify) {
+                    Resource.Loading -> LoadingNotify()
+                    Resource.Failure -> AnimationScreen(
+                        resourceRaw = R.raw.empty3,
+                        emptyText = stringResource(R.string.message_empty_notify),
+                        modifier = Modifier.fillMaxSize()
+                    )
+                    is Resource.Success -> {
+                        val listNotify = (stateListNotify as Resource.Success<List<Notify>>).data
 
-            when (stateListNotify) {
-                Resource.Loading -> LoadingNotify()
-                Resource.Failure -> AnimationScreen(
-                    resourceRaw = R.raw.empty3,
-                    emptyText = stringResource(R.string.message_empty_notify),
-                    modifier = Modifier.padding(it).fillMaxSize()
-                )
-                is Resource.Success -> {
-                    val listNotify = (stateListNotify as Resource.Success<List<Notify>>).data
-
-                    if (listNotify.isEmpty()) {
-                        AnimationScreen(
-                            modifier = Modifier.padding(it).fillMaxSize(),
-                            resourceRaw = R.raw.empty3,
-                            emptyText = stringResource(R.string.message_empty_notify)
-                        )
-                    } else {
-                        ListSwipeNotify(
-                            listState = notifyScreenState.listState,
-                            listNotify = listNotify,
-                            actionBottomReached = {
-                                notifyVM.concatenateNotify(callbackSuccess = notifyScreenState::animateScrollMore)
-                            },
-                            actionClick = { notify ->
-                                actionRootDestinations.changeRoot(
-                                    PostDetailsDestination(
-                                        notify.idPost,
-                                        false
+                        if (listNotify.isEmpty()) {
+                            AnimationScreen(
+                                modifier = Modifier.fillMaxSize(),
+                                resourceRaw = R.raw.empty3,
+                                emptyText = stringResource(R.string.message_empty_notify)
+                            )
+                        } else {
+                            ListSwipeNotify(
+                                modifier = Modifier.fillMaxSize(),
+                                listState = notifyScreenState.listState,
+                                listNotify = listNotify,
+                                actionBottomReached = {
+                                    notifyVM.concatenateNotify(callbackSuccess = notifyScreenState::animateScrollMore)
+                                },
+                                actionClick = { notify ->
+                                    actionRootDestinations.changeRoot(
+                                        PostDetailsDestination(
+                                            notify.idPost,
+                                            false
+                                        )
                                     )
-                                )
-                                if (!notify.isOpen) notifyVM.openNotifications(notify)
-                            }
-                        )
+                                    if (!notify.isOpen) notifyVM.openNotifications(notify)
+                                }
+                            )
+                        }
                     }
                 }
+                CircularProgressAnimation(
+                    isVisible = notifyVM.stateConcatNotify,
+                    modifier = Modifier.align(
+                        Alignment.BottomCenter
+                    )
+                )
+
             }
+
         }
     }
 }

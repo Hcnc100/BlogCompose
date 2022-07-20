@@ -2,11 +2,20 @@ package com.nullpointer.blogcompose.ui.screens.profileScreen
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.lazy.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.GridCells
+import androidx.compose.foundation.lazy.GridItemSpan
+import androidx.compose.foundation.lazy.LazyGridState
+import androidx.compose.foundation.lazy.LazyVerticalGrid
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.Scaffold
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -85,25 +94,37 @@ fun ProfileScreen(
                         actionRootDestinations.changeRoot(AddBlogScreenDestination)
                     }
                 },
-                bottomBar = { CircularProgressAnimation(myPostViewModel.stateConcatMyPost) }
             ) {
-                ProfileScreen(
-                    user = currentUser,
-                    listPostState = stateListPost,
-                    gridState = profileScreenState.listState,
-                    actionDetails = { actionRootDestinations.changeRoot(PostDetailsDestination(it)) },
-                    actionProfile = {action->
-                        when (action) {
-                            ActionMyProfile.LOAD_MORE -> myPostViewModel.concatenatePost {
-                                profileScreenState.animateScrollMore()
-                            }
-                            ActionMyProfile.GO_SETTINGS -> actionRootDestinations.changeRoot(
-                                ConfigScreenDestination
+                Box(modifier = Modifier.padding(it)) {
+                    ProfileScreen(
+                        user = currentUser,
+                        listPostState = stateListPost,
+                        gridState = profileScreenState.listState,
+                        actionDetails = {idPost->
+                            actionRootDestinations.changeRoot(
+                                PostDetailsDestination(idPost)
                             )
-                            ActionMyProfile.SHOW_MODAL -> profileScreenState.showModal()
+                        },
+                        actionProfile = { action ->
+                            when (action) {
+                                ActionMyProfile.LOAD_MORE -> myPostViewModel.concatenatePost {
+                                    profileScreenState.animateScrollMore()
+                                }
+                                ActionMyProfile.GO_SETTINGS -> actionRootDestinations.changeRoot(
+                                    ConfigScreenDestination
+                                )
+                                ActionMyProfile.SHOW_MODAL -> profileScreenState.showModal()
+                            }
                         }
-                    }
-                )
+                    )
+                    CircularProgressAnimation(
+                        isVisible = myPostViewModel.stateConcatMyPost,
+                        modifier = Modifier.align(
+                            Alignment.BottomCenter
+                        )
+                    )
+                }
+
             }
         }
     }
