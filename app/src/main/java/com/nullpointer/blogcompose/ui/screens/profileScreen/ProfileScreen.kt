@@ -2,15 +2,11 @@ package com.nullpointer.blogcompose.ui.screens.profileScreen
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.lazy.GridCells
-import androidx.compose.foundation.lazy.GridItemSpan
-import androidx.compose.foundation.lazy.LazyGridState
-import androidx.compose.foundation.lazy.LazyVerticalGrid
-import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.foundation.lazy.*
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ModalBottomSheetLayout
+import androidx.compose.material.Scaffold
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -31,7 +27,10 @@ import com.nullpointer.blogcompose.ui.screens.profileScreen.components.FailedPro
 import com.nullpointer.blogcompose.ui.screens.profileScreen.components.ItemMyPost
 import com.nullpointer.blogcompose.ui.screens.states.ProfileScreenState
 import com.nullpointer.blogcompose.ui.screens.states.rememberProfileScreenState
-import com.nullpointer.blogcompose.ui.share.*
+import com.nullpointer.blogcompose.ui.share.ButtonAdd
+import com.nullpointer.blogcompose.ui.share.CircularProgressAnimation
+import com.nullpointer.blogcompose.ui.share.OnBottomReached
+import com.nullpointer.blogcompose.ui.share.SelectImgButtonSheet
 import com.ramcosta.composedestinations.annotation.Destination
 
 
@@ -122,6 +121,7 @@ fun ProfileScreen(
     LazyVerticalGrid(
         state = gridState,
         cells = GridCells.Adaptive(120.dp)) {
+
         item(
             span = { GridItemSpan(maxLineSpan) },
             key = { user.idUser }
@@ -153,6 +153,5 @@ fun ProfileScreen(
             onLoadMore = { actionProfile(ActionMyProfile.LOAD_MORE) })
 
 }
-
 
 

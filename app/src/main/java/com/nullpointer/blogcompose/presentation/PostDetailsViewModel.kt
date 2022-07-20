@@ -55,8 +55,11 @@ class PostDetailsViewModel @Inject constructor(
     var hasNewComments by mutableStateOf(false)
         private set
 
+    var addingComment by mutableStateOf(false)
+        private set
+
     // * var to saved number of comments
-    var numberComments by SavableProperty(savedStateHandle, KEY_COMMENTS, -1)
+     var numberComments by SavableProperty(savedStateHandle, KEY_COMMENTS, -1)
         private set
 
     private val _listComments = MutableStateFlow<Resource<List<Comment>>>(Resource.Loading)
@@ -156,6 +159,7 @@ class PostDetailsViewModel @Inject constructor(
         try {
             // * change number of comments
             // ! this for no show any for "hasNewComments"
+            addingComment=true
             numberComments++
             postState.value.let {
                 if (it is Resource.Success) {
@@ -168,6 +172,8 @@ class PostDetailsViewModel @Inject constructor(
         } catch (e: Exception) {
             _messageDetails.send(R.string.message_error_add_comment)
             Timber.e("Error al agregar un commet $e")
+        }finally {
+            addingComment=false
         }
     }
 

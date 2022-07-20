@@ -80,7 +80,7 @@ fun PostDetails(
     }
 
     LaunchedEffect(key1 = commentsState) {
-        if (commentsState is Resource.Success && isRequestFocus) {
+        if (commentsState is Resource.Success && isRequestFocus && postState is Resource.Success) {
             delay(200)
             isRequestFocus = false
             focusRequester.requestFocus()
@@ -119,6 +119,8 @@ fun PostDetails(
             isConcatenate = postDetailsViewModel.stateConcatComment,
             listState = postDetailsState.lazyListState,
             hasNewComments = postDetailsViewModel.hasNewComments,
+            addingComment = postDetailsViewModel.addingComment,
+            realNumberComment = postDetailsViewModel.numberComments,
             actionDetails = { action ->
                 when (action) {
                     ActionDetails.RELOAD_COMMENTS -> postDetailsViewModel.requestsComments()
@@ -143,8 +145,11 @@ fun PostDetails(
     isConcatenate: Boolean,
     listState: LazyListState,
     hasNewComments: Boolean,
+    addingComment: Boolean,
+    realNumberComment: Int,
     actionDetails: (ActionDetails) -> Unit,
 ) {
+
     Box(modifier = modifier) {
         LazyColumn(state = listState, modifier = Modifier.fillMaxWidth()) {
             when (postState) {
@@ -164,38 +169,6 @@ fun PostDetails(
                             blog = postState.data,
                             actionLike = { actionDetails(ActionDetails.LIKE_THIS_POST) })
                     }
-                }
-            }
-            item(key = { "has-more-comments" }) {
-                if (postState is Resource.Success &&
-                    listComments is Resource.Success &&
-                    postState.data.numberComments != listState.layoutInfo.totalItemsCount - 2
-                ) {
-                    if (isConcatenate) {
-                        CircularProgressIndicator(
-                            modifier = Modifier
-                                .padding(10.dp)
-                                .size(30.dp)
-                        )
-                    } else {
-                        Text(
-                            stringResource(id = R.string.text_load_more_comments),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable { actionDetails(ActionDetails.GET_MORE_COMMENTS) }
-                                .padding(10.dp))
-                    }
-
-                }
-            }
-            when (postState) {
-                Resource.Failure -> Unit
-                Resource.Loading -> {
-                    items(10, key = { "post-loading $it" }) {
-                        FakeItemBlog()
-                    }
-                }
-                is Resource.Success -> {
                     when (listComments) {
                         Resource.Failure -> {
                             item(key = { "fail-comments" }) {
@@ -213,6 +186,23 @@ fun PostDetails(
                             }
                         }
                         is Resource.Success -> {
+                            item(key = { "has-more-comments" }) {
+                                when {
+                                    isConcatenate-> CircularProgressIndicator(
+                                        modifier = Modifier
+                                            .padding(10.dp)
+                                            .size(25.dp)
+                                    )
+                                    !addingComment && realNumberComment > listComments.data.size -> Text(
+                                        stringResource(id = R.string.text_load_more_comments),
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clickable { actionDetails(ActionDetails.GET_MORE_COMMENTS) }
+                                            .padding(10.dp))
+                                    else -> Spacer(modifier = Modifier.fillMaxWidth())
+                                }
+                            }
+
                             items(listComments.data, key = { it.id }) {
                                 ItemComment(
                                     comment = it,
@@ -233,6 +223,7 @@ fun PostDetails(
             )
     }
 }
+
 
 @Composable
 private fun TextNewComments(
