@@ -79,7 +79,7 @@ fun PostDetails(
         likeViewModel.messageLike.collect(postDetailsState::showSnackMessage)
     }
 
-    LaunchedEffect(key1 = commentsState) {
+    LaunchedEffect(key1 = commentsState, key2 = postState) {
         if (commentsState is Resource.Success && isRequestFocus && postState is Resource.Success) {
             delay(200)
             isRequestFocus = false
