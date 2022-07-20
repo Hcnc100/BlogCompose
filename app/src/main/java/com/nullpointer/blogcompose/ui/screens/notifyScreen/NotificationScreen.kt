@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -21,7 +23,6 @@ import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.models.notify.Notify
 import com.nullpointer.blogcompose.presentation.NotifyViewModel
 import com.nullpointer.blogcompose.services.notfication.MyFirebaseMessagingService
-import com.nullpointer.blogcompose.services.uploadImg.UploadDataServices
 import com.nullpointer.blogcompose.ui.interfaces.ActionRootDestinations
 import com.nullpointer.blogcompose.ui.navigation.HomeNavGraph
 import com.nullpointer.blogcompose.ui.navigation.MainTransitions
@@ -66,14 +67,18 @@ fun NotifyScreen(
                     Resource.Failure -> AnimationScreen(
                         resourceRaw = R.raw.empty3,
                         emptyText = stringResource(R.string.message_empty_notify),
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .verticalScroll(rememberScrollState())
                     )
                     is Resource.Success -> {
                         val listNotify = (stateListNotify as Resource.Success<List<Notify>>).data
 
                         if (listNotify.isEmpty()) {
                             AnimationScreen(
-                                modifier = Modifier.fillMaxSize(),
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .verticalScroll(rememberScrollState()),
                                 resourceRaw = R.raw.empty3,
                                 emptyText = stringResource(R.string.message_empty_notify)
                             )

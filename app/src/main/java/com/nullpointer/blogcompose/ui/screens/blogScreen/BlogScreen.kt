@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -61,7 +63,7 @@ fun BlogScreen(
     }
 
     LaunchedEffect(key1 = Unit) {
-        postVM.messagePost.collect(blogScreenState::showSnackMessage)
+        likeVM.messageLike.collect(blogScreenState::showSnackMessage)
     }
 
     SwipeRefresh(
@@ -69,11 +71,11 @@ fun BlogScreen(
         state = blogScreenState.swipeState,
         onRefresh = { postVM.requestNewPost(true) }) {
         Scaffold(
+            scaffoldState = blogScreenState.scaffoldState,
             floatingActionButton = {
                 ButtonAdd(isScrollInProgress = blogScreenState.isScrollInProgress) {
                     actionRootDestinations.changeRoot(AddBlogScreenDestination)
                 }
-
             }
         ) {
             Box(modifier = Modifier.padding(it)) {
@@ -81,14 +83,18 @@ fun BlogScreen(
                     Resource.Failure -> AnimationScreen(
                         resourceRaw = R.raw.empty1,
                         emptyText = stringResource(id = R.string.message_empty_post),
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .verticalScroll(rememberScrollState())
                     )
                     Resource.Loading -> LoadingBlog()
                     is Resource.Success -> {
                         val listPost = (statePost as Resource.Success<List<Post>>).data
                         if (listPost.isEmpty()) {
                             AnimationScreen(
-                                modifier = Modifier.fillMaxSize(),
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .verticalScroll(rememberScrollState()),
                                 resourceRaw = R.raw.empty1,
                                 emptyText = stringResource(id = R.string.message_empty_post)
                             )

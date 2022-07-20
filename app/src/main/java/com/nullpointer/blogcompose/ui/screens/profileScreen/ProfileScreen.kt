@@ -2,8 +2,8 @@ package com.nullpointer.blogcompose.ui.screens.profileScreen
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.GridCells
 import androidx.compose.foundation.lazy.GridItemSpan
 import androidx.compose.foundation.lazy.LazyGridState
@@ -17,9 +17,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.models.posts.MyPost
 import com.nullpointer.blogcompose.models.users.SimpleUser
@@ -32,6 +35,7 @@ import com.nullpointer.blogcompose.ui.navigation.MainTransitions
 import com.nullpointer.blogcompose.ui.screens.destinations.AddBlogScreenDestination
 import com.nullpointer.blogcompose.ui.screens.destinations.ConfigScreenDestination
 import com.nullpointer.blogcompose.ui.screens.destinations.PostDetailsDestination
+import com.nullpointer.blogcompose.ui.screens.emptyScreen.AnimationScreen
 import com.nullpointer.blogcompose.ui.screens.profileScreen.components.FailedProfilePost
 import com.nullpointer.blogcompose.ui.screens.profileScreen.components.ItemMyPost
 import com.nullpointer.blogcompose.ui.screens.states.ProfileScreenState
@@ -95,7 +99,7 @@ fun ProfileScreen(
                     }
                 },
             ) {
-                Box(modifier = Modifier.padding(it)) {
+                Box(modifier = Modifier.padding(it).fillMaxSize()) {
                     ProfileScreen(
                         user = currentUser,
                         listPostState = stateListPost,
@@ -141,7 +145,9 @@ fun ProfileScreen(
 ) {
     LazyVerticalGrid(
         state = gridState,
-        cells = GridCells.Adaptive(120.dp)) {
+        cells = GridCells.Adaptive(120.dp),
+        modifier = Modifier.fillMaxWidth()
+        ) {
 
         item(
             span = { GridItemSpan(maxLineSpan) },
@@ -156,15 +162,29 @@ fun ProfileScreen(
         when (listPostState) {
             Resource.Failure -> item(key = { "failed-user" }) { FailedProfilePost() }
             Resource.Loading -> items(count = 20, key = { it }) { ItemLoadingMyPost() }
-            is Resource.Success -> items(
-                count = listPostState.data.size,
-                key = { listPostState.data[it].id }
-            ) { index ->
-                ItemMyPost(
-                    post = listPostState.data[index],
-                    modifier = Modifier.animateItemPlacement(),
-                    actionDetails = actionDetails
-                )
+            is Resource.Success -> {
+                if (listPostState.data.isEmpty()) {
+                    item(key = { "empty-my post" }, span = { GridItemSpan(maxLineSpan)}) {
+                        AnimationScreen(
+                            resourceRaw = R.raw.empty5,
+                            emptyText = stringResource(id = R.string.message_empty_my_post),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(350.dp)
+                        )
+                    }
+                } else {
+                    items(
+                        count = listPostState.data.size,
+                        key = { listPostState.data[it].id }
+                    ) { index ->
+                        ItemMyPost(
+                            post = listPostState.data[index],
+                            modifier = Modifier.animateItemPlacement(),
+                            actionDetails = actionDetails
+                        )
+                    }
+                }
             }
         }
     }
