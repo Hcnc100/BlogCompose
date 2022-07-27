@@ -2,7 +2,8 @@
 <resources>
 
     <style name="Theme.BlogCompose" parent="android:Theme.Material.Light.NoActionBar">
-        <item name="android:statusBarColor">@color/black</item>
+        <item name="android:statusBarColor">@color/primary_blue</item>
+        <item name="android:windowBackground">@color/primary_blue</item>
     </style>
 
     <style name="Theme.MySplash" parent="Theme.SplashScreen">

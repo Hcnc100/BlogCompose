@@ -81,7 +81,7 @@ private fun MainButtonNavigation(
                     )
                 },
                 label = { Text(stringResource(id = destination.title)) },
-                selectedContentColor =Color.Red.copy(0.4f),
+                selectedContentColor =Color.Red.copy(0.6f),
                 unselectedContentColor = Color.White,
                 alwaysShowLabel = false,
                 modifier = Modifier.background(MaterialTheme.colors.primary)
