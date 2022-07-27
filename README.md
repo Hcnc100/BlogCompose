@@ -2,6 +2,9 @@
 A Simple Blog App using Jetpack Compose, Flow, Navigation Compose, Room and Firebase
 
 ## Instructions
+
+# Auth
+
 1. Download your Firebase configuration file (Enabling authentication and Cloud Firestore)
 2. Create or register your application in the Facebook developer console to enable authentication with Facebook and add the codes of:
 
@@ -9,42 +12,63 @@ A Simple Blog App using Jetpack Compose, Flow, Navigation Compose, Room and Fire
 * facebook_login_protocol_scheme
 * facebook_client_token
 
-3. Enable Cloud Vision API in your Google Cloud Platform
-4. Deploy this cloud functions [BlogComposeFunctions](https://github.com/Hcnc100/BlogComposeFunctions)
+# Notification
+If your enable notification to user for comment or like, see <a href="https://github.com/Hcnc100/BlogComposeFunctions">BlogComposeFunctions</a>,
+if not then only see current notifications force refresh (with swipe refresh)
 
-### Note 1
-To upload the images, a moderation mechanism was chosen using cloud functions, if the profile image is detected as adult content, it will be marked as invalid and will not be established as a profile image, in the case of uploading a post with the image will be uploaded, but if it is detected that it is adult content it will be censored, just as in this case the content of the post is moderated. Note that no optimal mechanism was found to moderate usernames, so usernames are not validated.
 
-### Note 2
-Notifications use cloud Functions
-[BlogComposeFunctions](https://github.com/Hcnc100/BlogComposeFunctions)
+### Bug 
+Has a bug when concatenate my post in profile screen for use a LazyVerticalGrid, wait for them to solve it
 
 ## Screenshots
 ### Auth
 <p>
-  <img src="https://i.imgur.com/oI9IObR.png" alt="auth" width="200"/>
-  <img src="https://i.imgur.com/oza8oUO.png" alt="registry" width="200"/>
+  <img src="https://i.imgur.com/7JI3I83.png" alt="auth" width="200"/>
+  <img src="https://i.imgur.com/7mADeoV.png" alt="registry" width="200"/>
  </p>
 
 ### Empty home
 
 <p>
-  <img src="https://i.imgur.com/q2PgiuQ.png" alt="empty post" width="200"/>
-  <img src="https://i.imgur.com/A9EV78Z.png" alt="empty notify" width="200"/>
-  <img src="https://i.imgur.com/cE2btGx.png" alt="empty profile" width="200"/>
+  <img src="https://i.imgur.com/siFfaTA.png" alt="empty post" width="200"/>
+  <img src="https://i.imgur.com/xPfQzQ9.png" alt="empty notify" width="200"/>
+  <img src="https://i.imgur.com/cqCVNI6.png" alt="empty profile" width="200"/>
 </p>
 
 ### Create and details post
 
 <p>
-  <img src="https://i.imgur.com/DOY6EBI.png" alt="create post" width="200"/>
-  <img src="https://i.imgur.com/1OwN5p6.png" alt="example post" width="200"/>
-  <img src="https://i.imgur.com/e4vytt6.png" alt="post no empty" width="200"/>
-  <img src="https://i.imgur.com/MxMngxx.png" alt="details post" width="200"/>
+  <img src="https://i.imgur.com/y3GvDBa.png" alt="create post" width="200"/>
+  <img src="https://i.imgur.com/zyR4gED.png" alt="example post" width="200"/>
+  <img src="https://i.imgur.com/ry1kTPl.png" alt="post no empty" width="200"/>
+  <img src="https://i.imgur.com/xmgQ57Y.png" alt="details post" width="200"/>
 </p>
 
 ### Notifications
 <p>
-  <img src="https://i.imgur.com/8pxdMTn.png" alt="notifications" width="200"/>
-  <img src="https://i.imgur.com/oAfYX3h.png" alt="notify 2" width="200"/>
+  <img src="https://i.imgur.com/QOWS8xb.png" width="200"/>
+  <img src="https://i.imgur.com/Z0SQSae.png" alt="notify 2" width="200"/>
 </p>
+
+### Profile
+<p>
+  <img src="https://i.imgur.com/17hiVBP.png" width="200"/>
+</p>
+
+
+# Firebase
+
+## Rules Cloud Firestore
+
+<p>
+  <img src="https://i.imgur.com/LUj84qZ.png" width="800"/>
+</p>
+
+
+## Rules Storage
+
+<p>
+  <img src="https://i.imgur.com/PFXD2EP.png" width="800"/>
+</p>
+
+
