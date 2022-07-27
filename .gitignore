@@ -16,3 +16,4 @@ local.properties
 google-services.json
 *.log
 secrets.xml
+app/release/*
