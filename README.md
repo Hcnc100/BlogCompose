@@ -17,8 +17,9 @@ If your enable notification to user for comment or like, see <a href="https://gi
 if not then only see current notifications force refresh (with swipe refresh)
 
 
-### Bug 
-Has a bug when concatenate my post in profile screen for use a LazyVerticalGrid, wait for them to solve it
+### ~~Bug~~ 
+~~Has a bug when concatenate my post in profile screen for use a LazyVerticalGrid, wait for them to solve it~~
+<p>fixed in v2.0.0</p>
 
 ## Screenshots
 ### Auth
