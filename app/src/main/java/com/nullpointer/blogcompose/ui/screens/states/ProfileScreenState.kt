@@ -1,10 +1,9 @@
 package com.nullpointer.blogcompose.ui.screens.states
 
 import android.content.Context
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.animateScrollBy
-import androidx.compose.foundation.lazy.LazyGridState
-import androidx.compose.foundation.lazy.rememberLazyGridState
+import androidx.compose.foundation.lazy.grid.LazyGridState
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -12,12 +11,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
-import com.nullpointer.blogcompose.ui.interfaces.ActionRootDestinations
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @ExperimentalMaterialApi
-@OptIn(ExperimentalFoundationApi::class)
 class ProfileScreenState constructor(
     private val sizeScrollMore:Float,
     scaffoldState: ScaffoldState,
@@ -31,7 +28,6 @@ class ProfileScreenState constructor(
 
     val swipeState get() = swipeRefreshScreenState.swipeState
 
-    @OptIn(ExperimentalFoundationApi::class)
     val isScrollInProgress get() = listState.isScrollInProgress
 
     fun animateScrollMore(){
@@ -41,7 +37,7 @@ class ProfileScreenState constructor(
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun rememberProfileScreenState(
     sizeScrollMore:Float,

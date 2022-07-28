@@ -1,11 +1,8 @@
 package com.nullpointer.blogcompose.ui.share
 
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.lazy.LazyGridState
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.runtime.*
-import kotlinx.coroutines.InternalCoroutinesApi
-import kotlinx.coroutines.flow.collect
 
 @Composable
 fun LazyListState.OnBottomReached(
@@ -28,7 +25,6 @@ fun LazyListState.OnBottomReached(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun LazyGridState.OnBottomReached(
     buffer: Int = 0,

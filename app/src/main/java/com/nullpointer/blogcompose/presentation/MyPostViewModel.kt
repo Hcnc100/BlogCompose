@@ -54,6 +54,7 @@ class MyPostViewModel @Inject constructor(
     val listMyPost = flow<Resource<List<MyPost>>> {
         postRepository.listMyLastPost.collect {
             emit(Resource.Success(it))
+            isConcatenateEnable=true
         }
     }.catch {
         Timber.e("Error get my post $it")

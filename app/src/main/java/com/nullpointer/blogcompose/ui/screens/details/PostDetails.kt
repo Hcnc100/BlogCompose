@@ -153,9 +153,9 @@ fun PostDetails(
     Box(modifier = modifier) {
         LazyColumn(state = listState, modifier = Modifier.fillMaxWidth()) {
             when (postState) {
-                Resource.Loading -> item(key = { "fake-details" }) { FakeHeaderBlogDetails() }
+                Resource.Loading -> item(key =  "fake-details" ) { FakeHeaderBlogDetails() }
                 Resource.Failure -> {
-                    item(key = { "failed-details" }) {
+                    item(key =  "failed-details" ) {
                         AnimationScreen(
                             resourceRaw = R.raw.error1,
                             emptyText = stringResource(id = R.string.error_load_post),
@@ -164,14 +164,14 @@ fun PostDetails(
                     }
                 }
                 is Resource.Success -> {
-                    item(key = { postState.data.id }) {
+                    item(key =  postState.data.id ) {
                         HeaderBlogDetails(
                             blog = postState.data,
                             actionLike = { actionDetails(ActionDetails.LIKE_THIS_POST) })
                     }
                     when (listComments) {
                         Resource.Failure -> {
-                            item(key = { "fail-comments" }) {
+                            item(key =  "fail-comments" ) {
                                 ErrorLoadingComments(
                                     actionReloadComments = { actionDetails(ActionDetails.RELOAD_COMMENTS) },
                                 )
@@ -186,7 +186,7 @@ fun PostDetails(
                             }
                         }
                         is Resource.Success -> {
-                            item(key = { "has-more-comments" }) {
+                            item(key =  "has-more-comments" ) {
                                 when {
                                     isConcatenate-> CircularProgressIndicator(
                                         modifier = Modifier

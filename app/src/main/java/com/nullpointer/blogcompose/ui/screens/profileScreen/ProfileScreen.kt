@@ -2,12 +2,11 @@ package com.nullpointer.blogcompose.ui.screens.profileScreen
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.GridCells
-import androidx.compose.foundation.lazy.GridItemSpan
-import androidx.compose.foundation.lazy.LazyGridState
-import androidx.compose.foundation.lazy.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyGridState
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.Scaffold
@@ -17,7 +16,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -145,13 +143,13 @@ fun ProfileScreen(
 ) {
     LazyVerticalGrid(
         state = gridState,
-        cells = GridCells.Adaptive(120.dp),
+        columns = GridCells.Adaptive(120.dp),
         modifier = Modifier.fillMaxWidth()
         ) {
 
         item(
             span = { GridItemSpan(maxLineSpan) },
-            key = { user.idUser }
+            key = user.idUser
         ) {
             HeaderUser(
                 user = user,
@@ -160,7 +158,7 @@ fun ProfileScreen(
             )
         }
         when (listPostState) {
-            Resource.Failure -> item(key = { "failed-user" }) { FailedProfilePost() }
+            Resource.Failure -> item(key = "failed-user" ) { FailedProfilePost() }
             Resource.Loading -> items(count = 20, key = { it }) { ItemLoadingMyPost() }
             is Resource.Success -> {
                 if (listPostState.data.isEmpty()) {

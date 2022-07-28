@@ -24,7 +24,7 @@ class PostRepoImpl(
 
     companion object {
         private const val SIZE_POST_REQUEST = 5
-        private const val SIZE_MY_POST_REQUEST = 15
+        private const val SIZE_MY_POST_REQUEST = 7
     }
 
     override val listLastPost: Flow<List<Post>> = postDAO.getAllPost()
