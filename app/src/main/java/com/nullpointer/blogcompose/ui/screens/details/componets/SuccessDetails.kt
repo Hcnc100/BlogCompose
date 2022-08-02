@@ -8,6 +8,8 @@ import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -69,8 +71,10 @@ fun HeaderBlogDetails(
     actionLike: () -> Unit
 ) {
 
-    val iconLike = derivedStateOf {
-        if (blog.ownerLike) R.drawable.ic_fav else R.drawable.ic_unfav
+    val iconLike by remember(blog.ownerLike) {
+        derivedStateOf {
+            if (blog.ownerLike) R.drawable.ic_fav else R.drawable.ic_unfav
+        }
     }
 
     Column(
@@ -109,9 +113,8 @@ fun HeaderBlogDetails(
                     actionLike()
                 }, verticalAlignment = Alignment.CenterVertically) {
                 Icon(
-                    painter = painterResource(id = iconLike.value), contentDescription = stringResource(
-                        id = R.string.description_like_button
-                    )
+                    painter = painterResource(id = iconLike),
+                    contentDescription = stringResource(id = R.string.description_like_button)
                 )
                 Spacer(modifier = Modifier.width(5.dp))
                 Text(

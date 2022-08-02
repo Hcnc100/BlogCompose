@@ -10,10 +10,7 @@ import androidx.compose.material.Card
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -93,13 +90,15 @@ private fun ActionsPost(
     post: SimplePost,
     actionBlog: (ActionsPost, SimplePost) -> Unit
 ) {
-    val iconLike = derivedStateOf {
-        if (post.ownerLike) R.drawable.ic_fav else R.drawable.ic_unfav
+    val iconLike by remember(post.ownerLike) {
+        derivedStateOf {
+            if (post.ownerLike) R.drawable.ic_fav else R.drawable.ic_unfav
+        }
     }
     Row(modifier = modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
         Row {
             IconAction(
-                drawableRes = iconLike.value,
+                drawableRes = iconLike,
                 stringDescription = R.string.description_like_button
             ) {
                 actionBlog(ActionsPost.LIKE, post)
