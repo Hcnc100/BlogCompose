@@ -50,7 +50,7 @@ class MainActivity : ComponentActivity() {
                         loading=false
                         DestinationsNavHost(
                             startRoute = startDestination,
-                            navGraph = NavGraphs.root,
+                            navGraph = NavGraphs.main,
                             navController = rootAppState.navController,
                             engine = rootAppState.navHostEngine,
                             dependenciesContainerBuilder = {
