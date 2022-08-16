@@ -17,18 +17,17 @@ import com.nullpointer.blogcompose.presentation.AuthViewModel
 import com.nullpointer.blogcompose.ui.interfaces.ActionRootDestinations
 import com.nullpointer.blogcompose.ui.navigation.HomeDestinations
 import com.nullpointer.blogcompose.ui.navigation.MainTransitions
-import com.nullpointer.blogcompose.ui.navigation.RootNavGraph
+import com.nullpointer.blogcompose.ui.navigation.MainNavGraph
 import com.nullpointer.blogcompose.ui.screens.NavGraphs
 import com.nullpointer.blogcompose.ui.screens.states.MainScreenState
 import com.nullpointer.blogcompose.ui.screens.states.rememberMainScreenState
 import com.nullpointer.blogcompose.ui.share.SimpleToolbar
-import com.nullpointer.blogcompose.ui.share.ToolbarBack
 import com.ramcosta.composedestinations.DestinationsNavHost
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.dependency
 import com.ramcosta.composedestinations.navigation.navigate
 
-@RootNavGraph
+@MainNavGraph
 @Destination(style = MainTransitions::class)
 @Composable
 fun MainScreen(

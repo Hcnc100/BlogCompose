@@ -31,7 +31,7 @@ import com.nullpointer.blogcompose.models.posts.Post
 import com.nullpointer.blogcompose.presentation.LikeViewModel
 import com.nullpointer.blogcompose.presentation.PostDetailsViewModel
 import com.nullpointer.blogcompose.ui.interfaces.ActionRootDestinations
-import com.nullpointer.blogcompose.ui.navigation.RootNavGraph
+import com.nullpointer.blogcompose.ui.navigation.MainNavGraph
 import com.nullpointer.blogcompose.ui.screens.details.componets.*
 import com.nullpointer.blogcompose.ui.screens.emptyScreen.AnimationScreen
 import com.nullpointer.blogcompose.ui.screens.states.PostDetailsState
@@ -43,7 +43,7 @@ import com.ramcosta.composedestinations.annotation.Destination
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-@RootNavGraph
+@MainNavGraph
 @Destination(
     deepLinks = [
         DeepLink(

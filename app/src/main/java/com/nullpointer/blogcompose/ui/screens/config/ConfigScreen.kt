@@ -22,11 +22,11 @@ import coil.transform.CircleCropTransformation
 import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.presentation.AuthViewModel
 import com.nullpointer.blogcompose.ui.interfaces.ActionRootDestinations
-import com.nullpointer.blogcompose.ui.navigation.RootNavGraph
+import com.nullpointer.blogcompose.ui.navigation.MainNavGraph
 import com.nullpointer.blogcompose.ui.share.ToolbarBack
 import com.ramcosta.composedestinations.annotation.Destination
 
-@RootNavGraph
+@MainNavGraph
 @Composable
 @Destination
 fun ConfigScreen(

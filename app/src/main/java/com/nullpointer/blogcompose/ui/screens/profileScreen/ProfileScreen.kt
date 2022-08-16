@@ -162,7 +162,7 @@ fun ProfileScreen(
             Resource.Loading -> items(count = 20, key = { it }) { ItemLoadingMyPost() }
             is Resource.Success -> {
                 if (listPostState.data.isEmpty()) {
-                    item(key = { "empty-my post" }, span = { GridItemSpan(maxLineSpan)}) {
+                    item(key = "empty-my post" , span = { GridItemSpan(maxLineSpan)}) {
                         AnimationScreen(
                             resourceRaw = R.raw.empty5,
                             emptyText = stringResource(id = R.string.message_empty_my_post),

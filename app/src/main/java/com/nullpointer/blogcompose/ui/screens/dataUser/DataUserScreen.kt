@@ -2,7 +2,6 @@ package com.nullpointer.blogcompose.ui.screens.dataUser
 
 import android.net.Uri
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
@@ -10,7 +9,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -22,7 +20,7 @@ import coil.compose.SubcomposeAsyncImageContent
 import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.presentation.AuthViewModel
 import com.nullpointer.blogcompose.presentation.RegistryViewModel
-import com.nullpointer.blogcompose.ui.navigation.RootNavGraph
+import com.nullpointer.blogcompose.ui.navigation.MainNavGraph
 import com.nullpointer.blogcompose.ui.screens.states.SelectImageScreenState
 import com.nullpointer.blogcompose.ui.screens.states.rememberSelectImageScreenState
 import com.nullpointer.blogcompose.ui.share.EditableTextSavable
@@ -31,7 +29,7 @@ import com.nullpointer.blogcompose.ui.share.SimpleToolbar
 import com.ramcosta.composedestinations.annotation.Destination
 
 @OptIn(ExperimentalMaterialApi::class)
-@RootNavGraph
+@MainNavGraph
 @Destination
 @Composable
 fun DataUserScreen(

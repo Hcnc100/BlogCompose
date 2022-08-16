@@ -18,7 +18,7 @@ import coil.compose.SubcomposeAsyncImage
 import coil.compose.SubcomposeAsyncImageContent
 import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.ui.interfaces.ActionRootDestinations
-import com.nullpointer.blogcompose.ui.navigation.RootNavGraph
+import com.nullpointer.blogcompose.ui.navigation.MainNavGraph
 import com.nullpointer.blogcompose.ui.screens.addPost.viewModel.AddBlogViewModel
 import com.nullpointer.blogcompose.ui.screens.states.SelectImageScreenState
 import com.nullpointer.blogcompose.ui.screens.states.rememberSelectImageScreenState
@@ -28,7 +28,7 @@ import com.nullpointer.blogcompose.ui.share.ToolbarBack
 import com.ramcosta.composedestinations.annotation.Destination
 
 @OptIn(ExperimentalMaterialApi::class)
-@RootNavGraph
+@MainNavGraph
 @Destination
 @Composable
 fun AddBlogScreen(
