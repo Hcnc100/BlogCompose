@@ -53,7 +53,7 @@ fun DataUserScreen(
                 actionHidden = dataScreenState::hiddenModal,
                 actionBeforeSelect = { uri ->
                     uri?.let {
-                        registryViewModel.imageProfile.changeValue(it, dataScreenState.context)
+                        registryViewModel.imageProfile.changeValue(it)
                     }
                     dataScreenState.hiddenModal()
                 }

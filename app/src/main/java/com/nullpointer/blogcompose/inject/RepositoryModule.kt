@@ -1,11 +1,11 @@
 package com.nullpointer.blogcompose.inject
 
-import com.nullpointer.blogcompose.data.remote.notify.NotifyDataSource
-import com.nullpointer.blogcompose.data.remote.notify.NotifyDataSourceImpl
 import com.nullpointer.blogcompose.domain.auth.AuthRepoImpl
 import com.nullpointer.blogcompose.domain.auth.AuthRepository
 import com.nullpointer.blogcompose.domain.comment.CommentsRepoImpl
 import com.nullpointer.blogcompose.domain.comment.CommentsRepository
+import com.nullpointer.blogcompose.domain.compress.CompressRepoImpl
+import com.nullpointer.blogcompose.domain.compress.CompressRepository
 import com.nullpointer.blogcompose.domain.images.ImagesRepoImpl
 import com.nullpointer.blogcompose.domain.images.ImagesRepository
 import com.nullpointer.blogcompose.domain.notify.NotifyRepoImpl
@@ -44,11 +44,17 @@ abstract class RepositoryModule {
     @Singleton
     abstract fun providePostRepository(
         postRepoImpl: PostRepoImpl
-    ):PostRepository
+    ): PostRepository
 
     @Binds
     @Singleton
     abstract fun provideCommentsRepository(
         commentsRepoImpl: CommentsRepoImpl
-    ):CommentsRepository
+    ): CommentsRepository
+
+    @Binds
+    @Singleton
+    abstract fun provideCompressRepository(
+        compressRepoImpl: CompressRepoImpl
+    ): CompressRepository
 }

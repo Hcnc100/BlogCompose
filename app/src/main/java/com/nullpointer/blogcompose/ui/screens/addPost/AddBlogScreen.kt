@@ -47,7 +47,7 @@ fun AddBlogScreen(
                 isVisible = addBlogState.isShowModal
             ) { uri ->
                 addBlogState.hiddenModal()
-                uri?.let { addBlogVM.imageBlog.changeValue(it, addBlogState.context) }
+                uri?.let { addBlogVM.imageBlog.changeValue(it) }
             }
         },
     ) {

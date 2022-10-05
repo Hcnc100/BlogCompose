@@ -251,7 +251,7 @@ private fun TextInputComment(
 ) {
     val actionSendValidate = {
         if (valueProperty.hasChanged) {
-            actionSend(valueProperty.value)
+            actionSend(valueProperty.currentValue)
             valueProperty.clearValue()
         }
     }

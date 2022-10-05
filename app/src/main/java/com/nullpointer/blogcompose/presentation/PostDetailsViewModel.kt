@@ -31,7 +31,8 @@ class PostDetailsViewModel @Inject constructor(
 ) : ViewModel() {
 
     companion object {
-        const val KEY_COMMENTS = "KEY_COMMENTS"
+        private const val KEY_COMMENTS = "KEY_COMMENTS"
+        private const val TAG_COMMENT_DETAILS="TAG_COMMENT_DETAILS"
     }
 
     // * job to control init comments and emit state
@@ -68,11 +69,12 @@ class PostDetailsViewModel @Inject constructor(
     var currentPost:SimplePost?=null
 
     val comment = PropertySavableString(
-        state = savedStateHandle,
+        savedState = savedStateHandle,
         label = R.string.label_comment,
         hint = R.string.comment_hint,
         maxLength = 250,
-        lengthError = R.string.error_length_comment
+        lengthError = R.string.error_length_comment,
+        tagSavable = TAG_COMMENT_DETAILS
     )
 
     val postState: StateFlow<Resource<Post>> = flow<Resource<Post>> {
