@@ -49,4 +49,9 @@ class PostLocalDataSourceImpl(
     override suspend fun insertListMyPost(listMyPost: List<MyPost>) =
         myPostDAO.insertListPost(listMyPost)
 
+    override suspend fun deleterAllPost() {
+        myPostDAO.deleterAll()
+        postDAO.deleterAll()
+    }
+
 }

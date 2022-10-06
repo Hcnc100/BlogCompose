@@ -3,6 +3,8 @@ package com.nullpointer.blogcompose.inject
 import com.nullpointer.blogcompose.data.local.cache.BlogDataBase
 import com.nullpointer.blogcompose.data.local.cache.MyPostDAO
 import com.nullpointer.blogcompose.data.local.cache.PostDAO
+import com.nullpointer.blogcompose.data.local.post.PostLocalDataSource
+import com.nullpointer.blogcompose.data.local.post.PostLocalDataSourceImpl
 import com.nullpointer.blogcompose.data.local.preferences.PreferencesDataSource
 import com.nullpointer.blogcompose.data.remote.post.PostDataSourceImpl
 import com.nullpointer.blogcompose.data.remote.post.PostRemoteDataSource
@@ -32,16 +34,21 @@ object PostModule {
 
     @Provides
     @Singleton
-    fun getPostDataSource(): PostRemoteDataSource =
-        PostDataSourceImpl()
+    fun providePostLocalDataSource(
+        postDAO: PostDAO,
+        myPostDAO: MyPostDAO,
+    ): PostLocalDataSource = PostLocalDataSourceImpl(postDAO, myPostDAO)
+
+    @Provides
+    @Singleton
+    fun getPostDataSource(): PostRemoteDataSource = PostDataSourceImpl()
 
     @Provides
     @Singleton
     fun getPostRepository(
         prefDataSource: PreferencesDataSource,
         postDataSource: PostRemoteDataSource,
-        myPostDAO: MyPostDAO,
-        postDAO: PostDAO,
-    ): PostRepoImpl = PostRepoImpl(postDataSource, prefDataSource, postDAO, myPostDAO)
+        postLocalDataSource: PostLocalDataSource
+    ): PostRepoImpl = PostRepoImpl(postDataSource, prefDataSource, postLocalDataSource)
 
 }

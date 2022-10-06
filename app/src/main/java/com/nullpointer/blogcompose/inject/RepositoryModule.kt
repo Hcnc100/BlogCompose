@@ -6,6 +6,8 @@ import com.nullpointer.blogcompose.domain.comment.CommentsRepoImpl
 import com.nullpointer.blogcompose.domain.comment.CommentsRepository
 import com.nullpointer.blogcompose.domain.compress.CompressRepoImpl
 import com.nullpointer.blogcompose.domain.compress.CompressRepository
+import com.nullpointer.blogcompose.domain.delete.DeleterRepoImpl
+import com.nullpointer.blogcompose.domain.delete.DeleterRepository
 import com.nullpointer.blogcompose.domain.images.ImagesRepoImpl
 import com.nullpointer.blogcompose.domain.images.ImagesRepository
 import com.nullpointer.blogcompose.domain.notify.NotifyRepoImpl
@@ -57,4 +59,10 @@ abstract class RepositoryModule {
     abstract fun provideCompressRepository(
         compressRepoImpl: CompressRepoImpl
     ): CompressRepository
+
+    @Binds
+    @Singleton
+    abstract fun provideDeleterRepository(
+        deleterRepoImpl: DeleterRepoImpl
+    ): DeleterRepository
 }

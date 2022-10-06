@@ -10,8 +10,7 @@ import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.states.LoginStatus
 import com.nullpointer.blogcompose.core.utils.launchSafeIO
 import com.nullpointer.blogcompose.domain.auth.AuthRepository
-import com.nullpointer.blogcompose.domain.notify.NotifyRepository
-import com.nullpointer.blogcompose.domain.post.PostRepository
+import com.nullpointer.blogcompose.domain.delete.DeleterRepository
 import com.nullpointer.blogcompose.models.users.SimpleUser
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -24,8 +23,7 @@ import javax.inject.Inject
 @HiltViewModel
 class AuthViewModel @Inject constructor(
     private val authRepository: AuthRepository,
-    private val notifyRepository: NotifyRepository,
-    private val postRepository: PostRepository,
+    private val deleterRepository: DeleterRepository
 ) : ViewModel() {
 
     private val SimpleUser.isUserAuth get() = idUser.isNotEmpty()
@@ -76,8 +74,9 @@ class AuthViewModel @Inject constructor(
 
     fun logOut() = launchSafeIO {
         authRepository.logOut()
-        notifyRepository.deleterAllNotify()
-        postRepository.deleterAllPost()
+//        notifyRepository.deleterAllNotify()
+//        postRepository.deleterAllPost()
+        deleterRepository.clearAllData()
     }
 
 

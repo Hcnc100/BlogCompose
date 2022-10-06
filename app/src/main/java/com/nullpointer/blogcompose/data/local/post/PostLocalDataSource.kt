@@ -18,4 +18,5 @@ interface PostLocalDataSource {
     suspend fun getFirstPost(): Post?
     suspend fun getMyFirstPost(): MyPost?
     suspend fun updatePost(post: SimplePost)
+    suspend fun deleterAllPost()
 }

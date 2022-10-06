@@ -126,6 +126,6 @@ class PostViewModel @Inject constructor(
     }
 
     fun deleterPostInvalid(idPost: String) = viewModelScope.launch(Dispatchers.IO) {
-        postRepository.deleterPost(idPost)
+//        postRepository.deleterPost(idPost)
     }
 }

@@ -93,7 +93,7 @@ class PostDetailsViewModel @Inject constructor(
                     emit(Resource.Success(newPost))
                     // * update inner post (saved in database)
                     withContext(Dispatchers.IO) {
-                        postRepository.updatePost(newPost)
+//                        postRepository.updatePost(newPost)
                     }
                 }
             }
