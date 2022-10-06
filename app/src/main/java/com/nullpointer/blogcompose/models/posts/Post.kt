@@ -27,13 +27,6 @@ data class Post(
     @set:Exclude @get:Exclude
     @PrimaryKey
     override var id: String = UUID.randomUUID().toString(),
-) : SimplePost(), Parcelable {
-    fun toggleLike(): Post {
-        val newCount = if (ownerLike) numberLikes -1 else numberLikes +1
-        return this.copy(
-            numberLikes = newCount,
-            ownerLike = !ownerLike
-        )
-    }
+) : SimplePost, Parcelable {
 }
 

@@ -3,13 +3,13 @@ package com.nullpointer.blogcompose.models.posts
 import com.nullpointer.blogcompose.models.users.SimpleUser
 import java.util.*
 
-abstract class SimplePost {
-    abstract var description: String
-    abstract var urlImage: String
-    abstract var numberComments: Int
-    abstract var numberLikes: Int
-    abstract var ownerLike: Boolean
-    abstract var timestamp: Date?
-    abstract var id: String
-    abstract var userPoster: SimpleUser?
+interface SimplePost {
+    var description: String
+    var urlImage: String
+    var numberComments: Int
+    var numberLikes: Int
+    var ownerLike: Boolean
+    var timestamp: Date?
+    var id: String
+    var userPoster: SimpleUser?
 }

@@ -26,7 +26,7 @@ data class MyPost(
     @set:Exclude @get:Exclude
     @PrimaryKey
     override var id: String = UUID.randomUUID().toString(),
-) : SimplePost(), Parcelable {
+) : SimplePost, Parcelable {
     companion object {
         fun fromPost(post: Post) = MyPost(
             description = post.description,

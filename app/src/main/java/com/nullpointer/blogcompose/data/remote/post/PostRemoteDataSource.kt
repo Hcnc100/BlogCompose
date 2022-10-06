@@ -5,13 +5,13 @@ import com.nullpointer.blogcompose.models.posts.Post
 import kotlinx.coroutines.flow.Flow
 import java.util.*
 
-interface PostDataSource {
+interface PostRemoteDataSource {
 
     fun getRealTimePost(idPost: String): Flow<Post?>
 
     suspend fun addNewPost(post: Post): String
     suspend fun deleterPost(idPost: String)
-    suspend fun getPost(idPost: String):Post?
+    suspend fun getPost(idPost: String): Post?
 
 
     suspend fun getLastPost(

@@ -72,7 +72,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
                 // ? this is for other notifications
                 notifyHelper.launchNotifyPost(notify)
                 notifyRepository.requestLastNotifyStartWith(notify.id)
-                postRepository.updatePost(notify.idPost)
+                postRepository.updatePostById(notify.idPost)
                 notifyServicesEvent.trySend(Unit)
             } catch (e: Exception) {
                 Timber.e("Error al notificar $e")
