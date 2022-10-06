@@ -93,7 +93,7 @@ fun DataUserScreen(
             }
         }
     }
-    if(authViewModel.creatingUser) CreatingDialog()
+    if (authViewModel.isProcessing) CreatingDialog()
 }
 
 @Composable

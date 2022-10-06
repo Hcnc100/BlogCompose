@@ -3,23 +3,20 @@ package com.nullpointer.blogcompose.presentation
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.AuthCredential
 import com.nullpointer.blogcompose.R
-import com.nullpointer.blogcompose.core.delegates.SavableComposeState
 import com.nullpointer.blogcompose.core.states.LoginStatus
+import com.nullpointer.blogcompose.core.utils.launchSafeIO
 import com.nullpointer.blogcompose.domain.auth.AuthRepository
 import com.nullpointer.blogcompose.domain.notify.NotifyRepository
 import com.nullpointer.blogcompose.domain.post.PostRepository
 import com.nullpointer.blogcompose.models.users.SimpleUser
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -29,7 +26,6 @@ class AuthViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val notifyRepository: NotifyRepository,
     private val postRepository: PostRepository,
-    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
     private val SimpleUser.isUserAuth get() = idUser.isNotEmpty()
@@ -44,17 +40,13 @@ class AuthViewModel @Inject constructor(
     private val _messageAuth = Channel<Int>()
     val messageAuth = _messageAuth.receiveAsFlow()
 
-    val stateAuthUser = flow {
-        authRepository.myUser.collect { user ->
-            val state = if (!user.isUserAuth) {
-                LoginStatus.Unauthenticated
-            } else if (user.isDataComplete) {
-                LoginStatus.Authenticated.CompleteData
-            } else {
-                LoginStatus.Authenticated.CompletingData
-            }
-            emit(state)
+    val stateAuthUser = authRepository.myUser.transform { user ->
+        val stateUser = when {
+            !user.isUserAuth -> LoginStatus.Unauthenticated
+            user.isDataComplete -> LoginStatus.Authenticated.CompleteData
+            else -> LoginStatus.Authenticated.CompletingData
         }
+        emit(stateUser)
     }.catch {
         emit(LoginStatus.Unauthenticated)
         Timber.e("Error get user for preferences $it")
@@ -67,56 +59,39 @@ class AuthViewModel @Inject constructor(
     )
 
 
-    var isLoading by SavableComposeState(savedStateHandle, "KEY_LOADING", false)
-        private set
-    var creatingUser by mutableStateOf(false)
+    var isProcessing by mutableStateOf(false)
         private set
 
     fun authWithCredential(
         authCredential: AuthCredential
-    ) = viewModelScope.launch(Dispatchers.IO) {
-        try {
-            isLoading = true
-            authRepository.authWithCredential(authCredential)
-        } catch (e: Exception) {
-            when (e) {
-                is CancellationException -> throw e
-                else -> {
-                    Timber.e("Error al auth $e")
-                    _messageAuth.trySend(R.string.message_error_auth)
-                }
-            }
-        } finally {
-            isLoading = false
-        }
-    }
+    ) = launchSafeIO(
+        blockBefore = { isProcessing = true },
+        blockAfter = { isProcessing = false },
+        blockException = {
+            Timber.e("Error al auth $it")
+            _messageAuth.trySend(R.string.message_error_auth)
+        },
+        blockIO = { authRepository.authWithCredential(authCredential) }
+    )
 
-    fun logOut() = viewModelScope.launch(Dispatchers.IO) {
+    fun logOut() = launchSafeIO {
         authRepository.logOut()
         notifyRepository.deleterAllNotify()
         postRepository.deleterAllPost()
     }
 
 
-
     fun createNewUser(
         myUser: SimpleUser
-    ) = viewModelScope.launch(Dispatchers.IO) {
-        try {
-            creatingUser = true
-            authRepository.createNewUser(myUser)
-        } catch (e: Exception) {
-            when (e) {
-                is CancellationException -> throw e
-                else -> {
-                    Timber.e("error to create new user $e")
-                    _messageAuth.trySend(R.string.message_error_login)
-                }
-            }
-        } finally {
-            creatingUser = false
-        }
-    }
+    ) = launchSafeIO(
+        blockBefore = { isProcessing = true },
+        blockAfter = { isProcessing = false },
+        blockException = {
+            Timber.e("error to create new user $it")
+            _messageAuth.trySend(R.string.message_error_login)
+        },
+        blockIO = { authRepository.createNewUser(myUser) }
+    )
 
 
 

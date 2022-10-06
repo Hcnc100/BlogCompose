@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -33,13 +34,29 @@ fun AuthScreen(
         authViewModel.messageAuth.collect(authScreenState::showSnackMessage)
     }
 
-    Scaffold(
+    AuthScreen(
+        isAuthenticated = authViewModel.isProcessing,
         scaffoldState = authScreenState.scaffoldState,
+        actionAuthWithCredential = authViewModel::authWithCredential
+    )
+
+}
+
+@Composable
+fun AuthScreen(
+    isAuthenticated: Boolean,
+    scaffoldState: ScaffoldState,
+    actionAuthWithCredential: (AuthCredential) -> Unit
+) {
+    Scaffold(
+        scaffoldState = scaffoldState,
         backgroundColor = MaterialTheme.colors.primary
     ) {
         Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.SpaceAround
+            modifier = Modifier
+                .padding(it)
+                .fillMaxSize(),
+            verticalArrangement = Arrangement.SpaceBetween
         ) {
             ContainerLogo()
             Box(
@@ -48,40 +65,31 @@ fun AuthScreen(
                     .height(250.dp),
                 contentAlignment = Alignment.Center
             ) {
-                if(authViewModel.isLoading){
+                if (isAuthenticated) {
                     CircularProgressIndicator(color = MaterialTheme.colors.onPrimary)
-                }else{
-                    ButtonsAuth(
-                        modifier = Modifier.fillMaxSize(),
-                        authWithCredential = authViewModel::authWithCredential
-                    )
+                } else {
+                    ButtonsAuth(authWithCredential = actionAuthWithCredential)
                 }
             }
         }
     }
 }
 
+
 @Composable
 private fun ContainerLogo(
     modifier: Modifier = Modifier
 ) {
-    Box(
+    AsyncImage(
+        model = R.mipmap.ic_launcher,
+        contentDescription = stringResource(R.string.description_logo_app),
         modifier = modifier
             .fillMaxWidth()
-            .height(250.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Card(
-            shape = CircleShape,
-            elevation = 10.dp
-        ) {
-            AsyncImage(
-                model = R.mipmap.ic_launcher,
-                contentDescription = stringResource(R.string.description_logo_app),
-                modifier = Modifier.size(150.dp)
-            )
-        }
-    }
+            .height(250.dp)
+            .wrapContentSize(Alignment.Center)
+            .size(150.dp)
+            .clip(CircleShape),
+    )
 }
 
 
@@ -95,7 +103,7 @@ private fun ButtonsAuth(
 
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.SpaceEvenly,
+        verticalArrangement = Arrangement.spacedBy(20.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // * text disclaimer
