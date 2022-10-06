@@ -29,6 +29,7 @@ open class SelectImageScreenState(
     }
 
     fun showModal(){
+        hiddenKeyBoard()
         scope.launch {
             modalBottomSheetState.show()
         }

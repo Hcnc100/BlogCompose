@@ -32,6 +32,8 @@ class PropertySavableImg(
 
     val isNotEmpty get() = value != Uri.EMPTY
 
+    val isEmpty get() = value == Uri.EMPTY
+
     fun changeValue(newValue: Uri, isInit: Boolean = false) {
         if (isInit) {
             value = newValue

@@ -161,4 +161,7 @@
     <string name="description_edit_img_user">Icono para cambiar la imagen actual del usuario</string>
     <string name="description_settings">Icono para ir a la pantalla de ajustes</string>
     <string name="retry_load_comments">Reintentar cargar comentarios</string>
+
+    <string name="error_load_my_post">Error al cargar mis publicaciones</string>
+    <string name="message_empty_image_post">La imagen no puede estar vacía</string>
 </resources>

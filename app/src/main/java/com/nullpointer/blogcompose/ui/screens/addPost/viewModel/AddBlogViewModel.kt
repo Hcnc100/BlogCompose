@@ -1,7 +1,6 @@
 package com.nullpointer.blogcompose.ui.screens.addPost.viewModel
 
 import android.content.Context
-import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -9,7 +8,6 @@ import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.delegates.PropertySavableImg
 import com.nullpointer.blogcompose.core.delegates.PropertySavableString
 import com.nullpointer.blogcompose.domain.compress.CompressRepository
-import com.nullpointer.blogcompose.models.posts.Post
 import com.nullpointer.blogcompose.services.uploadImg.UploadDataControl
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -51,13 +49,20 @@ class AddBlogViewModel @Inject constructor(
         tagSavable = TAG_DESCRIPTION_POST
     )
 
-    val isValidData get() = imageBlog.isNotEmpty && !description.hasError
-
-    fun getPostValidate(context: Context):Boolean{
-        return if (isValidData){
-            UploadDataControl.startServicesUploadPost(context,description.currentValue,imageBlog.value)
-            true
-        }else false
+    fun createPostValidate(context: Context, callBackSuccess: () -> Unit) {
+        if (imageBlog.isEmpty) {
+            _messageAddBlog.trySend(R.string.message_empty_image_post)
+        } else {
+            description.reValueField()
+            if (!description.hasError) {
+                UploadDataControl.startServicesUploadPost(
+                    context = context,
+                    description = description.currentValue,
+                    uriImg = imageBlog.value
+                )
+                callBackSuccess()
+            }
+        }
     }
 
 }
