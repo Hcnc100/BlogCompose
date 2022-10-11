@@ -2,6 +2,7 @@ package com.nullpointer.blogcompose.data.remote.post
 
 import com.nullpointer.blogcompose.models.notify.Notify
 import com.nullpointer.blogcompose.models.posts.Post
+import com.nullpointer.blogcompose.models.posts.SimplePost
 import kotlinx.coroutines.flow.Flow
 import java.util.*
 
@@ -9,9 +10,9 @@ interface PostRemoteDataSource {
 
     fun getRealTimePost(idPost: String): Flow<Post?>
 
-    suspend fun addNewPost(post: Post): String
+    suspend fun addNewPost(post: SimplePost): String
     suspend fun deleterPost(idPost: String)
-    suspend fun getPost(idPost: String): Post?
+    suspend fun getPost(idPost: String): SimplePost?
 
 
     suspend fun getLastPost(

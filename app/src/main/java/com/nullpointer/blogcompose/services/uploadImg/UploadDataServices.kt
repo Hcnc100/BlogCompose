@@ -11,6 +11,7 @@ import com.nullpointer.blogcompose.domain.auth.AuthRepository
 import com.nullpointer.blogcompose.domain.images.ImagesRepository
 import com.nullpointer.blogcompose.domain.post.PostRepository
 import com.nullpointer.blogcompose.models.posts.Post
+import com.nullpointer.blogcompose.models.posts.SimplePost
 import com.nullpointer.blogcompose.models.users.SimpleUser
 import com.nullpointer.blogcompose.services.uploadImg.UploadDataControl.ACTION_START_POST
 import com.nullpointer.blogcompose.services.uploadImg.UploadDataControl.ACTION_START_USER
@@ -80,7 +81,13 @@ class UploadDataServices : LifecycleService() {
                             typeUpdate = typeUpdate
                         ) {
                             withContext(Dispatchers.IO){
-                                postRepository.addNewPost(post = createNewPost(uuid, description, it))
+                                postRepository.addNewPost(
+                                    post = createNewPost(
+                                        uuid,
+                                        description,
+                                        it
+                                    ) as Post
+                                )
                             }
                         }
                         finishUploadSuccessEvent.trySend(Unit)
@@ -114,7 +121,11 @@ class UploadDataServices : LifecycleService() {
     }
 
 
-    private suspend fun createNewPost(uuidPost: String, description: String, urlImg: String): Post {
+    private suspend fun createNewPost(
+        uuidPost: String,
+        description: String,
+        urlImg: String
+    ): SimplePost {
         val user = authRepository.myUser.first()
         return Post(
             id = uuidPost,

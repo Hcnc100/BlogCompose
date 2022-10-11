@@ -98,7 +98,7 @@ fun ProfileScreen(
         ) {
             Scaffold(
                 floatingActionButton = {
-                    ButtonAdd(isScrollInProgress = profileScreenState.isScrollInProgress) {
+                    ButtonAdd(isVisible = profileScreenState.isScrollInProgress) {
                         actionRootDestinations.changeRoot(AddBlogScreenDestination)
                     }
                 },

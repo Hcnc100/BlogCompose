@@ -129,7 +129,7 @@ class PostRepoImpl(
     }
 
 
-    override suspend fun addNewPost(post: Post) {
+    override suspend fun addNewPost(post: SimplePost) {
         val idPost = postDataSource.addNewPost(post)
         requestLastPostInitWith(idPost)
     }

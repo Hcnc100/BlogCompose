@@ -50,12 +50,13 @@ fun EditableImage(
 
         SimpleImage(
             error = error,
-            imgUser = imgUser,
+            image = imgUser.value,
             isCircular = isCircular,
             sizeImage = sizeImage,
             placeholder = placeholder,
             sizePlaceHolder = sizePlaceHolder,
-            contentDescription = contentDescription
+            contentDescription = contentDescription,
+            isEmpty = imgUser.isEmpty,
         )
         FloatingActionButton(
             onClick = actionChangePhoto,
@@ -72,14 +73,20 @@ fun EditableImage(
             )
         }
 
+        if (imgUser.isCompress)
+            CircularProgressIndicator(
+                modifier = Modifier.size(50.dp),
+                color = MaterialTheme.colors.primary,
+                strokeWidth = 5.dp
+            )
     }
 }
 
 @Composable
 fun SimpleImage(
+    image: Any,
     sizeImage: Dp,
     modifier: Modifier = Modifier,
-    imgUser: PropertySavableImg,
     sizePlaceHolder: Dp = sizeImage,
     context: Context = LocalContext.current,
     @DrawableRes
@@ -87,7 +94,8 @@ fun SimpleImage(
     @DrawableRes
     error: Int = R.drawable.ic_broken_image,
     contentDescription: String? = null,
-    isCircular: Boolean
+    isCircular: Boolean,
+    isEmpty: Boolean,
 ) {
 
     require(sizePlaceHolder <= sizeImage) {
@@ -98,14 +106,14 @@ fun SimpleImage(
         placeholder = painterResource(id = placeholder),
         error = painterResource(id = error),
         model = ImageRequest.Builder(context)
-            .data(imgUser.value)
+            .data(image)
             .crossfade(true).apply {
                 if (isCircular) transformations(CircleCropTransformation())
             }
             .build(),
     )
 
-    val paddingImg by animateDpAsState(targetValue = if (imgUser.isEmpty) sizeImage - sizePlaceHolder else 0.dp)
+    val paddingImg by animateDpAsState(targetValue = if (isEmpty) sizeImage - sizePlaceHolder else 0.dp)
 
     Box(
         contentAlignment = Alignment.Center,
@@ -118,18 +126,12 @@ fun SimpleImage(
             Image(
                 contentDescription = contentDescription,
                 colorFilter = if (painter.isSuccess) null else ColorFilter.tint(getGrayColor()),
-                painter = if (imgUser.isNotEmpty) painter else painterResource(id = placeholder),
+                painter = if (!isEmpty) painter else painterResource(id = placeholder),
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(paddingImg)
+                    .padding(paddingImg),
             )
         }
 
-        if (imgUser.isCompress)
-            CircularProgressIndicator(
-                modifier = Modifier.size(50.dp),
-                color = MaterialTheme.colors.primary,
-                strokeWidth = 5.dp
-            )
     }
 }

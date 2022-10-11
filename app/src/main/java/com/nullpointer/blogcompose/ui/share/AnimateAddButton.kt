@@ -13,12 +13,12 @@ import com.nullpointer.blogcompose.R
 @Composable
 fun ButtonAdd(
     modifier: Modifier = Modifier,
-    isScrollInProgress: Boolean,
+    isVisible: Boolean,
     action: () -> Unit,
 ) {
     AnimatedVisibility(
         modifier = modifier,
-        visible = !isScrollInProgress,
+        visible = !isVisible,
         enter = scaleIn() + fadeIn(),
         exit = scaleOut() + fadeOut()
     ) {

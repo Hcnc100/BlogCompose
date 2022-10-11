@@ -13,7 +13,7 @@ interface PostRepository {
     suspend fun requestLastPostInitWith(idPost: String)
     suspend fun concatenatePost(): Int
     suspend fun concatenateMyPost(): Int
-    suspend fun addNewPost(post: Post)
+    suspend fun addNewPost(post: SimplePost)
     suspend fun updateLikePost(post: SimplePost, isLiked: Boolean)
     suspend fun updatePostById(idPost: String)
     suspend fun getRealTimePost(idPost: String): Flow<Post?>

@@ -19,6 +19,7 @@ import com.nullpointer.blogcompose.data.remote.FirebaseConstants.NAME_REF_POST
 import com.nullpointer.blogcompose.data.remote.FirebaseConstants.TIMESTAMP
 import com.nullpointer.blogcompose.models.notify.Notify
 import com.nullpointer.blogcompose.models.posts.Post
+import com.nullpointer.blogcompose.models.posts.SimplePost
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -35,7 +36,7 @@ class PostDataSourceImpl : PostRemoteDataSource {
     private val auth = Firebase.auth
 
 
-    override suspend fun addNewPost(post: Post): String {
+    override suspend fun addNewPost(post: SimplePost): String {
         refPosts.document(post.id).set(post).await()
         return post.id
     }
@@ -44,7 +45,7 @@ class PostDataSourceImpl : PostRemoteDataSource {
         refPosts.document(idPost).delete().await()
     }
 
-    override suspend fun getPost(idPost: String): Post? {
+    override suspend fun getPost(idPost: String): SimplePost? {
         return refPosts.document(idPost).get().await().toPost()
     }
 
@@ -169,7 +170,8 @@ class PostDataSourceImpl : PostRemoteDataSource {
         return toObject<Post>()?.copy(
             timestamp = timestampEstimate(TIMESTAMP),
             id = id,
-            ownerLike = isPostLiked(id)
-        )
+        )?.also {
+            it.ownerLike = isPostLiked(id)
+        }
     }
 }

@@ -1,44 +1,43 @@
-package com.nullpointer.blogcompose.ui.screens.blogScreen.components
+package com.nullpointer.blogcompose.ui.screens.blogScreen.components.items
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
-import coil.transform.CircleCropTransformation
 import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.utils.TimeUtils
-import com.nullpointer.blogcompose.ui.screens.blogScreen.ActionsPost
 import com.nullpointer.blogcompose.models.posts.SimplePost
+import com.nullpointer.blogcompose.ui.screens.blogScreen.ActionsPost
+import com.nullpointer.blogcompose.ui.share.SimpleImage
 import java.util.*
 
 @Composable
 fun BlogItem(
     post: SimplePost,
-    actionBlog: (ActionsPost, SimplePost) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    actionBlog: (ActionsPost, SimplePost) -> Unit
 ) {
-    ContainerBlog(modifier=modifier) {
+    Card(modifier = modifier) {
         Column {
             HeaderOwnerBlog(
                 urlImg = post.userPoster?.urlImg.toString(),
@@ -70,19 +69,6 @@ fun BlogItem(
     }
 }
 
-@Composable
-private fun ContainerBlog(
-    modifier: Modifier = Modifier,
-    content: @Composable () -> Unit,
-) {
-    Card(
-        modifier = modifier
-            .padding(10.dp)
-            .wrapContentWidth(),
-        shape = RoundedCornerShape(10.dp),
-        content = content
-    )
-}
 
 @Composable
 private fun ActionsPost(
@@ -90,12 +76,13 @@ private fun ActionsPost(
     post: SimplePost,
     actionBlog: (ActionsPost, SimplePost) -> Unit
 ) {
-    val iconLike by remember(post.ownerLike) {
-        derivedStateOf {
-            if (post.ownerLike) R.drawable.ic_fav else R.drawable.ic_unfav
-        }
+    val iconLike = remember(post.ownerLike) {
+        if (post.ownerLike) R.drawable.ic_fav else R.drawable.ic_unfav
     }
-    Row(modifier = modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
         Row {
             IconAction(
                 drawableRes = iconLike,
@@ -156,15 +143,22 @@ private fun ImageBlog(
     urlImg: String,
     actionClick: () -> Unit
 ) {
-    AsyncImage(
-        contentScale = ContentScale.Crop,
-        model = urlImg,
-        contentDescription = stringResource(id = R.string.description_img_blog),
-        modifier = Modifier
-            .fillMaxWidth()
-            .aspectRatio(1f)
-            .clickable { actionClick() }
-    )
+    BoxWithConstraints(
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        val height = remember {
+            this.maxWidth
+        }
+        SimpleImage(
+            image = urlImg,
+            contentDescription = stringResource(id = R.string.description_img_blog),
+            modifier = Modifier.clickable { actionClick() },
+            sizeImage = height,
+            sizePlaceHolder = height - 50.dp,
+            isCircular = false,
+            isEmpty = false
+        )
+    }
 }
 
 @Composable
@@ -173,23 +167,25 @@ private fun HeaderOwnerBlog(
     name: String,
     modifier: Modifier = Modifier
 ) {
-    Row(verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier.fillMaxWidth()) {
-        AsyncImage(
-            model = ImageRequest.Builder(LocalContext.current)
-                .data(urlImg)
-                .crossfade(true)
-                .transformations(CircleCropTransformation())
-                .build(),
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        SimpleImage(
+            image = urlImg,
             contentDescription = stringResource(id = R.string.description_img_owner_post),
-            modifier = Modifier.size(50.dp),
-            placeholder = painterResource(id = R.drawable.ic_person)
+            placeholder = R.drawable.ic_person,
+            isCircular = true,
+            isEmpty = false,
+            sizeImage = dimensionResource(id = R.dimen.size_photo_owner_blog)
         )
-        Spacer(modifier = Modifier.width(10.dp))
         Text(
             text = name,
-            style = MaterialTheme.typography.body1,
-            overflow = TextOverflow.Ellipsis
+            overflow = TextOverflow.Ellipsis,
+            style = MaterialTheme.typography.body1.copy(
+                fontWeight = FontWeight.Bold,
+            )
         )
     }
 }
@@ -197,7 +193,7 @@ private fun HeaderOwnerBlog(
 @Composable
 private fun TextTime(timeStamp: Date?, modifier: Modifier = Modifier) {
     val context = LocalContext.current
-    val textTime= remember {
+    val textTime = remember {
         TimeUtils.getTimeAgo(timeStamp?.time ?: 0, context)
     }
     Text(
@@ -206,7 +202,6 @@ private fun TextTime(timeStamp: Date?, modifier: Modifier = Modifier) {
         modifier = modifier
     )
 }
-
 
 @Composable
 private fun DescriptionBlog(
@@ -231,26 +226,25 @@ fun TextLikes(
     numberComments: Int,
     modifier: Modifier = Modifier
 ) {
+
+    val styleInfo = MaterialTheme.typography.caption.copy(
+        fontWeight = FontWeight.W400,
+        fontSize = 16.sp
+    )
+
     Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 5.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         Text(
             text = stringResource(id = R.string.text_count_likes, numberLikes),
-            modifier = Modifier.padding(vertical = 5.dp),
-            style = MaterialTheme.typography.caption,
-            fontWeight = FontWeight.W400,
-            fontSize = 14.sp
+            style = styleInfo
         )
         Text(
             text = stringResource(id = R.string.text_count_comments, numberComments),
-            modifier = Modifier.padding(vertical = 5.dp),
-            style = MaterialTheme.typography.caption,
-            fontWeight = FontWeight.W400,
-            fontSize = 14.sp
+            style = styleInfo
         )
     }
 }
-
-
-

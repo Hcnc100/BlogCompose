@@ -2,25 +2,18 @@ package com.nullpointer.blogcompose.ui.screens.blogScreen
 
 import android.content.Context
 import android.content.Intent
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Scaffold
+import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.SwipeRefreshState
 import com.nullpointer.blogcompose.R
+import com.nullpointer.blogcompose.actions.ActionBlogScreen
+import com.nullpointer.blogcompose.actions.ActionBlogScreen.*
 import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.models.posts.Post
 import com.nullpointer.blogcompose.models.posts.SimplePost
@@ -31,18 +24,18 @@ import com.nullpointer.blogcompose.ui.interfaces.ActionRootDestinations
 import com.nullpointer.blogcompose.ui.navigation.HomeNavGraph
 import com.nullpointer.blogcompose.ui.navigation.MainTransitions
 import com.nullpointer.blogcompose.ui.screens.blogScreen.ActionsPost.*
-import com.nullpointer.blogcompose.ui.screens.blogScreen.components.BlogItem
-import com.nullpointer.blogcompose.ui.screens.blogScreen.components.LoadingBlog
+import com.nullpointer.blogcompose.ui.screens.blogScreen.components.list.ListFailBlog
+import com.nullpointer.blogcompose.ui.screens.blogScreen.components.list.ListLoadBlog
+import com.nullpointer.blogcompose.ui.screens.blogScreen.components.list.ListSuccessBlog
 import com.nullpointer.blogcompose.ui.screens.destinations.AddBlogScreenDestination
 import com.nullpointer.blogcompose.ui.screens.destinations.PostDetailsDestination
-import com.nullpointer.blogcompose.ui.screens.emptyScreen.AnimationScreen
 import com.nullpointer.blogcompose.ui.screens.states.SwipeRefreshScreenState
 import com.nullpointer.blogcompose.ui.screens.states.rememberSwipeRefreshScreenState
 import com.nullpointer.blogcompose.ui.share.ButtonAdd
-import com.nullpointer.blogcompose.ui.share.CircularProgressAnimation
-import com.nullpointer.blogcompose.ui.share.OnBottomReached
+import com.nullpointer.blogcompose.ui.share.ScaffoldSwipe
 import com.ramcosta.composedestinations.annotation.Destination
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.merge
 
 @HomeNavGraph(start = true)
 @Destination(style = MainTransitions::class)
@@ -59,89 +52,84 @@ fun BlogScreen(
     val statePost by postVM.listPost.collectAsState()
 
     LaunchedEffect(key1 = Unit) {
-        postVM.messagePost.collect(blogScreenState::showSnackMessage)
+        merge(postVM.messagePost, likeVM.messageLike).collect(blogScreenState::showSnackMessage)
     }
 
-    LaunchedEffect(key1 = Unit) {
-        likeVM.messageLike.collect(blogScreenState::showSnackMessage)
-    }
 
-    SwipeRefresh(
-        modifier = Modifier.fillMaxSize(),
-        state = blogScreenState.swipeState,
-        onRefresh = { postVM.requestNewPost(true) }) {
-        Scaffold(
-            scaffoldState = blogScreenState.scaffoldState,
-            floatingActionButton = {
-                ButtonAdd(isScrollInProgress = blogScreenState.isScrollInProgress) {
-                    actionRootDestinations.changeRoot(AddBlogScreenDestination)
+    BlogScreen(
+        stateListPost = statePost,
+        isConcatenate = postVM.stateConcatData,
+        lazyListState = blogScreenState.listState,
+        scaffoldState = blogScreenState.scaffoldState,
+        swipeState = blogScreenState.swipeState,
+        buttonAddIsVisible = !blogScreenState.isScrollInProgress,
+        actionBlogScreen = { action ->
+            when (action) {
+                RELOAD_BLOG -> postVM.requestNewPost(true)
+                ADD_BLOG -> actionRootDestinations.changeRoot(AddBlogScreenDestination)
+                CONCATENATE_BLOG -> postVM.concatenatePost {
+                    postVM.concatenatePost(blogScreenState::animateScrollMore)
                 }
             }
-        ) {
-            Box(modifier = Modifier.padding(it)) {
-                when (statePost) {
-                    Resource.Failure -> AnimationScreen(
-                        resourceRaw = R.raw.empty1,
-                        emptyText = stringResource(id = R.string.message_empty_post),
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .verticalScroll(rememberScrollState())
-                    )
-                    Resource.Loading -> LoadingBlog()
-                    is Resource.Success -> {
-                        val listPost = (statePost as Resource.Success<List<Post>>).data
-                        if (listPost.isEmpty()) {
-                            AnimationScreen(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .verticalScroll(rememberScrollState()),
-                                resourceRaw = R.raw.empty1,
-                                emptyText = stringResource(id = R.string.message_empty_post)
-                            )
-                        } else {
-                            ListPost(
-                                modifier = Modifier.fillMaxSize(),
-                                listPost = listPost,
-                                listState = blogScreenState.listState,
-                                actionBottomReached = { postVM.concatenatePost(blogScreenState::animateScrollMore) },
-                                actionBlog = { action, post ->
-                                    when (action) {
-                                        DETAILS -> actionRootDestinations.changeRoot(
-                                            PostDetailsDestination(post.id)
-                                        )
-                                        COMMENT -> actionRootDestinations.changeRoot(
-                                            PostDetailsDestination(post.id, true)
-                                        )
-                                        SHARE -> sharePost(post.id, blogScreenState.context)
-                                        LIKE -> likeVM.likePost(post)
-                                        DOWNLOAD -> {}
-                                        SAVE -> {}
-                                    }
-                                }
-                            )
-                        }
-                    }
-                }
-                CircularProgressAnimation(
-                    isVisible = postVM.stateConcatData,
-                    modifier = Modifier.align(
-                        Alignment.BottomCenter
-                    )
+        },
+        actionBlog = { action, post ->
+            when (action) {
+                DETAILS -> actionRootDestinations.changeRoot(PostDetailsDestination(post.id))
+                COMMENT -> actionRootDestinations.changeRoot(
+                    PostDetailsDestination(post.id, true)
                 )
+                SHARE -> sharePost(post.id, blogScreenState.context)
+                LIKE -> likeVM.likePost(post)
+                DOWNLOAD -> {}
+                SAVE -> {}
             }
+        })
 
+}
+
+
+@Composable
+private fun BlogScreen(
+    isConcatenate: Boolean,
+    lazyListState: LazyListState,
+    scaffoldState: ScaffoldState,
+    swipeState: SwipeRefreshState,
+    stateListPost: Resource<List<Post>>,
+    actionBlog: (ActionsPost, SimplePost) -> Unit,
+    actionBlogScreen: (ActionBlogScreen) -> Unit,
+    buttonAddIsVisible: Boolean
+) {
+
+    ScaffoldSwipe(
+        actionOnRefresh = { actionBlogScreen(RELOAD_BLOG) },
+        swipeState = swipeState,
+        scaffoldState = scaffoldState,
+        floatingActionButton = {
+            ButtonAdd(isVisible = buttonAddIsVisible, action = {
+                actionBlogScreen(ADD_BLOG)
+            })
         }
+    ) {
+        ListPost(
+            listState = lazyListState,
+            actionBottomReached = {
+                actionBlogScreen(CONCATENATE_BLOG)
+            },
+            actionBlog = actionBlog,
+            stateListPost = stateListPost,
+            isConcatenate = isConcatenate
+        )
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun ListPost(
-    listPost: List<Post>,
     listState: LazyListState,
     actionBottomReached: () -> Unit,
     actionBlog: (ActionsPost, SimplePost) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    stateListPost: Resource<List<Post>>,
+    isConcatenate: Boolean
 ) {
 
     LaunchedEffect(key1 = Unit) {
@@ -153,24 +141,19 @@ private fun ListPost(
         }
     }
 
-    LazyColumn(
-        state = listState,
-        modifier = modifier) {
-        items(
-            listPost.size,
-            key = { index -> listPost[index].id }
-        ) { index ->
-            BlogItem(
-                post = listPost[index],
-                actionBlog = actionBlog,
-                modifier = Modifier.animateItemPlacement()
-            )
-        }
+    when (stateListPost) {
+        Resource.Failure -> ListFailBlog(modifier = modifier)
+        Resource.Loading -> ListLoadBlog(modifier = modifier)
+        is Resource.Success -> ListSuccessBlog(
+            listPost = stateListPost.data,
+            isConcatenate = isConcatenate,
+            listState = listState,
+            actionBottomReached = actionBottomReached,
+            actionBlog = actionBlog,
+        )
+
     }
-    // * when go to the finish list, request more notifications
-    listState.OnBottomReached(0) {
-        actionBottomReached()
-    }
+
 
 }
 
