@@ -1,17 +1,16 @@
 package com.nullpointer.blogcompose.ui.share
 
 import android.content.Context
-
 import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.DrawableRes
-import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
+import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -23,12 +22,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
-import coil.compose.rememberImagePainter
 import com.nullpointer.blogcompose.BuildConfig
 import com.nullpointer.blogcompose.R
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
-
 import java.io.File
 
 @Composable
@@ -72,10 +67,12 @@ fun SelectImgButtonSheet(
         )
         Spacer(modifier = Modifier.padding(vertical = 5.dp))
         ItemCamera {
+            actionHidden()
             tmpUri.value = getTmpFileUri(context)
             launcherPhoto.launch(tmpUri.value)
         }
         ItemGallery {
+            actionHidden()
             launcherImg.launch("image/*")
         }
     }

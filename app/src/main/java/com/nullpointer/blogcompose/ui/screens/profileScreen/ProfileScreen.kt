@@ -1,5 +1,6 @@
 package com.nullpointer.blogcompose.ui.screens.profileScreen
 
+import android.content.Context
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
@@ -16,6 +17,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -51,11 +53,15 @@ import com.ramcosta.composedestinations.annotation.Destination
 @Composable
 fun ProfileScreen(
     authViewModel: AuthViewModel,
+    context: Context = LocalContext.current,
     actionRootDestinations: ActionRootDestinations,
     myPostViewModel: MyPostViewModel = hiltViewModel(),
     profileScreenState: ProfileScreenState = rememberProfileScreenState(
         isRefresh = myPostViewModel.stateRequestMyPost,
-        sizeScrollMore = 50f
+        sizeScrollMore = 50f,
+        actionChangeImage = {
+            UploadDataControl.startServicesUploadUser(context, it)
+        }
     )
 ) {
     // * states
@@ -97,7 +103,9 @@ fun ProfileScreen(
                     }
                 },
             ) {
-                Box(modifier = Modifier.padding(it).fillMaxSize()) {
+                Box(modifier = Modifier
+                    .padding(it)
+                    .fillMaxSize()) {
                     ProfileScreen(
                         user = currentUser,
                         listPostState = stateListPost,

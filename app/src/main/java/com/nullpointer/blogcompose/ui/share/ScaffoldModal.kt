@@ -10,20 +10,22 @@ import androidx.compose.ui.Modifier
 @Composable
 fun ScaffoldModal(
     isVisibleModal: Boolean,
-    scaffoldState: ScaffoldState,
-    actionHideModal: () -> Unit,
     modifier: Modifier = Modifier,
+    actionHideModal: () -> Unit,
     callBackSelection: (Uri) -> Unit,
     sheetState: ModalBottomSheetState,
     topBar: @Composable () -> Unit = {},
+    floatingActionButtonPosition: FabPosition = FabPosition.End,
     floatingActionButton: @Composable () -> Unit = {},
+    scaffoldState: ScaffoldState = rememberScaffoldState(),
     content: @Composable (PaddingValues) -> Unit
 ) {
     Scaffold(
         topBar = topBar,
         modifier = modifier,
         floatingActionButton = floatingActionButton,
-        scaffoldState = scaffoldState
+        scaffoldState = scaffoldState,
+        floatingActionButtonPosition = floatingActionButtonPosition,
     ) { padding ->
         ModalBottomSheetLayout(
             sheetState = sheetState,
@@ -31,13 +33,12 @@ fun ScaffoldModal(
                 SelectImgButtonSheet(
                     isVisible = isVisibleModal,
                     actionHidden = actionHideModal
-                ) { uri ->
-                    actionHideModal()
-                    uri?.let { callBackSelection(it) }
-                }
+                ) { uri -> uri?.let { callBackSelection(it) } }
             },
         ) {
+
             content(padding)
         }
     }
 }
+

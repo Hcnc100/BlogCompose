@@ -4,6 +4,7 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.content.res.Resources.getSystem
 import android.net.Uri
 import android.os.Build
 import android.os.Parcel
@@ -127,3 +128,5 @@ fun ViewModel.launchSafeIO(
         }
     }
 }
+
+val Int.px: Int get() = (this * getSystem().displayMetrics.density).toInt()

@@ -1,31 +1,32 @@
 package com.nullpointer.blogcompose.ui.screens.dataUser
 
 import android.net.Uri
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import coil.compose.AsyncImagePainter
-import coil.compose.SubcomposeAsyncImage
-import coil.compose.SubcomposeAsyncImageContent
 import com.nullpointer.blogcompose.R
+import com.nullpointer.blogcompose.actions.ActionDataUser
+import com.nullpointer.blogcompose.actions.ActionDataUser.*
+import com.nullpointer.blogcompose.core.delegates.PropertySavableImg
+import com.nullpointer.blogcompose.core.delegates.PropertySavableString
 import com.nullpointer.blogcompose.presentation.AuthViewModel
 import com.nullpointer.blogcompose.presentation.RegistryViewModel
 import com.nullpointer.blogcompose.ui.navigation.MainNavGraph
 import com.nullpointer.blogcompose.ui.screens.states.SelectImageScreenState
 import com.nullpointer.blogcompose.ui.screens.states.rememberSelectImageScreenState
+import com.nullpointer.blogcompose.ui.share.CustomSnackBar
+import com.nullpointer.blogcompose.ui.share.EditableImage
 import com.nullpointer.blogcompose.ui.share.EditableTextSavable
-import com.nullpointer.blogcompose.ui.share.SelectImgButtonSheet
-import com.nullpointer.blogcompose.ui.share.SimpleToolbar
+import com.nullpointer.blogcompose.ui.share.ScaffoldModal
 import com.ramcosta.composedestinations.annotation.Destination
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -35,144 +36,117 @@ import com.ramcosta.composedestinations.annotation.Destination
 fun DataUserScreen(
     authViewModel: AuthViewModel,
     registryViewModel: RegistryViewModel = hiltViewModel(),
-    dataScreenState: SelectImageScreenState = rememberSelectImageScreenState()
+    dataScreenState: SelectImageScreenState = rememberSelectImageScreenState(
+        actionChangeImage = registryViewModel.imageProfile::changeValue
+    )
 ) {
 
     LaunchedEffect(key1 = Unit) {
         registryViewModel.registryMessage.collect(dataScreenState::showSnackMessage)
     }
-    BackHandler(dataScreenState.isShowModal) {
-        dataScreenState.hiddenModal()
-    }
 
-    ModalBottomSheetLayout(
+    DataUserScreen(
+        nameUser = registryViewModel.nameUser,
+        imgUser = registryViewModel.imageProfile,
+        isVisibleModal = dataScreenState.isShowModal,
         sheetState = dataScreenState.modalBottomSheetState,
-        sheetContent = {
-            SelectImgButtonSheet(
-                isVisible = dataScreenState.isShowModal,
-                actionHidden = dataScreenState::hiddenModal,
-                actionBeforeSelect = { uri ->
-                    uri?.let {
-                        registryViewModel.imageProfile.changeValue(it)
-                    }
-                    dataScreenState.hiddenModal()
-                }
-            )
-        },
-    ) {
-        Scaffold(
-            scaffoldState = dataScreenState.scaffoldState,
-            topBar = {
-                SimpleToolbar(title = stringResource(id = R.string.title_profile))
-            },
-            floatingActionButtonPosition = FabPosition.Center,
-            floatingActionButton = {
-                ButtonRegistryStatus(isEnabled = registryViewModel.isDataValid) {
+        hostState = dataScreenState.scaffoldState.snackbarHostState,
+        actionDataUser = { action ->
+            when (action) {
+                SHOW_MODAL -> dataScreenState.showModal()
+                HIDDEN_MODAL -> dataScreenState.hiddenModal()
+                CREATE_USER -> {
                     dataScreenState.hiddenKeyBoard()
                     registryViewModel.getUpdatedUser()?.let {
                         authViewModel.createNewUser(it)
                     }
                 }
             }
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(20.dp)
-            ) {
-                PhotoProfile(
-                    urlImg = registryViewModel.imageProfile.value,
-                    actionChangePhoto = dataScreenState::showModal,
-                    modifier = Modifier.align(Alignment.CenterHorizontally),
-                    isCompress = registryViewModel.imageProfile.isCompress
-                )
-                Spacer(modifier = Modifier.height(40.dp))
-                EditableTextSavable(
-                    valueProperty = registryViewModel.nameUser,
-                )
-            }
-        }
-    }
+        },
+        actionSelectImg = dataScreenState::launchSelectImage
+    )
+
     if (authViewModel.isProcessing) CreatingDialog()
 }
 
+
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
-private fun PhotoProfile(
-    modifier: Modifier = Modifier,
-    urlImg: Uri,
-    isCompress: Boolean,
-    actionChangePhoto: () -> Unit
+private fun DataUserScreen(
+    isVisibleModal: Boolean,
+    hostState: SnackbarHostState,
+    imgUser: PropertySavableImg,
+    actionSelectImg: (Uri) -> Unit,
+    nameUser: PropertySavableString,
+    sheetState: ModalBottomSheetState,
+    actionDataUser: (ActionDataUser) -> Unit
 ) {
-
-    Box(modifier = modifier) {
-        Card(shape = CircleShape) {
-            Box(contentAlignment = Alignment.Center) {
-                SubcomposeAsyncImage(
-                    model = urlImg,
-                    contentDescription = stringResource(id = R.string.description_image_profile),
-                    modifier = Modifier.size(180.dp),
-                    contentScale = ContentScale.Crop
+    ScaffoldModal(
+        sheetState = sheetState,
+        isVisibleModal = isVisibleModal,
+        actionHideModal = { actionDataUser(HIDDEN_MODAL) },
+        callBackSelection = actionSelectImg,
+        floatingActionButtonPosition = FabPosition.Center,
+    ) {
+        Box(modifier = Modifier.padding(it)) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(it),
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(40.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.padding(20.dp)
                 ) {
-
-                    when {
-                        painter.state is AsyncImagePainter.State.Success -> SubcomposeAsyncImageContent()
-                        painter.state is AsyncImagePainter.State.Error && urlImg != Uri.EMPTY -> {
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_broken_image),
-                                contentDescription = stringResource(id = R.string.description_error_load_img),
-                                modifier = Modifier.padding(40.dp)
-                            )
-                        }
-                        else -> Icon(
-                            painter = painterResource(id = R.drawable.ic_person),
-                            contentDescription = stringResource(id = R.string.description_image_profile),
-                            modifier = Modifier.padding(40.dp)
-                        )
-                    }
+                    EditableImage(
+                        imgUser = imgUser,
+                        sizeImage = 180.dp,
+                        sizePlaceHolder = 150.dp,
+                        actionChangePhoto = { actionDataUser(SHOW_MODAL) },
+                        contentDescription = stringResource(id = R.string.description_image_profile),
+                        isCircular = true,
+                    )
+                    EditableTextSavable(
+                        singleLine = true,
+                        valueProperty = nameUser,
+                        keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
+                        keyboardActions = KeyboardActions(
+                            onDone = { actionDataUser(CREATE_USER) }
+                        ),
+                    )
                 }
 
-                if (isCompress)
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(30.dp),
-                        color = MaterialTheme.colors.primary,
-                        strokeWidth = 4.dp
-                    )
 
-            }
-        }
-        FloatingActionButton(
-            onClick = actionChangePhoto,
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(15.dp)
-                .size(40.dp)
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_edit),
-                contentDescription = stringResource(
-                    id = R.string.change_image_user
+                ButtonRegistryStatus(
+                    actionClick = { actionDataUser(CREATE_USER) },
+                    modifier = Modifier
+                        .padding(15.dp)
+                        .align(Alignment.CenterHorizontally),
                 )
+            }
+
+            CustomSnackBar(
+                hostState = hostState, modifier = Modifier
+                    .padding(vertical = 70.dp)
+                    .align(Alignment.BottomCenter)
             )
         }
+
     }
-
-
 }
-
-
 
 
 
 @Composable
 private fun ButtonRegistryStatus(
-    isEnabled: Boolean,
     modifier: Modifier = Modifier,
     actionClick: () -> Unit
 ) {
     Button(
         modifier = modifier,
         onClick = actionClick,
-        enabled = isEnabled
     ) {
         Text(
            stringResource(R.string.text_button_registry),

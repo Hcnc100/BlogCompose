@@ -4,8 +4,6 @@ import android.content.Context
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -31,6 +29,7 @@ import com.nullpointer.blogcompose.ui.navigation.MainNavGraph
 import com.nullpointer.blogcompose.ui.screens.addPost.viewModel.AddBlogViewModel
 import com.nullpointer.blogcompose.ui.screens.states.SelectImageScreenState
 import com.nullpointer.blogcompose.ui.screens.states.rememberSelectImageScreenState
+import com.nullpointer.blogcompose.ui.share.EditableImage
 import com.nullpointer.blogcompose.ui.share.EditableTextSavable
 import com.nullpointer.blogcompose.ui.share.ScaffoldModal
 import com.nullpointer.blogcompose.ui.share.ToolbarBack
@@ -43,7 +42,7 @@ import com.ramcosta.composedestinations.annotation.Destination
 fun AddBlogScreen(
     rootDestinations: ActionRootDestinations,
     addBlogVM: AddBlogViewModel = hiltViewModel(),
-    addBlogState: SelectImageScreenState = rememberSelectImageScreenState()
+    addBlogState: SelectImageScreenState = rememberSelectImageScreenState(actionChangeImage = {})
 ) {
     BackHandler(addBlogState.isShowModal, addBlogState::hiddenModal)
     LaunchedEffect(key1 = Unit) {
@@ -96,25 +95,44 @@ fun AddBlogScreen(
             )
         },
     ) {
-        Column(
-            modifier = Modifier
-                .padding(it)
-                .padding(10.dp)
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(20.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            ImageNewBlog(
-                imgBlog = imageProperty,
-                actionEditImg = { actionAddBlogScreen(SHOW_MODAL) }
-            )
-            EditableTextSavable(
-                valueProperty = descriptionProperty,
-                modifierText = Modifier.height(150.dp)
-            )
-            ButtonPublish(
-                actionPublish = { actionAddBlogScreen(SEND_POST) })
+        BoxWithConstraints {
+            val sizeWidth = this.maxWidth
+
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(it),
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(20.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    EditableImage(
+                        sizeImage = sizeWidth,
+                        imgUser = imageProperty,
+                        isCircular = false,
+                        sizePlaceHolder = sizeWidth - 50.dp,
+                        actionChangePhoto = { actionAddBlogScreen(SHOW_MODAL) }
+                    )
+
+                    EditableTextSavable(
+                        valueProperty = descriptionProperty,
+                        modifier = Modifier
+                            .height(150.dp)
+                            .width(300.dp),
+                    )
+                }
+
+                ButtonPublish(
+                    actionPublish = { actionAddBlogScreen(SEND_POST) },
+                    modifier = Modifier
+                        .padding(15.dp)
+                        .align(Alignment.CenterHorizontally)
+                )
+            }
         }
+
     }
 }
 
@@ -122,8 +140,9 @@ fun AddBlogScreen(
 @Composable
 private fun ButtonPublish(
     actionPublish: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    Button(onClick = actionPublish) {
+    Button(onClick = actionPublish, modifier = modifier) {
         Icon(
             painterResource(id = R.drawable.ic_publish),
             stringResource(R.string.description_icon_upload)

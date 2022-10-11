@@ -1,8 +1,6 @@
 package com.nullpointer.blogcompose.ui.share
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.MaterialTheme
@@ -14,15 +12,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.unit.dp
 import com.nullpointer.blogcompose.core.delegates.PropertySavableString
 
 @Composable
 fun EditableTextSavable(
     modifier: Modifier = Modifier,
-    modifierText: Modifier = Modifier,
     isEnabled: Boolean = true,
     singleLine: Boolean = false,
     valueProperty: PropertySavableString,
@@ -31,8 +27,13 @@ fun EditableTextSavable(
     keyboardActions: KeyboardActions = KeyboardActions.Default,
     visualTransformation: VisualTransformation = VisualTransformation.None,
 ) {
-    Surface {
-        Column(modifier = modifier) {
+
+
+    Surface(
+        modifier = modifier.height(80.dp),
+    ) {
+
+        Column {
             OutlinedTextField(
                 shape = shape,
                 enabled = isEnabled,
@@ -41,7 +42,9 @@ fun EditableTextSavable(
                 keyboardOptions = keyboardOptions,
                 keyboardActions = keyboardActions,
                 value = valueProperty.currentValue,
-                modifier = modifierText.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight(.8f),
                 onValueChange = valueProperty::changeValue,
                 visualTransformation = visualTransformation,
                 label = { Text(stringResource(id = valueProperty.label)) },
@@ -62,4 +65,5 @@ fun EditableTextSavable(
             }
         }
     }
+
 }

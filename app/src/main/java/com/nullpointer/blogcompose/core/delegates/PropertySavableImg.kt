@@ -32,7 +32,9 @@ class PropertySavableImg(
 
     val isNotEmpty get() = value != Uri.EMPTY
 
-    val isEmpty get() = value == Uri.EMPTY
+    val isEmpty get() = !isNotEmpty
+
+    var hasError = false
 
     fun changeValue(newValue: Uri, isInit: Boolean = false) {
         if (isInit) {
@@ -43,12 +45,14 @@ class PropertySavableImg(
                 try {
                     isCompress = true
                     value = withContext(Dispatchers.IO) { actionCompress(newValue) }
+                    hasError = false
                 } catch (e: Exception) {
                     when (e) {
                         is CancellationException -> throw e
                         else -> {
                             Timber.e("Job compress exception $e")
                             value = defaultValue
+                            hasError = true
                             actionSendErrorCompress()
                         }
                     }
@@ -57,6 +61,10 @@ class PropertySavableImg(
                 }
             }
         }
+    }
+
+    fun reValueField() {
+        if (isEmpty) hasError = true
     }
 
     fun clearValue() {

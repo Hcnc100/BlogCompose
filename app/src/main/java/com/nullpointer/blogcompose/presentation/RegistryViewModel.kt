@@ -7,6 +7,7 @@ import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.delegates.PropertySavableImg
 import com.nullpointer.blogcompose.core.delegates.PropertySavableString
 import com.nullpointer.blogcompose.domain.compress.CompressRepository
+import com.nullpointer.blogcompose.models.customSnack.MessageSnack.Companion.createErrorMessageEncode
 import com.nullpointer.blogcompose.models.users.SimpleUser
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -25,7 +26,7 @@ class RegistryViewModel @Inject constructor(
     }
 
     // * var to show messages
-    private val _registryMessage = Channel<Int>()
+    private val _registryMessage = Channel<String>()
     val registryMessage = _registryMessage.receiveAsFlow()
 
 
@@ -47,25 +48,38 @@ class RegistryViewModel @Inject constructor(
         scope = viewModelScope,
         actionCompress = compressRepository::compressImage,
         actionSendErrorCompress = {
-            _registryMessage.trySend(R.string.message_error_compress_img)
+            val message = createErrorMessageEncode(R.string.message_error_compress_img)
+            _registryMessage.trySend(message)
         },
     )
 
 
 
-    private val fullDataChange: Boolean
-        get() = nameUser.hasChanged && imageProfile.hasChanged
-
-    val isDataValid get() = !nameUser.hasError && !imageProfile.isNotEmpty
-
-
     fun getUpdatedUser(): SimpleUser? {
-        return if(fullDataChange){
-            SimpleUser(name = nameUser.currentValue, urlImg = imageProfile.value.toString())
-        }else{
-            _registryMessage.trySend(R.string.message_error_empty_data)
-            null
+        nameUser.reValueField()
+        val (user, message) = when {
+            imageProfile.isEmpty && nameUser.isEmpty -> {
+                val message = createErrorMessageEncode(R.string.message_error_empty_data)
+                Pair(null, message)
+            }
+            imageProfile.isEmpty -> {
+                val message = createErrorMessageEncode(R.string.need_img_user)
+                Pair(null, message)
+            }
+            nameUser.hasError -> {
+                val message = createErrorMessageEncode(R.string.need_name_user)
+                Pair(null, message)
+            }
+            else -> {
+                val user = SimpleUser(
+                    name = nameUser.currentValue,
+                    urlImg = imageProfile.value.toString()
+                )
+                Pair(user, null)
+            }
         }
+        message?.let { _registryMessage.trySend(it) }
+        return user
     }
 
 

@@ -1,6 +1,9 @@
 package com.nullpointer.blogcompose.ui.screens.states
 
 import android.content.Context
+import android.net.Uri
+import androidx.activity.compose.ManagedActivityResultLauncher
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
@@ -11,26 +14,37 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import com.canhub.cropper.CropImageContract
+import com.canhub.cropper.CropImageContractOptions
+import com.canhub.cropper.CropImageView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @ExperimentalMaterialApi
 class ProfileScreenState constructor(
-    private val sizeScrollMore:Float,
-    scaffoldState: ScaffoldState,
-    focusManager: FocusManager,
     context: Context,
-    modalBottomSheetState: ModalBottomSheetState,
     scope: CoroutineScope,
-    private val swipeRefreshScreenState: SwipeRefreshScreenState,
+    focusManager: FocusManager,
+    scaffoldState: ScaffoldState,
     val listState: LazyGridState,
-) : SelectImageScreenState(scaffoldState, context, focusManager, modalBottomSheetState, scope) {
+    private val sizeScrollMore: Float,
+    modalBottomSheetState: ModalBottomSheetState,
+    private val swipeRefreshScreenState: SwipeRefreshScreenState,
+    launcherCropImage: ManagedActivityResultLauncher<CropImageContractOptions, CropImageView.CropResult>
+) : SelectImageScreenState(
+    scope = scope,
+    context = context,
+    focusManager = focusManager,
+    scaffoldState = scaffoldState,
+    launcherCropImage = launcherCropImage,
+    modalBottomSheetState = modalBottomSheetState
+) {
 
     val swipeState get() = swipeRefreshScreenState.swipeState
 
     val isScrollInProgress get() = listState.isScrollInProgress
 
-    fun animateScrollMore(){
+    fun animateScrollMore() {
         scope.launch {
             listState.animateScrollBy(sizeScrollMore)
         }
@@ -40,8 +54,9 @@ class ProfileScreenState constructor(
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun rememberProfileScreenState(
-    sizeScrollMore:Float,
     isRefresh: Boolean,
+    sizeScrollMore: Float,
+    actionChangeImage: (Uri) -> Unit,
     context: Context = LocalContext.current,
     focusManager: FocusManager = LocalFocusManager.current,
     gridState: LazyGridState = rememberLazyGridState(),
@@ -54,21 +69,29 @@ fun rememberProfileScreenState(
     modalBottomSheetState: ModalBottomSheetState = rememberModalBottomSheetState(
         initialValue = ModalBottomSheetValue.Hidden
     ),
+    launcherCropImage: ManagedActivityResultLauncher<CropImageContractOptions, CropImageView.CropResult> =
+        rememberLauncherForActivityResult(CropImageContract()) { result ->
+            if (result.isSuccessful) {
+                result.uriContent?.let { actionChangeImage(it) }
+            }
+        }
 ) = remember(
     coroutineScope,
     scaffoldState,
     swipeRefreshScreenState,
     modalBottomSheetState,
-    gridState
+    gridState,
+    launcherCropImage
 ) {
     ProfileScreenState(
-        sizeScrollMore,
-        scaffoldState,
-        focusManager,
-        context,
-        modalBottomSheetState,
-        coroutineScope,
-        swipeRefreshScreenState,
-        gridState,
+        context = context,
+        listState = gridState,
+        scope = coroutineScope,
+        focusManager = focusManager,
+        scaffoldState = scaffoldState,
+        sizeScrollMore = sizeScrollMore,
+        launcherCropImage = launcherCropImage,
+        modalBottomSheetState = modalBottomSheetState,
+        swipeRefreshScreenState = swipeRefreshScreenState
     )
 }

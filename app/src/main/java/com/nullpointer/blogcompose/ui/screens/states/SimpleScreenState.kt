@@ -21,6 +21,10 @@ open class SimpleScreenState(
         )
     }
 
+    suspend fun showSnackMessage(string: String) {
+        scaffoldState.snackbarHostState.showSnackbar(string)
+    }
+
     fun hiddenKeyBoard() = focusManager.clearFocus()
 }
 

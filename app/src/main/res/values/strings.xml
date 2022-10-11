@@ -166,4 +166,7 @@
     <string name="retry_load_comments">Retry load comments</string>
     <string name="error_load_my_post">Error load my post</string>
     <string name="message_empty_image_post">Image cannot be empty</string>
+
+    <string name="need_img_user">A profile picture is required</string>
+    <string name="need_name_user">The name is required</string>
 </resources>

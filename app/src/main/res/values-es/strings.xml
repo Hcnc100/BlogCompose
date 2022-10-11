@@ -164,4 +164,7 @@
 
     <string name="error_load_my_post">Error al cargar mis publicaciones</string>
     <string name="message_empty_image_post">La imagen no puede estar vacía</string>
+
+    <string name="need_img_user">Se necesita una imagen de perfil</string>
+    <string name="need_name_user">Se necesita un nombre</string>
 </resources>

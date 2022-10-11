@@ -8,6 +8,7 @@ plugins {
     id 'kotlin-parcelize'
     id "com.google.protobuf" version "0.8.12"
     id "com.google.devtools.ksp" version "1.7.0-1.0.6"
+    id 'kotlinx-serialization' version '1.4.10'
 }
 
 kotlin {
@@ -155,6 +156,9 @@ dependencies {
 
     implementation 'com.google.code.gson:gson:2.8.9'
 
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.0"
+
+    implementation 'com.github.CanHub:Android-Image-Cropper:4.3.2'
 
 
 }
