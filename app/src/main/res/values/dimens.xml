@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="size_photo_owner_blog">40dp</dimen>
+    <dimen name="size_photo_header_owner_blog">40dp</dimen>
+    <dimen name="size_photo_my_post">100dp</dimen>
 </resources>

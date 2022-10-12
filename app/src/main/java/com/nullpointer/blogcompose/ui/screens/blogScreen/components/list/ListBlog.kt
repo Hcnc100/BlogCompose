@@ -14,11 +14,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.Dp
 import com.nullpointer.blogcompose.R
+import com.nullpointer.blogcompose.actions.ActionsPost
 import com.nullpointer.blogcompose.models.posts.Post
 import com.nullpointer.blogcompose.models.posts.SimplePost
-import com.nullpointer.blogcompose.ui.screens.blogScreen.ActionsPost
 import com.nullpointer.blogcompose.ui.screens.blogScreen.components.items.BlogItem
 import com.nullpointer.blogcompose.ui.screens.blogScreen.components.items.BlogLoadItem
 import com.nullpointer.blogcompose.ui.screens.emptyScreen.AnimationScreen
@@ -29,13 +29,15 @@ import com.valentinilk.shimmer.rememberShimmer
 
 @Composable
 fun ListLoadBlog(
+    spaceBetweenItems: Dp,
+    contentPadding: PaddingValues,
     modifier: Modifier = Modifier
 ) {
     val shimmer = rememberShimmer(shimmerBounds = ShimmerBounds.View)
     LazyColumn(
         modifier = modifier,
-        contentPadding = PaddingValues(5.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
+        contentPadding = contentPadding,
+        verticalArrangement = Arrangement.spacedBy(spaceBetweenItems),
     ) {
         items(5, key = { it }) {
             BlogLoadItem(shimmer = shimmer)
@@ -58,19 +60,21 @@ fun ListEmptyBlog(modifier: Modifier) {
 @Composable
 fun ListSuccessBlog(
     listPost: List<Post>,
+    spaceBetweenItems: Dp,
     isConcatenate: Boolean,
     listState: LazyListState,
+    contentPadding: PaddingValues,
     modifier: Modifier = Modifier,
     actionBottomReached: () -> Unit,
-    actionBlog: (ActionsPost, SimplePost) -> Unit
+    actionBlog: (ActionsPost, SimplePost) -> Unit,
 ) {
 
     Box {
         LazyColumn(
             state = listState,
             modifier = modifier,
-            contentPadding = PaddingValues(5.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+            contentPadding = contentPadding,
+            verticalArrangement = Arrangement.spacedBy(spaceBetweenItems)
         ) {
             items(
                 listPost,

@@ -1,28 +1,21 @@
 package com.nullpointer.blogcompose.ui.screens.profileScreen
 
 import android.content.Context
-import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.GridItemSpan
+import android.net.Uri
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.grid.LazyGridState
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ModalBottomSheetLayout
-import androidx.compose.material.Scaffold
+import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.google.accompanist.swiperefresh.SwipeRefresh
-import com.nullpointer.blogcompose.R
+import com.google.accompanist.swiperefresh.SwipeRefreshState
 import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.models.posts.MyPost
 import com.nullpointer.blogcompose.models.users.SimpleUser
@@ -35,19 +28,18 @@ import com.nullpointer.blogcompose.ui.navigation.MainTransitions
 import com.nullpointer.blogcompose.ui.screens.destinations.AddBlogScreenDestination
 import com.nullpointer.blogcompose.ui.screens.destinations.ConfigScreenDestination
 import com.nullpointer.blogcompose.ui.screens.destinations.PostDetailsDestination
-import com.nullpointer.blogcompose.ui.screens.emptyScreen.AnimationScreen
-import com.nullpointer.blogcompose.ui.screens.profileScreen.components.FailedProfilePost
-import com.nullpointer.blogcompose.ui.screens.profileScreen.components.ItemMyPost
+import com.nullpointer.blogcompose.ui.screens.profileScreen.ActionMyProfile.*
+import com.nullpointer.blogcompose.ui.screens.profileScreen.components.lists.ListEmptyMyBlogs
+import com.nullpointer.blogcompose.ui.screens.profileScreen.components.lists.ListLoadMyBlogs
+import com.nullpointer.blogcompose.ui.screens.profileScreen.components.lists.ListSuccessMyBlogs
 import com.nullpointer.blogcompose.ui.screens.states.ProfileScreenState
 import com.nullpointer.blogcompose.ui.screens.states.rememberProfileScreenState
 import com.nullpointer.blogcompose.ui.share.ButtonAdd
-import com.nullpointer.blogcompose.ui.share.CircularProgressAnimation
-import com.nullpointer.blogcompose.ui.share.OnBottomReached
-import com.nullpointer.blogcompose.ui.share.SelectImgButtonSheet
+import com.nullpointer.blogcompose.ui.share.ScaffoldModalSwipe
 import com.ramcosta.composedestinations.annotation.Destination
 
 
-@OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalMaterialApi::class)
 @HomeNavGraph
 @Destination(style = MainTransitions::class)
 @Composable
@@ -68,137 +60,118 @@ fun ProfileScreen(
     val stateListPost by myPostViewModel.listMyPost.collectAsState()
     val currentUser by authViewModel.currentUser.collectAsState()
 
-    BackHandler(profileScreenState.isShowModal) {
-        profileScreenState.hiddenModal()
-    }
-
 
     LaunchedEffect(key1 = Unit) {
         profileScreenState.hiddenModal()
     }
 
-    ModalBottomSheetLayout(
-        sheetState = profileScreenState.modalBottomSheetState,
-        sheetContent = {
-            SelectImgButtonSheet(
-                isVisible = profileScreenState.isShowModal,
-                actionHidden = profileScreenState::hiddenModal,
-                actionBeforeSelect = { uri ->
-                    uri?.let {
-                        UploadDataControl.startServicesUploadUser(profileScreenState.context, it)
-                    }
-                    profileScreenState.hiddenModal()
-                }
-            )
-        },
-    ) {
-        SwipeRefresh(
-            state = profileScreenState.swipeState,
-            onRefresh = { myPostViewModel.requestNewPost(true) }
-        ) {
-            Scaffold(
-                floatingActionButton = {
-                    ButtonAdd(isVisible = profileScreenState.isScrollInProgress) {
-                        actionRootDestinations.changeRoot(AddBlogScreenDestination)
-                    }
-                },
-            ) {
-                Box(modifier = Modifier
-                    .padding(it)
-                    .fillMaxSize()) {
-                    ProfileScreen(
-                        user = currentUser,
-                        listPostState = stateListPost,
-                        gridState = profileScreenState.listState,
-                        actionDetails = {idPost->
-                            actionRootDestinations.changeRoot(
-                                PostDetailsDestination(idPost)
-                            )
-                        },
-                        actionProfile = { action ->
-                            when (action) {
-                                ActionMyProfile.LOAD_MORE -> myPostViewModel.concatenatePost {
-                                    profileScreenState.animateScrollMore()
-                                }
-                                ActionMyProfile.GO_SETTINGS -> actionRootDestinations.changeRoot(
-                                    ConfigScreenDestination
-                                )
-                                ActionMyProfile.SHOW_MODAL -> profileScreenState.showModal()
-                            }
-                        }
-                    )
-                    CircularProgressAnimation(
-                        isVisible = myPostViewModel.stateConcatMyPost,
-                        modifier = Modifier.align(
-                            Alignment.BottomCenter
-                        )
-                    )
-                }
 
+    ProfileScreen(
+        user = currentUser,
+        listPostState = stateListPost,
+        gridState = profileScreenState.listState,
+        swipeState = profileScreenState.swipeState,
+        isModalVisible = profileScreenState.isShowModal,
+        sheetState = profileScreenState.modalBottomSheetState,
+        isAddButtonVisible = !profileScreenState.isScrollInProgress,
+        callBackSelectionImg = profileScreenState::launchSelectImage,
+        actionDetails = { actionRootDestinations.changeRoot(PostDetailsDestination(it)) },
+        actionProfile = { action ->
+            when (action) {
+                SHOW_MODAL -> profileScreenState.showModal()
+                HIDDEN_MODAL -> profileScreenState.hiddenModal()
+                REFRESH_BLOGS -> myPostViewModel.requestNewPost(true)
+                GO_SETTINGS -> actionRootDestinations.changeRoot(ConfigScreenDestination)
+                ADD_NEW_POST -> actionRootDestinations.changeRoot(AddBlogScreenDestination)
+                LOAD_MORE -> myPostViewModel.concatenatePost(profileScreenState::animateScrollMore)
             }
+        }
+    )
+
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+private fun ProfileScreen(
+    user: SimpleUser,
+    isModalVisible: Boolean,
+    gridState: LazyGridState,
+    isAddButtonVisible: Boolean,
+    swipeState: SwipeRefreshState,
+    actionDetails: (String) -> Unit,
+    sheetState: ModalBottomSheetState,
+    listPostState: Resource<List<MyPost>>,
+    callBackSelectionImg: (Uri) -> Unit,
+    actionProfile: (ActionMyProfile) -> Unit
+) {
+
+    ScaffoldModalSwipe(
+        swipeState = swipeState,
+        sheetState = sheetState,
+        isVisibleModal = isModalVisible,
+        actionOnRefresh = { actionProfile(REFRESH_BLOGS) },
+        actionHideModal = { actionProfile(HIDDEN_MODAL) },
+        callBackSelection = callBackSelectionImg,
+        floatingActionButton = {
+            ButtonAdd(
+                isVisible = isAddButtonVisible,
+                action = { actionProfile(ADD_NEW_POST) })
+        }
+    ) {
+        ListMyBlogs(
+            gridState = gridState,
+            actionDetails = actionDetails,
+            listPostState = listPostState,
+            actionLoadMore = { actionProfile(LOAD_MORE) }) {
+            HeaderUser(
+                user = user,
+                actionEditPhoto = { actionProfile(SHOW_MODAL) },
+                actionSettings = { actionProfile(GO_SETTINGS) }
+            )
         }
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun ProfileScreen(
-    user: SimpleUser,
+private fun ListMyBlogs(
     gridState: LazyGridState,
-    listPostState: Resource<List<MyPost>>,
+    actionLoadMore: () -> Unit,
+    modifier: Modifier = Modifier,
+    spaceBetweenItems: Dp = 5.dp,
     actionDetails: (String) -> Unit,
-    actionProfile: (ActionMyProfile) -> Unit,
+    listPostState: Resource<List<MyPost>>,
+    contextPadding: PaddingValues = PaddingValues(4.dp),
+    headerUser: @Composable () -> Unit
 ) {
-    LazyVerticalGrid(
-        state = gridState,
-        columns = GridCells.Adaptive(120.dp),
-        modifier = Modifier.fillMaxWidth()
-        ) {
-
-        item(
-            span = { GridItemSpan(maxLineSpan) },
-            key = user.idUser
-        ) {
-            HeaderUser(
-                user = user,
-                actionEditPhoto = { actionProfile(ActionMyProfile.SHOW_MODAL) },
-                actionSettings = { actionProfile(ActionMyProfile.GO_SETTINGS) }
-            )
-        }
-        when (listPostState) {
-            Resource.Failure -> item(key = "failed-user" ) { FailedProfilePost() }
-            Resource.Loading -> items(count = 20, key = { it }) { ItemLoadingMyPost() }
-            is Resource.Success -> {
-                if (listPostState.data.isEmpty()) {
-                    item(key = "empty-my post" , span = { GridItemSpan(maxLineSpan)}) {
-                        AnimationScreen(
-                            resourceRaw = R.raw.empty5,
-                            emptyText = stringResource(id = R.string.message_empty_my_post),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(350.dp)
-                        )
-                    }
-                } else {
-                    items(
-                        count = listPostState.data.size,
-                        key = { listPostState.data[it].id }
-                    ) { index ->
-                        ItemMyPost(
-                            post = listPostState.data[index],
-                            modifier = Modifier.animateItemPlacement(),
-                            actionDetails = actionDetails
-                        )
-                    }
-                }
+    when (listPostState) {
+        Resource.Failure -> ListEmptyMyBlogs(
+            modifier = modifier,
+            header = headerUser
+        )
+        Resource.Loading -> ListLoadMyBlogs(
+            header = headerUser,
+            contentPadding = contextPadding,
+            spaceBetweenItems = spaceBetweenItems
+        )
+        is Resource.Success -> {
+            if (listPostState.data.isEmpty()) {
+                ListEmptyMyBlogs(
+                    modifier = modifier,
+                    header = headerUser
+                )
+            } else {
+                ListSuccessMyBlogs(
+                    header = headerUser,
+                    gridState = gridState,
+                    listMyPost = listPostState.data,
+                    contentPadding = contextPadding,
+                    actionClickPost = actionDetails,
+                    actionLoadMore = actionLoadMore,
+                    spaceBetweenItems = spaceBetweenItems
+                )
             }
         }
     }
-    if (listPostState is Resource.Success)
-        gridState.OnBottomReached(
-            buffer = 0,
-            onLoadMore = { actionProfile(ActionMyProfile.LOAD_MORE) })
-
 }
 
 

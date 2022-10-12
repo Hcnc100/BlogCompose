@@ -94,8 +94,8 @@ fun SimpleImage(
     @DrawableRes
     error: Int = R.drawable.ic_broken_image,
     contentDescription: String? = null,
+    isEmpty: Boolean = false,
     isCircular: Boolean,
-    isEmpty: Boolean,
 ) {
 
     require(sizePlaceHolder <= sizeImage) {

@@ -50,6 +50,7 @@ fun DataUserScreen(
         imgUser = registryViewModel.imageProfile,
         isVisibleModal = dataScreenState.isShowModal,
         sheetState = dataScreenState.modalBottomSheetState,
+        actionSelectImg = dataScreenState::launchSelectImage,
         hostState = dataScreenState.scaffoldState.snackbarHostState,
         actionDataUser = { action ->
             when (action) {
@@ -62,8 +63,7 @@ fun DataUserScreen(
                     }
                 }
             }
-        },
-        actionSelectImg = dataScreenState::launchSelectImage
+        }
     )
 
     if (authViewModel.isProcessing) CreatingDialog()

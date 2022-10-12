@@ -25,9 +25,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.nullpointer.blogcompose.R
+import com.nullpointer.blogcompose.actions.ActionsPost
 import com.nullpointer.blogcompose.core.utils.TimeUtils
 import com.nullpointer.blogcompose.models.posts.SimplePost
-import com.nullpointer.blogcompose.ui.screens.blogScreen.ActionsPost
 import com.nullpointer.blogcompose.ui.share.SimpleImage
 import java.util.*
 
@@ -178,7 +178,7 @@ private fun HeaderOwnerBlog(
             placeholder = R.drawable.ic_person,
             isCircular = true,
             isEmpty = false,
-            sizeImage = dimensionResource(id = R.dimen.size_photo_owner_blog)
+            sizeImage = dimensionResource(id = R.dimen.size_photo_header_owner_blog)
         )
         Text(
             text = name,

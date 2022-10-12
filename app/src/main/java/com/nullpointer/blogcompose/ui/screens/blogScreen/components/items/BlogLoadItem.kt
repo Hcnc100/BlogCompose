@@ -83,7 +83,7 @@ private fun HeaderLoading(modifier: Modifier = Modifier, shimmer: Shimmer) {
     ) {
         Box(
             modifier = Modifier
-                .size(dimensionResource(id = R.dimen.size_photo_owner_blog))
+                .size(dimensionResource(id = R.dimen.size_photo_header_owner_blog))
                 .clip(CircleShape)
                 .myShimmer(shimmer)
         )

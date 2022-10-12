@@ -3,6 +3,7 @@ package com.nullpointer.blogcompose.ui.screens.blogScreen
 import android.content.Context
 import android.content.Intent
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.ScaffoldState
@@ -12,12 +13,15 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.swiperefresh.SwipeRefreshState
 import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.actions.ActionBlogScreen
 import com.nullpointer.blogcompose.actions.ActionBlogScreen.*
+import com.nullpointer.blogcompose.actions.ActionsPost
+import com.nullpointer.blogcompose.actions.ActionsPost.*
 import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.models.posts.Post
 import com.nullpointer.blogcompose.models.posts.SimplePost
@@ -27,7 +31,6 @@ import com.nullpointer.blogcompose.services.uploadImg.UploadDataServices
 import com.nullpointer.blogcompose.ui.interfaces.ActionRootDestinations
 import com.nullpointer.blogcompose.ui.navigation.HomeNavGraph
 import com.nullpointer.blogcompose.ui.navigation.MainTransitions
-import com.nullpointer.blogcompose.ui.screens.blogScreen.ActionsPost.*
 import com.nullpointer.blogcompose.ui.screens.blogScreen.components.list.ListEmptyBlog
 import com.nullpointer.blogcompose.ui.screens.blogScreen.components.list.ListLoadBlog
 import com.nullpointer.blogcompose.ui.screens.blogScreen.components.list.ListSuccessBlog
@@ -138,12 +141,14 @@ private fun BlogScreen(
 
 @Composable
 private fun ListPost(
+    isConcatenate: Boolean,
     listState: LazyListState,
-    actionBottomReached: () -> Unit,
-    actionBlog: (ActionsPost, SimplePost) -> Unit,
     modifier: Modifier = Modifier,
+    actionBottomReached: () -> Unit,
     stateListPost: Resource<List<Post>>,
-    isConcatenate: Boolean
+    actionBlog: (ActionsPost, SimplePost) -> Unit,
+    spaceBetweenItems: Dp = 10.dp,
+    contentPadding: PaddingValues = PaddingValues(4.dp)
 ) {
 
     LaunchedEffect(key1 = Unit) {
@@ -156,7 +161,11 @@ private fun ListPost(
     }
     when (stateListPost) {
         Resource.Failure -> ListEmptyBlog(modifier = modifier)
-        Resource.Loading -> ListLoadBlog(modifier = modifier)
+        Resource.Loading -> ListLoadBlog(
+            modifier = modifier,
+            contentPadding = contentPadding,
+            spaceBetweenItems = spaceBetweenItems
+        )
         is Resource.Success -> {
             if (stateListPost.data.isEmpty()) {
                 ListEmptyBlog(modifier = modifier)
@@ -165,8 +174,10 @@ private fun ListPost(
                     modifier = modifier,
                     listState = listState,
                     actionBlog = actionBlog,
-                    listPost = stateListPost.data,
                     isConcatenate = isConcatenate,
+                    listPost = stateListPost.data,
+                    contentPadding = contentPadding,
+                    spaceBetweenItems = spaceBetweenItems,
                     actionBottomReached = actionBottomReached
                 )
             }
