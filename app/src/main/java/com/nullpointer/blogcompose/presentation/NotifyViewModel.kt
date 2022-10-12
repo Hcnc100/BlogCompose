@@ -6,7 +6,6 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.delegates.SavableProperty
 import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.core.utils.NetworkException
@@ -49,7 +48,7 @@ class NotifyViewModel @Inject constructor(
     var stateRequestNotify by mutableStateOf(false)
 
     // * message to show about any state
-    private val _messageNotify = Channel<Int>()
+    private val _messageNotify = Channel<String>()
     val messageNotify = _messageNotify.receiveAsFlow()
 
     // * show notification from database
@@ -59,7 +58,7 @@ class NotifyViewModel @Inject constructor(
         }
     }.catch { e ->
         Timber.e("Error get notify from database $e")
-        _messageNotify.trySend(R.string.message_error_unknown)
+//        _messageNotify.trySend(R.string.message_error_unknown)
         emit(Resource.Failure)
     }.flowOn(Dispatchers.IO).stateIn(
         viewModelScope,
@@ -88,9 +87,11 @@ class NotifyViewModel @Inject constructor(
                 } catch (e: Exception) {
                     when (e) {
                         is CancellationException -> throw e
-                        is NetworkException -> _messageNotify.trySend(R.string.message_error_internet_checker)
+                        is NetworkException -> {
+//                            _messageNotify.trySend(R.string.message_error_internet_checker)
+                        }
                         else -> {
-                            _messageNotify.trySend(R.string.message_error_unknown)
+//                            _messageNotify.trySend(R.string.message_error_unknown)
                             Timber.e("Error en el concatenate notify $e")
                         }
                     }
@@ -117,10 +118,12 @@ class NotifyViewModel @Inject constructor(
             } catch (e: Exception) {
                 when (e) {
                     is CancellationException -> throw e
-                    is NetworkException -> _messageNotify.trySend(R.string.message_error_internet_checker)
+                    is NetworkException -> {
+//                        _messageNotify.trySend(R.string.message_error_internet_checker)
+                    }
                     is NullPointerException -> Timber.e(" Error al obtener ultimas notificaciones El usuario posiblemente es nulo")
                     else -> {
-                        _messageNotify.trySend(R.string.message_error_unknown)
+//                        _messageNotify.trySend(R.string.message_error_unknown)
                         Timber.e("Error al obtener ultimas notificaciones $e")
                     }
                 }

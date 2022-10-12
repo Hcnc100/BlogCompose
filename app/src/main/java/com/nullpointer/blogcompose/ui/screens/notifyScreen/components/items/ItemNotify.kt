@@ -1,4 +1,4 @@
-package com.nullpointer.blogcompose.ui.screens.notifyScreen
+package com.nullpointer.blogcompose.ui.screens.notifyScreen.components.items
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable

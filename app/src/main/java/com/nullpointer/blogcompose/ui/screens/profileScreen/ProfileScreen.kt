@@ -2,20 +2,26 @@ package com.nullpointer.blogcompose.ui.screens.profileScreen
 
 import android.content.Context
 import android.net.Uri
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetState
+import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.swiperefresh.SwipeRefreshState
+import com.nullpointer.blogcompose.actions.ActionMyProfile
+import com.nullpointer.blogcompose.actions.ActionMyProfile.*
 import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.models.posts.MyPost
 import com.nullpointer.blogcompose.models.users.SimpleUser
@@ -28,13 +34,13 @@ import com.nullpointer.blogcompose.ui.navigation.MainTransitions
 import com.nullpointer.blogcompose.ui.screens.destinations.AddBlogScreenDestination
 import com.nullpointer.blogcompose.ui.screens.destinations.ConfigScreenDestination
 import com.nullpointer.blogcompose.ui.screens.destinations.PostDetailsDestination
-import com.nullpointer.blogcompose.ui.screens.profileScreen.ActionMyProfile.*
 import com.nullpointer.blogcompose.ui.screens.profileScreen.components.lists.ListEmptyMyBlogs
 import com.nullpointer.blogcompose.ui.screens.profileScreen.components.lists.ListLoadMyBlogs
 import com.nullpointer.blogcompose.ui.screens.profileScreen.components.lists.ListSuccessMyBlogs
 import com.nullpointer.blogcompose.ui.screens.states.ProfileScreenState
 import com.nullpointer.blogcompose.ui.screens.states.rememberProfileScreenState
 import com.nullpointer.blogcompose.ui.share.ButtonAdd
+import com.nullpointer.blogcompose.ui.share.CustomSnackBar
 import com.nullpointer.blogcompose.ui.share.ScaffoldModalSwipe
 import com.ramcosta.composedestinations.annotation.Destination
 
@@ -72,7 +78,9 @@ fun ProfileScreen(
         gridState = profileScreenState.listState,
         swipeState = profileScreenState.swipeState,
         isModalVisible = profileScreenState.isShowModal,
+        scaffoldState = profileScreenState.scaffoldState,
         sheetState = profileScreenState.modalBottomSheetState,
+        isConcatenateMyBlogs = myPostViewModel.stateConcatMyPost,
         isAddButtonVisible = !profileScreenState.isScrollInProgress,
         callBackSelectionImg = profileScreenState::launchSelectImage,
         actionDetails = { actionRootDestinations.changeRoot(PostDetailsDestination(it)) },
@@ -97,6 +105,8 @@ private fun ProfileScreen(
     isModalVisible: Boolean,
     gridState: LazyGridState,
     isAddButtonVisible: Boolean,
+    scaffoldState: ScaffoldState,
+    isConcatenateMyBlogs: Boolean,
     swipeState: SwipeRefreshState,
     actionDetails: (String) -> Unit,
     sheetState: ModalBottomSheetState,
@@ -105,31 +115,43 @@ private fun ProfileScreen(
     actionProfile: (ActionMyProfile) -> Unit
 ) {
 
-    ScaffoldModalSwipe(
-        swipeState = swipeState,
-        sheetState = sheetState,
-        isVisibleModal = isModalVisible,
-        actionOnRefresh = { actionProfile(REFRESH_BLOGS) },
-        actionHideModal = { actionProfile(HIDDEN_MODAL) },
-        callBackSelection = callBackSelectionImg,
-        floatingActionButton = {
-            ButtonAdd(
-                isVisible = isAddButtonVisible,
-                action = { actionProfile(ADD_NEW_POST) })
+    Box {
+        ScaffoldModalSwipe(
+            swipeState = swipeState,
+            sheetState = sheetState,
+            isVisibleModal = isModalVisible,
+            actionOnRefresh = { actionProfile(REFRESH_BLOGS) },
+            actionHideModal = { actionProfile(HIDDEN_MODAL) },
+            callBackSelection = callBackSelectionImg,
+            floatingActionButton = {
+                ButtonAdd(
+                    isVisible = isAddButtonVisible,
+                    action = { actionProfile(ADD_NEW_POST) })
+            }
+        ) {
+            ListMyBlogs(
+                gridState = gridState,
+                actionDetails = actionDetails,
+                listPostState = listPostState,
+                isConcatenateMyBlogs = isConcatenateMyBlogs,
+                actionLoadMore = { actionProfile(LOAD_MORE) },
+                modifier = Modifier.padding(it)
+            ) {
+                HeaderUser(
+                    user = user,
+                    actionEditPhoto = { actionProfile(SHOW_MODAL) },
+                    actionSettings = { actionProfile(GO_SETTINGS) }
+                )
+            }
         }
-    ) {
-        ListMyBlogs(
-            gridState = gridState,
-            actionDetails = actionDetails,
-            listPostState = listPostState,
-            actionLoadMore = { actionProfile(LOAD_MORE) }) {
-            HeaderUser(
-                user = user,
-                actionEditPhoto = { actionProfile(SHOW_MODAL) },
-                actionSettings = { actionProfile(GO_SETTINGS) }
-            )
-        }
+        CustomSnackBar(
+            hostState = scaffoldState.snackbarHostState,
+            modifier = Modifier
+                .padding(vertical = 20.dp)
+                .align(Alignment.TopCenter)
+        )
     }
+
 }
 
 @Composable
@@ -138,6 +160,7 @@ private fun ListMyBlogs(
     actionLoadMore: () -> Unit,
     modifier: Modifier = Modifier,
     spaceBetweenItems: Dp = 5.dp,
+    isConcatenateMyBlogs: Boolean,
     actionDetails: (String) -> Unit,
     listPostState: Resource<List<MyPost>>,
     contextPadding: PaddingValues = PaddingValues(4.dp),
@@ -167,7 +190,8 @@ private fun ListMyBlogs(
                     contentPadding = contextPadding,
                     actionClickPost = actionDetails,
                     actionLoadMore = actionLoadMore,
-                    spaceBetweenItems = spaceBetweenItems
+                    spaceBetweenItems = spaceBetweenItems,
+                    isConcatenateMyBlog = isConcatenateMyBlogs
                 )
             }
         }

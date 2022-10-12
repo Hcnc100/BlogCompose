@@ -5,6 +5,7 @@ import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
@@ -15,6 +16,7 @@ import com.nullpointer.blogcompose.models.posts.MyPost
 import com.nullpointer.blogcompose.ui.screens.emptyScreen.AnimationScreen
 import com.nullpointer.blogcompose.ui.screens.profileScreen.components.items.ItemLoadMyPost
 import com.nullpointer.blogcompose.ui.screens.profileScreen.components.items.ItemMyPost
+import com.nullpointer.blogcompose.ui.share.CircularProgressAnimation
 import com.nullpointer.blogcompose.ui.share.OnBottomReached
 import com.valentinilk.shimmer.ShimmerBounds
 import com.valentinilk.shimmer.rememberShimmer
@@ -24,8 +26,9 @@ fun ListSuccessMyBlogs(
     spaceBetweenItems: Dp,
     listMyPost: List<MyPost>,
     gridState: LazyGridState,
-    contentPadding: PaddingValues,
     actionLoadMore: () -> Unit,
+    isConcatenateMyBlog: Boolean,
+    contentPadding: PaddingValues,
     actionClickPost: (String) -> Unit,
     header: @Composable () -> Unit
 ) {
@@ -49,6 +52,12 @@ fun ListSuccessMyBlogs(
                 )
             }
         }
+        CircularProgressAnimation(
+            isVisible = isConcatenateMyBlog,
+            modifier = Modifier.align(
+                Alignment.BottomCenter
+            )
+        )
     }
 
     gridState.OnBottomReached(buffer = 0, onLoadMore = actionLoadMore)

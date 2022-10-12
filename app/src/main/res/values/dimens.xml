@@ -2,4 +2,5 @@
 <resources>
     <dimen name="size_photo_header_owner_blog">40dp</dimen>
     <dimen name="size_photo_my_post">100dp</dimen>
+    <dimen name="size_photo_notify">50dp</dimen>
 </resources>
