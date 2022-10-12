@@ -31,25 +31,23 @@ fun ScaffoldModalSwipe(
         state = swipeState,
         onRefresh = actionOnRefresh
     ) {
-        Scaffold(
-            topBar = topBar,
-            modifier = modifier,
-            floatingActionButton = floatingActionButton,
-            scaffoldState = scaffoldState,
-            floatingActionButtonPosition = floatingActionButtonPosition,
-        ) { padding ->
-            ModalBottomSheetLayout(
-                sheetState = sheetState,
-                sheetContent = {
-                    SelectImgButtonSheet(
-                        isVisible = isVisibleModal,
-                        actionHidden = actionHideModal
-                    ) { uri -> uri?.let { callBackSelection(it) } }
-                },
-            ) {
-
-                content(padding)
-            }
+        ModalBottomSheetLayout(
+            sheetState = sheetState,
+            sheetContent = {
+                SelectImgButtonSheet(
+                    isVisible = isVisibleModal,
+                    actionHidden = actionHideModal
+                ) { uri -> uri?.let { callBackSelection(it) } }
+            },
+        ) {
+            Scaffold(
+                topBar = topBar,
+                content = content,
+                modifier = modifier,
+                scaffoldState = scaffoldState,
+                floatingActionButton = floatingActionButton,
+                floatingActionButtonPosition = floatingActionButtonPosition
+            )
         }
     }
 }

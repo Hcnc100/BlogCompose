@@ -20,25 +20,23 @@ fun ScaffoldModal(
     scaffoldState: ScaffoldState = rememberScaffoldState(),
     content: @Composable (PaddingValues) -> Unit
 ) {
-    Scaffold(
-        topBar = topBar,
-        modifier = modifier,
-        floatingActionButton = floatingActionButton,
-        scaffoldState = scaffoldState,
-        floatingActionButtonPosition = floatingActionButtonPosition,
-    ) { padding ->
-        ModalBottomSheetLayout(
-            sheetState = sheetState,
-            sheetContent = {
-                SelectImgButtonSheet(
-                    isVisible = isVisibleModal,
-                    actionHidden = actionHideModal
-                ) { uri -> uri?.let { callBackSelection(it) } }
-            },
-        ) {
-
-            content(padding)
-        }
+    ModalBottomSheetLayout(
+        sheetState = sheetState,
+        sheetContent = {
+            SelectImgButtonSheet(
+                isVisible = isVisibleModal,
+                actionHidden = actionHideModal
+            ) { uri -> uri?.let { callBackSelection(it) } }
+        },
+    ) {
+        Scaffold(
+            topBar = topBar,
+            modifier = modifier,
+            floatingActionButton = floatingActionButton,
+            scaffoldState = scaffoldState,
+            floatingActionButtonPosition = floatingActionButtonPosition,
+            content = content
+        )
     }
 }
 
