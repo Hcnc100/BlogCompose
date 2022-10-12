@@ -22,6 +22,7 @@ fun BlogLoadItem(
     modifier: Modifier = Modifier
 ) {
     Card(
+        modifier = modifier,
         shape = RoundedCornerShape(10.dp)
     ) {
         Column(
@@ -29,22 +30,23 @@ fun BlogLoadItem(
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            HeaderLoading(shimmer = shimmer)
+            HeaderLoading(shimmer = shimmer, modifier = Modifier.padding(5.dp))
             ImageLoading(shimmer = shimmer)
-            FakeTextLoading(shimmer = shimmer)
+            FakeTextLoading(shimmer = shimmer, modifier = Modifier.padding(5.dp))
         }
     }
 }
 
 @Composable
 private fun FakeTextLoading(
-    shimmer: Shimmer
+    shimmer: Shimmer,
+    modifier: Modifier = Modifier
 ) {
     val numberCommentsFake = remember {
         (1..3).random()
     }
     Column(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(5.dp)
     ) {
         repeat(numberCommentsFake) {
@@ -52,7 +54,7 @@ private fun FakeTextLoading(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(20.dp)
-                    .clip(RoundedCornerShape(3.dp))
+                    .clip(RoundedCornerShape(6.dp))
                     .myShimmer(shimmer)
             )
         }
@@ -88,7 +90,7 @@ private fun HeaderLoading(modifier: Modifier = Modifier, shimmer: Shimmer) {
         Box(
             modifier = Modifier
                 .width(widthRandom.dp)
-                .height(40.dp)
+                .height(20.dp)
                 .clip(RoundedCornerShape(5.dp))
                 .myShimmer(shimmer),
         )

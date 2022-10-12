@@ -167,4 +167,6 @@
 
     <string name="need_img_user">Se necesita una imagen de perfil</string>
     <string name="need_name_user">Se necesita un nombre</string>
+
+    <string name="error_time_out">El servidor no responde, reintente</string>
 </resources>

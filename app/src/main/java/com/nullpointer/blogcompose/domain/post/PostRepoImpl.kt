@@ -1,5 +1,6 @@
 package com.nullpointer.blogcompose.domain.post
 
+import com.nullpointer.blogcompose.core.utils.ExceptionManager.NO_INTERNET_CONNECTION
 import com.nullpointer.blogcompose.core.utils.InternetCheck
 import com.nullpointer.blogcompose.core.utils.NetworkException
 import com.nullpointer.blogcompose.data.local.post.PostLocalDataSource
@@ -86,6 +87,9 @@ class PostRepoImpl(
 
 
     override suspend fun updateLikePost(post: SimplePost, isLiked: Boolean) {
+
+        if (!InternetCheck.isNetworkAvailable()) throw Exception(NO_INTERNET_CONNECTION)
+
 
         // * toggle like post
         val postFakeUpdate = post.toggleLike()

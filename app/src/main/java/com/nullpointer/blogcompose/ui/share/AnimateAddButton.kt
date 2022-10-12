@@ -18,7 +18,7 @@ fun ButtonAdd(
 ) {
     AnimatedVisibility(
         modifier = modifier,
-        visible = !isVisible,
+        visible = isVisible,
         enter = scaleIn() + fadeIn(),
         exit = scaleOut() + fadeOut()
     ) {

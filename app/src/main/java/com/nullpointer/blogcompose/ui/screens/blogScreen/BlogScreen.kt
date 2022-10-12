@@ -2,13 +2,17 @@ package com.nullpointer.blogcompose.ui.screens.blogScreen
 
 import android.content.Context
 import android.content.Intent
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.swiperefresh.SwipeRefreshState
 import com.nullpointer.blogcompose.R
@@ -24,7 +28,7 @@ import com.nullpointer.blogcompose.ui.interfaces.ActionRootDestinations
 import com.nullpointer.blogcompose.ui.navigation.HomeNavGraph
 import com.nullpointer.blogcompose.ui.navigation.MainTransitions
 import com.nullpointer.blogcompose.ui.screens.blogScreen.ActionsPost.*
-import com.nullpointer.blogcompose.ui.screens.blogScreen.components.list.ListFailBlog
+import com.nullpointer.blogcompose.ui.screens.blogScreen.components.list.ListEmptyBlog
 import com.nullpointer.blogcompose.ui.screens.blogScreen.components.list.ListLoadBlog
 import com.nullpointer.blogcompose.ui.screens.blogScreen.components.list.ListSuccessBlog
 import com.nullpointer.blogcompose.ui.screens.destinations.AddBlogScreenDestination
@@ -32,6 +36,7 @@ import com.nullpointer.blogcompose.ui.screens.destinations.PostDetailsDestinatio
 import com.nullpointer.blogcompose.ui.screens.states.SwipeRefreshScreenState
 import com.nullpointer.blogcompose.ui.screens.states.rememberSwipeRefreshScreenState
 import com.nullpointer.blogcompose.ui.share.ButtonAdd
+import com.nullpointer.blogcompose.ui.share.CustomSnackBar
 import com.nullpointer.blogcompose.ui.share.ScaffoldSwipe
 import com.ramcosta.composedestinations.annotation.Destination
 import kotlinx.coroutines.delay
@@ -43,11 +48,11 @@ import kotlinx.coroutines.flow.merge
 fun BlogScreen(
     postVM: PostViewModel = hiltViewModel(),
     likeVM: LikeViewModel = hiltViewModel(),
+    actionRootDestinations: ActionRootDestinations,
     blogScreenState: SwipeRefreshScreenState = rememberSwipeRefreshScreenState(
         sizeScrollMore = 80f,
         isRefreshing = postVM.stateRequestData,
-    ),
-    actionRootDestinations: ActionRootDestinations
+    )
 ) {
     val statePost by postVM.listPost.collectAsState()
 
@@ -91,35 +96,44 @@ fun BlogScreen(
 @Composable
 private fun BlogScreen(
     isConcatenate: Boolean,
+    buttonAddIsVisible: Boolean,
     lazyListState: LazyListState,
     scaffoldState: ScaffoldState,
     swipeState: SwipeRefreshState,
     stateListPost: Resource<List<Post>>,
     actionBlog: (ActionsPost, SimplePost) -> Unit,
-    actionBlogScreen: (ActionBlogScreen) -> Unit,
-    buttonAddIsVisible: Boolean
+    actionBlogScreen: (ActionBlogScreen) -> Unit
 ) {
 
-    ScaffoldSwipe(
-        actionOnRefresh = { actionBlogScreen(RELOAD_BLOG) },
-        swipeState = swipeState,
-        scaffoldState = scaffoldState,
-        floatingActionButton = {
-            ButtonAdd(isVisible = buttonAddIsVisible, action = {
-                actionBlogScreen(ADD_BLOG)
-            })
+    Box {
+        ScaffoldSwipe(
+            actionOnRefresh = { actionBlogScreen(RELOAD_BLOG) },
+            swipeState = swipeState,
+            floatingActionButton = {
+                ButtonAdd(
+                    isVisible = buttonAddIsVisible,
+                    action = { actionBlogScreen(ADD_BLOG) }
+                )
+            }
+        ) {
+            ListPost(
+                actionBlog = actionBlog,
+                listState = lazyListState,
+                stateListPost = stateListPost,
+                isConcatenate = isConcatenate,
+                modifier = Modifier.padding(it),
+                actionBottomReached = { actionBlogScreen(CONCATENATE_BLOG) }
+            )
         }
-    ) {
-        ListPost(
-            listState = lazyListState,
-            actionBottomReached = {
-                actionBlogScreen(CONCATENATE_BLOG)
-            },
-            actionBlog = actionBlog,
-            stateListPost = stateListPost,
-            isConcatenate = isConcatenate
+
+        CustomSnackBar(
+            hostState = scaffoldState.snackbarHostState,
+            modifier = Modifier
+                .padding(vertical = 20.dp)
+                .align(Alignment.TopCenter)
         )
     }
+
 }
 
 @Composable
@@ -140,21 +154,24 @@ private fun ListPost(
             }
         }
     }
-
     when (stateListPost) {
-        Resource.Failure -> ListFailBlog(modifier = modifier)
+        Resource.Failure -> ListEmptyBlog(modifier = modifier)
         Resource.Loading -> ListLoadBlog(modifier = modifier)
-        is Resource.Success -> ListSuccessBlog(
-            listPost = stateListPost.data,
-            isConcatenate = isConcatenate,
-            listState = listState,
-            actionBottomReached = actionBottomReached,
-            actionBlog = actionBlog,
-        )
-
+        is Resource.Success -> {
+            if (stateListPost.data.isEmpty()) {
+                ListEmptyBlog(modifier = modifier)
+            } else {
+                ListSuccessBlog(
+                    modifier = modifier,
+                    listState = listState,
+                    actionBlog = actionBlog,
+                    listPost = stateListPost.data,
+                    isConcatenate = isConcatenate,
+                    actionBottomReached = actionBottomReached
+                )
+            }
+        }
     }
-
-
 }
 
 

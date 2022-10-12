@@ -6,7 +6,6 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.delegates.SavableProperty
 import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.core.utils.NetworkException
@@ -32,7 +31,7 @@ class PostViewModel @Inject constructor(
     private var isConcatEnable by SavableProperty(state, KEY_CONCATENATE_ENABLE, true)
 
     // * state message to show any error or message
-    private val _messagePost = Channel<Int>()
+    private val _messagePost = Channel<String>()
     val messagePost = _messagePost.receiveAsFlow()
 
     // * var to saved the job, to request new data
@@ -55,7 +54,7 @@ class PostViewModel @Inject constructor(
         }
     }.catch {
         Timber.d("Error to get list of posts $it")
-        _messagePost.trySend(R.string.message_error_unknown)
+//        _messagePost.trySend(R.string.message_error_unknown)
     }.flowOn(Dispatchers.IO).stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(5_000),
@@ -83,9 +82,11 @@ class PostViewModel @Inject constructor(
             } catch (e: Exception) {
                 when (e) {
                     is CancellationException -> throw e
-                    is NetworkException -> _messagePost.trySend(R.string.message_error_internet_checker)
+                    is NetworkException -> {
+//                        _messagePost.trySend(R.string.message_error_internet_checker)
+                    }
                     else -> {
-                        _messagePost.trySend(R.string.message_error_unknown)
+//                        _messagePost.trySend(R.string.message_error_unknown)
                         Timber.e("Error reuqest new post $e")
                     }
                 }
@@ -112,9 +113,11 @@ class PostViewModel @Inject constructor(
                 } catch (e: Exception) {
                     when (e) {
                         is CancellationException -> throw e
-                        is NetworkException -> _messagePost.trySend(R.string.message_error_internet_checker)
+                        is NetworkException -> {
+//                            _messagePost.trySend(R.string.message_error_internet_checker)
+                        }
                         else -> {
-                            _messagePost.trySend(R.string.message_error_unknown)
+//                            _messagePost.trySend(R.string.message_error_unknown)
                             Timber.e("Error concatenate new post $e")
                         }
                     }

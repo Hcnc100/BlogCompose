@@ -169,4 +169,5 @@
 
     <string name="need_img_user">A profile picture is required</string>
     <string name="need_name_user">The name is required</string>
+    <string name="error_time_out">The server is not responding, please try again</string>
 </resources>

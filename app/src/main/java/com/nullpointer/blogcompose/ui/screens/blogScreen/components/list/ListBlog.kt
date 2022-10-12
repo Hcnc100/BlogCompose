@@ -47,8 +47,8 @@ fun ListLoadBlog(
 fun ListEmptyBlog(modifier: Modifier) {
     AnimationScreen(
         modifier = modifier
-            .verticalScroll(rememberScrollState())
-            .fillMaxSize(),
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState()),
         resourceRaw = R.raw.empty1,
         emptyText = stringResource(id = R.string.message_empty_post)
     )
@@ -93,17 +93,4 @@ fun ListSuccessBlog(
 
     // * when go to the finish list, request more post
     listState.OnBottomReached(0, actionBottomReached)
-}
-
-@Composable
-fun ListFailBlog(
-    modifier: Modifier = Modifier
-) {
-    AnimationScreen(
-        resourceRaw = R.raw.empty1,
-        emptyText = stringResource(id = R.string.message_empty_post),
-        modifier = modifier
-            .verticalScroll(rememberScrollState())
-            .fillMaxSize()
-    )
 }
