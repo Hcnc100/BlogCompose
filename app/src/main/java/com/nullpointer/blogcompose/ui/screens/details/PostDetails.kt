@@ -1,12 +1,15 @@
 package com.nullpointer.blogcompose.ui.screens.details
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.Scaffold
+import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -34,6 +37,7 @@ import com.nullpointer.blogcompose.ui.screens.details.componets.others.TextInput
 import com.nullpointer.blogcompose.ui.screens.profileScreen.components.FailedProfilePost
 import com.nullpointer.blogcompose.ui.screens.states.PostDetailsState
 import com.nullpointer.blogcompose.ui.screens.states.rememberPostDetailsState
+import com.nullpointer.blogcompose.ui.share.CustomSnackBar
 import com.nullpointer.blogcompose.ui.share.ToolbarBack
 import com.ramcosta.composedestinations.annotation.DeepLink
 import com.ramcosta.composedestinations.annotation.Destination
@@ -87,10 +91,11 @@ fun PostDetails(
         statePostDetails = postState,
         stateListComments = commentsState,
         commentProperty = postDetailsViewModel.comment,
+        scaffoldState = postDetailsState.scaffoldState,
         lazyListState = postDetailsState.lazyListState,
         focusRequester = postDetailsState.focusRequester,
         hasNewComments = postDetailsViewModel.hasNewComments,
-        isConcatenateComment = postDetailsViewModel.stateConcatComment,
+        isConcatenateComment = postDetailsViewModel.isConcatenateComment,
         actionPostDetails = { action ->
             when (action) {
                 ACTION_BACK -> actionRootDestinations.backDestination()
@@ -115,6 +120,7 @@ fun PostDetails(
 fun PostDetails(
     hasNewComments: Boolean,
     lazyListState: LazyListState,
+    scaffoldState: ScaffoldState,
     isConcatenateComment: Boolean,
     focusRequester: FocusRequester,
     statePostDetails: Resource<Post>,
@@ -123,42 +129,51 @@ fun PostDetails(
     stateListComments: Resource<List<Comment>>,
     shimmer: Shimmer = rememberShimmer(shimmerBounds = ShimmerBounds.View)
 ) {
-    Scaffold(
-        topBar = {
-            ToolbarBack(
-                title = stringResource(R.string.title_post),
-                actionBack = { actionPostDetails(ACTION_BACK) }
-            )
-        },
-        bottomBar = {
-            if (statePostDetails is Resource.Success && stateListComments is Resource.Success)
-                TextInputComment(
-                    valueProperty = commentProperty,
-                    modifier = Modifier.focusRequester(focusRequester),
-                    actionSend = { actionPostDetails(SEND_COMMENT) }
+    Box {
+        Scaffold(
+            topBar = {
+                ToolbarBack(
+                    title = stringResource(R.string.title_post),
+                    actionBack = { actionPostDetails(ACTION_BACK) }
                 )
-        }
-    ) {
-        PostAndComments(
-            shimmer = shimmer,
-            listState = lazyListState,
-            modifier = Modifier
-                .padding(it)
-                .fillMaxSize(),
-            hasNewComments = hasNewComments,
-            statePostDetails = statePostDetails,
-            actionPostDetails = actionPostDetails,
-            stateListComments = stateListComments,
-            isConcatenateComment = isConcatenateComment
+            },
+            bottomBar = {
+                if (statePostDetails is Resource.Success && stateListComments is Resource.Success)
+                    TextInputComment(
+                        valueProperty = commentProperty,
+                        modifier = Modifier.focusRequester(focusRequester),
+                        actionSend = { actionPostDetails(SEND_COMMENT) }
+                    )
+            }
         ) {
-            when (statePostDetails) {
-                Resource.Failure -> FailedProfilePost()
-                Resource.Loading -> LoadDetailsPost(shimmer = shimmer)
-                is Resource.Success -> SuccessDetailsPost(
-                    blog = statePostDetails.data,
-                    actionLike = { actionPostDetails(LIKE_THIS_POST) })
+            PostAndComments(
+                shimmer = shimmer,
+                listState = lazyListState,
+                modifier = Modifier
+                    .padding(it)
+                    .fillMaxSize(),
+                hasNewComments = hasNewComments,
+                statePostDetails = statePostDetails,
+                actionPostDetails = actionPostDetails,
+                stateListComments = stateListComments,
+                isConcatenateComment = isConcatenateComment
+            ) {
+                when (statePostDetails) {
+                    Resource.Failure -> FailedProfilePost()
+                    Resource.Loading -> LoadDetailsPost(shimmer = shimmer)
+                    is Resource.Success -> SuccessDetailsPost(
+                        blog = statePostDetails.data,
+                        actionLike = { actionPostDetails(LIKE_THIS_POST) })
+                }
             }
         }
+
+        CustomSnackBar(
+            hostState = scaffoldState.snackbarHostState,
+            modifier = Modifier
+                .padding(vertical = 80.dp)
+                .align(Alignment.TopCenter)
+        )
     }
 }
 

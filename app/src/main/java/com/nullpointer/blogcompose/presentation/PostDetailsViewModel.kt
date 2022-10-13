@@ -8,19 +8,20 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.delegates.PropertySavableString
-import com.nullpointer.blogcompose.core.delegates.SavableComposeState
 import com.nullpointer.blogcompose.core.delegates.SavableProperty
 import com.nullpointer.blogcompose.core.states.Resource
-import com.nullpointer.blogcompose.core.utils.NetworkException
+import com.nullpointer.blogcompose.core.utils.ExceptionManager.sendMessageErrorToException
+import com.nullpointer.blogcompose.core.utils.launchSafeIO
 import com.nullpointer.blogcompose.domain.comment.CommentsRepository
 import com.nullpointer.blogcompose.domain.post.PostRepository
 import com.nullpointer.blogcompose.models.Comment
 import com.nullpointer.blogcompose.models.posts.Post
 import com.nullpointer.blogcompose.models.posts.SimplePost
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -36,17 +37,12 @@ class PostDetailsViewModel @Inject constructor(
         private const val TAG_COMMENT_DETAILS="TAG_COMMENT_DETAILS"
     }
 
-    // * job to control init comments and emit state
-    private var jobInitComments: Job? = null
-
     // * this var is for send any messaging
     private val _messageDetails = Channel<String>()
     val messageDetails = _messageDetails.receiveAsFlow()
 
-    // * save job to concatenate comments
-    private var jobConcatenate: Job? = null
 
-    var stateConcatComment by mutableStateOf(false)
+    var isConcatenateComment by mutableStateOf(false)
 
 
     // * this var is for update post selected
@@ -64,8 +60,6 @@ class PostDetailsViewModel @Inject constructor(
     var numberComments by SavableProperty(savedStateHandle, KEY_COMMENTS, -1)
         private set
 
-    var showAllComments by SavableComposeState(savedStateHandle, "PAN", true)
-        private set
 
     private val _listComments = MutableStateFlow<Resource<List<Comment>>>(Resource.Loading)
     val listComments = _listComments.asStateFlow()
@@ -103,11 +97,11 @@ class PostDetailsViewModel @Inject constructor(
             }
         }
     }.flowOn(Dispatchers.IO).catch {
-        Timber.d("Error con el post $it")
-//        _messageDetails.send(R.string.message_error_load_post)
-        // ! update this before
-
-//        postRepository.deleterPost(_idPost.value)
+        sendMessageErrorToException(
+            exception = Exception(it),
+            message = "Error get post real time",
+            channel = _messageDetails
+        )
         emit(Resource.Failure)
     }.stateIn(
         viewModelScope,
@@ -128,101 +122,84 @@ class PostDetailsViewModel @Inject constructor(
     }
 
 
-    fun concatenateComments() {
-        // * cancel old job and add new
-        jobConcatenate?.cancel()
-        jobConcatenate = viewModelScope.launch {
-            stateConcatComment = true
-            try {
-                listComments.value.let { stateListComment ->
-                    if (stateListComment is Resource.Success) {
-                        val lastComment = stateListComment.data.first()
-                        val listNewComments = withContext(Dispatchers.IO) {
-                            commentsRepository.concatenateComments(_idPost.value, lastComment.id)
-                        }
-                        val newList = listNewComments + stateListComment.data
-                        _listComments.emit(Resource.Success(newList))
-                        Timber.d("New comments concatenate ${listNewComments.size}")
-                    }
+    fun concatenateComments() = launchSafeIO(
+        isEnabled = !isConcatenateComment,
+        blockBefore = { isConcatenateComment = true },
+        blockAfter = { isConcatenateComment = false },
+        blockIO = {
+            listComments.value.let { stateListComment ->
+                if (stateListComment is Resource.Success) {
+                    val lastComment = stateListComment.data.first()
+                    val listNewComments = commentsRepository.concatenateComments(
+                        idPost = _idPost.value,
+                        lastComment = lastComment.id
+                    )
+                    val newList = listNewComments + stateListComment.data
+                    _listComments.emit(Resource.Success(newList))
+                    Timber.d("New comments concatenate ${listNewComments.size}")
                 }
-            } catch (e: Exception) {
-                when (e) {
-                    is CancellationException -> throw e
-                    is NetworkException -> {
-//                        _messageDetails.send(R.string.message_error_internet_checker)
-                    }
-                    else -> {
-//                        _messageDetails.send(R.string.message_error_unknown)
-                        Timber.d("Error al concatenar los post ${_idPost.value} : $e")
-                    }
-                }
-            } finally {
-                stateConcatComment = false
             }
+        },
+        blockException = {
+            sendMessageErrorToException(
+                exception = it,
+                message = "Error al concatenar los post ${_idPost.value}",
+                _messageDetails
+            )
         }
-    }
+    )
 
 
     fun addComment(
         callbackSuccess: () -> Unit
-    ) = viewModelScope.launch {
-        try {
-            // * change number of comments
-            // ! this for no show any for "hasNewComments"
+    ) = launchSafeIO(
+        blockBefore = { addingComment = true },
+        blockAfter = { addingComment = false },
+        blockIO = {
             val newComment = comment.currentValue
             comment.clearValue()
             addingComment = true
             numberComments++
             postState.value.let {
                 if (it is Resource.Success) {
-                    val listNewComment = withContext(Dispatchers.IO) {
-                        commentsRepository.addNewComment(it.data, newComment)
-                    }
+                    val listNewComment = commentsRepository.addNewComment(
+                        post = it.data,
+                        comment = newComment
+                    )
                     _listComments.emit(Resource.Success(listNewComment))
                     callbackSuccess()
                 }
             }
-        } catch (e: Exception) {
-//            _messageDetails.send(R.string.message_error_add_comment)
-            Timber.e("Error al agregar un commet $e")
-        }finally {
-            addingComment=false
+        },
+        blockException = {
+            sendMessageErrorToException(
+                exception = it,
+                message = "Error reload comments ${_idPost.value}",
+                channel = _messageDetails
+            )
         }
-    }
+    )
 
 
-    fun requestsComments(idPost: String = _idPost.value) {
-        // * this override comments in database and get last comments
-        jobInitComments?.cancel()
-        jobInitComments = viewModelScope.launch {
-            try {
-                hasNewComments = false
-                _listComments.emit(Resource.Loading)
-                val listNewComments = withContext(Dispatchers.IO) {
-                    commentsRepository.getLastComments(idPost)
-                }
-                _listComments.emit(Resource.Success(listNewComments))
-            } catch (e: Exception) {
-                _listComments.emit(Resource.Failure)
-                when (e) {
-                    is CancellationException -> throw e
-                    is NetworkException -> {
-//                        _messageDetails.send(R.string.message_error_internet_checker)
-                    }
-                    else -> {
-//                        _messageDetails.send(R.string.message_error_load_comments)
-                        Timber.e("Error al recargar comentarios ${_idPost.value} : $e")
-                    }
-                }
-            }
+    fun requestsComments(idPost: String = _idPost.value) = launchSafeIO(
+        blockException = {
+            sendMessageErrorToException(
+                exception = it,
+                message = "Error al recargar comentarios ${_idPost.value}",
+                channel = _messageDetails
+            )
+        },
+        blockIO = {
+            withContext(Dispatchers.Main) { hasNewComments = false }
+            _listComments.emit(Resource.Loading)
+            val listNewComments = commentsRepository.getLastComments(idPost)
+            _listComments.emit(Resource.Success(listNewComments))
         }
-    }
+    )
 
     override fun onCleared() {
         _idPost.value = ""
         numberComments = -1
-        jobConcatenate?.cancel()
-        jobInitComments?.cancel()
     }
 
 

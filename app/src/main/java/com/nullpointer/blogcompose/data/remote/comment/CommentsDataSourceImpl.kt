@@ -32,7 +32,7 @@ class CommentsDataSourceImpl:CommentsDataSource {
         includeComment: Boolean,
         idComment: String?
     ): List<Comment> {
-        val refListComment = refPosts.document(idPost).collection(NAME_REF_LIST_COMMENTS)
+        val refListComment = refComment.document(idPost).collection(NAME_REF_LIST_COMMENTS)
         return refListComment.getNewObjects(
             fieldTimestamp = TIMESTAMP,
             transform = { it.toComment() },
