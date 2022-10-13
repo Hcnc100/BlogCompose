@@ -104,26 +104,31 @@ fun Modifier.myShimmer(
 
 
 fun ViewModel.launchSafeIO(
+    isEnabled: Boolean = true,
     blockBefore: suspend CoroutineScope.() -> Unit = {},
     blockAfter: suspend CoroutineScope.(Boolean) -> Unit = {},
     blockException: suspend CoroutineScope.(Exception) -> Unit = {},
     blockIO: suspend CoroutineScope.() -> Unit,
-): Job {
-    var isForCancelled = false
-    return viewModelScope.launch {
-        try {
-            blockBefore()
-            withContext(Dispatchers.IO) { blockIO() }
-        } catch (e: Exception) {
-            when (e) {
-                is CancellationException -> {
-                    isForCancelled = true
-                    throw e
+): Job? {
+    return if (isEnabled) {
+        var isForCancelled = false
+        viewModelScope.launch {
+            try {
+                blockBefore()
+                withContext(Dispatchers.IO) { blockIO() }
+            } catch (e: Exception) {
+                when (e) {
+                    is CancellationException -> {
+                        isForCancelled = true
+                        throw e
+                    }
+                    else -> blockException(e)
                 }
-                else -> blockException(e)
+            } finally {
+                blockAfter(isForCancelled)
             }
-        } finally {
-            blockAfter(isForCancelled)
         }
+    } else {
+        null
     }
 }

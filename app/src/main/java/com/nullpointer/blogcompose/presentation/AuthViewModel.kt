@@ -74,8 +74,6 @@ class AuthViewModel @Inject constructor(
 
     fun logOut() = launchSafeIO {
         authRepository.logOut()
-//        notifyRepository.deleterAllNotify()
-//        postRepository.deleterAllPost()
         deleterRepository.clearAllData()
     }
 

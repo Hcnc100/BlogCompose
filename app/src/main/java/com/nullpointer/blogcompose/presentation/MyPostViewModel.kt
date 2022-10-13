@@ -6,23 +6,19 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.delegates.SavableProperty
 import com.nullpointer.blogcompose.core.states.Resource
-import com.nullpointer.blogcompose.core.utils.NetworkException
-import com.nullpointer.blogcompose.domain.post.PostRepoImpl
+import com.nullpointer.blogcompose.core.utils.ExceptionManager.sendMessageErrorToException
+import com.nullpointer.blogcompose.core.utils.launchSafeIO
 import com.nullpointer.blogcompose.domain.post.PostRepository
 import com.nullpointer.blogcompose.models.posts.MyPost
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 import javax.inject.Inject
-import kotlin.coroutines.cancellation.CancellationException
 
 @HiltViewModel
 class MyPostViewModel @Inject constructor(
@@ -31,34 +27,30 @@ class MyPostViewModel @Inject constructor(
 ) : ViewModel() {
 
     companion object {
-        private const val KEY_CONCATENATE_ENABLE = "KEY_CONCATENATE_ENABLE_MY_POST"
+        private const val CONCATENATE_ENABLE = "KEY_CONCATENATE_ENABLE_MY_POST"
     }
 
-    private var isConcatenateEnable by SavableProperty(
-        savedStateHandle,
-        KEY_CONCATENATE_ENABLE, true
-    )
+    private var isConcatenateEnable by SavableProperty(savedStateHandle, CONCATENATE_ENABLE, true)
 
-    private val _messageMyPosts = Channel<Int>()
+    private val _messageMyPosts = Channel<String>()
     val messageMyPosts = _messageMyPosts.receiveAsFlow()
 
-    private var jobRequestNew: Job? = null
-    var stateRequestMyPost by mutableStateOf(false)
+    var isRequestMyPost by mutableStateOf(false)
         private set
 
-    private var jobConcatMyPost: Job? = null
-    var stateConcatMyPost by mutableStateOf(false)
-    private set
+    var isConcatMyPost by mutableStateOf(false)
+        private set
 
 
-    val listMyPost = flow<Resource<List<MyPost>>> {
-        postRepository.listMyLastPost.collect {
-            emit(Resource.Success(it))
-            isConcatenateEnable=true
-        }
+    val listMyPost = postRepository.listMyLastPost.transform<List<MyPost>, Resource<List<MyPost>>> {
+        isConcatenateEnable = true
+        Resource.Success(it)
     }.catch {
-        Timber.e("Error get my post $it")
-        _messageMyPosts.trySend(R.string.message_error_unknown)
+        sendMessageErrorToException(
+            Exception(it),
+            "Error get my list post",
+            _messageMyPosts
+        )
         emit(Resource.Failure)
     }.flowOn(Dispatchers.IO).stateIn(
         viewModelScope,
@@ -71,60 +63,41 @@ class MyPostViewModel @Inject constructor(
     }
 
 
-    fun requestNewPost(forceRefresh: Boolean = false) {
-        // * request last post in cache or if there new post
-        // * or force refresh with the argument
-        jobRequestNew?.cancel()
-        jobRequestNew = viewModelScope.launch {
-            stateRequestMyPost = true
-            isConcatenateEnable=true
-            try {
-                val sizeNewPost =
-                    withContext(Dispatchers.IO) { postRepository.requestMyLastPost(forceRefresh) }
-                Timber.d("get $sizeNewPost my post news")
-            } catch (e: Exception) {
-                when (e) {
-                    is CancellationException -> throw e
-                    is NetworkException -> _messageMyPosts.trySend(R.string.message_error_internet_checker)
-                    is NullPointerException -> Timber.e(" Error al obtener ultimas notificaciones El usuario posiblemente es nulo")
-                    else -> {
-                        _messageMyPosts.trySend(R.string.message_error_unknown)
-                        Timber.e("Error en el request 'myPost' $e")
-                    }
-                }
-            } finally {
-                stateRequestMyPost = false
+    fun requestNewPost(forceRefresh: Boolean = false) = launchSafeIO(
+        isEnabled = !isRequestMyPost,
+        blockBefore = { isRequestMyPost = true },
+        blockAfter = { isRequestMyPost = false },
+        blockException = {
+            sendMessageErrorToException(
+                exception = it,
+                message = "Error request new my post",
+                channel = _messageMyPosts
+            )
+        },
+        blockIO = {
+            val sizeNewPost = postRepository.requestMyLastPost(forceRefresh)
+            if (sizeNewPost > 0) isConcatenateEnable = true
+            Timber.d("get $sizeNewPost my post news")
+        }
+    )
+
+    fun concatenatePost(callbackSuccess: () -> Unit) = launchSafeIO(
+        isEnabled = !isConcatMyPost,
+        blockBefore = { isConcatMyPost = true },
+        blockAfter = { isConcatMyPost = false },
+        blockException = {
+            sendMessageErrorToException(
+                exception = it,
+                message = "Error concatenate my post",
+                channel = _messageMyPosts
+            )
+        },
+        blockIO = {
+            val countPost = postRepository.concatenateMyPost()
+            Timber.d("number concat my post $countPost")
+            withContext(Dispatchers.Main) {
+                if (countPost == 0) isConcatenateEnable = false else callbackSuccess()
             }
         }
-    }
-
-    fun concatenatePost(callbackSuccess:()->Unit) {
-        // * request post and concatenate and the last post
-        if (isConcatenateEnable) {
-            jobConcatMyPost?.cancel()
-            jobConcatMyPost = viewModelScope.launch {
-                try {
-                    Timber.d("init concatenate more mypost")
-                    stateConcatMyPost = true
-                    val countPost = withContext(Dispatchers.IO) {
-                        postRepository.concatenateMyPost()
-                    }
-                    Timber.d("number concat my post $countPost")
-                    if (countPost == 0) isConcatenateEnable = false else callbackSuccess()
-                } catch (e: Exception) {
-                    when (e) {
-                        is CancellationException -> throw e
-                        is NetworkException -> _messageMyPosts.trySend(R.string.message_error_internet_checker)
-                        else -> {
-                            _messageMyPosts.trySend(R.string.message_error_unknown)
-                            Timber.e("Error en el request  de mis post $e")
-                        }
-                    }
-                } finally {
-                    stateConcatMyPost = false
-                }
-            }
-        }
-
-    }
+    )
 }

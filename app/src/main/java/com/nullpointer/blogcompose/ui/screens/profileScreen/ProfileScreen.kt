@@ -55,7 +55,7 @@ fun ProfileScreen(
     actionRootDestinations: ActionRootDestinations,
     myPostViewModel: MyPostViewModel = hiltViewModel(),
     profileScreenState: ProfileScreenState = rememberProfileScreenState(
-        isRefresh = myPostViewModel.stateRequestMyPost,
+        isRefresh = myPostViewModel.isRequestMyPost,
         sizeScrollMore = 50f,
         actionChangeImage = {
             UploadDataControl.startServicesUploadUser(context, it)
@@ -71,6 +71,10 @@ fun ProfileScreen(
         profileScreenState.hiddenModal()
     }
 
+    LaunchedEffect(key1 = Unit) {
+        myPostViewModel.messageMyPosts.collect(profileScreenState::showSnackMessage)
+    }
+
 
     ProfileScreen(
         user = currentUser,
@@ -80,7 +84,7 @@ fun ProfileScreen(
         isModalVisible = profileScreenState.isShowModal,
         scaffoldState = profileScreenState.scaffoldState,
         sheetState = profileScreenState.modalBottomSheetState,
-        isConcatenateMyBlogs = myPostViewModel.stateConcatMyPost,
+        isConcatenateMyBlogs = myPostViewModel.isConcatMyPost,
         isAddButtonVisible = !profileScreenState.isScrollInProgress,
         callBackSelectionImg = profileScreenState::launchSelectImage,
         actionDetails = { actionRootDestinations.changeRoot(PostDetailsDestination(it)) },
