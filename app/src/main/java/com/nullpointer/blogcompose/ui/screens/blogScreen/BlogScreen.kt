@@ -54,7 +54,7 @@ fun BlogScreen(
     actionRootDestinations: ActionRootDestinations,
     blogScreenState: SwipeRefreshScreenState = rememberSwipeRefreshScreenState(
         sizeScrollMore = 80f,
-        isRefreshing = postVM.stateRequestData,
+        isRefreshing = postVM.isRequestData,
     )
 ) {
     val statePost by postVM.listPost.collectAsState()
@@ -66,7 +66,7 @@ fun BlogScreen(
 
     BlogScreen(
         stateListPost = statePost,
-        isConcatenate = postVM.stateConcatData,
+        isConcatenate = postVM.isConcatenatePost,
         lazyListState = blogScreenState.listState,
         scaffoldState = blogScreenState.scaffoldState,
         swipeState = blogScreenState.swipeState,

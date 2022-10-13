@@ -8,13 +8,15 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nullpointer.blogcompose.core.delegates.SavableProperty
 import com.nullpointer.blogcompose.core.states.Resource
-import com.nullpointer.blogcompose.core.utils.NetworkException
+import com.nullpointer.blogcompose.core.utils.ExceptionManager.sendMessageErrorToException
+import com.nullpointer.blogcompose.core.utils.launchSafeIO
 import com.nullpointer.blogcompose.domain.post.PostRepository
 import com.nullpointer.blogcompose.models.posts.Post
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -25,36 +27,30 @@ class PostViewModel @Inject constructor(
 ) : ViewModel() {
 
     companion object {
-        private const val KEY_CONCATENATE_ENABLE = "KEY_CONCATENATE_ENABLE_POST"
+        private const val CONCATENATE_ENABLE = "KEY_CONCATENATE_ENABLE_POST"
     }
 
-    private var isConcatEnable by SavableProperty(state, KEY_CONCATENATE_ENABLE, true)
+    private var isConcatenateEnable by SavableProperty(state, CONCATENATE_ENABLE, true)
 
-    // * state message to show any error or message
     private val _messagePost = Channel<String>()
     val messagePost = _messagePost.receiveAsFlow()
 
-    // * var to saved the job, to request new data
-    // * this for can cancel this work
-    private var jobRequestNew: Job? = null
-    var stateRequestData by mutableStateOf(false)
+    var isRequestData by mutableStateOf(false)
         private set
 
-
-    // * var to save the job, to request post concatenate
-    // * this for can cancel this work
-    private var jobConcatPost: Job? = null
-    var stateConcatData by mutableStateOf(false)
+    var isConcatenatePost by mutableStateOf(false)
         private set
 
-    val listPost = flow<Resource<List<Post>>> {
-        postRepository.listLastPost.collect {
-            emit(Resource.Success(it))
-            isConcatEnable=true
-        }
+    val listPost = postRepository.listLastPost.transform<List<Post>, Resource<List<Post>>> {
+        isConcatenateEnable = true
+        emit(Resource.Success(it))
     }.catch {
-        Timber.d("Error to get list of posts $it")
-//        _messagePost.trySend(R.string.message_error_unknown)
+        sendMessageErrorToException(
+            exception = Exception(it),
+            message = "Error to get list of posts",
+            channel = _messagePost
+        )
+        emit(Resource.Failure)
     }.flowOn(Dispatchers.IO).stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(5_000),
@@ -68,67 +64,45 @@ class PostViewModel @Inject constructor(
     }
 
 
-    fun requestNewPost(forceRefresh: Boolean = false) {
-        // * this init request for new post, this will from cache or new data server
-        // * if no there internet launch exception
-        jobRequestNew?.cancel()
-        jobRequestNew = viewModelScope.launch {
-            stateRequestData = true
-            isConcatEnable = true
-            try {
-                val sizeNewPost =
-                    withContext(Dispatchers.IO) { postRepository.requestLastPost(forceRefresh) }
-                Timber.d("were obtained $sizeNewPost new post")
-            } catch (e: Exception) {
-                when (e) {
-                    is CancellationException -> throw e
-                    is NetworkException -> {
-//                        _messagePost.trySend(R.string.message_error_internet_checker)
-                    }
-                    else -> {
-//                        _messagePost.trySend(R.string.message_error_unknown)
-                        Timber.e("Error reuqest new post $e")
-                    }
-                }
-            } finally {
-                stateRequestData = false
+    fun requestNewPost(forceRefresh: Boolean = false) = launchSafeIO(
+        isEnabled = !isRequestData,
+        blockBefore = { isRequestData = true },
+        blockAfter = { isRequestData = false },
+        blockIO = {
+            val sizeNewPost = postRepository.requestLastPost(forceRefresh)
+            Timber.d("were obtained $sizeNewPost new post")
+        },
+        blockException = {
+            sendMessageErrorToException(
+                exception = Exception(it),
+                message = "Error to request new post",
+                channel = _messagePost
+            )
+        })
+
+    fun concatenatePost(callbackSuccess: () -> Unit) = launchSafeIO(
+        isEnabled = isConcatenateEnable && !isConcatenatePost,
+        blockBefore = { isConcatenatePost = true },
+        blockAfter = { isConcatenatePost = false },
+        blockException = {
+            sendMessageErrorToException(
+                exception = it,
+                message = "Error to concatenate post",
+                channel = _messagePost
+            )
+        },
+        blockIO = {
+            val sizeConcat = postRepository.concatenatePost()
+            Timber.d("New post concatenate $sizeConcat")
+            withContext(Dispatchers.Main) {
+                if (sizeConcat == 0) isConcatenateEnable = false else callbackSuccess()
             }
+
         }
-    }
+    )
 
-    fun concatenatePost(callbackSuccess: () -> Unit) {
-        // * this init new data but, consideration las post saved,
-        // * this for concatenate new post and no override the database
-        // * launch exception if no there internet
-        if (isConcatEnable) {
-            jobConcatPost?.cancel()
-            jobConcatPost = viewModelScope.launch {
-                Timber.d("Init process concatenate post")
-                stateConcatData = true
-                try {
-                    val sizeConcat = withContext(Dispatchers.IO) { postRepository.concatenatePost() }
-                    Timber.d("New post concatenate $sizeConcat")
-                    if (sizeConcat == 0) isConcatEnable = false else callbackSuccess()
 
-                } catch (e: Exception) {
-                    when (e) {
-                        is CancellationException -> throw e
-                        is NetworkException -> {
-//                            _messagePost.trySend(R.string.message_error_internet_checker)
-                        }
-                        else -> {
-//                            _messagePost.trySend(R.string.message_error_unknown)
-                            Timber.e("Error concatenate new post $e")
-                        }
-                    }
-                } finally {
-                    stateConcatData = false
-                }
-            }
-        }
-    }
-
-    fun deleterPostInvalid(idPost: String) = viewModelScope.launch(Dispatchers.IO) {
+    fun deleterPostInvalid(idPost: String) = launchSafeIO {
 //        postRepository.deleterPost(idPost)
     }
 }

@@ -44,7 +44,7 @@ class NotifyViewModel @Inject constructor(
     // * show notification from database
     val listNotify = notifyRepository.listNotify.transform<List<Notify>, Resource<List<Notify>>> {
         isConcatEnable = true
-        Resource.Success(it)
+        emit(Resource.Success(it))
     }.catch { e ->
         sendMessageErrorToException(
             exception = Exception(e),

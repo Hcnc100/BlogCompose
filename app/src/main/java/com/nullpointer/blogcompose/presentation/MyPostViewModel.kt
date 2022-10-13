@@ -44,12 +44,12 @@ class MyPostViewModel @Inject constructor(
 
     val listMyPost = postRepository.listMyLastPost.transform<List<MyPost>, Resource<List<MyPost>>> {
         isConcatenateEnable = true
-        Resource.Success(it)
+        emit(Resource.Success(it))
     }.catch {
         sendMessageErrorToException(
-            Exception(it),
-            "Error get my list post",
-            _messageMyPosts
+            channel = _messageMyPosts,
+            message = "Error get my list post",
+            exception = Exception(it)
         )
         emit(Resource.Failure)
     }.flowOn(Dispatchers.IO).stateIn(
