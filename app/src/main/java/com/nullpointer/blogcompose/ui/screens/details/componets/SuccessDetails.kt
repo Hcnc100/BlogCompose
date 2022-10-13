@@ -2,8 +2,6 @@ package com.nullpointer.blogcompose.ui.screens.details.componets
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Card
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -20,31 +18,8 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import coil.transform.CircleCropTransformation
 import com.nullpointer.blogcompose.R
-import com.nullpointer.blogcompose.models.Comment
 import com.nullpointer.blogcompose.models.posts.Post
 
-
-@Composable
-fun ItemComment(
-    comment: Comment,
-    modifier: Modifier
-) {
-    Row(modifier = modifier.padding(10.dp)) {
-        ImageProfileUser(
-            urlImg = comment.userComment?.urlImg.toString(),
-            contentDescription = stringResource(id = R.string.description_img_owner_post),
-            modifier = Modifier.size(40.dp)
-        )
-        Spacer(modifier = Modifier.width(10.dp))
-        Card(shape = RoundedCornerShape(10.dp)) {
-            Column(modifier = Modifier.padding(10.dp)) {
-                Text(comment.userComment?.name.toString())
-                Spacer(modifier = Modifier.height(5.dp))
-                Text(text = comment.comment)
-            }
-        }
-    }
-}
 
 @Composable
 fun ImageProfileUser(

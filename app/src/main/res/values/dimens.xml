@@ -3,4 +3,6 @@
     <dimen name="size_photo_header_owner_blog">40dp</dimen>
     <dimen name="size_photo_my_post">100dp</dimen>
     <dimen name="size_photo_notify">50dp</dimen>
+    <dimen name="size_photo_comment">40dp</dimen>
+    <dimen name="size_photo_details_post">50dp</dimen>
 </resources>

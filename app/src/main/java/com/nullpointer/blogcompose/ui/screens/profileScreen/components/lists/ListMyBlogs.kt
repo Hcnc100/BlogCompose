@@ -13,6 +13,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.models.posts.MyPost
+import com.nullpointer.blogcompose.types.ProfileTypes
 import com.nullpointer.blogcompose.ui.screens.emptyScreen.AnimationScreen
 import com.nullpointer.blogcompose.ui.screens.profileScreen.components.items.ItemLoadMyPost
 import com.nullpointer.blogcompose.ui.screens.profileScreen.components.items.ItemMyPost
@@ -100,10 +101,18 @@ fun ListLoadMyBlogs(
         horizontalArrangement = Arrangement.spacedBy(spaceBetweenItems),
         columns = GridCells.Adaptive(dimensionResource(id = R.dimen.size_photo_my_post))
     ) {
-        item(key = "header-profile", span = { GridItemSpan(maxLineSpan) }) {
+        item(
+            key = "header-profile",
+            span = { GridItemSpan(maxLineSpan) },
+            contentType = ProfileTypes.INFO_PROFILE
+        ) {
             header()
         }
-        items(20, key = { it }) {
+        items(
+            count = 20,
+            key = { it },
+            contentType = { ProfileTypes.GRID_POST }
+        ) {
             ItemLoadMyPost(shimmer = shimmer)
         }
     }

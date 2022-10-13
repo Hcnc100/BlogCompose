@@ -9,25 +9,44 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.focus.FocusManager
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 class PostDetailsState(
-    scaffoldState: ScaffoldState,
     context: Context,
+    val scope: CoroutineScope,
     focusManager: FocusManager,
+    scaffoldState: ScaffoldState,
     val lazyListState: LazyListState,
-    val scope: CoroutineScope
-) : SimpleScreenState(scaffoldState, context, focusManager)
+    val focusRequester: FocusRequester
+) : SimpleScreenState(scaffoldState, context, focusManager) {
+    fun requestFocus() {
+        focusRequester.requestFocus()
+    }
+
+    fun scrollToNewComment() = scope.launch {
+//        lazyListState.animateScrollToItem(lazyListState.layoutInfo.totalItemsCount - 1)
+    }
+}
 
 @Composable
 fun rememberPostDetailsState(
     context: Context = LocalContext.current,
-    focusManager: FocusManager = LocalFocusManager.current,
+    scope: CoroutineScope = rememberCoroutineScope(),
     scaffoldState: ScaffoldState = rememberScaffoldState(),
     lazyListState: LazyListState = rememberLazyListState(),
-    scope: CoroutineScope = rememberCoroutineScope()
-) = remember( LazyListState) {
-    PostDetailsState(scaffoldState, context, focusManager, lazyListState,scope)
+    focusManager: FocusManager = LocalFocusManager.current,
+    focusRequester: FocusRequester = remember { FocusRequester() }
+) = remember(LazyListState, scaffoldState, scope, focusRequester) {
+    PostDetailsState(
+        scope = scope,
+        context = context,
+        focusManager = focusManager,
+        scaffoldState = scaffoldState,
+        lazyListState = lazyListState,
+        focusRequester = focusRequester
+    )
 }

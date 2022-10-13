@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.delegates.PropertySavableString
+import com.nullpointer.blogcompose.core.delegates.SavableComposeState
 import com.nullpointer.blogcompose.core.delegates.SavableProperty
 import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.core.utils.NetworkException
@@ -39,7 +40,7 @@ class PostDetailsViewModel @Inject constructor(
     private var jobInitComments: Job? = null
 
     // * this var is for send any messaging
-    private val _messageDetails = Channel<Int>()
+    private val _messageDetails = Channel<String>()
     val messageDetails = _messageDetails.receiveAsFlow()
 
     // * save job to concatenate comments
@@ -60,13 +61,16 @@ class PostDetailsViewModel @Inject constructor(
         private set
 
     // * var to saved number of comments
-     var numberComments by SavableProperty(savedStateHandle, KEY_COMMENTS, -1)
+    var numberComments by SavableProperty(savedStateHandle, KEY_COMMENTS, -1)
+        private set
+
+    var showAllComments by SavableComposeState(savedStateHandle, "PAN", true)
         private set
 
     private val _listComments = MutableStateFlow<Resource<List<Comment>>>(Resource.Loading)
     val listComments = _listComments.asStateFlow()
 
-    var currentPost:SimplePost?=null
+    var currentPost: SimplePost? = null
 
     val comment = PropertySavableString(
         savedState = savedStateHandle,
@@ -80,9 +84,9 @@ class PostDetailsViewModel @Inject constructor(
     val postState: StateFlow<Resource<Post>> = flow<Resource<Post>> {
         // * update the comments when idPost is updated and this is not empty
         _idPost.collect {
-            if(it.isNotEmpty()){
+            if (it.isNotEmpty()) {
                 postRepository.getRealTimePost(it).collect { newPost ->
-                    currentPost=newPost
+                    currentPost = newPost
                     if (newPost!!.numberComments != numberComments) {
                         if (numberComments != -1 && newPost.numberComments > numberComments)
                             hasNewComments = true
@@ -100,7 +104,7 @@ class PostDetailsViewModel @Inject constructor(
         }
     }.flowOn(Dispatchers.IO).catch {
         Timber.d("Error con el post $it")
-        _messageDetails.send(R.string.message_error_load_post)
+//        _messageDetails.send(R.string.message_error_load_post)
         // ! update this before
 
 //        postRepository.deleterPost(_idPost.value)
@@ -144,9 +148,11 @@ class PostDetailsViewModel @Inject constructor(
             } catch (e: Exception) {
                 when (e) {
                     is CancellationException -> throw e
-                    is NetworkException -> _messageDetails.send(R.string.message_error_internet_checker)
+                    is NetworkException -> {
+//                        _messageDetails.send(R.string.message_error_internet_checker)
+                    }
                     else -> {
-                        _messageDetails.send(R.string.message_error_unknown)
+//                        _messageDetails.send(R.string.message_error_unknown)
                         Timber.d("Error al concatenar los post ${_idPost.value} : $e")
                     }
                 }
@@ -157,22 +163,27 @@ class PostDetailsViewModel @Inject constructor(
     }
 
 
-    fun addComment(comment: String) = viewModelScope.launch {
+    fun addComment(
+        callbackSuccess: () -> Unit
+    ) = viewModelScope.launch {
         try {
             // * change number of comments
             // ! this for no show any for "hasNewComments"
-            addingComment=true
+            val newComment = comment.currentValue
+            comment.clearValue()
+            addingComment = true
             numberComments++
             postState.value.let {
                 if (it is Resource.Success) {
                     val listNewComment = withContext(Dispatchers.IO) {
-                        commentsRepository.addNewComment(it.data, comment)
+                        commentsRepository.addNewComment(it.data, newComment)
                     }
                     _listComments.emit(Resource.Success(listNewComment))
+                    callbackSuccess()
                 }
             }
         } catch (e: Exception) {
-            _messageDetails.send(R.string.message_error_add_comment)
+//            _messageDetails.send(R.string.message_error_add_comment)
             Timber.e("Error al agregar un commet $e")
         }finally {
             addingComment=false
@@ -195,9 +206,11 @@ class PostDetailsViewModel @Inject constructor(
                 _listComments.emit(Resource.Failure)
                 when (e) {
                     is CancellationException -> throw e
-                    is NetworkException -> _messageDetails.send(R.string.message_error_internet_checker)
+                    is NetworkException -> {
+//                        _messageDetails.send(R.string.message_error_internet_checker)
+                    }
                     else -> {
-                        _messageDetails.send(R.string.message_error_load_comments)
+//                        _messageDetails.send(R.string.message_error_load_comments)
                         Timber.e("Error al recargar comentarios ${_idPost.value} : $e")
                     }
                 }
