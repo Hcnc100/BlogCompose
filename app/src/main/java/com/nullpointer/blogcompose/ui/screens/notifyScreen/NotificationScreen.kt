@@ -44,7 +44,7 @@ fun NotifyScreen(
     notifyVM: NotifyViewModel = hiltViewModel(),
     actionRootDestinations: ActionRootDestinations,
     notifyScreenState: SwipeRefreshScreenState = rememberSwipeRefreshScreenState(
-        isRefreshing = notifyVM.stateRequestNotify,
+        isRefreshing = notifyVM.isRequestNotify,
         sizeScrollMore = 120f
     )
 ) {
@@ -61,7 +61,7 @@ fun NotifyScreen(
         stateListNotify = stateListNotify,
         lazyListState = notifyScreenState.listState,
         scaffoldState = notifyScreenState.scaffoldState,
-        isConcatenateNotify = notifyVM.stateConcatNotify,
+        isConcatenateNotify = notifyVM.isConcatNotify,
         swipeRefreshState = notifyScreenState.swipeState,
         actionClickNotify = { notify ->
             actionRootDestinations.changeRoot(

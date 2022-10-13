@@ -30,7 +30,7 @@ class MyPostViewModel @Inject constructor(
         private const val CONCATENATE_ENABLE = "KEY_CONCATENATE_ENABLE_MY_POST"
     }
 
-    private var isConcatenateEnable by SavableProperty(savedStateHandle, CONCATENATE_ENABLE, true)
+    private var isConcatenateEnable by SavableProperty(savedStateHandle, CONCATENATE_ENABLE, false)
 
     private val _messageMyPosts = Channel<String>()
     val messageMyPosts = _messageMyPosts.receiveAsFlow()
@@ -82,7 +82,7 @@ class MyPostViewModel @Inject constructor(
     )
 
     fun concatenatePost(callbackSuccess: () -> Unit) = launchSafeIO(
-        isEnabled = !isConcatMyPost,
+        isEnabled = !isConcatMyPost && isConcatenateEnable,
         blockBefore = { isConcatMyPost = true },
         blockAfter = { isConcatMyPost = false },
         blockException = {
