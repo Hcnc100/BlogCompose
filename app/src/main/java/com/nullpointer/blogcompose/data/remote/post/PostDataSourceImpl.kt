@@ -8,7 +8,7 @@ import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
-import com.nullpointer.blogcompose.core.utils.timestampEstimate
+import com.nullpointer.blogcompose.core.utils.getTimeEstimate
 import com.nullpointer.blogcompose.data.remote.FirebaseConstants.FIELD_ARRAY_LIKES
 import com.nullpointer.blogcompose.data.remote.FirebaseConstants.FIELD_NUMBER_LIKES
 import com.nullpointer.blogcompose.data.remote.FirebaseConstants.FIELD_POST_ID
@@ -168,7 +168,7 @@ class PostDataSourceImpl : PostRemoteDataSource {
 
     private suspend fun DocumentSnapshot.toPost(): Post? {
         return toObject<Post>()?.copy(
-            timestamp = timestampEstimate(TIMESTAMP),
+            timestamp = getTimeEstimate(TIMESTAMP),
             id = id,
         )?.also {
             it.ownerLike = isPostLiked(id)

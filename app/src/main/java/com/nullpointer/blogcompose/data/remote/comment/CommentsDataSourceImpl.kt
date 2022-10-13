@@ -2,12 +2,12 @@ package com.nullpointer.blogcompose.data.remote.comment
 
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FieldValue
-import com.google.firebase.firestore.Query
-import com.google.firebase.firestore.Source
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
-import com.nullpointer.blogcompose.core.utils.timestampEstimate
+import com.nullpointer.blogcompose.core.utils.getConcatenateObjects
+import com.nullpointer.blogcompose.core.utils.getNewObjects
+import com.nullpointer.blogcompose.core.utils.getTimeEstimate
 import com.nullpointer.blogcompose.data.remote.FirebaseConstants.FIELD_NUMBER_COMMENTS
 import com.nullpointer.blogcompose.data.remote.FirebaseConstants.NAME_REF_COMMENTS
 import com.nullpointer.blogcompose.data.remote.FirebaseConstants.NAME_REF_LIST_COMMENTS
@@ -25,40 +25,36 @@ class CommentsDataSourceImpl:CommentsDataSource {
     private val refComment = database.collection(NAME_REF_COMMENTS)
     private val refNotify = database.collection(NAME_REF_NOTIFY)
 
-    override suspend fun getCommentsForPost(
-        nComments: Int,
-        startWithCommentId: String?,
-        endWithCommentId: String?,
-        includeComment: Boolean,
+
+    override suspend fun getLastCommentFromPost(
         idPost: String,
+        numberComments: Long,
+        includeComment: Boolean,
+        idComment: String?
     ): List<Comment> {
+        val refListComment = refPosts.document(idPost).collection(NAME_REF_LIST_COMMENTS)
+        return refListComment.getNewObjects(
+            fieldTimestamp = TIMESTAMP,
+            transform = { it.toComment() },
+            nResults = numberComments,
+            includeEnd = includeComment,
+            endWithId = idComment
+        )
+    }
 
-        // * get base query
-        var query = refComment
-            .document(idPost)
-            .collection(NAME_REF_LIST_COMMENTS)
-            .orderBy(TIMESTAMP, Query.Direction.DESCENDING)
-
-        val refCommentCurrent = refComment.document(idPost).collection(NAME_REF_LIST_COMMENTS)
-
-        if (startWithCommentId != null) {
-            val refDocument = refCommentCurrent.document(startWithCommentId).get().await()
-            if (refDocument.exists())
-                query =
-                    if (includeComment) query.startAt(refDocument) else query.startAfter(refDocument)
-        }
-
-        if (endWithCommentId != null) {
-            val refDocument = refCommentCurrent.document(endWithCommentId).get().await()
-            if (refDocument.exists())
-                query =
-                    if (includeComment) query.endAt(refDocument) else query.endBefore(refDocument)
-        }
-
-        // * limit result or for default all
-        if (nComments != Integer.MAX_VALUE) query = query.limit(nComments.toLong())
-
-        return query.get(Source.SERVER).await().documents.mapNotNull { it.toComment() }.reversed()
+    override suspend fun getListConcatenateComments(
+        idPost: String,
+        numberComments: Long,
+        idComment: String
+    ): List<Comment> {
+        val refListComment = refPosts.document(idPost).collection(NAME_REF_LIST_COMMENTS)
+        return refListComment.getConcatenateObjects(
+            fieldTimestamp = TIMESTAMP,
+            transform = { it.toComment() },
+            nResults = numberComments,
+            startWithId = idComment,
+            includeStart = false
+        )
     }
 
     override suspend fun addNewComment(
@@ -68,7 +64,8 @@ class CommentsDataSourceImpl:CommentsDataSource {
         notify: Notify?
     ): String {
         val refPostComment = refPosts.document(idPost)
-        val refNewComment = refComment.document(idPost).collection(NAME_REF_LIST_COMMENTS).document(comment.id)
+        val refNewComment =
+            refComment.document(idPost).collection(NAME_REF_LIST_COMMENTS).document(comment.id)
         val refListNotifyOwnerPost = refNotify.document(ownerPost).collection(NAME_REF_LIST_NOTIFY)
         database.runTransaction { transaction ->
             transaction.update(refPostComment, FIELD_NUMBER_COMMENTS, FieldValue.increment(1))
@@ -82,7 +79,7 @@ class CommentsDataSourceImpl:CommentsDataSource {
 
     private fun DocumentSnapshot.toComment(): Comment? {
         return toObject<Comment>()?.copy(
-            timestamp = timestampEstimate(TIMESTAMP),
+            timestamp = getTimeEstimate(TIMESTAMP),
             id = id,
         )
     }

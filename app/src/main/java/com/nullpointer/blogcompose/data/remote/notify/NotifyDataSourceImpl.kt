@@ -6,7 +6,7 @@ import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
-import com.nullpointer.blogcompose.core.utils.timestampEstimate
+import com.nullpointer.blogcompose.core.utils.getTimeEstimate
 import com.nullpointer.blogcompose.models.notify.Notify
 import kotlinx.coroutines.tasks.await
 import java.util.*
@@ -72,7 +72,7 @@ class NotifyDataSourceImpl:NotifyDataSource{
     private fun DocumentSnapshot.toNotify(): Notify? {
         return toObject<Notify>()?.copy(
             id = id,
-            timestamp = timestampEstimate(TIMESTAMP)
+            timestamp = getTimeEstimate(TIMESTAMP)
         )
     }
 

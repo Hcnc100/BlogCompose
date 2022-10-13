@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
-import android.os.Parcel
 import android.text.format.DateFormat.is24HourFormat
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -22,10 +21,15 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import coil.compose.AsyncImagePainter
+import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.Query
+import com.nullpointer.blogcompose.core.utils.ExceptionManager.NO_INTERNET_CONNECTION
+import com.nullpointer.blogcompose.core.utils.ExceptionManager.SERVER_TIME_OUT
 import com.valentinilk.shimmer.Shimmer
 import com.valentinilk.shimmer.shimmer
 import kotlinx.coroutines.*
+import kotlinx.coroutines.tasks.await
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -75,18 +79,7 @@ inline fun <reified VM : ViewModel> shareViewModel():VM {
     return hiltViewModel(activity)
 }
 
-fun DocumentSnapshot.timestampEstimate(nameField: String): Date? {
-    return getTimestamp(nameField, DocumentSnapshot.ServerTimestampBehavior.ESTIMATE)?.toDate()
-}
 
-fun Parcel.writeDate(date: Date?) {
-    writeLong(date?.time ?: -1)
-}
-
-fun Parcel.readDate(): Date? {
-    val long = readLong()
-    return if (long != -1L) Date(long) else null
-}
 
 
 val AsyncImagePainter.isSuccess get() = state is AsyncImagePainter.State.Success
@@ -130,5 +123,110 @@ fun ViewModel.launchSafeIO(
         }
     } else {
         null
+    }
+}
+
+suspend fun <T> CollectionReference.getConcatenateObjects(
+    includeStart: Boolean,
+    fieldTimestamp: String,
+    startWithId: String? = null,
+    nResults: Long = Long.MAX_VALUE,
+    transform: (document: DocumentSnapshot) -> T?,
+): List<T> {
+    // * base query
+    var query = orderBy(fieldTimestamp, Query.Direction.DESCENDING)
+    if (startWithId != null) {
+        val refDocument = document(startWithId).get().await()
+        if (refDocument.exists()) {
+            query = if (includeStart)
+                query.startAt(refDocument) else query.startAfter(refDocument)
+        }
+    }
+    // * limit result or for default all
+    if (nResults != Long.MAX_VALUE) query = query.limit(nResults)
+    return query.get().await().documents.mapNotNull { transform(it) }
+}
+
+suspend fun <T> CollectionReference.getNewObject(
+    timestamp: Date?,
+    fieldTimestamp: String,
+    transform: (document: DocumentSnapshot) -> T?
+): T? {
+    val baseRequest = orderBy(fieldTimestamp, Query.Direction.DESCENDING)
+    var query = baseRequest
+    if (timestamp != null) {
+        query = baseRequest.whereGreaterThan(fieldTimestamp, timestamp)
+    }
+    val response = query.limit(1).get().await().documents
+    return if (response.isEmpty()) {
+        null
+    } else {
+        transform(response.first())
+    }
+}
+
+suspend fun <T> CollectionReference.getNewObjects(
+    includeEnd: Boolean,
+    fieldTimestamp: String,
+    endWithId: String? = null,
+    fieldQuery: Boolean = true,
+    nResults: Long = Long.MAX_VALUE,
+    transform: (document: DocumentSnapshot) -> T?
+): List<T> {
+    // * base query
+    val baseRequest = orderBy(fieldTimestamp, Query.Direction.DESCENDING)
+    var query = baseRequest
+    if (endWithId != null) {
+        val refDocument = document(endWithId).get().await()
+        if (refDocument.exists()) {
+            query = if (includeEnd)
+                query.endAt(refDocument) else query.endBefore(refDocument)
+        }
+    }
+    // * limit result or for default all
+    if (nResults != Long.MAX_VALUE) query = query.limit(nResults)
+
+    val previewDocuments = query.get().await().documents
+
+    return if (fieldQuery && previewDocuments.isNotEmpty() && previewDocuments.size < nResults) {
+        val newQuery = getConcatenateObjects(
+            includeStart = false,
+            fieldTimestamp = fieldTimestamp,
+            startWithId = previewDocuments.last().id,
+            nResults = nResults - previewDocuments.size,
+            transform = transform
+        )
+
+        previewDocuments.mapNotNull { transform(it) } + newQuery
+
+    } else {
+        previewDocuments.mapNotNull { transform(it) }
+    }
+}
+
+//suspend fun List<Task<Void>>.awaitAll() {
+//    this.forEach { it.await() }
+//}
+
+fun DocumentSnapshot.getTimeEstimate(
+    timestampField: String
+): Date? {
+    return getTimestamp(
+        /* field = */ timestampField,
+        /* serverTimestampBehavior = */ DocumentSnapshot.ServerTimestampBehavior.ESTIMATE
+    )?.toDate()
+}
+
+suspend fun <T> callApiTimeOut(
+    timeOut: Long = 3000,
+    callApi: suspend () -> T
+): T {
+    if (!InternetCheck.isNetworkAvailable()) throw Exception(NO_INTERNET_CONNECTION)
+    return try {
+        withTimeout(timeOut) {
+            callApi()
+        }
+    } catch (e: TimeoutCancellationException) {
+        throw Exception(SERVER_TIME_OUT)
     }
 }

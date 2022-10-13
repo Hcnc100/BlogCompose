@@ -5,12 +5,17 @@ import com.nullpointer.blogcompose.models.notify.Notify
 
 interface CommentsDataSource {
 
-    suspend fun getCommentsForPost(
-        nComments: Int = Integer.MAX_VALUE,
-        startWithCommentId: String? = null,
-        endWithCommentId: String? = null,
-        includeComment: Boolean = false,
+    suspend fun getLastCommentFromPost(
         idPost: String,
+        numberComments: Long,
+        includeComment: Boolean = false,
+        idComment: String? = null
+    ): List<Comment>
+
+    suspend fun getListConcatenateComments(
+        idPost: String,
+        numberComments: Long,
+        idComment: String
     ): List<Comment>
 
     suspend fun addNewComment(
