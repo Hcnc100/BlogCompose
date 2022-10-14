@@ -17,6 +17,12 @@ class CommentsRepoImpl(
     companion object {
         private const val SIZE_COMMENTS = 7L
     }
+
+    override suspend fun createComment(comment: String): Comment {
+        val currentUser = prefDataSource.getCurrentUser()
+        return currentUser.createNewComment(comment)
+    }
+
     override suspend fun addNewComment(post: SimplePost, comment: String): List<Comment> {
         return callApiTimeOut {
             val currentUser = prefDataSource.getCurrentUser()

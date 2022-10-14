@@ -94,7 +94,7 @@ fun SuccessListComments(
                     isConcatenateComments -> {
                         CircularProgressComments()
                     }
-                    numberComments != listComments.size -> {
+                    numberComments > listComments.size -> {
                         TextLoadMoreComments(actionClick = actionConcatenateComments)
                     }
                     else -> Divider()

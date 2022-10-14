@@ -7,4 +7,5 @@ interface CommentsRepository {
     suspend fun addNewComment(post: SimplePost, comment: String): List<Comment>
     suspend fun getLastComments(idPost: String): List<Comment>
     suspend fun concatenateComments(idPost: String, lastComment: String): List<Comment>
+    suspend fun createComment(comment: String): Comment
 }

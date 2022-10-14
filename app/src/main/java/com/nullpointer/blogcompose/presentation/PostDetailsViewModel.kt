@@ -8,7 +8,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.delegates.PropertySavableString
-import com.nullpointer.blogcompose.core.delegates.SavableProperty
 import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.core.utils.ExceptionManager.sendMessageErrorToException
 import com.nullpointer.blogcompose.core.utils.launchSafeIO
@@ -16,7 +15,6 @@ import com.nullpointer.blogcompose.domain.comment.CommentsRepository
 import com.nullpointer.blogcompose.domain.post.PostRepository
 import com.nullpointer.blogcompose.models.Comment
 import com.nullpointer.blogcompose.models.posts.Post
-import com.nullpointer.blogcompose.models.posts.SimplePost
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
@@ -33,7 +31,6 @@ class PostDetailsViewModel @Inject constructor(
 ) : ViewModel() {
 
     companion object {
-        private const val KEY_COMMENTS = "KEY_COMMENTS"
         private const val TAG_COMMENT_DETAILS="TAG_COMMENT_DETAILS"
     }
 
@@ -57,13 +54,12 @@ class PostDetailsViewModel @Inject constructor(
         private set
 
     // * var to saved number of comments
-    var numberComments by SavableProperty(savedStateHandle, KEY_COMMENTS, -1)
+    var numberComments by mutableStateOf(-1)
         private set
 
     private val _listComments = MutableStateFlow<Resource<List<Comment>>>(Resource.Loading)
     val listComments = _listComments.asStateFlow()
 
-    var currentPost: SimplePost? = null
 
     val comment = PropertySavableString(
         savedState = savedStateHandle,
@@ -152,7 +148,17 @@ class PostDetailsViewModel @Inject constructor(
             (postState.value as? Resource.Success)?.let { statePost ->
                 val newComment = comment.currentValue
                 comment.clearValue()
-                numberComments++
+
+                numberComments = statePost.data.numberComments + 1
+
+                // * fake update
+                (_listComments.value as? Resource.Success)?.let { stateList ->
+                    val listFake = stateList.data + commentsRepository.createComment(newComment)
+                    _listComments.emit(Resource.Success(listFake))
+                    callbackSuccess()
+                }
+
+
                 val listNewComment = commentsRepository.addNewComment(
                     post = statePost.data,
                     comment = newComment
