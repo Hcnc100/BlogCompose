@@ -2,8 +2,10 @@ package com.nullpointer.blogcompose.inject
 
 import com.nullpointer.blogcompose.data.local.cache.BlogDataBase
 import com.nullpointer.blogcompose.data.local.cache.NotifyDAO
-import com.nullpointer.blogcompose.data.remote.notify.NotifyDataSource
+import com.nullpointer.blogcompose.data.local.notify.NotifyLocalDataSource
+import com.nullpointer.blogcompose.data.local.notify.NotifyLocalDataSourceImpl
 import com.nullpointer.blogcompose.data.remote.notify.NotifyDataSourceImpl
+import com.nullpointer.blogcompose.data.remote.notify.NotifyRemoteDataSource
 import com.nullpointer.blogcompose.domain.notify.NotifyRepoImpl
 import dagger.Module
 import dagger.Provides
@@ -23,13 +25,19 @@ object NotifyModule {
 
     @Provides
     @Singleton
-    fun provideNotifyDatSource(): NotifyDataSource =
+    fun provideNotifyRemoteDataSource(): NotifyRemoteDataSource =
         NotifyDataSourceImpl()
 
     @Provides
     @Singleton
+    fun provideNotifyLocalDataSource(
+        notifyDAO: NotifyDAO
+    ): NotifyLocalDataSource = NotifyLocalDataSourceImpl(notifyDAO)
+
+    @Provides
+    @Singleton
     fun provideNotifyRepo(
-        notifyDataSource: NotifyDataSource,
-        notifyDAO: NotifyDAO,
-    ): NotifyRepoImpl = NotifyRepoImpl(notifyDataSource, notifyDAO)
+        notifyRemoteDataSource: NotifyRemoteDataSource,
+        notifyLocalDataSource: NotifyLocalDataSource
+    ): NotifyRepoImpl = NotifyRepoImpl(notifyLocalDataSource, notifyRemoteDataSource)
 }

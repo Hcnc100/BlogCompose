@@ -7,7 +7,7 @@ interface CommentsDataSource {
 
     suspend fun getLastCommentFromPost(
         idPost: String,
-        numberComments: Long,
+        numberComments: Long = Long.MAX_VALUE,
         includeComment: Boolean = false,
         idComment: String? = null
     ): List<Comment>

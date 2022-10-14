@@ -1,65 +1,68 @@
 package com.nullpointer.blogcompose.domain.notify
 
-import com.nullpointer.blogcompose.core.utils.InternetCheck
-import com.nullpointer.blogcompose.core.utils.NetworkException
-import com.nullpointer.blogcompose.data.local.cache.NotifyDAO
-import com.nullpointer.blogcompose.data.remote.notify.NotifyDataSource
+import com.nullpointer.blogcompose.core.utils.callApiTimeOut
+import com.nullpointer.blogcompose.data.local.notify.NotifyLocalDataSource
+import com.nullpointer.blogcompose.data.remote.notify.NotifyRemoteDataSource
 import com.nullpointer.blogcompose.models.notify.Notify
 import kotlinx.coroutines.flow.Flow
 
 class NotifyRepoImpl(
-    private val notifyDataSource: NotifyDataSource,
-    private val notifyDAO: NotifyDAO,
+    private val notifyLocalDataSource: NotifyLocalDataSource,
+    private val notifyRemoteDataSource: NotifyRemoteDataSource
 ) : NotifyRepository {
 
     companion object {
-        // * size of request notify data source
-        private const val SIZE_NOTIFY_REQUEST = 10
+        private const val SIZE_NOTIFY_REQUEST = 10L
     }
 
-    // * return flow to notification in database, is for get modifications in realtime
-    override val listNotify: Flow<List<Notify>> = notifyDAO.getAllNotify()
+    override val listNotify: Flow<List<Notify>> = notifyLocalDataSource.listNotify
 
     override suspend fun requestLastNotify(forceRefresh: Boolean): Int {
-        if (!InternetCheck.isNetworkAvailable()) throw NetworkException()
-        // * get the first id from notify order for date
-        // ? if the database is empty o the parameter "force refresh" is true
-        // ? request new data and replace data in database
-        val firstNotify = if (forceRefresh) null else notifyDAO.getFirstNotify()
-        val listNewNotify = notifyDataSource.getLastNotifyBeforeThat(
-            numberRequest = SIZE_NOTIFY_REQUEST,
-            date = firstNotify?.timestamp)
-        if (listNewNotify.isNotEmpty()) notifyDAO.updateAllNotify(listNewNotify)
-        return listNewNotify.size
+        return callApiTimeOut {
+            val firstNotify = if (forceRefresh) null else notifyLocalDataSource.getFirstNotify()
+            val listNewNotify = notifyRemoteDataSource.getLastNotifications(
+                numberRequest = SIZE_NOTIFY_REQUEST,
+                idNotify = firstNotify?.id
+            )
+            if (listNewNotify.isNotEmpty()) notifyLocalDataSource.updateAllNotify(listNewNotify)
+            listNewNotify.size
+        }
     }
-    override suspend fun requestLastNotifyStartWith(idNotify: String){
-        val listConcatNotify = notifyDataSource.getLastNotifications(
-            numberRequest = SIZE_NOTIFY_REQUEST,
-            startWith = idNotify,
-            includeNotify = true
-        )
-        if (listConcatNotify.isNotEmpty()) notifyDAO.updateAllNotify(listConcatNotify)
+
+    override suspend fun requestLastNotifyStartWith(idNotify: String) {
+        callApiTimeOut {
+            val listConcatNotify = notifyRemoteDataSource.getLastNotifications(
+                numberRequest = SIZE_NOTIFY_REQUEST,
+                idNotify = idNotify,
+                includeNotify = true
+            )
+            if (listConcatNotify.isNotEmpty()) notifyLocalDataSource.updateAllNotify(
+                listConcatNotify
+            )
+        }
     }
 
     override suspend fun concatenateNotify(): Int {
-        if (!InternetCheck.isNetworkAvailable()) throw NetworkException()
-        // * get last notify consideration the last notify order for date
-        // * this for no request all notify
-        // ? this notifications no override the notification from database
-        val listConcatNotify = notifyDataSource.getLastNotifications(
-            numberRequest = SIZE_NOTIFY_REQUEST,
-            startWith = notifyDAO.getLastNotify()?.id
-        )
-        if (listConcatNotify.isNotEmpty()) notifyDAO.insertListNotify(listConcatNotify)
-        return listConcatNotify.size
+        return callApiTimeOut {
+            val listConcatNotify = notifyRemoteDataSource.getLastNotifications(
+                numberRequest = SIZE_NOTIFY_REQUEST,
+                idNotify = notifyLocalDataSource.getLastNotify()?.id
+            )
+            if (listConcatNotify.isNotEmpty()) notifyLocalDataSource.insertListNotify(
+                listConcatNotify
+            )
+            listConcatNotify.size
+        }
     }
 
     override suspend fun deleterAllNotify() =
-        notifyDAO.deleterAll()
+        notifyLocalDataSource.deleterAllNotify()
 
     override suspend fun openNotify(notify: Notify) {
-        notifyDataSource.updateOpenNotify(notify.id)
-        notifyDAO.updateNotify(notify.copy(isOpen = true))
+        callApiTimeOut {
+            notifyRemoteDataSource.updateOpenNotify(notify.id)
+            notifyLocalDataSource.updateNotify(notify.copy(isOpen = true))
+        }
     }
 
 }
