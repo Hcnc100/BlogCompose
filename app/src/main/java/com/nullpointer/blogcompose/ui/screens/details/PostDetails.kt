@@ -104,10 +104,8 @@ fun PostDetails(
                 GET_MORE_COMMENTS -> postDetailsViewModel.concatenateComments()
                 SEND_COMMENT -> postDetailsViewModel.addComment(postDetailsState::scrollToLastItem)
                 LIKE_THIS_POST -> {
-                    postDetailsViewModel.currentPost?.let { post ->
-                        likeViewModel.likePost(
-                            simplePost = post
-                        )
+                    (postState as? Resource.Success)?.let { state ->
+                        likeViewModel.likePost(simplePost = state.data)
                     }
                 }
             }

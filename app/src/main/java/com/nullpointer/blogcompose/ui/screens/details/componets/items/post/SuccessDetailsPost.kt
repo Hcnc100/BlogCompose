@@ -26,14 +26,14 @@ fun SuccessDetailsPost(
     BoxWithConstraints {
         val width = this.maxWidth
         Column(
-            modifier = modifier.fillMaxWidth()
+            modifier = modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             HeaderDetails(
                 imageBlog = blog.urlImage,
                 nameOwnerPost = blog.userPoster?.name.toString()
             )
-            Text(text = blog.description, modifier = Modifier.padding(10.dp))
-            Spacer(modifier = Modifier.height(10.dp))
+            Text(text = blog.description, modifier = Modifier.padding(horizontal = 10.dp))
             SimpleImage(
                 sizeImage = width,
                 image = blog.urlImage,
@@ -67,15 +67,13 @@ private fun ActionDetailsBlog(
 
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
-        modifier = modifier
-            .padding(10.dp)
-            .fillMaxWidth()
+        modifier = modifier.fillMaxWidth()
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
-                .padding(10.dp)
-                .clickable { actionLike() },
+                .clickable { actionLike() }
+                .padding(10.dp),
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             Icon(
@@ -100,7 +98,7 @@ private fun HeaderDetails(
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.padding(10.dp),
+        modifier = Modifier.padding(vertical = 10.dp),
         horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         SimpleImage(
