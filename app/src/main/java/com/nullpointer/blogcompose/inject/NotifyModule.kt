@@ -4,8 +4,8 @@ import com.nullpointer.blogcompose.data.local.cache.BlogDataBase
 import com.nullpointer.blogcompose.data.local.cache.NotifyDAO
 import com.nullpointer.blogcompose.data.local.notify.NotifyLocalDataSource
 import com.nullpointer.blogcompose.data.local.notify.NotifyLocalDataSourceImpl
-import com.nullpointer.blogcompose.data.remote.notify.NotifyDataSourceImpl
 import com.nullpointer.blogcompose.data.remote.notify.NotifyRemoteDataSource
+import com.nullpointer.blogcompose.data.remote.notify.NotifyRemoteDataSourceImpl
 import com.nullpointer.blogcompose.domain.notify.NotifyRepoImpl
 import dagger.Module
 import dagger.Provides
@@ -26,7 +26,7 @@ object NotifyModule {
     @Provides
     @Singleton
     fun provideNotifyRemoteDataSource(): NotifyRemoteDataSource =
-        NotifyDataSourceImpl()
+        NotifyRemoteDataSourceImpl()
 
     @Provides
     @Singleton

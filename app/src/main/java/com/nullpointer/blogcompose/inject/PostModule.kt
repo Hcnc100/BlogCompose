@@ -6,8 +6,8 @@ import com.nullpointer.blogcompose.data.local.cache.PostDAO
 import com.nullpointer.blogcompose.data.local.post.PostLocalDataSource
 import com.nullpointer.blogcompose.data.local.post.PostLocalDataSourceImpl
 import com.nullpointer.blogcompose.data.local.preferences.PreferencesDataSource
-import com.nullpointer.blogcompose.data.remote.post.PostDataSourceImpl
 import com.nullpointer.blogcompose.data.remote.post.PostRemoteDataSource
+import com.nullpointer.blogcompose.data.remote.post.PostRemoteDataSourceImpl
 import com.nullpointer.blogcompose.domain.post.PostRepoImpl
 import dagger.Module
 import dagger.Provides
@@ -41,14 +41,14 @@ object PostModule {
 
     @Provides
     @Singleton
-    fun getPostDataSource(): PostRemoteDataSource = PostDataSourceImpl()
+    fun getPostRemoteDataSource(): PostRemoteDataSource = PostRemoteDataSourceImpl()
 
     @Provides
     @Singleton
     fun getPostRepository(
         prefDataSource: PreferencesDataSource,
-        postDataSource: PostRemoteDataSource,
+        postRemoteDataSource: PostRemoteDataSource,
         postLocalDataSource: PostLocalDataSource
-    ): PostRepoImpl = PostRepoImpl(postDataSource, prefDataSource, postLocalDataSource)
+    ): PostRepoImpl = PostRepoImpl(prefDataSource, postLocalDataSource, postRemoteDataSource)
 
 }

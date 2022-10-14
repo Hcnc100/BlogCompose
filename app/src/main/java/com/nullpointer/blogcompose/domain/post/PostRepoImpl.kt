@@ -17,9 +17,9 @@ import java.util.*
 
 @Suppress("UNCHECKED_CAST")
 class PostRepoImpl(
-    private val postDataSource: PostRemoteDataSource,
     private val prefDataSource: PreferencesDataSource,
-    private val postLocalDataSource: PostLocalDataSource
+    private val postLocalDataSource: PostLocalDataSource,
+    private val postRemoteDataSource: PostRemoteDataSource
 ) : PostRepository {
 
     companion object {
@@ -80,7 +80,7 @@ class PostRepoImpl(
 
 
     override suspend fun updatePostById(idPost: String) {
-        postDataSource.getPost(idPost)?.let {
+        postRemoteDataSource.getPost(idPost)?.let {
             postLocalDataSource.updatePost(it)
         }
     }
@@ -107,7 +107,7 @@ class PostRepoImpl(
             post.createLikeNotify(currentUser) else null
 
         // * update post and send notification
-        postDataSource.updateLikes(
+        postRemoteDataSource.updateLikes(
             idPost = post.id,
             isLiked = !post.ownerLike,
             notify = newNotify,
@@ -133,12 +133,12 @@ class PostRepoImpl(
 
     override suspend fun getRealTimePost(idPost: String): Flow<Post?> {
         if (!InternetCheck.isNetworkAvailable()) throw NetworkException()
-        return postDataSource.getRealTimePost(idPost)
+        return postRemoteDataSource.getRealTimePost(idPost)
     }
 
 
     override suspend fun addNewPost(post: SimplePost) {
-        val idPost = postDataSource.addNewPost(post)
+        val idPost = postRemoteDataSource.addNewPost(post)
         requestLastPostInitWith(idPost)
     }
 
@@ -149,7 +149,7 @@ class PostRepoImpl(
         size: Int
     ): List<SimplePost> {
         if (!InternetCheck.isNetworkAvailable()) throw NetworkException()
-        return postDataSource.getLastPostBeforeThat(
+        return postRemoteDataSource.getLastPostBeforeThat(
             date = beforePostTimestamp,
             nPosts = size,
             fromUserId = fromUser
@@ -163,7 +163,7 @@ class PostRepoImpl(
         size: Int
     ): List<SimplePost> {
         if (!InternetCheck.isNetworkAvailable()) throw NetworkException()
-        return postDataSource.getLastPost(
+        return postRemoteDataSource.getLastPost(
             nPosts = size,
             startWithPostId = postStartId,
             fromUserId = fromUser,

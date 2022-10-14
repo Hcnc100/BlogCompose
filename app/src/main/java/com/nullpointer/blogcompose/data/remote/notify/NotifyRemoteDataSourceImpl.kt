@@ -10,7 +10,7 @@ import com.nullpointer.blogcompose.core.utils.getNewObjects
 import com.nullpointer.blogcompose.core.utils.getTimeEstimate
 import com.nullpointer.blogcompose.models.notify.Notify
 
-class NotifyDataSourceImpl : NotifyRemoteDataSource {
+class NotifyRemoteDataSourceImpl : NotifyRemoteDataSource {
     companion object {
         private const val TIMESTAMP = "timestamp"
         private const val NOTIFICATIONS = "notifications"

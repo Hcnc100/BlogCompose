@@ -28,7 +28,7 @@ import kotlinx.coroutines.tasks.await
 import timber.log.Timber
 import java.util.*
 
-class PostDataSourceImpl : PostRemoteDataSource {
+class PostRemoteDataSourceImpl : PostRemoteDataSource {
     private val database = Firebase.firestore
     private val refPosts = database.collection(NAME_REF_POST)
     private val refLikePost = database.collection(NAME_REF_LIKE_POST)
