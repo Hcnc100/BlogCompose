@@ -27,8 +27,8 @@ class PostDetailsState(
         focusRequester.requestFocus()
     }
 
-    fun scrollToNewComment() = scope.launch {
-//        lazyListState.animateScrollToItem(lazyListState.layoutInfo.totalItemsCount - 1)
+    fun scrollToLastItem() = scope.launch {
+        lazyListState.animateScrollToItem(lazyListState.layoutInfo.totalItemsCount)
     }
 }
 

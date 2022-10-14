@@ -85,6 +85,10 @@ class PostRepoImpl(
         }
     }
 
+    override suspend fun updatePost(post: SimplePost) {
+        postLocalDataSource.updatePost(post)
+    }
+
 
     override suspend fun updateLikePost(post: SimplePost, isLiked: Boolean) {
 

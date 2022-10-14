@@ -60,7 +60,6 @@ class PostDetailsViewModel @Inject constructor(
     var numberComments by SavableProperty(savedStateHandle, KEY_COMMENTS, -1)
         private set
 
-
     private val _listComments = MutableStateFlow<Resource<List<Comment>>>(Resource.Loading)
     val listComments = _listComments.asStateFlow()
 
@@ -75,39 +74,37 @@ class PostDetailsViewModel @Inject constructor(
         tagSavable = TAG_COMMENT_DETAILS
     )
 
-    val postState: StateFlow<Resource<Post>> = flow<Resource<Post>> {
-        // * update the comments when idPost is updated and this is not empty
-        _idPost.collect {
-            if (it.isNotEmpty()) {
-                postRepository.getRealTimePost(it).collect { newPost ->
-                    currentPost = newPost
-                    if (newPost!!.numberComments != numberComments) {
-                        if (numberComments != -1 && newPost.numberComments > numberComments)
-                            hasNewComments = true
-                        numberComments = newPost.numberComments
-                    }
+    val postState: StateFlow<Resource<Post>> = _idPost
+        .filter { it.isNotEmpty() }
+        .transform<String, Resource<Post>> {
+            postRepository.getRealTimePost(it).collect { updatedPost ->
+                requireNotNull(updatedPost)
 
-                    // * emit post reciber
-                    emit(Resource.Success(newPost))
-                    // * update inner post (saved in database)
-                    withContext(Dispatchers.IO) {
-//                        postRepository.updatePost(newPost)
+                if (updatedPost.numberComments != numberComments) {
+                    if (numberComments != -1 && updatedPost.numberComments > numberComments) {
+                        hasNewComments = true
                     }
+                    numberComments = updatedPost.numberComments
                 }
+
+                emit(Resource.Success(updatedPost))
+
+                postRepository.updatePost(updatedPost)
+
             }
-        }
-    }.flowOn(Dispatchers.IO).catch {
-        sendMessageErrorToException(
-            exception = Exception(it),
-            message = "Error get post real time",
-            channel = _messageDetails
+        }.flowOn(Dispatchers.IO).catch {
+            sendMessageErrorToException(
+                exception = Exception(it),
+                message = "Error get post real time",
+                channel = _messageDetails
+            )
+            emit(Resource.Failure)
+        }.stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000),
+            Resource.Loading
         )
-        emit(Resource.Failure)
-    }.stateIn(
-        viewModelScope,
-        SharingStarted.WhileSubscribed(5000),
-        Resource.Loading
-    )
+
 
     // * this show commnets saved in database
     // * the update is for demand and only update database
@@ -115,10 +112,8 @@ class PostDetailsViewModel @Inject constructor(
 
     // * set id post and request comments
     fun initIdPost(idPost: String) {
-        if (idPost != _idPost.value) {
-            _idPost.value = idPost
-            requestsComments(idPost)
-        }
+        _idPost.value = idPost
+        requestsComments(idPost)
     }
 
 
@@ -127,17 +122,15 @@ class PostDetailsViewModel @Inject constructor(
         blockBefore = { isConcatenateComment = true },
         blockAfter = { isConcatenateComment = false },
         blockIO = {
-            listComments.value.let { stateListComment ->
-                if (stateListComment is Resource.Success) {
-                    val lastComment = stateListComment.data.first()
-                    val listNewComments = commentsRepository.concatenateComments(
-                        idPost = _idPost.value,
-                        lastComment = lastComment.id
-                    )
-                    val newList = listNewComments + stateListComment.data
-                    _listComments.emit(Resource.Success(newList))
-                    Timber.d("New comments concatenate ${listNewComments.size}")
-                }
+            (listComments.value as? Resource.Success)?.let { stateListComment ->
+                val lastComment = stateListComment.data.first()
+                val listNewComments = commentsRepository.concatenateComments(
+                    idPost = _idPost.value,
+                    lastComment = lastComment.id
+                )
+                val newList = listNewComments + stateListComment.data
+                _listComments.emit(Resource.Success(newList))
+                Timber.d("New comments concatenate ${listNewComments.size}")
             }
         },
         blockException = {
@@ -156,19 +149,16 @@ class PostDetailsViewModel @Inject constructor(
         blockBefore = { addingComment = true },
         blockAfter = { addingComment = false },
         blockIO = {
-            val newComment = comment.currentValue
-            comment.clearValue()
-            addingComment = true
-            numberComments++
-            postState.value.let {
-                if (it is Resource.Success) {
-                    val listNewComment = commentsRepository.addNewComment(
-                        post = it.data,
-                        comment = newComment
-                    )
-                    _listComments.emit(Resource.Success(listNewComment))
-                    callbackSuccess()
-                }
+            (postState.value as? Resource.Success)?.let { statePost ->
+                val newComment = comment.currentValue
+                comment.clearValue()
+                numberComments++
+                val listNewComment = commentsRepository.addNewComment(
+                    post = statePost.data,
+                    comment = newComment
+                )
+                _listComments.emit(Resource.Success(listNewComment))
+                callbackSuccess()
             }
         },
         blockException = {
@@ -191,7 +181,6 @@ class PostDetailsViewModel @Inject constructor(
         },
         blockIO = {
             withContext(Dispatchers.Main) { hasNewComments = false }
-            _listComments.emit(Resource.Loading)
             val listNewComments = commentsRepository.getLastComments(idPost)
             _listComments.emit(Resource.Success(listNewComments))
         }

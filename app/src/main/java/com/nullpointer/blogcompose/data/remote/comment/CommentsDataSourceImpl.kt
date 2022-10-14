@@ -47,7 +47,7 @@ class CommentsDataSourceImpl:CommentsDataSource {
         numberComments: Long,
         idComment: String
     ): List<Comment> {
-        val refListComment = refPosts.document(idPost).collection(NAME_REF_LIST_COMMENTS)
+        val refListComment = refComment.document(idPost).collection(NAME_REF_LIST_COMMENTS)
         return refListComment.getConcatenateObjects(
             fieldTimestamp = TIMESTAMP,
             transform = { it.toComment() },

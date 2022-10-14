@@ -83,7 +83,7 @@ fun PostDetails(
             delay(200)
             isRequestFocus = false
             postDetailsState.requestFocus()
-            postDetailsState.lazyListState.animateScrollToItem(postDetailsState.lazyListState.layoutInfo.totalItemsCount)
+            postDetailsState.scrollToLastItem()
         }
     }
 
@@ -94,6 +94,7 @@ fun PostDetails(
         scaffoldState = postDetailsState.scaffoldState,
         lazyListState = postDetailsState.lazyListState,
         focusRequester = postDetailsState.focusRequester,
+        numberComments = postDetailsViewModel.numberComments,
         hasNewComments = postDetailsViewModel.hasNewComments,
         isConcatenateComment = postDetailsViewModel.isConcatenateComment,
         actionPostDetails = { action ->
@@ -101,7 +102,7 @@ fun PostDetails(
                 ACTION_BACK -> actionRootDestinations.backDestination()
                 RELOAD_COMMENTS -> postDetailsViewModel.requestsComments()
                 GET_MORE_COMMENTS -> postDetailsViewModel.concatenateComments()
-                SEND_COMMENT -> postDetailsViewModel.addComment(postDetailsState::scrollToNewComment)
+                SEND_COMMENT -> postDetailsViewModel.addComment(postDetailsState::scrollToLastItem)
                 LIKE_THIS_POST -> {
                     postDetailsViewModel.currentPost?.let { post ->
                         likeViewModel.likePost(
@@ -118,6 +119,7 @@ fun PostDetails(
 
 @Composable
 fun PostDetails(
+    numberComments: Int,
     hasNewComments: Boolean,
     lazyListState: LazyListState,
     scaffoldState: ScaffoldState,
@@ -149,14 +151,15 @@ fun PostDetails(
             PostAndComments(
                 shimmer = shimmer,
                 listState = lazyListState,
-                modifier = Modifier
-                    .padding(it)
-                    .fillMaxSize(),
+                numberComments = numberComments,
                 hasNewComments = hasNewComments,
                 statePostDetails = statePostDetails,
                 actionPostDetails = actionPostDetails,
                 stateListComments = stateListComments,
-                isConcatenateComment = isConcatenateComment
+                isConcatenateComment = isConcatenateComment,
+                modifier = Modifier
+                    .padding(it)
+                    .fillMaxSize(),
             ) {
                 when (statePostDetails) {
                     Resource.Failure -> FailedProfilePost()
@@ -180,6 +183,7 @@ fun PostDetails(
 @Composable
 fun PostAndComments(
     shimmer: Shimmer,
+    numberComments: Int,
     hasNewComments: Boolean,
     listState: LazyListState,
     isConcatenateComment: Boolean,
@@ -208,6 +212,7 @@ fun PostAndComments(
             headerPost = headerPost,
             lazyListState = listState,
             contentPadding = contentPadding,
+            numberComments = numberComments,
             hasNewComments = hasNewComments,
             sizeBetweenItems = sizeBetweenItems,
             stateListComments = stateListComments,
@@ -222,6 +227,7 @@ fun PostAndComments(
 @Composable
 fun ListComments(
     shimmer: Shimmer,
+    numberComments: Int,
     sizeBetweenItems: Dp,
     hasNewComments: Boolean,
     lazyListState: LazyListState,
@@ -250,6 +256,7 @@ fun ListComments(
             modifier = modifier,
             header = headerPost,
             lisState = lazyListState,
+            numberComments = numberComments,
             hasNewComments = hasNewComments,
             contentPadding = contentPadding,
             sizeBetweenItems = sizeBetweenItems,
