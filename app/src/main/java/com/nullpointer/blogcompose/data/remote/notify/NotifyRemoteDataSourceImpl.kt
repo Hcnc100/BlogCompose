@@ -46,9 +46,8 @@ class NotifyRemoteDataSourceImpl : NotifyRemoteDataSource {
             includeStart = false,
             fieldTimestamp = TIMESTAMP,
             startWithId = idNotify,
-            nResults = numberRequest,
-            transform = { it.toNotify() }
-        )
+            nResults = numberRequest
+        ) { it.toNotify() }
     }
 
 

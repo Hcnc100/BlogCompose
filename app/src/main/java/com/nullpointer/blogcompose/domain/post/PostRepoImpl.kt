@@ -1,8 +1,6 @@
 package com.nullpointer.blogcompose.domain.post
 
-import com.nullpointer.blogcompose.core.utils.ExceptionManager.NO_INTERNET_CONNECTION
-import com.nullpointer.blogcompose.core.utils.InternetCheck
-import com.nullpointer.blogcompose.core.utils.NetworkException
+import com.nullpointer.blogcompose.core.utils.callApiTimeOut
 import com.nullpointer.blogcompose.data.local.post.PostLocalDataSource
 import com.nullpointer.blogcompose.data.local.preferences.PreferencesDataSource
 import com.nullpointer.blogcompose.data.remote.post.PostRemoteDataSource
@@ -13,7 +11,6 @@ import com.nullpointer.blogcompose.models.posts.Post
 import com.nullpointer.blogcompose.models.posts.SimplePost
 import com.nullpointer.blogcompose.models.users.SimpleUser
 import kotlinx.coroutines.flow.Flow
-import java.util.*
 
 @Suppress("UNCHECKED_CAST")
 class PostRepoImpl(
@@ -23,8 +20,8 @@ class PostRepoImpl(
 ) : PostRepository {
 
     companion object {
-        private const val SIZE_POST_REQUEST = 5
-        private const val SIZE_MY_POST_REQUEST = 7
+        private const val SIZE_POST_REQUEST = 5L
+        private const val SIZE_MY_POST_REQUEST = 7L
     }
 
     override val listLastPost: Flow<List<Post>> = postLocalDataSource.listLastPost
@@ -32,56 +29,68 @@ class PostRepoImpl(
 
 
     override suspend fun requestLastPost(forceRefresh: Boolean): Int {
-        val firstPost = if (forceRefresh) null else postLocalDataSource.getFirstPost()
-        val listLastPost = getPostBeforeThat(
-            firstPost?.timestamp,
-            size = SIZE_POST_REQUEST
-        )
-        postLocalDataSource.updateAllPost(listLastPost as List<Post>)
-        return listLastPost.size
+        return callApiTimeOut {
+            val firstPost = if (forceRefresh) null else postLocalDataSource.getFirstPost()
+            val listLastPost = postRemoteDataSource.getLastPost(
+                numberPost = SIZE_POST_REQUEST,
+                idPost = firstPost?.id
+            )
+            postLocalDataSource.updateAllPost(listLastPost)
+            listLastPost.size
+        }
     }
 
 
     override suspend fun requestMyLastPost(forceRefresh: Boolean): Int {
-        val firstPost = if (forceRefresh) null else postLocalDataSource.getMyFirstPost()
-        val listMyLastPost = getPostBeforeThat(
-            beforePostTimestamp = firstPost?.timestamp,
-            fromUser = prefDataSource.getIdUser(),
-            size = SIZE_MY_POST_REQUEST
-        )
-        postLocalDataSource.updateAllMyPost(listMyLastPost as List<MyPost>)
-        return listMyLastPost.size
+        return callApiTimeOut {
+            val firstPost = if (forceRefresh) null else postLocalDataSource.getMyFirstPost()
+            val listMyLastPost = postRemoteDataSource.getLastPost(
+                idPost = firstPost?.id,
+                fromUserId = prefDataSource.getIdUser(),
+                numberPost = SIZE_MY_POST_REQUEST
+            )
+
+            postLocalDataSource.updateAllMyPost(listMyLastPost.map { it.toMyPost() })
+            listMyLastPost.size
+        }
     }
 
     override suspend fun concatenatePost(): Int {
-        postLocalDataSource.getLastPost()?.let { lastPost ->
-            val concatenatePost = getPostStartWith(
-                postStartId = lastPost.id,
-                size = SIZE_POST_REQUEST
-            )
-            postLocalDataSource.insertListPost(concatenatePost as List<Post>)
-            return concatenatePost.size
+        return callApiTimeOut {
+            postLocalDataSource.getLastPost()?.let { lastPost ->
+                val concatenatePost = postRemoteDataSource.getConcatenatePost(
+                    idPost = lastPost.id,
+                    numberPosts = SIZE_POST_REQUEST
+                )
+                postLocalDataSource.insertListPost(concatenatePost)
+                concatenatePost.size
+            }
+            0
         }
-        return 0
     }
 
     override suspend fun concatenateMyPost(): Int {
-        postLocalDataSource.getLastPost()?.let { lastPost ->
-            val concatenatePost = getPostStartWith(
-                fromUser = prefDataSource.getIdUser(),
-                postStartId = lastPost.id,
-                size = SIZE_MY_POST_REQUEST
-            )
-            postLocalDataSource.insertListMyPost(concatenatePost as List<MyPost>)
-            return concatenatePost.size
+        return callApiTimeOut {
+            postLocalDataSource.getLastPost()?.let { lastPost ->
+                val concatenatePost = postRemoteDataSource.getConcatenatePost(
+                    idPost = lastPost.id,
+                    fromUserId = prefDataSource.getIdUser(),
+                    numberPosts = SIZE_MY_POST_REQUEST
+                )
+                postLocalDataSource.insertListMyPost(concatenatePost.map { it.toMyPost() })
+                concatenatePost.size
+            }
+            0
         }
-        return 0
+
     }
 
 
     override suspend fun updatePostById(idPost: String) {
-        postRemoteDataSource.getPost(idPost)?.let {
-            postLocalDataSource.updatePost(it)
+        callApiTimeOut {
+            postRemoteDataSource.getPost(idPost)?.let {
+                postLocalDataSource.updatePost(it)
+            }
         }
     }
 
@@ -91,84 +100,51 @@ class PostRepoImpl(
 
 
     override suspend fun updateLikePost(post: SimplePost, isLiked: Boolean) {
+        callApiTimeOut {
+            // * toggle like post
+            val postFakeUpdate = post.toggleLike()
 
-        if (!InternetCheck.isNetworkAvailable()) throw Exception(NO_INTERNET_CONNECTION)
+            // * update fake post
+            postLocalDataSource.updatePost(postFakeUpdate)
 
+            // * create notify if is needed
+            val currentUser = prefDataSource.getCurrentUser()
+            val newNotify = if (post.userPoster?.idUser != prefDataSource.getIdUser() && isLiked)
+                post.createLikeNotify(currentUser) else null
 
-        // * toggle like post
-        val postFakeUpdate = post.toggleLike()
-
-        // * update fake post
-        postLocalDataSource.updatePost(postFakeUpdate)
-
-        // * create notify if is needed
-        val currentUser = prefDataSource.getCurrentUser()
-        val newNotify = if (post.userPoster?.idUser != prefDataSource.getIdUser() && isLiked)
-            post.createLikeNotify(currentUser) else null
-
-        // * update post and send notification
-        postRemoteDataSource.updateLikes(
-            idPost = post.id,
-            isLiked = !post.ownerLike,
-            notify = newNotify,
-            ownerPost = post.userPoster?.idUser!!,
-            idUser = currentUser.idUser
-        )?.let {
-            postLocalDataSource.updatePost(it)
-        }
-
-    }
-
-    override suspend fun requestLastPostInitWith(idPost: String) {
-        getPostStartWith(
-            postStartId = idPost,
-            includePost = true,
-            size = SIZE_POST_REQUEST
-        ).let { listPost ->
-            postLocalDataSource.updateAllPost(listPost as List<Post>)
-            postLocalDataSource.updateAllMyPost(listPost as List<MyPost>)
+            // * update post and send notification
+            postRemoteDataSource.updateLikes(
+                idPost = post.id,
+                isLiked = !post.ownerLike,
+                notify = newNotify,
+                ownerPost = post.userPoster?.idUser!!,
+                idUser = currentUser.idUser
+            )?.let {
+                postLocalDataSource.updatePost(it)
+            }
         }
     }
 
 
     override suspend fun getRealTimePost(idPost: String): Flow<Post?> {
-        if (!InternetCheck.isNetworkAvailable()) throw NetworkException()
-        return postRemoteDataSource.getRealTimePost(idPost)
+        return callApiTimeOut {
+            postRemoteDataSource.getRealTimePost(idPost)
+        }
     }
 
 
-    override suspend fun addNewPost(post: SimplePost) {
-        val idPost = postRemoteDataSource.addNewPost(post)
-        requestLastPostInitWith(idPost)
-    }
-
-
-    private suspend fun getPostBeforeThat(
-        beforePostTimestamp: Date?,
-        fromUser: String? = null,
-        size: Int
-    ): List<SimplePost> {
-        if (!InternetCheck.isNetworkAvailable()) throw NetworkException()
-        return postRemoteDataSource.getLastPostBeforeThat(
-            date = beforePostTimestamp,
-            nPosts = size,
-            fromUserId = fromUser
-        )
-    }
-
-    private suspend fun getPostStartWith(
-        fromUser: String? = null,
-        postStartId: String,
-        includePost: Boolean = false,
-        size: Int
-    ): List<SimplePost> {
-        if (!InternetCheck.isNetworkAvailable()) throw NetworkException()
-        return postRemoteDataSource.getLastPost(
-            nPosts = size,
-            startWithPostId = postStartId,
-            fromUserId = fromUser,
-            includePost = includePost
-        )
+    override suspend fun addNewPost(post: Post) {
+        callApiTimeOut {
+            val idPost = postRemoteDataSource.addNewPost(post)
+            postRemoteDataSource.getLastPost(
+                idPost = idPost,
+                includePost = true,
+                numberPost = SIZE_POST_REQUEST
+            ).let { listPost ->
+                postLocalDataSource.updateAllPost(listPost)
+                postLocalDataSource.updateAllMyPost(listPost.map { it.toMyPost() })
+            }
+        }
     }
 
 
@@ -187,6 +163,19 @@ class PostRepoImpl(
         return this.copy(
             numberLikes = newCount,
             ownerLike = !ownerLike
+        )
+    }
+
+    private fun Post.toMyPost(): MyPost {
+        return MyPost(
+            description = description,
+            userPoster = userPoster,
+            urlImage = urlImage,
+            numberComments = numberComments,
+            numberLikes = numberLikes,
+            ownerLike = ownerLike,
+            timestamp = timestamp,
+            id = id,
         )
     }
 

@@ -49,7 +49,7 @@ class MyPostViewModel @Inject constructor(
         sendMessageErrorToException(
             channel = _messageMyPosts,
             message = "Error get my list post",
-            exception = Exception(it)
+            exception = it
         )
         emit(Resource.Failure)
     }.flowOn(Dispatchers.IO).stateIn(

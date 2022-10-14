@@ -3,11 +3,12 @@ package com.nullpointer.blogcompose.data.remote.post
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FieldValue
-import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
+import com.nullpointer.blogcompose.core.utils.getConcatenateObjects
+import com.nullpointer.blogcompose.core.utils.getNewObjects
 import com.nullpointer.blogcompose.core.utils.getTimeEstimate
 import com.nullpointer.blogcompose.data.remote.FirebaseConstants.FIELD_ARRAY_LIKES
 import com.nullpointer.blogcompose.data.remote.FirebaseConstants.FIELD_NUMBER_LIKES
@@ -19,14 +20,12 @@ import com.nullpointer.blogcompose.data.remote.FirebaseConstants.NAME_REF_POST
 import com.nullpointer.blogcompose.data.remote.FirebaseConstants.TIMESTAMP
 import com.nullpointer.blogcompose.models.notify.Notify
 import com.nullpointer.blogcompose.models.posts.Post
-import com.nullpointer.blogcompose.models.posts.SimplePost
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import timber.log.Timber
-import java.util.*
 
 class PostRemoteDataSourceImpl : PostRemoteDataSource {
     private val database = Firebase.firestore
@@ -36,7 +35,7 @@ class PostRemoteDataSourceImpl : PostRemoteDataSource {
     private val auth = Firebase.auth
 
 
-    override suspend fun addNewPost(post: SimplePost): String {
+    override suspend fun addNewPost(post: Post): String {
         refPosts.document(post.id).set(post).await()
         return post.id
     }
@@ -45,53 +44,45 @@ class PostRemoteDataSourceImpl : PostRemoteDataSource {
         refPosts.document(idPost).delete().await()
     }
 
-    override suspend fun getPost(idPost: String): SimplePost? {
+    override suspend fun getPost(idPost: String): Post? {
         return refPosts.document(idPost).get().await().toPost()
     }
 
 
     override suspend fun getLastPost(
-        nPosts: Int,
-        startWithPostId: String?,
-        endWithPostId: String?,
+        numberPost: Long,
+        idPost: String?,
         fromUserId: String?,
         includePost: Boolean,
     ): List<Post> {
-        // * base query
-        var query = refPosts.orderBy(TIMESTAMP, Query.Direction.DESCENDING)
-        // * filter to myUser or for default get all
-        if (fromUserId != null) query = query.whereEqualTo(FIELD_POST_ID, fromUserId)
-        // * get only post validating
-        // ? indicate if start or end with any id post
-        if (startWithPostId != null) {
-            val refDocument = refPosts.document(startWithPostId).get().await()
-            if (refDocument.exists())
-                query = if (includePost) query.startAt(refDocument) else query.startAfter(refDocument)
-        } else if (endWithPostId != null) {
-            val refDocument = refPosts.document(endWithPostId).get().await()
-            if (refDocument.exists())
-                query = if (includePost) query.endAt(refDocument) else query.endBefore(refDocument)
-        }
-        // * limit result or for default all
-        if (nPosts != Integer.MAX_VALUE) query = query.limit(nPosts.toLong())
-        return query.get().await().documents.mapNotNull { it.toPost() }
+        return refPosts.getNewObjects(
+            includeEnd = includePost,
+            fieldTimestamp = TIMESTAMP,
+            nResults = numberPost,
+            transform = { it.toPost() },
+            addingQuery = {
+                if (fromUserId != null)
+                    it.whereEqualTo(FIELD_POST_ID, fromUserId) else it
+            }
+        )
     }
 
-    override suspend fun getLastPostBeforeThat(
-        date: Date?,
-        nPosts: Int,
-        fromUserId: String?,
+    override suspend fun getConcatenatePost(
+        idPost: String?,
+        numberPosts: Long,
+        fromUserId: String?
     ): List<Post> {
-        // * order post for date
-        var query = refPosts.orderBy(TIMESTAMP, Query.Direction.DESCENDING)
-        // * get more recent post that date passed for args
-        if (date != null) query = query.whereGreaterThan(TIMESTAMP, date)
-        // * get only post validating
-        // * filter to myUser or for default get all
-        if (fromUserId != null) query = query.whereEqualTo(FIELD_POST_ID, fromUserId)
-        // * limit the request
-        if (nPosts != Integer.MAX_VALUE) query = query.limit(nPosts.toLong())
-        return query.get().await().documents.mapNotNull { it.toPost() }
+        return refPosts.getConcatenateObjects(
+            includeStart = false,
+            fieldTimestamp = TIMESTAMP,
+            startWithId = idPost,
+            nResults = numberPosts,
+            transform = { it.toPost() },
+            addingQuery = {
+                if (fromUserId != null)
+                    it.whereEqualTo(FIELD_POST_ID, fromUserId) else it
+            }
+        )
     }
 
     override fun getRealTimePost(idPost: String): Flow<Post?> = callbackFlow {

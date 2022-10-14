@@ -9,7 +9,7 @@ object ExceptionManager {
     const val NO_INTERNET_CONNECTION = "NO_INTERNET_NETWORK"
     const val SERVER_TIME_OUT = "SERVER_TIME_OUT"
 
-    private fun getMessageForMsgException(exception: Exception, message: String?): String {
+    private fun getMessageForMsgException(exception: Throwable, message: String?): String {
         Timber.e("${message}: $exception")
         return when (exception.message) {
             NO_INTERNET_CONNECTION -> MessageSnack.createInfoMessageEncode(R.string.message_error_internet_checker)
@@ -23,7 +23,7 @@ object ExceptionManager {
 
 
     fun sendMessageErrorToException(
-        exception: Exception,
+        exception: Throwable,
         message: String,
         channel: Channel<String>
     ) {

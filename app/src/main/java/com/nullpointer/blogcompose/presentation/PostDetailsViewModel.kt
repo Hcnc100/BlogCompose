@@ -94,7 +94,7 @@ class PostDetailsViewModel @Inject constructor(
             }
         }.flowOn(Dispatchers.IO).catch {
             sendMessageErrorToException(
-                exception = Exception(it),
+                exception = it,
                 message = "Error get post real time",
                 channel = _messageDetails
             )

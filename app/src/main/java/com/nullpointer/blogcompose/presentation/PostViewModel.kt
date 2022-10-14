@@ -46,7 +46,7 @@ class PostViewModel @Inject constructor(
         emit(Resource.Success(it))
     }.catch {
         sendMessageErrorToException(
-            exception = Exception(it),
+            exception = it,
             message = "Error to get list of posts",
             channel = _messagePost
         )
@@ -74,7 +74,7 @@ class PostViewModel @Inject constructor(
         },
         blockException = {
             sendMessageErrorToException(
-                exception = Exception(it),
+                exception = it,
                 message = "Error to request new post",
                 channel = _messagePost
             )

@@ -47,7 +47,7 @@ class NotifyViewModel @Inject constructor(
         emit(Resource.Success(it))
     }.catch { e ->
         sendMessageErrorToException(
-            exception = Exception(e),
+            exception = e,
             message = "Error get notify from database",
             _messageNotify
         )

@@ -10,10 +10,9 @@ interface PostRepository {
     val listMyLastPost: Flow<List<MyPost>>
     suspend fun requestLastPost(forceRefresh: Boolean = false): Int
     suspend fun requestMyLastPost(forceRefresh: Boolean = false): Int
-    suspend fun requestLastPostInitWith(idPost: String)
     suspend fun concatenatePost(): Int
     suspend fun concatenateMyPost(): Int
-    suspend fun addNewPost(post: SimplePost)
+    suspend fun addNewPost(post: Post)
     suspend fun updateLikePost(post: SimplePost, isLiked: Boolean)
     suspend fun updatePostById(idPost: String)
     suspend fun updatePost(post: SimplePost)

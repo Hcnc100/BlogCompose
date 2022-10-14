@@ -131,10 +131,14 @@ suspend fun <T> CollectionReference.getConcatenateObjects(
     fieldTimestamp: String,
     startWithId: String? = null,
     nResults: Long = Long.MAX_VALUE,
-    transform: (document: DocumentSnapshot) -> T?,
+    addingQuery: ((Query) -> Query)? = null,
+    transform: suspend (document: DocumentSnapshot) -> T?,
 ): List<T> {
     // * base query
     var query = orderBy(fieldTimestamp, Query.Direction.DESCENDING)
+
+    addingQuery?.let { adding -> query = adding(query) }
+
     if (startWithId != null) {
         val refDocument = document(startWithId).get().await()
         if (refDocument.exists()) {
@@ -171,11 +175,14 @@ suspend fun <T> CollectionReference.getNewObjects(
     endWithId: String? = null,
     fieldQuery: Boolean = true,
     nResults: Long = Long.MAX_VALUE,
-    transform: (document: DocumentSnapshot) -> T?
+    addingQuery: ((Query) -> Query)? = null,
+    transform: suspend (document: DocumentSnapshot) -> T?
 ): List<T> {
-    // * base query
-    val baseRequest = orderBy(fieldTimestamp, Query.Direction.DESCENDING)
-    var query = baseRequest
+
+    var query = orderBy(fieldTimestamp, Query.Direction.DESCENDING)
+
+    addingQuery?.let { adding -> query = adding(query) }
+
     if (endWithId != null) {
         val refDocument = document(endWithId).get().await()
         if (refDocument.exists()) {

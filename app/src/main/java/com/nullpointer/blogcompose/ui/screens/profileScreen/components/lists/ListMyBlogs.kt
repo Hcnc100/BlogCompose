@@ -1,5 +1,6 @@
 package com.nullpointer.blogcompose.ui.screens.profileScreen.components.lists
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.foundation.rememberScrollState
@@ -22,6 +23,7 @@ import com.nullpointer.blogcompose.ui.share.OnBottomReached
 import com.valentinilk.shimmer.ShimmerBounds
 import com.valentinilk.shimmer.rememberShimmer
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ListSuccessMyBlogs(
     spaceBetweenItems: Dp,
@@ -49,7 +51,8 @@ fun ListSuccessMyBlogs(
             items(listMyPost, key = { it.id }) { post ->
                 ItemMyPost(
                     post = post,
-                    actionDetails = actionClickPost
+                    actionDetails = actionClickPost,
+                    modifier = Modifier.animateItemPlacement()
                 )
             }
         }
