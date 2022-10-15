@@ -45,9 +45,10 @@ class PostRepoImpl(
     override suspend fun requestMyLastPost(forceRefresh: Boolean): Int {
         return callApiTimeOut {
             val firstPost = if (forceRefresh) null else postLocalDataSource.getMyFirstPost()
+            val idUser = prefDataSource.getIdUser()
             val listMyLastPost = postRemoteDataSource.getLastPost(
                 idPost = firstPost?.id,
-                fromUserId = prefDataSource.getIdUser(),
+                fromUserId = idUser,
                 numberPost = SIZE_MY_POST_REQUEST
             )
 
@@ -136,15 +137,25 @@ class PostRepoImpl(
 
     override suspend fun addNewPost(post: Post) {
         callApiTimeOut {
-            val idPost = postRemoteDataSource.addNewPost(post)
+
+            val newIdPost = postRemoteDataSource.addNewPost(post)
+
             postRemoteDataSource.getLastPost(
-                idPost = idPost,
+                idPost = newIdPost,
                 includePost = true,
                 numberPost = SIZE_POST_REQUEST
-            ).let { listPost ->
-                postLocalDataSource.updateAllPost(listPost)
-                postLocalDataSource.updateAllMyPost(listPost.map { it.toMyPost() })
-            }
+            ).let { listPost -> postLocalDataSource.updateAllPost(listPost) }
+
+
+            val myIdUser = prefDataSource.getIdUser()
+            val idLastPost = postLocalDataSource.getMyFirstPost()?.id
+
+            postRemoteDataSource.getLastPostBetween(
+                fromUserId = myIdUser,
+                startWithId = newIdPost,
+                endWithId = idLastPost
+            )
+                .let { listPost -> postLocalDataSource.insertListMyPost(listPost.map { it.toMyPost() }) }
         }
     }
 

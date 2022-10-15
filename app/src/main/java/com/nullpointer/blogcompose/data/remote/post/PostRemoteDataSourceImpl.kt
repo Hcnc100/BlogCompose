@@ -9,6 +9,7 @@ import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
 import com.nullpointer.blogcompose.core.utils.getConcatenateObjects
 import com.nullpointer.blogcompose.core.utils.getNewObjects
+import com.nullpointer.blogcompose.core.utils.getObjectsBetween
 import com.nullpointer.blogcompose.core.utils.getTimeEstimate
 import com.nullpointer.blogcompose.data.remote.FirebaseConstants.FIELD_ARRAY_LIKES
 import com.nullpointer.blogcompose.data.remote.FirebaseConstants.FIELD_NUMBER_LIKES
@@ -48,14 +49,31 @@ class PostRemoteDataSourceImpl : PostRemoteDataSource {
         return refPosts.document(idPost).get().await().toPost()
     }
 
+    override suspend fun getLastPostBetween(
+        endWithId: String?,
+        fromUserId: String?,
+        startWithId: String
+    ): List<Post> {
+        return refPosts.getObjectsBetween(
+            fieldTimestamp = TIMESTAMP,
+            startWithId = startWithId,
+            endWithId = endWithId,
+            transform = { it.toPost() },
+            addingQuery = {
+                if (fromUserId != null)
+                    it.whereEqualTo(FIELD_POST_ID, fromUserId) else it
+            }
+        )
+    }
 
     override suspend fun getLastPost(
-        numberPost: Long,
         idPost: String?,
         fromUserId: String?,
         includePost: Boolean,
+        numberPost: Long
     ): List<Post> {
         return refPosts.getNewObjects(
+            endWithId = idPost,
             includeEnd = includePost,
             fieldTimestamp = TIMESTAMP,
             nResults = numberPost,
@@ -69,8 +87,8 @@ class PostRemoteDataSourceImpl : PostRemoteDataSource {
 
     override suspend fun getConcatenatePost(
         idPost: String?,
-        numberPosts: Long,
-        fromUserId: String?
+        fromUserId: String?,
+        numberPosts: Long
     ): List<Post> {
         return refPosts.getConcatenateObjects(
             includeStart = false,
@@ -113,11 +131,11 @@ class PostRemoteDataSourceImpl : PostRemoteDataSource {
     }
 
     override suspend fun updateLikes(
+        idUser: String,
         idPost: String,
-        isLiked: Boolean,
         notify: Notify?,
-        ownerPost: String,
-        idUser: String
+        isLiked: Boolean,
+        ownerPost: String
     ): Post? {
         val refPostLiked = refPosts.document(idPost)
         val refListPostLike = refLikePost.document(idPost)

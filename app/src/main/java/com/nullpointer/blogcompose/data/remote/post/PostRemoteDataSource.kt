@@ -13,24 +13,30 @@ interface PostRemoteDataSource {
     suspend fun getPost(idPost: String): Post?
 
 
+    suspend fun getLastPostBetween(
+        endWithId: String?,
+        fromUserId: String?,
+        startWithId: String
+    ): List<Post>
+
     suspend fun getLastPost(
-        numberPost: Long = Long.MAX_VALUE,
         idPost: String? = null,
         fromUserId: String? = null,
-        includePost: Boolean = false
+        includePost: Boolean = false,
+        numberPost: Long = Long.MAX_VALUE
     ): List<Post>
 
     suspend fun getConcatenatePost(
         idPost: String? = null,
-        numberPosts: Long = Long.MAX_VALUE,
         fromUserId: String? = null,
+        numberPosts: Long = Long.MAX_VALUE,
     ): List<Post>
 
     suspend fun updateLikes(
+        idUser: String,
         idPost: String,
-        isLiked: Boolean,
         notify: Notify?,
-        ownerPost: String,
-        idUser: String
+        isLiked: Boolean,
+        ownerPost: String
     ): Post?
 }

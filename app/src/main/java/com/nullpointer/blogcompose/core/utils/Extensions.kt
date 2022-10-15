@@ -172,6 +172,36 @@ suspend fun <T> CollectionReference.getNewObject(
     }
 }
 
+suspend fun <T> CollectionReference.getObjectsBetween(
+    fieldTimestamp: String,
+    startWithId: String,
+    endWithId: String? = null,
+    addingQuery: ((Query) -> Query)? = null,
+    transform: suspend (document: DocumentSnapshot) -> T?
+): List<T> {
+
+    var query = orderBy(fieldTimestamp, Query.Direction.DESCENDING)
+
+    addingQuery?.let { adding -> query = adding(query) }
+
+
+    val refDocumentStart = document(startWithId).get().await()
+    if (refDocumentStart.exists()) {
+        query = query.startAt(refDocumentStart)
+    }
+
+
+    if (endWithId != null) {
+        val refDocumentEnd = document(endWithId).get().await()
+        if (refDocumentEnd.exists()) {
+            query = query.endBefore(refDocumentEnd)
+        }
+    }
+
+    return query.get().await().documents.mapNotNull { transform(it) }
+}
+
+
 suspend fun <T> CollectionReference.getNewObjects(
     includeEnd: Boolean,
     fieldTimestamp: String,
@@ -204,7 +234,8 @@ suspend fun <T> CollectionReference.getNewObjects(
             fieldTimestamp = fieldTimestamp,
             startWithId = previewDocuments.last().id,
             nResults = nResults - previewDocuments.size,
-            transform = transform
+            transform = transform,
+            addingQuery = addingQuery
         )
 
         previewDocuments.mapNotNull { transform(it) } + newQuery

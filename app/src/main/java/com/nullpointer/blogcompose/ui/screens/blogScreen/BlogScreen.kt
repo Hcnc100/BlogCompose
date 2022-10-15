@@ -63,6 +63,10 @@ fun BlogScreen(
         merge(postVM.messagePost, likeVM.messageLike).collect(blogScreenState::showSnackMessage)
     }
 
+    LaunchedEffect(key1 = Unit) {
+        postVM.requestNewPost(false, blogScreenState::scrollToTop)
+    }
+
 
     BlogScreen(
         stateListPost = statePost,
@@ -73,7 +77,7 @@ fun BlogScreen(
         buttonAddIsVisible = !blogScreenState.isScrollInProgress,
         actionBlogScreen = { action ->
             when (action) {
-                RELOAD_BLOG -> postVM.requestNewPost(true)
+                RELOAD_BLOG -> postVM.requestNewPost(true, blogScreenState::scrollToTop)
                 ADD_BLOG -> actionRootDestinations.changeRoot(AddBlogScreenDestination)
                 CONCATENATE_BLOG -> postVM.concatenatePost {
                     postVM.concatenatePost(blogScreenState::animateScrollMore)

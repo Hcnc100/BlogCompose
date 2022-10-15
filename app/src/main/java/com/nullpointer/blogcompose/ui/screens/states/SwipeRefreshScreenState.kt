@@ -15,7 +15,6 @@ import androidx.compose.ui.platform.LocalFocusManager
 import com.google.accompanist.swiperefresh.SwipeRefreshState
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
 
@@ -30,9 +29,15 @@ class SwipeRefreshScreenState constructor(
 ) : SimpleScreenState(scaffoldState, context, focusManager){
     val isScrollInProgress get() = listState.isScrollInProgress
 
-    fun animateScrollMore(){
+    fun animateScrollMore() {
         scope.launch {
             listState.animateScrollBy(sizeScrollMore)
+        }
+    }
+
+    fun scrollToTop() {
+        scope.launch {
+            listState.scrollToItem(0)
         }
     }
 }

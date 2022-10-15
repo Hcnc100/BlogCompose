@@ -60,17 +60,22 @@ class PostViewModel @Inject constructor(
     init {
         // * when init this view model , request new post if is needed
         Timber.e("Se inicio el post view model")
-        requestNewPost()
     }
 
 
-    fun requestNewPost(forceRefresh: Boolean = false) = launchSafeIO(
+    fun requestNewPost(
+        forceRefresh: Boolean = false,
+        callbackSuccess: () -> Unit
+    ) = launchSafeIO(
         isEnabled = !isRequestData,
         blockBefore = { isRequestData = true },
         blockAfter = { isRequestData = false },
         blockIO = {
             val sizeNewPost = postRepository.requestLastPost(forceRefresh)
             Timber.d("were obtained $sizeNewPost new post")
+            withContext(Dispatchers.Main) {
+                callbackSuccess()
+            }
         },
         blockException = {
             sendMessageErrorToException(
