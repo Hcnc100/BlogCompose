@@ -5,7 +5,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.dataStore
 import com.nullpointer.blogcompose.data.local.UserPreference
 import com.nullpointer.blogcompose.data.local.UserSerializer
-import com.nullpointer.blogcompose.models.users.SimpleUser
+import com.nullpointer.blogcompose.models.users.AuthUser
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
@@ -19,27 +19,27 @@ class PreferencesDataSourceImpl(
     )
 
     override val user = context.userProtoDataStore.data.map { user ->
-        SimpleUser(
-            idUser = user.uuid,
+        AuthUser(
+            id = user.uuid,
             name = user.name,
             urlImg = user.urlImg,
         )
     }
 
     override suspend fun getIdUser(): String {
-        return user.first().idUser
+        return user.first().id
     }
 
-    override suspend fun getCurrentUser(): SimpleUser {
+    override suspend fun getCurrentUser(): AuthUser {
         return user.first()
     }
 
 
-    override suspend fun updateUser(myUser: SimpleUser) {
+    override suspend fun updateUser(myUser: AuthUser) {
         context.userProtoDataStore.updateData { currentUserData ->
             currentUserData.toBuilder()
                 .setName(myUser.name)
-                .setUuid(myUser.idUser)
+                .setUuid(myUser.id)
                 .setUrlImg(myUser.urlImg)
                 .build()
         }

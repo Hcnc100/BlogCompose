@@ -23,7 +23,10 @@ import androidx.lifecycle.viewModelScope
 import coil.compose.AsyncImagePainter
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.Query
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import com.nullpointer.blogcompose.core.utils.ExceptionManager.NO_INTERNET_CONNECTION
 import com.nullpointer.blogcompose.core.utils.ExceptionManager.SERVER_TIME_OUT
 import com.valentinilk.shimmer.Shimmer
@@ -236,4 +239,25 @@ suspend fun <T> callApiTimeOut(
     } catch (e: TimeoutCancellationException) {
         throw Exception(SERVER_TIME_OUT)
     }
+}
+
+fun <T> T.toMap(
+    listIgnoredFields: List<String> = emptyList(),
+    listTimestampFields: List<String> = emptyList()
+): Map<String, Any> {
+    val gson = Gson()
+    val json = gson.toJson(this)
+    val previewMap = gson.fromJson<Map<String, Any>>(
+        /* json = */ json,
+        /* typeOfT = */ object : TypeToken<T>() {}.type
+    ).toMutableMap()
+
+    listTimestampFields.forEach {
+        previewMap[it] = FieldValue.serverTimestamp()
+    }
+
+    listIgnoredFields.forEach {
+        previewMap.remove(it)
+    }
+    return previewMap
 }

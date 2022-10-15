@@ -7,6 +7,7 @@ import com.nullpointer.blogcompose.models.Comment
 import com.nullpointer.blogcompose.models.notify.Notify
 import com.nullpointer.blogcompose.models.notify.TypeNotify
 import com.nullpointer.blogcompose.models.posts.SimplePost
+import com.nullpointer.blogcompose.models.users.AuthUser
 import com.nullpointer.blogcompose.models.users.SimpleUser
 
 class CommentsRepoImpl(
@@ -69,7 +70,7 @@ class CommentsRepoImpl(
     }
 
     private suspend fun createNewNotify(
-        currentUser: SimpleUser,
+        currentUser: AuthUser,
         post: SimplePost
     ): Notify? {
         return if (post.userPoster?.idUser == prefDataSource.getIdUser())
@@ -78,17 +79,25 @@ class CommentsRepoImpl(
             post.createCommentNotify(currentUser)
     }
 
-    private fun SimpleUser.createNewComment(newComment: String): Comment {
+    private fun AuthUser.createNewComment(newComment: String): Comment {
         return Comment(
-            userComment = this,
+            userComment = SimpleUser(
+                idUser = id,
+                name = name,
+                urlImg = urlImg
+            ),
             comment = newComment
         )
     }
 
 
-    private fun SimplePost.createCommentNotify(myUser: SimpleUser): Notify {
+    private fun SimplePost.createCommentNotify(myUser: AuthUser): Notify {
         return Notify(
-            userInNotify = myUser,
+            userInNotify = SimpleUser(
+                idUser = myUser.id,
+                name = myUser.name,
+                urlImg = myUser.urlImg
+            ),
             idPost = id,
             urlImgPost = urlImage,
             type = TypeNotify.COMMENT

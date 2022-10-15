@@ -2,12 +2,11 @@ package com.nullpointer.blogcompose.domain.auth
 
 import androidx.core.net.toUri
 import com.google.firebase.auth.AuthCredential
-import com.nullpointer.blogcompose.core.utils.InternetCheck
-import com.nullpointer.blogcompose.core.utils.NetworkException
+import com.nullpointer.blogcompose.core.utils.callApiTimeOut
 import com.nullpointer.blogcompose.data.local.preferences.PreferencesDataSource
 import com.nullpointer.blogcompose.data.remote.auth.AuthDataSource
 import com.nullpointer.blogcompose.data.remote.image.ImagesDataSource
-import com.nullpointer.blogcompose.models.users.SimpleUser
+import com.nullpointer.blogcompose.models.users.AuthUser
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 
@@ -17,18 +16,27 @@ class AuthRepoImpl(
     private val imagesDataSource: ImagesDataSource
 ) : AuthRepository {
 
-    override val myUser: Flow<SimpleUser> = prefDataSource.user
+    override val myUser: Flow<AuthUser> = prefDataSource.user
 
-    override suspend fun getIdUser() = this.myUser.first().idUser
+    override suspend fun getIdUser() = this.myUser.first().id
 
     override suspend fun authWithCredential(authCredential: AuthCredential) {
         // * authenticate user and save data user
-        val user = authDataSource.authWithCredential(authCredential)
+        val user = callApiTimeOut {
+            authDataSource.authWithCredential(authCredential)
+        }
         prefDataSource.updateUser(user)
     }
 
-    override suspend fun updateTokenUser(token: String) =
-        authDataSource.updateTokenUser(token, null)
+    override suspend fun updateTokenUser(token: String) {
+        val oldToken = myUser.first().token
+        callApiTimeOut {
+            authDataSource.addingTokenUser(
+                newToken = token,
+                oldToken = oldToken
+            )
+        }
+    }
 
     override suspend fun logOut() {
         // * log out the user and deleter user saved
@@ -37,16 +45,25 @@ class AuthRepoImpl(
     }
 
     override suspend fun uploadDataUser(urlImg: String?, name: String?) {
-        if (!InternetCheck.isNetworkAvailable()) throw NetworkException()
-        val updateUser = authDataSource.updateDataUser(name, urlImg)
-        prefDataSource.updateUser(updateUser)
+        callApiTimeOut {
+            val newUser = myUser.first().let {
+                if (urlImg != null) it.copy(urlImg = urlImg) else it
+            }.let {
+                if (name != null) it.copy(name = name) else it
+            }
+            val updateUser = authDataSource.updateDataUser(newUser)
+            prefDataSource.updateUser(updateUser)
+        }
     }
 
 
-    override suspend fun createNewUser(user: SimpleUser) {
-        if (!InternetCheck.isNetworkAvailable()) throw NetworkException()
-        val uriImg = imagesDataSource.uploadImageUserWithOutState(user.urlImg.toUri())
-        val updateUser = authDataSource.updateFullDataUser(user.name, uriImg.toString())
-        prefDataSource.updateUser(updateUser)
+    override suspend fun createNewUser(user: AuthUser) {
+        callApiTimeOut {
+            val newUriImg = imagesDataSource.uploadImageUserWithOutState(user.urlImg.toUri())
+            val newUser = user.copy(urlImg = newUriImg.toString())
+            val updateUser = authDataSource.createNewUser(newUser)
+            prefDataSource.updateUser(updateUser)
+        }
+
     }
 }

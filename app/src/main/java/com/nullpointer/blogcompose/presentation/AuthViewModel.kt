@@ -11,7 +11,7 @@ import com.nullpointer.blogcompose.core.states.LoginStatus
 import com.nullpointer.blogcompose.core.utils.launchSafeIO
 import com.nullpointer.blogcompose.domain.auth.AuthRepository
 import com.nullpointer.blogcompose.domain.delete.DeleterRepository
-import com.nullpointer.blogcompose.models.users.SimpleUser
+import com.nullpointer.blogcompose.models.users.AuthUser
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
@@ -26,13 +26,13 @@ class AuthViewModel @Inject constructor(
     private val deleterRepository: DeleterRepository
 ) : ViewModel() {
 
-    private val SimpleUser.isUserAuth get() = idUser.isNotEmpty()
-    private val SimpleUser.isDataComplete get() = name.isNotEmpty() && urlImg.isNotEmpty()
+    private val AuthUser.isUserAuth get() = id.isNotEmpty()
+    private val AuthUser.isDataComplete get() = name.isNotEmpty() && urlImg.isNotEmpty()
 
     val currentUser = authRepository.myUser.flowOn(Dispatchers.IO).stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(5000),
-        SimpleUser()
+        AuthUser()
     )
 
     private val _messageAuth = Channel<Int>()
@@ -79,7 +79,7 @@ class AuthViewModel @Inject constructor(
 
 
     fun createNewUser(
-        myUser: SimpleUser
+        myUser: AuthUser
     ) = launchSafeIO(
         blockBefore = { isProcessing = true },
         blockAfter = { isProcessing = false },

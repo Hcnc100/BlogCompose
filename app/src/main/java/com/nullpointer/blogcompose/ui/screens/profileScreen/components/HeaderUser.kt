@@ -14,11 +14,11 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import coil.transform.CircleCropTransformation
 import com.nullpointer.blogcompose.R
-import com.nullpointer.blogcompose.models.users.SimpleUser
+import com.nullpointer.blogcompose.models.users.AuthUser
 
 @Composable
 fun HeaderUser(
-    user: SimpleUser,
+    user: AuthUser,
     actionEditPhoto: () -> Unit,
     actionSettings: () -> Unit
 ) {

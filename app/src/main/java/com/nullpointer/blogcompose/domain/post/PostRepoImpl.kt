@@ -9,6 +9,7 @@ import com.nullpointer.blogcompose.models.notify.TypeNotify
 import com.nullpointer.blogcompose.models.posts.MyPost
 import com.nullpointer.blogcompose.models.posts.Post
 import com.nullpointer.blogcompose.models.posts.SimplePost
+import com.nullpointer.blogcompose.models.users.AuthUser
 import com.nullpointer.blogcompose.models.users.SimpleUser
 import kotlinx.coroutines.flow.Flow
 
@@ -118,7 +119,7 @@ class PostRepoImpl(
                 isLiked = !post.ownerLike,
                 notify = newNotify,
                 ownerPost = post.userPoster?.idUser!!,
-                idUser = currentUser.idUser
+                idUser = currentUser.id
             )?.let {
                 postLocalDataSource.updatePost(it)
             }
@@ -148,9 +149,13 @@ class PostRepoImpl(
     }
 
 
-    private fun SimplePost.createLikeNotify(myUser: SimpleUser): Notify {
+    private fun SimplePost.createLikeNotify(myUser: AuthUser): Notify {
         return Notify(
-            userInNotify = myUser,
+            userInNotify = SimpleUser(
+                idUser = myUser.id,
+                name = myUser.name,
+                urlImg = myUser.urlImg
+            ),
             idPost = id,
             urlImgPost = urlImage,
             type = TypeNotify.LIKE

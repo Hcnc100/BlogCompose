@@ -25,9 +25,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class PostDetailsViewModel @Inject constructor(
+    savedStateHandle: SavedStateHandle,
     private val postRepository: PostRepository,
     private val commentsRepository: CommentsRepository,
-    savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
     companion object {

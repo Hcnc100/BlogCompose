@@ -132,7 +132,7 @@ class UploadDataServices : LifecycleService() {
             description = description,
             urlImage = urlImg,
             userPoster = SimpleUser(
-                idUser = user.idUser,
+                idUser = user.id,
                 name = user.name,
                 urlImg = user.urlImg,
             )

@@ -8,7 +8,7 @@ import com.nullpointer.blogcompose.core.delegates.PropertySavableImg
 import com.nullpointer.blogcompose.core.delegates.PropertySavableString
 import com.nullpointer.blogcompose.domain.compress.CompressRepository
 import com.nullpointer.blogcompose.models.customSnack.MessageSnack.Companion.createErrorMessageEncode
-import com.nullpointer.blogcompose.models.users.SimpleUser
+import com.nullpointer.blogcompose.models.users.AuthUser
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -54,8 +54,7 @@ class RegistryViewModel @Inject constructor(
     )
 
 
-
-    fun getUpdatedUser(): SimpleUser? {
+    fun getUpdatedUser(): AuthUser? {
         nameUser.reValueField()
         val (user, message) = when {
             imageProfile.isEmpty && nameUser.isEmpty -> {
@@ -71,7 +70,7 @@ class RegistryViewModel @Inject constructor(
                 Pair(null, message)
             }
             else -> {
-                val user = SimpleUser(
+                val user = AuthUser(
                     name = nameUser.currentValue,
                     urlImg = imageProfile.value.toString()
                 )

@@ -11,11 +11,11 @@ import java.util.*
 @Entity(tableName = "table_comments")
 data class Comment(
     @Embedded
-    val userComment:SimpleUser?=null,
+    val userComment: SimpleUser? = null,
     val comment: String = "",
     @ServerTimestamp
     val timestamp: Date? = null,
     @PrimaryKey
     @get:Exclude
-    val id: String=UUID.randomUUID().toString(),
+    val id: String = UUID.randomUUID().toString(),
 )

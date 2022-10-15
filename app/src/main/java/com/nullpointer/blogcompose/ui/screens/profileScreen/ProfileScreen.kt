@@ -24,7 +24,7 @@ import com.nullpointer.blogcompose.actions.ActionMyProfile
 import com.nullpointer.blogcompose.actions.ActionMyProfile.*
 import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.models.posts.MyPost
-import com.nullpointer.blogcompose.models.users.SimpleUser
+import com.nullpointer.blogcompose.models.users.AuthUser
 import com.nullpointer.blogcompose.presentation.AuthViewModel
 import com.nullpointer.blogcompose.presentation.MyPostViewModel
 import com.nullpointer.blogcompose.services.uploadImg.UploadDataControl
@@ -105,7 +105,7 @@ fun ProfileScreen(
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun ProfileScreen(
-    user: SimpleUser,
+    user: AuthUser,
     isModalVisible: Boolean,
     gridState: LazyGridState,
     isAddButtonVisible: Boolean,
