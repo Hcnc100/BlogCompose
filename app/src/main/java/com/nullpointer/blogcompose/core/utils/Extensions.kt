@@ -259,7 +259,7 @@ fun DocumentSnapshot.getTimeEstimate(
 }
 
 suspend fun <T> callApiTimeOut(
-    timeOut: Long = 3000,
+    timeOut: Long = 5000,
     callApi: suspend () -> T
 ): T {
     if (!InternetCheck.isNetworkAvailable()) throw Exception(NO_INTERNET_CONNECTION)

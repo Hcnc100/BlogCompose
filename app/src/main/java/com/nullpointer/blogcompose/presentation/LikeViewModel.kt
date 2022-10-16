@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import com.nullpointer.blogcompose.core.utils.ExceptionManager.sendMessageErrorToException
 import com.nullpointer.blogcompose.core.utils.launchSafeIO
 import com.nullpointer.blogcompose.domain.post.PostRepository
-import com.nullpointer.blogcompose.models.posts.SimplePost
+import com.nullpointer.blogcompose.models.posts.Post
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
@@ -23,7 +23,7 @@ class LikeViewModel @Inject constructor(
     private var jobLike: Job? = null
 
 
-    fun likePost(simplePost: SimplePost) {
+    fun likePost(simplePost: Post) {
         // * this init like job, update the database with new data with the new data of
         // * server
         jobLike?.cancel()

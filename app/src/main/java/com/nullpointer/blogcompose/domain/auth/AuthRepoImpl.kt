@@ -45,25 +45,24 @@ class AuthRepoImpl(
     }
 
     override suspend fun uploadDataUser(urlImg: String?, name: String?) {
-        callApiTimeOut {
-            val newUser = myUser.first().let {
-                if (urlImg != null) it.copy(urlImg = urlImg) else it
-            }.let {
-                if (name != null) it.copy(name = name) else it
-            }
-            val updateUser = authDataSource.updateDataUser(newUser)
-            prefDataSource.updateUser(updateUser)
+        val newUser = myUser.first().let {
+            if (urlImg != null) it.copy(urlImg = urlImg) else it
+        }.let {
+            if (name != null) it.copy(name = name) else it
         }
+        val updateUser = callApiTimeOut {
+            authDataSource.updateDataUser(newUser)
+        }
+        prefDataSource.updateUser(updateUser)
     }
 
 
     override suspend fun createNewUser(user: AuthUser) {
-        callApiTimeOut {
+        val updateUser = callApiTimeOut(10_000) {
             val newUriImg = imagesDataSource.uploadImageUserWithOutState(user.urlImg.toUri())
             val newUser = user.copy(urlImg = newUriImg.toString())
-            val updateUser = authDataSource.createNewUser(newUser)
-            prefDataSource.updateUser(updateUser)
+            authDataSource.createNewUser(newUser)
         }
-
+        prefDataSource.updateUser(updateUser)
     }
 }

@@ -18,41 +18,37 @@ class NotifyRepoImpl(
     override val listNotify: Flow<List<Notify>> = notifyLocalDataSource.listNotify
 
     override suspend fun requestLastNotify(forceRefresh: Boolean): Int {
-        return callApiTimeOut {
-            val firstNotify = if (forceRefresh) null else notifyLocalDataSource.getFirstNotify()
-            val listNewNotify = notifyRemoteDataSource.getLastNotifications(
+        val firstNotify = if (forceRefresh) null else notifyLocalDataSource.getFirstNotify()
+        val listNewNotify = callApiTimeOut {
+            notifyRemoteDataSource.getLastNotifications(
                 numberRequest = SIZE_NOTIFY_REQUEST,
                 idNotify = firstNotify?.id
             )
-            if (listNewNotify.isNotEmpty()) notifyLocalDataSource.updateAllNotify(listNewNotify)
-            listNewNotify.size
         }
+        if (listNewNotify.isNotEmpty()) notifyLocalDataSource.updateAllNotify(listNewNotify)
+        return listNewNotify.size
     }
 
     override suspend fun requestLastNotifyStartWith(idNotify: String) {
-        callApiTimeOut {
-            val listConcatNotify = notifyRemoteDataSource.getLastNotifications(
+        val listConcatNotify = callApiTimeOut {
+            notifyRemoteDataSource.getLastNotifications(
                 numberRequest = SIZE_NOTIFY_REQUEST,
                 idNotify = idNotify,
                 includeNotify = true
             )
-            if (listConcatNotify.isNotEmpty()) notifyLocalDataSource.updateAllNotify(
-                listConcatNotify
-            )
         }
+        notifyLocalDataSource.updateAllNotify(listConcatNotify)
     }
 
     override suspend fun concatenateNotify(): Int {
-        return callApiTimeOut {
-            val listConcatNotify = notifyRemoteDataSource.getLastNotifications(
+        val listConcatNotify = callApiTimeOut {
+            notifyRemoteDataSource.getLastNotifications(
                 numberRequest = SIZE_NOTIFY_REQUEST,
                 idNotify = notifyLocalDataSource.getLastNotify()?.id
             )
-            if (listConcatNotify.isNotEmpty()) notifyLocalDataSource.insertListNotify(
-                listConcatNotify
-            )
-            listConcatNotify.size
         }
+        notifyLocalDataSource.insertListNotify(listConcatNotify)
+        return listConcatNotify.size
     }
 
     override suspend fun deleterAllNotify() =
@@ -61,8 +57,8 @@ class NotifyRepoImpl(
     override suspend fun openNotify(notify: Notify) {
         callApiTimeOut {
             notifyRemoteDataSource.updateOpenNotify(notify.id)
-            notifyLocalDataSource.updateNotify(notify.copy(isOpen = true))
         }
+        notifyLocalDataSource.updateNotify(notify.copy(isOpen = true))
     }
 
 }

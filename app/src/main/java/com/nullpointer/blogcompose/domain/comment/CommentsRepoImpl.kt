@@ -6,7 +6,7 @@ import com.nullpointer.blogcompose.data.remote.comment.CommentsDataSource
 import com.nullpointer.blogcompose.models.Comment
 import com.nullpointer.blogcompose.models.notify.Notify
 import com.nullpointer.blogcompose.models.notify.TypeNotify
-import com.nullpointer.blogcompose.models.posts.SimplePost
+import com.nullpointer.blogcompose.models.posts.Post
 import com.nullpointer.blogcompose.models.users.AuthUser
 import com.nullpointer.blogcompose.models.users.SimpleUser
 
@@ -24,31 +24,28 @@ class CommentsRepoImpl(
         return currentUser.createNewComment(comment)
     }
 
-    override suspend fun addNewComment(post: SimplePost, comment: String): List<Comment> {
+    override suspend fun addNewComment(post: Post, comment: String): List<Comment> {
+        val currentUser = prefDataSource.getCurrentUser()
+        val notify = createNewNotify(currentUser, post)
+        val newComment = currentUser.createNewComment(comment)
         return callApiTimeOut {
-            val currentUser = prefDataSource.getCurrentUser()
-            val notify = createNewNotify(currentUser, post)
-            val newComment = currentUser.createNewComment(comment)
+
             val idComment = commentDataSource.addNewComment(
                 idPost = post.id,
                 ownerPost = post.userPoster?.idUser!!,
                 comment = newComment,
                 notify = notify
             )
-            getLastCommentsInitWith(post.id, idComment)
-        }
-    }
 
-    private suspend fun getLastCommentsInitWith(idPost: String, idComment: String): List<Comment> {
-        return callApiTimeOut {
             commentDataSource.getLastCommentFromPost(
-                idPost = idPost,
+                idPost = post.id,
                 numberComments = SIZE_COMMENTS,
                 includeComment = true,
                 idComment = idComment
             ).reversed()
         }
     }
+
 
     override suspend fun getLastComments(idPost: String): List<Comment> {
         return callApiTimeOut {
@@ -71,7 +68,7 @@ class CommentsRepoImpl(
 
     private suspend fun createNewNotify(
         currentUser: AuthUser,
-        post: SimplePost
+        post: Post
     ): Notify? {
         return if (post.userPoster?.idUser == prefDataSource.getIdUser())
             null
@@ -91,7 +88,7 @@ class CommentsRepoImpl(
     }
 
 
-    private fun SimplePost.createCommentNotify(myUser: AuthUser): Notify {
+    private fun Post.createCommentNotify(myUser: AuthUser): Notify {
         return Notify(
             userInNotify = SimpleUser(
                 idUser = myUser.id,

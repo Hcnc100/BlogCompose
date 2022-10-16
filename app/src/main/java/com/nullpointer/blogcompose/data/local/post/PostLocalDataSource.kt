@@ -2,7 +2,6 @@ package com.nullpointer.blogcompose.data.local.post
 
 import com.nullpointer.blogcompose.models.posts.MyPost
 import com.nullpointer.blogcompose.models.posts.Post
-import com.nullpointer.blogcompose.models.posts.SimplePost
 import kotlinx.coroutines.flow.Flow
 
 interface PostLocalDataSource {
@@ -17,6 +16,6 @@ interface PostLocalDataSource {
     suspend fun insertListMyPost(listMyPost: List<MyPost>)
     suspend fun getFirstPost(): Post?
     suspend fun getMyFirstPost(): MyPost?
-    suspend fun updatePost(post: SimplePost)
+    suspend fun updatePost(post: Post, myPost: MyPost)
     suspend fun deleterAllPost()
 }

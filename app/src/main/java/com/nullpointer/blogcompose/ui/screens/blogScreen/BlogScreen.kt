@@ -63,11 +63,6 @@ fun BlogScreen(
         merge(postVM.messagePost, likeVM.messageLike).collect(blogScreenState::showSnackMessage)
     }
 
-    LaunchedEffect(key1 = Unit) {
-        postVM.requestNewPost(false, blogScreenState::scrollToTop)
-    }
-
-
     BlogScreen(
         stateListPost = statePost,
         isConcatenate = postVM.isConcatenatePost,
@@ -77,7 +72,7 @@ fun BlogScreen(
         buttonAddIsVisible = !blogScreenState.isScrollInProgress,
         actionBlogScreen = { action ->
             when (action) {
-                RELOAD_BLOG -> postVM.requestNewPost(true, blogScreenState::scrollToTop)
+                RELOAD_BLOG -> postVM.requestNewPost(true)
                 ADD_BLOG -> actionRootDestinations.changeRoot(AddBlogScreenDestination)
                 CONCATENATE_BLOG -> postVM.concatenatePost {
                     postVM.concatenatePost(blogScreenState::animateScrollMore)
@@ -91,7 +86,7 @@ fun BlogScreen(
                     PostDetailsDestination(post.id, true)
                 )
                 SHARE -> sharePost(post.id, blogScreenState.context)
-                LIKE -> likeVM.likePost(post)
+                LIKE -> likeVM.likePost(post as Post)
                 DOWNLOAD -> {}
                 SAVE -> {}
             }

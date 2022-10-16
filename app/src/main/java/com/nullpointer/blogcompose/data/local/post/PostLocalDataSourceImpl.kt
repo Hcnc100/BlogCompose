@@ -4,7 +4,6 @@ import com.nullpointer.blogcompose.data.local.cache.MyPostDAO
 import com.nullpointer.blogcompose.data.local.cache.PostDAO
 import com.nullpointer.blogcompose.models.posts.MyPost
 import com.nullpointer.blogcompose.models.posts.Post
-import com.nullpointer.blogcompose.models.posts.SimplePost
 import kotlinx.coroutines.flow.Flow
 
 class PostLocalDataSourceImpl(
@@ -20,14 +19,9 @@ class PostLocalDataSourceImpl(
     override suspend fun getMyFirstPost(): MyPost? =
         myPostDAO.getFirstPost()
 
-    override suspend fun updatePost(post: SimplePost) {
-        (post as? MyPost)?.let {
-            myPostDAO.updatePost(it)
-        }
-        (post as? Post)?.let {
-            postDAO.updatePost(it)
-        }
-
+    override suspend fun updatePost(post: Post, myPost: MyPost) {
+        myPostDAO.updatePost(myPost)
+        postDAO.updatePost(post)
     }
 
 
