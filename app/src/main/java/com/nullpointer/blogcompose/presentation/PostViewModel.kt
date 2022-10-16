@@ -81,7 +81,6 @@ class PostViewModel @Inject constructor(
         })
 
     fun concatenatePost(callbackSuccess: () -> Unit) = launchSafeIO(
-        isEnabled = isConcatenateEnable && !isConcatenatePost,
         blockBefore = { isConcatenatePost = true },
         blockAfter = { isConcatenatePost = false },
         blockException = {

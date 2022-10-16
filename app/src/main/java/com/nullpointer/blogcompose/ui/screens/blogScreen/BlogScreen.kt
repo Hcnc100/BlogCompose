@@ -75,9 +75,7 @@ fun BlogScreen(
             when (action) {
                 RELOAD_BLOG -> postVM.requestNewPost(true)
                 ADD_BLOG -> actionRootDestinations.changeRoot(AddBlogScreenDestination)
-                CONCATENATE_BLOG -> postVM.concatenatePost {
-                    postVM.concatenatePost(blogScreenState::animateScrollMore)
-                }
+                CONCATENATE_BLOG -> postVM.concatenatePost(blogScreenState::animateScrollMore)
             }
         },
         actionBlog = { action, post ->
