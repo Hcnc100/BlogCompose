@@ -32,17 +32,19 @@ fun ListSuccessMyBlogs(
     actionLoadMore: () -> Unit,
     isConcatenateMyBlog: Boolean,
     contentPadding: PaddingValues,
+    modifier: Modifier = Modifier,
     actionClickPost: (String) -> Unit,
     header: @Composable () -> Unit
 ) {
 
     Box {
         LazyVerticalGrid(
+            modifier = modifier,
+            state = gridState,
             contentPadding = contentPadding,
             verticalArrangement = Arrangement.spacedBy(spaceBetweenItems),
             horizontalArrangement = Arrangement.spacedBy(spaceBetweenItems),
-            columns = GridCells.Adaptive(dimensionResource(id = R.dimen.size_photo_my_post)),
-            state = gridState
+            columns = GridCells.Adaptive(dimensionResource(id = R.dimen.size_photo_my_post))
         ) {
             item(key = "header-profile", span = { GridItemSpan(maxLineSpan) }) {
                 header()

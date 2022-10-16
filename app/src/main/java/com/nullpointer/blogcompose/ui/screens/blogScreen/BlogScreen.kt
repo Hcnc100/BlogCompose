@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.ScaffoldState
@@ -123,7 +124,9 @@ private fun BlogScreen(
                 listState = lazyListState,
                 stateListPost = stateListPost,
                 isConcatenate = isConcatenate,
-                modifier = Modifier.padding(it),
+                modifier = Modifier
+                    .padding(it)
+                    .fillMaxSize(),
                 actionBottomReached = { actionBlogScreen(CONCATENATE_BLOG) }
             )
         }

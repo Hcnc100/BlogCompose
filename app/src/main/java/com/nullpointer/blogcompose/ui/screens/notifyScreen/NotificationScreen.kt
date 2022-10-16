@@ -2,6 +2,7 @@ package com.nullpointer.blogcompose.ui.screens.notifyScreen
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.ScaffoldState
@@ -99,7 +100,9 @@ fun NotificationScreen(
                 stateListNotify = stateListNotify,
                 isConcatenateNotify = isConcatenateNotify,
                 actionBottomReached = { actionNotify(CONCATENATE_NOTIFY) },
-                modifier = Modifier.padding(it)
+                modifier = Modifier
+                    .padding(it)
+                    .fillMaxSize()
             )
         }
         CustomSnackBar(
@@ -118,7 +121,7 @@ private fun ListNotify(
     listState: LazyListState,
     isConcatenateNotify: Boolean,
     modifier: Modifier = Modifier,
-    sizeBetweenItems: Dp = 10.dp,
+    sizeBetweenItems: Dp = 5.dp,
     actionBottomReached: () -> Unit,
     stateListNotify: Resource<List<Notify>>,
     actionClick: (notify: Notify) -> Unit,
@@ -146,6 +149,7 @@ private fun ListNotify(
                 EmptyListNotify(modifier = modifier)
             } else {
                 SuccessListNotify(
+                    modifier = modifier,
                     lazyListState = listState,
                     listNotify = stateListNotify.data,
                     contentPadding = contentPadding,

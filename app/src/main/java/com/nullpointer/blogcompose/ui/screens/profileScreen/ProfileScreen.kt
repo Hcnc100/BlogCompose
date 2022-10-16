@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.Uri
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.material.ExperimentalMaterialApi
@@ -139,7 +140,9 @@ private fun ProfileScreen(
                 listPostState = listPostState,
                 isConcatenateMyBlogs = isConcatenateMyBlogs,
                 actionLoadMore = { actionProfile(LOAD_MORE) },
-                modifier = Modifier.padding(it)
+                modifier = Modifier
+                    .padding(it)
+                    .fillMaxSize()
             ) {
                 HeaderUser(
                     user = user,
@@ -189,6 +192,7 @@ private fun ListMyBlogs(
             } else {
                 ListSuccessMyBlogs(
                     header = headerUser,
+                    modifier = modifier,
                     gridState = gridState,
                     listMyPost = listPostState.data,
                     contentPadding = contextPadding,
