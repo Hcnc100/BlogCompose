@@ -1,6 +1,5 @@
 package com.nullpointer.blogcompose.ui.screens.addPost.viewModel
 
-import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -8,7 +7,7 @@ import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.core.delegates.PropertySavableImg
 import com.nullpointer.blogcompose.core.delegates.PropertySavableString
 import com.nullpointer.blogcompose.domain.compress.CompressRepository
-import com.nullpointer.blogcompose.services.uploadImg.UploadDataControl
+import com.nullpointer.blogcompose.domain.services.ServicesRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -17,7 +16,8 @@ import javax.inject.Inject
 @HiltViewModel
 class AddBlogViewModel @Inject constructor(
     state: SavedStateHandle,
-    private val compressRepository: CompressRepository
+    private val compressRepository: CompressRepository,
+    private val servicesRepository: ServicesRepository
 ) : ViewModel() {
 
     companion object {
@@ -49,16 +49,15 @@ class AddBlogViewModel @Inject constructor(
         tagSavable = TAG_DESCRIPTION_POST
     )
 
-    fun createPostValidate(context: Context, callBackSuccess: () -> Unit) {
+    fun createPostValidate(callBackSuccess: () -> Unit) {
         if (imageBlog.isEmpty) {
             _messageAddBlog.trySend(R.string.message_empty_image_post)
         } else {
             description.reValueField()
             if (!description.hasError) {
-                UploadDataControl.startServicesUploadPost(
-                    context = context,
-                    description = description.currentValue,
-                    uriImg = imageBlog.value
+                servicesRepository.startUploadPost(
+                    imagePost = imageBlog.value,
+                    descriptionPost = description.currentValue
                 )
                 callBackSuccess()
             }

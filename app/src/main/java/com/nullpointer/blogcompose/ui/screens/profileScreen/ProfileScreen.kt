@@ -1,6 +1,5 @@
 package com.nullpointer.blogcompose.ui.screens.profileScreen
 
-import android.content.Context
 import android.net.Uri
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -16,7 +15,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -27,8 +25,7 @@ import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.models.posts.MyPost
 import com.nullpointer.blogcompose.models.users.AuthUser
 import com.nullpointer.blogcompose.presentation.AuthViewModel
-import com.nullpointer.blogcompose.presentation.MyPostViewModel
-import com.nullpointer.blogcompose.services.uploadImg.UploadDataControl
+import com.nullpointer.blogcompose.presentation.ProfileViewModel
 import com.nullpointer.blogcompose.ui.interfaces.ActionRootDestinations
 import com.nullpointer.blogcompose.ui.navigation.HomeNavGraph
 import com.nullpointer.blogcompose.ui.navigation.MainTransitions
@@ -52,15 +49,12 @@ import com.ramcosta.composedestinations.annotation.Destination
 @Composable
 fun ProfileScreen(
     authViewModel: AuthViewModel,
-    context: Context = LocalContext.current,
     actionRootDestinations: ActionRootDestinations,
-    myPostViewModel: MyPostViewModel = hiltViewModel(),
+    myPostViewModel: ProfileViewModel = hiltViewModel(),
     profileScreenState: ProfileScreenState = rememberProfileScreenState(
         isRefresh = myPostViewModel.isRequestMyPost,
         sizeScrollMore = 50f,
-        actionChangeImage = {
-            UploadDataControl.startServicesUploadUser(context, it)
-        }
+        actionChangeImage = myPostViewModel::uploadImageUser
     )
 ) {
     // * states

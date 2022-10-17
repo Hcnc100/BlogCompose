@@ -1,5 +1,6 @@
 package com.nullpointer.blogcompose.presentation
 
+import android.net.Uri
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -11,6 +12,7 @@ import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.core.utils.ExceptionManager.sendMessageErrorToException
 import com.nullpointer.blogcompose.core.utils.launchSafeIO
 import com.nullpointer.blogcompose.domain.post.PostRepository
+import com.nullpointer.blogcompose.domain.services.ServicesRepository
 import com.nullpointer.blogcompose.models.posts.MyPost
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -21,9 +23,10 @@ import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
-class MyPostViewModel @Inject constructor(
+class ProfileViewModel @Inject constructor(
+    savedStateHandle: SavedStateHandle,
     private val postRepository: PostRepository,
-    savedStateHandle: SavedStateHandle
+    private val servicesRepository: ServicesRepository
 ) : ViewModel() {
 
     companion object {
@@ -100,4 +103,9 @@ class MyPostViewModel @Inject constructor(
             }
         }
     )
+
+    fun uploadImageUser(newImage: Uri) {
+        servicesRepository.startUploadImgProfile(newImage)
+    }
+
 }

@@ -14,6 +14,8 @@ import com.nullpointer.blogcompose.domain.notify.NotifyRepoImpl
 import com.nullpointer.blogcompose.domain.notify.NotifyRepository
 import com.nullpointer.blogcompose.domain.post.PostRepoImpl
 import com.nullpointer.blogcompose.domain.post.PostRepository
+import com.nullpointer.blogcompose.domain.services.ServicesRepository
+import com.nullpointer.blogcompose.domain.services.ServicesRepositoryImpl
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -65,4 +67,10 @@ abstract class RepositoryModule {
     abstract fun provideDeleterRepository(
         deleterRepoImpl: DeleterRepoImpl
     ): DeleterRepository
+
+    @Binds
+    @Singleton
+    abstract fun provideServicesRepository(
+        servicesRepoImpl: ServicesRepositoryImpl
+    ): ServicesRepository
 }

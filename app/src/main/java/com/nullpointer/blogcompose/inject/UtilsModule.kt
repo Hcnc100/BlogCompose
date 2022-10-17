@@ -6,6 +6,7 @@ import com.nullpointer.blogcompose.data.local.post.PostLocalDataSource
 import com.nullpointer.blogcompose.data.local.preferences.PreferencesDataSource
 import com.nullpointer.blogcompose.domain.compress.CompressRepoImpl
 import com.nullpointer.blogcompose.domain.delete.DeleterRepoImpl
+import com.nullpointer.blogcompose.domain.services.ServicesRepositoryImpl
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -16,6 +17,12 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object UtilsModule {
+
+    @Provides
+    @Singleton
+    fun provideServicesRepository(
+        @ApplicationContext context: Context
+    ): ServicesRepositoryImpl = ServicesRepositoryImpl(context)
 
     @Provides
     @Singleton
