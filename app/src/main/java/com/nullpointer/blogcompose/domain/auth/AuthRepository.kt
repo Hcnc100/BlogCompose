@@ -6,10 +6,10 @@ import kotlinx.coroutines.flow.Flow
 
 interface AuthRepository {
     val myUser: Flow<AuthUser>
-    suspend fun authWithCredential(authCredential: AuthCredential)
-    suspend fun updateTokenUser(token: String)
-    suspend fun uploadDataUser(urlImg: String? = null, name: String? = null)
     suspend fun logOut()
+    suspend fun verifyTokenUser()
     suspend fun createNewUser(user: AuthUser)
-    suspend fun getIdUser(): String
+    suspend fun updateTokenUser(token: String)
+    suspend fun authWithCredential(authCredential: AuthCredential)
+    suspend fun uploadDataUser(urlImg: String? = null, name: String? = null)
 }

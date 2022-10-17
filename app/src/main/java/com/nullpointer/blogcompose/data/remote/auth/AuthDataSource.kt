@@ -5,7 +5,7 @@ import com.nullpointer.blogcompose.models.users.AuthUser
 
 interface AuthDataSource {
     suspend fun authWithCredential(credential: AuthCredential): AuthUser
-    suspend fun updateDataUser(simpleUser: AuthUser): AuthUser
+    suspend fun updateDataUser(name: String?, urlImg: String?)
     suspend fun addingTokenUser(
         newToken: String? = null,
         uuidUser: String? = null,

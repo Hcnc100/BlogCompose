@@ -1,6 +1,7 @@
 package com.nullpointer.blogcompose.inject
 
 import android.content.Context
+import com.nullpointer.blogcompose.data.local.notify.NotifyLocalDataSource
 import com.nullpointer.blogcompose.data.local.post.PostLocalDataSource
 import com.nullpointer.blogcompose.data.local.preferences.PreferencesDataSource
 import com.nullpointer.blogcompose.domain.compress.CompressRepoImpl
@@ -26,6 +27,11 @@ object UtilsModule {
     @Singleton
     fun provideDeleterRepository(
         postLocalDataSource: PostLocalDataSource,
-        preferencesDataSource: PreferencesDataSource,
-    ): DeleterRepoImpl = DeleterRepoImpl(postLocalDataSource, preferencesDataSource)
+        notifyLocalDataSource: NotifyLocalDataSource,
+        preferencesDataSource: PreferencesDataSource
+    ): DeleterRepoImpl = DeleterRepoImpl(
+        postLocalDataSource,
+        notifyLocalDataSource,
+        preferencesDataSource
+    )
 }

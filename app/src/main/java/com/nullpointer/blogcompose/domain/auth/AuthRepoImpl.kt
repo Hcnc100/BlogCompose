@@ -16,44 +16,44 @@ class AuthRepoImpl(
     private val imagesDataSource: ImagesDataSource
 ) : AuthRepository {
 
-    override val myUser: Flow<AuthUser> = prefDataSource.user
+    override val myUser: Flow<AuthUser> = prefDataSource.getUser()
 
-    override suspend fun getIdUser() = this.myUser.first().id
+    override suspend fun verifyTokenUser() {
+        val lastTokenSaved = prefDataSource.getUser().first().token
+        val newTokenSaved = authDataSource.getUserToken()
+
+        if (lastTokenSaved != newTokenSaved) {
+            callApiTimeOut { authDataSource.addingTokenUser(newToken = newTokenSaved) }
+            prefDataSource.updateUser(token = newTokenSaved)
+        }
+    }
 
     override suspend fun authWithCredential(authCredential: AuthCredential) {
         // * authenticate user and save data user
-        val user = callApiTimeOut {
-            authDataSource.authWithCredential(authCredential)
-        }
+        val user = callApiTimeOut { authDataSource.authWithCredential(authCredential) }
         prefDataSource.updateUser(user)
     }
 
     override suspend fun updateTokenUser(token: String) {
-        val oldToken = myUser.first().token
+        val oldToken = prefDataSource.getUser().first().token
         callApiTimeOut {
             authDataSource.addingTokenUser(
                 newToken = token,
                 oldToken = oldToken
             )
         }
+        prefDataSource.updateUser(token = token)
     }
 
     override suspend fun logOut() {
         // * log out the user and deleter user saved
         authDataSource.logOut()
-        prefDataSource.deleterUser()
+        prefDataSource.deleterData()
     }
 
     override suspend fun uploadDataUser(urlImg: String?, name: String?) {
-        val newUser = myUser.first().let {
-            if (urlImg != null) it.copy(urlImg = urlImg) else it
-        }.let {
-            if (name != null) it.copy(name = name) else it
-        }
-        val updateUser = callApiTimeOut {
-            authDataSource.updateDataUser(newUser)
-        }
-        prefDataSource.updateUser(updateUser)
+        callApiTimeOut { authDataSource.updateDataUser(name, urlImg) }
+        prefDataSource.updateUser(name, urlImg)
     }
 
 

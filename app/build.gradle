@@ -6,7 +6,6 @@ plugins {
     id 'dagger.hilt.android.plugin'
     id 'kotlin-kapt'
     id 'kotlin-parcelize'
-    id "com.google.protobuf" version "0.8.12"
     id "com.google.devtools.ksp" version "1.7.0-1.0.6"
     id 'kotlinx-serialization' version '1.4.10'
 }
@@ -146,7 +145,6 @@ dependencies {
     // * data store
     implementation("androidx.datastore:datastore:1.0.0")
     implementation("androidx.datastore:datastore-preferences:1.0.0")
-    implementation "com.google.protobuf:protobuf-javalite:3.17.2"
 
     // * shimmer effect
     implementation 'com.valentinilk.shimmer:compose-shimmer:1.0.3'
@@ -161,21 +159,5 @@ dependencies {
     implementation 'com.github.CanHub:Android-Image-Cropper:4.3.2'
 
 
-}
-
-protobuf {
-    protoc {
-        artifact = "com.google.protobuf:protoc:3.11.0"
-    }
-
-    generateProtoTasks {
-        all().each { task ->
-            task.builtins {
-                java {
-                    option 'lite'
-                }
-            }
-        }
-    }
 }
 

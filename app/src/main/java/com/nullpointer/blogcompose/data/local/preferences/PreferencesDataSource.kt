@@ -4,9 +4,8 @@ import com.nullpointer.blogcompose.models.users.AuthUser
 import kotlinx.coroutines.flow.Flow
 
 interface PreferencesDataSource {
-    val user: Flow<AuthUser>
-    suspend fun getCurrentUser(): AuthUser
-    suspend fun getIdUser(): String
-    suspend fun deleterUser()
-    suspend fun updateUser(myUser: AuthUser)
+    suspend fun deleterData()
+    fun getUser(): Flow<AuthUser>
+    suspend fun updateUser(user: AuthUser)
+    suspend fun updateUser(name: String? = null, urlImg: String? = null, token: String? = null)
 }

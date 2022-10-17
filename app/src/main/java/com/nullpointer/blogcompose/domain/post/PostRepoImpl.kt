@@ -11,6 +11,7 @@ import com.nullpointer.blogcompose.models.posts.Post
 import com.nullpointer.blogcompose.models.users.AuthUser
 import com.nullpointer.blogcompose.models.users.SimpleUser
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 
 @Suppress("UNCHECKED_CAST")
 class PostRepoImpl(
@@ -43,7 +44,7 @@ class PostRepoImpl(
 
     override suspend fun requestMyLastPost(forceRefresh: Boolean): Int {
         val firstPost = if (forceRefresh) null else postLocalDataSource.getMyFirstPost()
-        val idUser = prefDataSource.getIdUser()
+        val idUser = prefDataSource.getUser().first().id
         val listMyLastPost = callApiTimeOut {
             postRemoteDataSource.getLastPost(
                 idPost = firstPost?.id,
@@ -73,12 +74,13 @@ class PostRepoImpl(
 
     override suspend fun concatenateMyPost(): Int {
         val lastMyPost = postLocalDataSource.getLastMyPost()
+        val idUser = prefDataSource.getUser().first().id
 
         return if (lastMyPost != null) {
             val concatenatePost = callApiTimeOut {
                 postRemoteDataSource.getConcatenatePost(
                     idPost = lastMyPost.id,
-                    fromUserId = prefDataSource.getIdUser(),
+                    fromUserId = idUser,
                     numberPosts = SIZE_MY_POST_REQUEST
                 )
             }
@@ -113,9 +115,10 @@ class PostRepoImpl(
         postLocalDataSource.updatePost(postFakeUpdate, postFakeUpdate.toMyPost())
 
         // * create notify if is needed
-        val currentUser = prefDataSource.getCurrentUser()
+        val currentUser = prefDataSource.getUser().first()
 
-        val newNotify = if (post.userPoster?.idUser != prefDataSource.getIdUser() && isLiked)
+
+        val newNotify = if (post.userPoster?.idUser != currentUser.id && isLiked)
             post.createLikeNotify(currentUser) else null
 
         callApiTimeOut {
@@ -141,7 +144,7 @@ class PostRepoImpl(
 
 
     override suspend fun addNewPost(post: Post) {
-        val myIdUser = prefDataSource.getIdUser()
+        val myIdUser = prefDataSource.getUser().first().id
         val idLastPost = postLocalDataSource.getMyFirstPost()?.id
         val newIdPost = postRemoteDataSource.addNewPost(post)
 

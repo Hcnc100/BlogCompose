@@ -9,6 +9,7 @@ import com.nullpointer.blogcompose.models.notify.TypeNotify
 import com.nullpointer.blogcompose.models.posts.Post
 import com.nullpointer.blogcompose.models.users.AuthUser
 import com.nullpointer.blogcompose.models.users.SimpleUser
+import kotlinx.coroutines.flow.first
 
 class CommentsRepoImpl(
     private val prefDataSource: PreferencesDataSource,
@@ -20,12 +21,12 @@ class CommentsRepoImpl(
     }
 
     override suspend fun createComment(comment: String): Comment {
-        val currentUser = prefDataSource.getCurrentUser()
+        val currentUser = prefDataSource.getUser().first()
         return currentUser.createNewComment(comment)
     }
 
     override suspend fun addNewComment(post: Post, comment: String): List<Comment> {
-        val currentUser = prefDataSource.getCurrentUser()
+        val currentUser = prefDataSource.getUser().first()
         val notify = createNewNotify(currentUser, post)
         val newComment = currentUser.createNewComment(comment)
         return callApiTimeOut {
@@ -70,7 +71,7 @@ class CommentsRepoImpl(
         currentUser: AuthUser,
         post: Post
     ): Notify? {
-        return if (post.userPoster?.idUser == prefDataSource.getIdUser())
+        return if (post.userPoster?.idUser == prefDataSource.getUser().first().id)
             null
         else
             post.createCommentNotify(currentUser)

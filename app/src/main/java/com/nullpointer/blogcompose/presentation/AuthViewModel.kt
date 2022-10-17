@@ -29,6 +29,10 @@ class AuthViewModel @Inject constructor(
     private val AuthUser.isUserAuth get() = id.isNotEmpty()
     private val AuthUser.isDataComplete get() = name.isNotEmpty() && urlImg.isNotEmpty()
 
+    init {
+        verifyTokenUser()
+    }
+
     val currentUser = authRepository.myUser.flowOn(Dispatchers.IO).stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(5000),
@@ -59,6 +63,13 @@ class AuthViewModel @Inject constructor(
 
     var isProcessing by mutableStateOf(false)
         private set
+
+    private fun verifyTokenUser() = launchSafeIO(
+        blockIO = { authRepository.verifyTokenUser() },
+        blockException = {
+            Timber.e("Error update token $it")
+        }
+    )
 
     fun authWithCredential(
         authCredential: AuthCredential

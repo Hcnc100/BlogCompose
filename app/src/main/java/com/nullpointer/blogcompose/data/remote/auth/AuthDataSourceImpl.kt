@@ -8,7 +8,6 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.ktx.messaging
-import com.nullpointer.blogcompose.core.utils.toMap
 import com.nullpointer.blogcompose.models.users.AuthUser
 import kotlinx.coroutines.tasks.await
 import timber.log.Timber
@@ -102,14 +101,17 @@ class AuthDataSourceImpl : AuthDataSource {
     }
 
 
-    override suspend fun updateDataUser(simpleUser: AuthUser): AuthUser {
+    override suspend fun updateDataUser(name: String?, urlImg: String?) {
         val nodeUser = nodeUsers.document(auth.currentUser!!.uid)
-        val mapUpdate = simpleUser.toMap(
-            listIgnoredFields = listOf("idUser"),
-            listTimestampFields = listOf(FIELD_TIME_UPDATE)
-        )
-        nodeUser.update(mapUpdate).await()
-        return nodeUser.get().await().toMyUser()
+
+        val mapUpdated = mutableMapOf<String, Any>()
+
+        name?.let { mapUpdated["name"] = name }
+        urlImg?.let { mapUpdated["urlImg"] = urlImg }
+        mapUpdated[FIELD_TIME_UPDATE] = FieldValue.serverTimestamp()
+
+        nodeUser.update(mapUpdated).await()
+        return
     }
 
 
