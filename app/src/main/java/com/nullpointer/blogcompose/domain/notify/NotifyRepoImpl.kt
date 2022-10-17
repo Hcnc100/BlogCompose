@@ -30,25 +30,30 @@ class NotifyRepoImpl(
     }
 
     override suspend fun requestLastNotifyStartWith(idNotify: String) {
-        val listConcatNotify = callApiTimeOut {
-            notifyRemoteDataSource.getLastNotifications(
-                numberRequest = SIZE_NOTIFY_REQUEST,
-                idNotify = idNotify,
-                includeNotify = true
+        val firstNotify = notifyLocalDataSource.getFirstNotify()
+        val listNewNotify = callApiTimeOut {
+            notifyRemoteDataSource.getLastPostBetween(
+                startWithId = idNotify,
+                endWithId = firstNotify?.id,
             )
         }
-        notifyLocalDataSource.updateAllNotify(listConcatNotify)
+        notifyLocalDataSource.insertListNotify(listNewNotify)
     }
 
     override suspend fun concatenateNotify(): Int {
-        val listConcatNotify = callApiTimeOut {
-            notifyRemoteDataSource.getLastNotifications(
-                numberRequest = SIZE_NOTIFY_REQUEST,
-                idNotify = notifyLocalDataSource.getLastNotify()?.id
-            )
+        val lastNotify = notifyLocalDataSource.getLastNotify()
+        return if (lastNotify != null) {
+            val listConcatNotify = callApiTimeOut {
+                notifyRemoteDataSource.getConcatenateNotify(
+                    numberRequest = SIZE_NOTIFY_REQUEST,
+                    idNotify = lastNotify.id
+                )
+            }
+            notifyLocalDataSource.insertListNotify(listConcatNotify)
+            return listConcatNotify.size
+        } else {
+            0
         }
-        notifyLocalDataSource.insertListNotify(listConcatNotify)
-        return listConcatNotify.size
     }
 
     override suspend fun deleterAllNotify() =
@@ -60,5 +65,6 @@ class NotifyRepoImpl(
         }
         notifyLocalDataSource.updateNotify(notify.copy(isOpen = true))
     }
+
 
 }

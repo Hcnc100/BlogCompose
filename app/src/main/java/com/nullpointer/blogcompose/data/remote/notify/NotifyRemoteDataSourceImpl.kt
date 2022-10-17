@@ -7,7 +7,9 @@ import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
 import com.nullpointer.blogcompose.core.utils.getConcatenateObjects
 import com.nullpointer.blogcompose.core.utils.getNewObjects
+import com.nullpointer.blogcompose.core.utils.getObjectsBetween
 import com.nullpointer.blogcompose.core.utils.getTimeEstimate
+import com.nullpointer.blogcompose.data.remote.FirebaseConstants
 import com.nullpointer.blogcompose.models.notify.Notify
 
 class NotifyRemoteDataSourceImpl : NotifyRemoteDataSource {
@@ -33,6 +35,19 @@ class NotifyRemoteDataSourceImpl : NotifyRemoteDataSource {
             endWithId = idNotify,
             nResults = numberRequest,
             transform = { it.toNotify() }
+        )
+    }
+
+    override suspend fun getLastPostBetween(
+        endWithId: String?,
+        startWithId: String
+    ): List<Notify> {
+        val nodeUserNotify = nodeNotify.document(auth.currentUser?.uid!!).collection(LIST_NOTIFY)
+        return nodeUserNotify.getObjectsBetween(
+            fieldTimestamp = FirebaseConstants.TIMESTAMP,
+            startWithId = startWithId,
+            endWithId = endWithId,
+            transform = { it.toNotify() },
         )
     }
 

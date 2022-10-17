@@ -15,5 +15,10 @@ interface NotifyRemoteDataSource {
         idNotify: String
     ): List<Notify>
 
+    suspend fun getLastPostBetween(
+        endWithId: String?,
+        startWithId: String
+    ): List<Notify>
+
     fun updateOpenNotify(idNotify: String)
 }
