@@ -38,7 +38,6 @@ class AuthDataSourceImpl : AuthDataSource {
 
             database.runTransaction { transaction ->
                 val currentToken = transaction.get(refToken)
-                // && (currentToken.get(FIELD_ARRAY_TOKENS) as? List<*>) == null
                 if (currentToken.exists()) {
 
                     (currentToken.get(FIELD_ARRAY_TOKENS) as? HashMap<*, *>)?.let {
@@ -95,6 +94,7 @@ class AuthDataSourceImpl : AuthDataSource {
         val refUser = nodeUsers.document(user.uid)
         val docUser = refUser.get().await()
         return if (docUser.exists()) {
+            addingTokenUser(uuidUser = user.uid)
             docUser.toMyUser()
         } else {
             AuthUser(id = user.uid)
