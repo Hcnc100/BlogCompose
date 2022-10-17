@@ -33,6 +33,8 @@ class ProfileViewModel @Inject constructor(
         private const val CONCATENATE_ENABLE = "KEY_CONCATENATE_ENABLE_MY_POST"
     }
 
+    val eventUploadPost get() = servicesRepository.finishUploadSuccessEvent
+
     private var isConcatenateEnable by SavableProperty(savedStateHandle, CONCATENATE_ENABLE, false)
 
     private val _messageMyPosts = Channel<String>()

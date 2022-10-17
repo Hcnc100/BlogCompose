@@ -41,6 +41,7 @@ import com.nullpointer.blogcompose.ui.share.ButtonAdd
 import com.nullpointer.blogcompose.ui.share.CustomSnackBar
 import com.nullpointer.blogcompose.ui.share.ScaffoldModalSwipe
 import com.ramcosta.composedestinations.annotation.Destination
+import kotlinx.coroutines.delay
 
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -70,6 +71,12 @@ fun ProfileScreen(
         myPostViewModel.messageMyPosts.collect(profileScreenState::showSnackMessage)
     }
 
+    LaunchedEffect(key1 = Unit) {
+        myPostViewModel.eventUploadPost.collect {
+            delay(200)
+            profileScreenState.scrollToTop()
+        }
+    }
 
     ProfileScreen(
         user = currentUser,

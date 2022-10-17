@@ -11,6 +11,7 @@ import com.nullpointer.blogcompose.core.states.Resource
 import com.nullpointer.blogcompose.core.utils.ExceptionManager.sendMessageErrorToException
 import com.nullpointer.blogcompose.core.utils.launchSafeIO
 import com.nullpointer.blogcompose.domain.post.PostRepository
+import com.nullpointer.blogcompose.domain.services.ServicesRepository
 import com.nullpointer.blogcompose.models.posts.Post
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -22,8 +23,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class PostViewModel @Inject constructor(
+    state: SavedStateHandle,
     private val postRepository: PostRepository,
-    state: SavedStateHandle
+    private val servicesRepository: ServicesRepository
 ) : ViewModel() {
 
     companion object {
@@ -40,6 +42,8 @@ class PostViewModel @Inject constructor(
 
     var isConcatenatePost by mutableStateOf(false)
         private set
+
+    val eventUploadPost get() = servicesRepository.finishUploadSuccessEvent
 
     val listPost = postRepository.listLastPost.transform<List<Post>, Resource<List<Post>>> {
         isConcatenateEnable = true

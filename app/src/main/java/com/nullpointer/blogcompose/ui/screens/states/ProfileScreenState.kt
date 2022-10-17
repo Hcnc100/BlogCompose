@@ -49,6 +49,12 @@ class ProfileScreenState constructor(
             listState.animateScrollBy(sizeScrollMore)
         }
     }
+
+    fun scrollToTop() {
+        scope.launch {
+            listState.scrollToItem(0)
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterialApi::class)

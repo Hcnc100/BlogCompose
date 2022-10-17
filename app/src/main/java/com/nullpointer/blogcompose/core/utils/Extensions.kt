@@ -67,8 +67,10 @@ fun Context.getNotifyServices(): NotificationManager {
     return getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 }
 
-fun Context.showToastMessage(@StringRes stringRes: Int) {
-    Toast.makeText(this, getString(stringRes), Toast.LENGTH_SHORT).show()
+suspend fun Context.showToastMessage(@StringRes stringRes: Int) {
+    withContext(Dispatchers.Main) {
+        Toast.makeText(this@showToastMessage, getString(stringRes), Toast.LENGTH_SHORT).show()
+    }
 }
 
 fun Context.sendEmail(email:String){

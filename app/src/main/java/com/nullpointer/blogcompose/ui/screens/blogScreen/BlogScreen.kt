@@ -28,7 +28,6 @@ import com.nullpointer.blogcompose.models.posts.Post
 import com.nullpointer.blogcompose.models.posts.SimplePost
 import com.nullpointer.blogcompose.presentation.LikeViewModel
 import com.nullpointer.blogcompose.presentation.PostViewModel
-import com.nullpointer.blogcompose.services.uploadImg.UploadDataServices
 import com.nullpointer.blogcompose.ui.interfaces.ActionRootDestinations
 import com.nullpointer.blogcompose.ui.navigation.HomeNavGraph
 import com.nullpointer.blogcompose.ui.navigation.MainTransitions
@@ -62,6 +61,13 @@ fun BlogScreen(
 
     LaunchedEffect(key1 = Unit) {
         merge(postVM.messagePost, likeVM.messageLike).collect(blogScreenState::showSnackMessage)
+    }
+
+    LaunchedEffect(key1 = Unit) {
+        postVM.eventUploadPost.collect {
+            delay(200)
+            blogScreenState.scrollToTop()
+        }
     }
 
     BlogScreen(
@@ -151,14 +157,6 @@ private fun ListPost(
     contentPadding: PaddingValues = PaddingValues(4.dp)
 ) {
 
-    LaunchedEffect(key1 = Unit) {
-        UploadDataServices.finishUploadSuccess.collect {
-            delay(200)
-            if (listState.firstVisibleItemIndex != 0) {
-                listState.animateScrollToItem(0)
-            }
-        }
-    }
     when (stateListPost) {
         Resource.Failure -> ListEmptyBlog(modifier = modifier)
         Resource.Loading -> ListLoadBlog(
