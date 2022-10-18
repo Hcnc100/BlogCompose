@@ -11,7 +11,7 @@ class ServicesRepositoryImpl(
 ) : ServicesRepository {
 
     private val _finishUploadSuccessEvent = Channel<Unit>()
-    override val finishUploadSuccessEvent = _finishUploadSuccessEvent.receiveAsFlow()
+    override val eventHasNewPost = _finishUploadSuccessEvent.receiveAsFlow()
 
 
     override fun startUploadImgProfile(newImg: Uri) {
@@ -29,7 +29,7 @@ class ServicesRepositoryImpl(
         )
     }
 
-    override fun notifyPostSuccessUpload() {
+    override fun notifyEventHasNewPost() {
         _finishUploadSuccessEvent.trySend(Unit)
     }
 }

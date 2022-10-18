@@ -101,7 +101,7 @@ class UploadDataServices : LifecycleService() {
                     description = descriptionPost
                 )
                 postRepository.addNewPost(newPost)
-                servicesRepository.notifyPostSuccessUpload()
+                servicesRepository.notifyEventHasNewPost()
                 showToastMessage(R.string.post_upload_success)
             }
         )

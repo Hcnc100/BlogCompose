@@ -43,7 +43,7 @@ class PostViewModel @Inject constructor(
     var isConcatenatePost by mutableStateOf(false)
         private set
 
-    val eventUploadPost get() = servicesRepository.finishUploadSuccessEvent
+    val eventUploadPost get() = servicesRepository.eventHasNewPost
 
     val listPost = postRepository.listLastPost.transform<List<Post>, Resource<List<Post>>> {
         isConcatenateEnable = true
@@ -68,13 +68,16 @@ class PostViewModel @Inject constructor(
     }
 
 
-    fun requestNewPost(forceRefresh: Boolean = false) = launchSafeIO(
+    fun requestNewPost(
+        forceRefresh: Boolean = false
+    ) = launchSafeIO(
         isEnabled = !isRequestData,
         blockBefore = { isRequestData = true },
         blockAfter = { isRequestData = false },
         blockIO = {
             val sizeNewPost = postRepository.requestLastPost(forceRefresh)
             Timber.d("were obtained $sizeNewPost new post")
+            if (sizeNewPost > 0) servicesRepository.notifyEventHasNewPost()
         },
         blockException = {
             sendMessageErrorToException(

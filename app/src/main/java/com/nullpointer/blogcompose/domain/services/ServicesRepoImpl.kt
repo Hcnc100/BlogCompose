@@ -4,9 +4,9 @@ import android.net.Uri
 import kotlinx.coroutines.flow.Flow
 
 interface ServicesRepository {
-    val finishUploadSuccessEvent: Flow<Unit>
+    val eventHasNewPost: Flow<Unit>
 
     fun startUploadImgProfile(newImg: Uri)
     fun startUploadPost(descriptionPost: String, imagePost: Uri)
-    fun notifyPostSuccessUpload()
+    fun notifyEventHasNewPost()
 }
