@@ -24,13 +24,13 @@ interface NotifyDAO {
     @Query("DELETE FROM table_notify")
     suspend fun deleterAll()
 
-    @Query("SELECT * FROM table_notify")
+    @Query("SELECT * FROM table_notify ORDER BY timestamp DESC")
     fun getAllNotify(): Flow<List<Notify>>
 
     @Query("SELECT * FROM table_notify ORDER BY timestamp DESC LIMIT 1")
     suspend fun getFirstNotify(): Notify?
 
-    @Query("SELECT * FROM table_notify ORDER BY timestamp LIMIT 1")
+    @Query("SELECT * FROM table_notify ORDER BY timestamp ASC LIMIT 1")
     suspend fun getLastNotify(): Notify?
 
 }
