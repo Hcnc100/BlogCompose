@@ -26,6 +26,7 @@ import com.nullpointer.blogcompose.presentation.LikeViewModel
 import com.nullpointer.blogcompose.presentation.PostDetailsViewModel
 import com.nullpointer.blogcompose.ui.interfaces.ActionRootDestinations
 import com.nullpointer.blogcompose.ui.navigation.MainNavGraph
+import com.nullpointer.blogcompose.ui.screens.destinations.ZoomScreenDestination
 import com.nullpointer.blogcompose.ui.screens.details.ActionDetails.*
 import com.nullpointer.blogcompose.ui.screens.details.componets.items.post.ErrorDetailsPost
 import com.nullpointer.blogcompose.ui.screens.details.componets.items.post.LoadDetailsPost
@@ -103,9 +104,14 @@ fun PostDetails(
                 RELOAD_COMMENTS -> postDetailsViewModel.requestsComments()
                 GET_MORE_COMMENTS -> postDetailsViewModel.concatenateComments()
                 SEND_COMMENT -> postDetailsViewModel.addComment(postDetailsState::scrollToLastItem)
+                ZOOM_IMAGE -> {
+                    (postState as? Resource.Success)?.let { postState ->
+                        actionRootDestinations.changeRoot(ZoomScreenDestination(postState.data.urlImage))
+                    }
+                }
                 LIKE_THIS_POST -> {
-                    (postState as? Resource.Success)?.let { state ->
-                        likeViewModel.likePost(simplePost = state.data)
+                    (postState as? Resource.Success)?.let { postState ->
+                        likeViewModel.likePost(simplePost = postState.data)
                     }
                 }
             }
@@ -164,7 +170,9 @@ fun PostDetails(
                     Resource.Loading -> LoadDetailsPost(shimmer = shimmer)
                     is Resource.Success -> SuccessDetailsPost(
                         blog = statePostDetails.data,
-                        actionLike = { actionPostDetails(LIKE_THIS_POST) })
+                        actionLike = { actionPostDetails(LIKE_THIS_POST) },
+                        actionZoomImage = { actionPostDetails(ZOOM_IMAGE) }
+                    )
                 }
             }
         }

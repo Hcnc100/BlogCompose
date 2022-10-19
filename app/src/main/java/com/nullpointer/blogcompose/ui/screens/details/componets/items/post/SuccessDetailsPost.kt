@@ -20,8 +20,9 @@ import com.nullpointer.blogcompose.ui.share.SimpleImage
 @Composable
 fun SuccessDetailsPost(
     blog: Post,
-    modifier: Modifier = Modifier,
-    actionLike: () -> Unit
+    actionLike: () -> Unit,
+    actionZoomImage: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     BoxWithConstraints {
         val width = this.maxWidth
@@ -38,7 +39,9 @@ fun SuccessDetailsPost(
                 sizeImage = width,
                 image = blog.urlImage,
                 contentDescription = stringResource(id = R.string.description_img_post),
-                isCircular = false
+                isCircular = false,
+                modifier = Modifier
+                    .clickable { actionZoomImage() }
             )
             ActionDetailsBlog(
                 isLiked = blog.ownerLike,
