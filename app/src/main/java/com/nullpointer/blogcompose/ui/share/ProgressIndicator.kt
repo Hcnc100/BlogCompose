@@ -13,21 +13,26 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import timber.log.Timber
 
 @Composable
 fun CircularProgressAnimation(
     isVisible: Boolean,
     modifier: Modifier = Modifier,
 ) {
+
+    Timber.d("is how Circular $isVisible")
+
     AnimatedVisibility(
         visible = isVisible,
         enter = expandVertically(),
         exit = shrinkVertically(),
         modifier = modifier
     ) {
-        Box(modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 20.dp),
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 20.dp),
             contentAlignment = Alignment.Center) {
             Card(shape = CircleShape) {
                 CircularProgressIndicator(modifier = Modifier.padding(5.dp))
