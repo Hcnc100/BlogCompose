@@ -20,8 +20,8 @@ import com.nullpointer.blogcompose.ui.screens.states.rememberRootAppState
 import com.nullpointer.blogcompose.ui.theme.BlogComposeTheme
 import com.ramcosta.composedestinations.DestinationsNavHost
 import com.ramcosta.composedestinations.navigation.dependency
-import com.ramcosta.composedestinations.spec.Route
 import dagger.hilt.android.AndroidEntryPoint
+
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {

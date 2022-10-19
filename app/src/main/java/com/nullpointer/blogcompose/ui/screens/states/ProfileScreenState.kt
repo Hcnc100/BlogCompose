@@ -17,6 +17,8 @@ import androidx.compose.ui.platform.LocalFocusManager
 import com.canhub.cropper.CropImageContract
 import com.canhub.cropper.CropImageContractOptions
 import com.canhub.cropper.CropImageView
+import com.google.accompanist.swiperefresh.SwipeRefreshState
+import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -28,8 +30,8 @@ class ProfileScreenState constructor(
     scaffoldState: ScaffoldState,
     val listState: LazyGridState,
     private val sizeScrollMore: Float,
+    val swipeState: SwipeRefreshState,
     modalBottomSheetState: ModalBottomSheetState,
-    private val swipeRefreshScreenState: SwipeRefreshScreenState,
     launcherCropImage: ManagedActivityResultLauncher<CropImageContractOptions, CropImageView.CropResult>
 ) : SelectImageScreenState(
     scope = scope,
@@ -40,7 +42,6 @@ class ProfileScreenState constructor(
     modalBottomSheetState = modalBottomSheetState
 ) {
 
-    val swipeState get() = swipeRefreshScreenState.swipeState
 
     val isScrollInProgress get() = listState.isScrollInProgress
 
@@ -60,18 +61,15 @@ class ProfileScreenState constructor(
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun rememberProfileScreenState(
-    isRefresh: Boolean,
     sizeScrollMore: Float,
+    isRefreshing: Boolean,
     actionChangeImage: (Uri) -> Unit,
     context: Context = LocalContext.current,
     focusManager: FocusManager = LocalFocusManager.current,
     gridState: LazyGridState = rememberLazyGridState(),
     scaffoldState: ScaffoldState = rememberScaffoldState(),
     coroutineScope: CoroutineScope = rememberCoroutineScope(),
-    swipeRefreshScreenState: SwipeRefreshScreenState = rememberSwipeRefreshScreenState(
-        isRefreshing = isRefresh,
-        sizeScrollMore = 20f
-    ),
+    swipeState: SwipeRefreshState = rememberSwipeRefreshState(isRefreshing = isRefreshing),
     modalBottomSheetState: ModalBottomSheetState = rememberModalBottomSheetState(
         initialValue = ModalBottomSheetValue.Hidden
     ),
@@ -84,7 +82,7 @@ fun rememberProfileScreenState(
 ) = remember(
     coroutineScope,
     scaffoldState,
-    swipeRefreshScreenState,
+    swipeState,
     modalBottomSheetState,
     gridState,
     launcherCropImage
@@ -93,11 +91,11 @@ fun rememberProfileScreenState(
         context = context,
         listState = gridState,
         scope = coroutineScope,
+        swipeState = swipeState,
         focusManager = focusManager,
         scaffoldState = scaffoldState,
         sizeScrollMore = sizeScrollMore,
         launcherCropImage = launcherCropImage,
-        modalBottomSheetState = modalBottomSheetState,
-        swipeRefreshScreenState = swipeRefreshScreenState
+        modalBottomSheetState = modalBottomSheetState
     )
 }

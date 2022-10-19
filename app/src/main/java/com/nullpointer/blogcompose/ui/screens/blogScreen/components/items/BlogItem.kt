@@ -96,12 +96,6 @@ private fun ActionsPost(
             ) {
                 actionBlog(ActionsPost.COMMENT, post)
             }
-            IconAction(
-                drawableRes = R.drawable.ic_share,
-                stringDescription = R.string.description_share_post
-            ) {
-                actionBlog(ActionsPost.SHARE, post)
-            }
         }
 
         Row {
@@ -112,10 +106,10 @@ private fun ActionsPost(
                 actionBlog(ActionsPost.DOWNLOAD, post)
             }
             IconAction(
-                drawableRes = R.drawable.ic_save,
-                stringDescription = R.string.description_save_post
+                drawableRes = R.drawable.ic_share,
+                stringDescription = R.string.description_share_post
             ) {
-                actionBlog(ActionsPost.SAVE, post)
+                actionBlog(ActionsPost.SHARE, post)
             }
         }
     }

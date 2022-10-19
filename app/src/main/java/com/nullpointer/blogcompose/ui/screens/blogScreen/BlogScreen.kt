@@ -1,7 +1,5 @@
 package com.nullpointer.blogcompose.ui.screens.blogScreen
 
-import android.content.Context
-import android.content.Intent
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,7 +16,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.swiperefresh.SwipeRefreshState
-import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.actions.ActionBlogScreen
 import com.nullpointer.blogcompose.actions.ActionBlogScreen.*
 import com.nullpointer.blogcompose.actions.ActionsPost
@@ -36,8 +33,8 @@ import com.nullpointer.blogcompose.ui.screens.blogScreen.components.list.ListLoa
 import com.nullpointer.blogcompose.ui.screens.blogScreen.components.list.ListSuccessBlog
 import com.nullpointer.blogcompose.ui.screens.destinations.AddBlogScreenDestination
 import com.nullpointer.blogcompose.ui.screens.destinations.PostDetailsDestination
-import com.nullpointer.blogcompose.ui.screens.states.SwipeRefreshScreenState
-import com.nullpointer.blogcompose.ui.screens.states.rememberSwipeRefreshScreenState
+import com.nullpointer.blogcompose.ui.screens.states.BlogScreenState
+import com.nullpointer.blogcompose.ui.screens.states.rememberBlogScreenState
 import com.nullpointer.blogcompose.ui.share.ButtonAdd
 import com.nullpointer.blogcompose.ui.share.CustomSnackBar
 import com.nullpointer.blogcompose.ui.share.ScaffoldSwipe
@@ -52,7 +49,7 @@ fun BlogScreen(
     postVM: PostViewModel = hiltViewModel(),
     likeVM: LikeViewModel = hiltViewModel(),
     actionRootDestinations: ActionRootDestinations,
-    blogScreenState: SwipeRefreshScreenState = rememberSwipeRefreshScreenState(
+    blogScreenState: BlogScreenState = rememberBlogScreenState(
         sizeScrollMore = 80f,
         isRefreshing = postVM.isRequestData,
     )
@@ -90,10 +87,12 @@ fun BlogScreen(
                 COMMENT -> actionRootDestinations.changeRoot(
                     PostDetailsDestination(post.id, true)
                 )
-                SHARE -> sharePost(post.id, blogScreenState.context)
+                SHARE -> blogScreenState.sharePost(post.id)
                 LIKE -> likeVM.likePost(post as Post)
-                DOWNLOAD -> {}
-                SAVE -> {}
+                DOWNLOAD -> blogScreenState.downloadPost(
+                    urlImg = post.urlImage,
+                    idPost = post.id
+                )
             }
         })
 
@@ -183,16 +182,4 @@ private fun ListPost(
     }
 }
 
-
-private fun sharePost(idPost: String, context: Context) {
-    val intent = Intent(Intent.ACTION_SEND)
-        .putExtra(Intent.EXTRA_TEXT, "https://www.blog-compose.com/post/$idPost")
-        .setType("text/plain")
-    context.startActivity(
-        Intent.createChooser(
-            intent,
-            context.getString(R.string.title_share_post)
-        )
-    )
-}
 

@@ -18,15 +18,15 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 
-class SwipeRefreshScreenState constructor(
-    private val sizeScrollMore:Float,
-    scaffoldState: ScaffoldState,
+open class SwipeRefreshScreenState constructor(
     context: Context,
-    focusManager: FocusManager,
-    val swipeState: SwipeRefreshState,
-    val listState: LazyListState,
     val scope: CoroutineScope,
-) : SimpleScreenState(scaffoldState, context, focusManager){
+    focusManager: FocusManager,
+    scaffoldState: ScaffoldState,
+    val listState: LazyListState,
+    private val sizeScrollMore: Float,
+    val swipeState: SwipeRefreshState,
+) : SimpleScreenState(scaffoldState, context, focusManager) {
     val isScrollInProgress get() = listState.isScrollInProgress
 
     fun animateScrollMore() {
@@ -44,14 +44,22 @@ class SwipeRefreshScreenState constructor(
 
 @Composable
 fun rememberSwipeRefreshScreenState(
-    sizeScrollMore:Float,
+    sizeScrollMore: Float,
     isRefreshing: Boolean,
-    scaffoldState: ScaffoldState= rememberScaffoldState(),
-    swipeState: SwipeRefreshState= rememberSwipeRefreshState(isRefreshing = isRefreshing),
-    listState: LazyListState= rememberLazyListState(),
     context: Context = LocalContext.current,
+    scope: CoroutineScope = rememberCoroutineScope(),
+    listState: LazyListState = rememberLazyListState(),
+    scaffoldState: ScaffoldState = rememberScaffoldState(),
     focusManager: FocusManager = LocalFocusManager.current,
-    scope: CoroutineScope = rememberCoroutineScope()
+    swipeState: SwipeRefreshState = rememberSwipeRefreshState(isRefreshing = isRefreshing)
 )= remember(scaffoldState,swipeState,listState,scope) {
-    SwipeRefreshScreenState(sizeScrollMore,scaffoldState, context, focusManager, swipeState, listState,scope)
+    SwipeRefreshScreenState(
+        scope = scope,
+        context = context,
+        listState = listState,
+        swipeState = swipeState,
+        focusManager = focusManager,
+        scaffoldState = scaffoldState,
+        sizeScrollMore = sizeScrollMore
+    )
 }

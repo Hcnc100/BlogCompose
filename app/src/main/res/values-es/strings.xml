@@ -169,4 +169,8 @@
     <string name="need_name_user">Se necesita un nombre</string>
 
     <string name="error_time_out">El servidor no responde, reintente</string>
+
+    <string name="description_notify_download_post">Descargando el post %s</string>
+    <string name="title_notify_download_post">Descargando</string>
+    <string name="message_download_post">Descargando el archivo …</string>
 </resources>

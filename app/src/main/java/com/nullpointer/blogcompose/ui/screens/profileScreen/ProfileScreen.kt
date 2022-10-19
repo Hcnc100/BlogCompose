@@ -53,7 +53,7 @@ fun ProfileScreen(
     actionRootDestinations: ActionRootDestinations,
     myPostViewModel: ProfileViewModel = hiltViewModel(),
     profileScreenState: ProfileScreenState = rememberProfileScreenState(
-        isRefresh = myPostViewModel.isRequestMyPost,
+        isRefreshing = myPostViewModel.isRequestMyPost,
         sizeScrollMore = 50f,
         actionChangeImage = myPostViewModel::uploadImageUser
     )

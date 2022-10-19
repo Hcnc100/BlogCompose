@@ -170,4 +170,8 @@
     <string name="need_img_user">A profile picture is required</string>
     <string name="need_name_user">The name is required</string>
     <string name="error_time_out">The server is not responding, please try again</string>
+
+    <string name="description_notify_download_post">Downloading post %s</string>
+    <string name="title_notify_download_post">Downloading</string>
+    <string name="message_download_post">Downloading the file …</string>
 </resources>
