@@ -13,15 +13,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import timber.log.Timber
 
 @Composable
 fun CircularProgressAnimation(
     isVisible: Boolean,
     modifier: Modifier = Modifier,
 ) {
-
-    Timber.d("is how Circular $isVisible")
 
     AnimatedVisibility(
         visible = isVisible,
