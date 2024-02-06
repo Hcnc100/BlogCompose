@@ -52,7 +52,6 @@ class MainActivity : ComponentActivity() {
                             startRoute = startDestination,
                             navGraph = NavGraphs.main,
                             navController = rootAppState.navController,
-                            engine = rootAppState.navHostEngine,
                             dependenciesContainerBuilder = {
                                 dependency(authViewModel)
                                 dependency(rootAppState.rootActions)

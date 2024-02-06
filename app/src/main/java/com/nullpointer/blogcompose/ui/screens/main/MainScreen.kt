@@ -16,7 +16,6 @@ import com.nullpointer.blogcompose.R
 import com.nullpointer.blogcompose.presentation.AuthViewModel
 import com.nullpointer.blogcompose.ui.interfaces.ActionRootDestinations
 import com.nullpointer.blogcompose.ui.navigation.HomeDestinations
-import com.nullpointer.blogcompose.ui.navigation.MainTransitions
 import com.nullpointer.blogcompose.ui.navigation.MainNavGraph
 import com.nullpointer.blogcompose.ui.screens.NavGraphs
 import com.nullpointer.blogcompose.ui.screens.states.MainScreenState
@@ -28,7 +27,7 @@ import com.ramcosta.composedestinations.navigation.dependency
 import com.ramcosta.composedestinations.navigation.navigate
 
 @MainNavGraph
-@Destination(style = MainTransitions::class)
+@Destination
 @Composable
 fun MainScreen(
     authViewModel: AuthViewModel,

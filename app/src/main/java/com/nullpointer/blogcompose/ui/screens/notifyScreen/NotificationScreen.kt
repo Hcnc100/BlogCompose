@@ -25,7 +25,6 @@ import com.nullpointer.blogcompose.presentation.NotifyViewModel
 import com.nullpointer.blogcompose.services.notfication.MyFirebaseMessagingService
 import com.nullpointer.blogcompose.ui.interfaces.ActionRootDestinations
 import com.nullpointer.blogcompose.ui.navigation.HomeNavGraph
-import com.nullpointer.blogcompose.ui.navigation.MainTransitions
 import com.nullpointer.blogcompose.ui.screens.destinations.PostDetailsDestination
 import com.nullpointer.blogcompose.ui.screens.notifyScreen.components.lists.EmptyListNotify
 import com.nullpointer.blogcompose.ui.screens.notifyScreen.components.lists.LoadListNotify
@@ -39,7 +38,7 @@ import kotlinx.coroutines.delay
 
 
 @HomeNavGraph
-@Destination(style = MainTransitions::class)
+@Destination
 @Composable
 fun NotifyScreen(
     notifyVM: NotifyViewModel = hiltViewModel(),

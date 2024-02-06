@@ -13,6 +13,7 @@ import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.google.accompanist.navigation.material.ExperimentalMaterialNavigationApi
 import com.nullpointer.blogcompose.ui.interfaces.ActionRootDestinations
@@ -29,7 +30,6 @@ class RootAppState(
     focusManager: FocusManager,
     val navController: NavHostController,
     val scope: CoroutineScope,
-    val navHostEngine: NavHostEngine
 
 ) : SimpleScreenState(scaffoldState, context, focusManager) {
     val rootActions = object : ActionRootDestinations {
@@ -39,18 +39,13 @@ class RootAppState(
     }
 }
 
-@OptIn(ExperimentalAnimationApi::class, ExperimentalMaterialNavigationApi::class)
 @Composable
 fun rememberRootAppState(
     scaffoldState: ScaffoldState = rememberScaffoldState(),
-    navController: NavHostController = rememberAnimatedNavController(),
+    navController: NavHostController = rememberNavController(),
     scope: CoroutineScope= rememberCoroutineScope(),
-    navHostEngine: NavHostEngine = rememberAnimatedNavHostEngine(
-        navHostContentAlignment = Alignment.BottomEnd,
-        rootDefaultAnimations = RootNavGraphDefaultAnimations.ACCOMPANIST_FADING,
-    ),
     context: Context = LocalContext.current,
     focusManager: FocusManager = LocalFocusManager.current,
 ) = remember(scaffoldState, navController) {
-    RootAppState(scaffoldState, context, focusManager, navController,scope,navHostEngine)
+    RootAppState(scaffoldState, context, focusManager, navController,scope)
 }

@@ -27,7 +27,6 @@ import com.nullpointer.blogcompose.presentation.LikeViewModel
 import com.nullpointer.blogcompose.presentation.PostViewModel
 import com.nullpointer.blogcompose.ui.interfaces.ActionRootDestinations
 import com.nullpointer.blogcompose.ui.navigation.HomeNavGraph
-import com.nullpointer.blogcompose.ui.navigation.MainTransitions
 import com.nullpointer.blogcompose.ui.screens.blogScreen.components.list.ListEmptyBlog
 import com.nullpointer.blogcompose.ui.screens.blogScreen.components.list.ListLoadBlog
 import com.nullpointer.blogcompose.ui.screens.blogScreen.components.list.ListSuccessBlog
@@ -43,7 +42,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.merge
 
 @HomeNavGraph(start = true)
-@Destination(style = MainTransitions::class)
+@Destination
 @Composable
 fun BlogScreen(
     postVM: PostViewModel = hiltViewModel(),
